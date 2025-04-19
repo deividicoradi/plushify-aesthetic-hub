@@ -1,10 +1,15 @@
-
 import React from 'react';
-import { Calendar, Users, BarChart3, Brain, Mail, Award, Package, Clock, Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, Users, BarChart3, Brain, Mail, Award, Box, Clock, Star } from 'lucide-react';
 
-const Feature = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => {
+const Feature = ({ icon, title, description, path }: { icon: React.ReactNode, title: string, description: string, path?: string }) => {
+  const navigate = useNavigate();
+  
   return (
-    <div className="relative p-6 rounded-xl border border-plush-100 bg-white shadow-sm card-hover">
+    <div 
+      className="relative p-6 rounded-xl border border-plush-100 bg-white shadow-sm card-hover cursor-pointer transition-all duration-300 hover:shadow-md"
+      onClick={() => path && navigate(path)}
+    >
       <div className="absolute -top-4 left-6 w-8 h-8 rounded-full bg-gradient-to-r from-plush-500 to-plush-600 flex items-center justify-center">
         {icon}
       </div>
@@ -33,54 +38,63 @@ const Features = () => {
             icon={<Calendar className="w-4 h-4 text-white" />}
             title="Agenda Inteligente"
             description="Agendamentos online com lembretes automáticos e redistribuição de horários para evitar janelas vazias."
-          />
-          
-          <Feature 
-            icon={<Users className="w-4 h-4 text-white" />}
-            title="Gestão de Clientes"
-            description="Histórico completo, preferências, pontos de fidelidade e lembretes de retorno personalizados."
-          />
-          
-          <Feature 
-            icon={<BarChart3 className="w-4 h-4 text-white" />}
-            title="Dashboards Analíticos"
-            description="Acompanhe métricas importantes do seu negócio com relatórios detalhados e insights valiosos."
+            path="/agendamentos"
           />
           
           <Feature 
             icon={<Brain className="w-4 h-4 text-white" />}
-            title="Assistente com IA"
-            description="Crie campanhas, mensagens personalizadas e obtenha insights sobre suas atividades automaticamente."
-          />
-          
-          <Feature 
-            icon={<Mail className="w-4 h-4 text-white" />}
-            title="Marketing Inteligente"
-            description="Campanhas automáticas de aniversário, retorno e fidelização com conteúdo gerado por IA."
+            title="Comunicação com IA"
+            description="Gere campanhas automáticas e mensagens personalizadas com nossa inteligência artificial."
+            path="/comunicacao"
           />
           
           <Feature 
             icon={<Award className="w-4 h-4 text-white" />}
             title="Cursos e Certificados"
             description="Crie e venda cursos com certificados automáticos e área de alunos integrada."
+            path="/cursos"
+          />
+          
+          <Feature 
+            icon={<Box className="w-4 h-4 text-white" />}
+            title="Controle de Insumos"
+            description="Gerencie seu estoque com alertas de nível baixo e cálculo automático de consumo por procedimento."
+            path="/estoque"
+          />
+          
+          <Feature 
+            icon={<Users className="w-4 h-4 text-white" />}
+            title="Gestão de Clientes"
+            description="Histórico completo, preferências, pontos de fidelidade e lembretes de retorno personalizados."
+            path="/clientes"
+          />
+          
+          <Feature 
+            icon={<BarChart3 className="w-4 h-4 text-white" />}
+            title="Dashboard Analíticos"
+            description="Acompanhe métricas importantes do seu negócio com relatórios detalhados e insights valiosos."
+            path="/dashboard"
+          />
+          
+          <Feature 
+            icon={<Mail className="w-4 h-4 text-white" />}
+            title="Marketing Inteligente"
+            description="Campanhas automáticas de aniversário, retorno e fidelização com conteúdo gerado por IA."
+            path="/comunicacao"
           />
           
           <Feature 
             icon={<Package className="w-4 h-4 text-white" />}
-            title="Controle de Insumos"
-            description="Gerencie seu estoque com alertas de nível baixo e cálculo automático de consumo por procedimento."
-          />
-          
-          <Feature 
-            icon={<Clock className="w-4 h-4 text-white" />}
-            title="Automação de Processos"
-            description="Reduza tarefas manuais com confirmações automáticas, lembretes e mensagens pós-atendimento."
+            title="Planos e Assinaturas"
+            description="Apresente planos Free, Starter, Pro e Premium com integração Stripe."
+            path="/planos"
           />
           
           <Feature 
             icon={<Star className="w-4 h-4 text-white" />}
             title="Programa de Fidelidade"
             description="Sistema de pontos, níveis de cliente e benefícios automáticos para fidelizar sua clientela."
+            path="/fidelidade"
           />
         </div>
         
