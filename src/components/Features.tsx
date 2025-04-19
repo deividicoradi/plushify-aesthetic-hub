@@ -84,7 +84,7 @@ const Features = () => {
           />
           
           <Feature 
-            icon={<Package className="w-4 h-4 text-white" />}
+            icon={<Box className="w-4 h-4 text-white" />}
             title="Planos e Assinaturas"
             description="Apresente planos Free, Starter, Pro e Premium com integração Stripe."
             path="/planos"
