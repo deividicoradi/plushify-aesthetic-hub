@@ -18,30 +18,33 @@ import Clients from "./pages/Clients";
 import Loyalty from "./pages/Loyalty";
 import Signup from "./pages/Signup";
 
+// Create a client
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/cadastro" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/agendamentos" element={<Appointments />} />
-          <Route path="/comunicacao" element={<Communication />} />
-          <Route path="/cursos" element={<Courses />} />
-          <Route path="/estoque" element={<Inventory />} />
-          <Route path="/planos" element={<Plans />} />
-          <Route path="/clientes" element={<Clients />} />
-          <Route path="/fidelidade" element={<Loyalty />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/cadastro" element={<Signup />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/agendamentos" element={<Appointments />} />
+            <Route path="/comunicacao" element={<Communication />} />
+            <Route path="/cursos" element={<Courses />} />
+            <Route path="/estoque" element={<Inventory />} />
+            <Route path="/planos" element={<Plans />} />
+            <Route path="/clientes" element={<Clients />} />
+            <Route path="/fidelidade" element={<Loyalty />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+};
 
 export default App;
