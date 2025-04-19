@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Calendar, Users, BarChart3, Brain, Mail, Certificate, Package, Clock, Star } from 'lucide-react';
+import { Calendar, Users, BarChart3, Brain, Mail, Award, Package, Clock, Star } from 'lucide-react';
 
 const Feature = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => {
   return (
@@ -60,7 +60,7 @@ const Features = () => {
           />
           
           <Feature 
-            icon={<Certificate className="w-4 h-4 text-white" />}
+            icon={<Award className="w-4 h-4 text-white" />}
             title="Cursos e Certificados"
             description="Crie e venda cursos com certificados automáticos e área de alunos integrada."
           />
