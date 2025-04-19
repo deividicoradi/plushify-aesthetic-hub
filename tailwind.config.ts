@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,34 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Plushify custom colors
+				plush: {
+					50: '#fcf4f9',
+					100: '#f9e8f3',
+					200: '#f5d5e8',
+					300: '#edb5d4',
+					400: '#e289b9',
+					500: '#d65e9a',
+					600: '#c53d7c',
+					700: '#ab2d65',
+					800: '#8e2754',
+					900: '#762347',
+					950: '#460f27',
+				},
+				accent2: {
+					50: '#f0f8ff',
+					100: '#e0f0fe',
+					200: '#b9e1fe',
+					300: '#7ccbfd',
+					400: '#36b0fa',
+					500: '#0c96eb',
+					600: '#0177c9',
+					700: '#0260a3',
+					800: '#065186',
+					900: '#0a446e',
+					950: '#062a49',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +112,25 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' },
+				},
+				'pulse-soft': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 6s ease-in-out infinite',
+				'pulse-soft': 'pulse-soft 3s ease-in-out infinite',
+			},
+			fontFamily: {
+				'serif': ['Playfair Display', 'serif'],
+				'sans': ['Inter', 'sans-serif'],
 			}
 		}
 	},
