@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import LoginModal from './LoginModal';
+import DesktopMenu from './navbar/DesktopMenu';
+import MobileMenu from './navbar/MobileMenu';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -12,17 +14,11 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 20);
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleLogin = () => {
@@ -44,35 +40,7 @@ const Navbar = () => {
             <img src="/logo.svg" alt="Plushify" className="h-10" />
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-foreground/80 hover:text-plush-600 transition-colors">
-              Início
-            </Link>
-            <Link to="#features" className="text-foreground/80 hover:text-plush-600 transition-colors">
-              Funcionalidades
-            </Link>
-            <Link to="#pricing" className="text-foreground/80 hover:text-plush-600 transition-colors">
-              Planos
-            </Link>
-            <Link to="#testimonials" className="text-foreground/80 hover:text-plush-600 transition-colors">
-              Depoimentos
-            </Link>
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="outline" 
-                className="border-plush-200 hover:border-plush-400 text-plush-700"
-                onClick={handleLogin}
-              >
-                Entrar
-              </Button>
-              <Button 
-                className="bg-plush-600 hover:bg-plush-700 text-white"
-                onClick={handleSignUp}
-              >
-                Começar Grátis
-              </Button>
-            </div>
-          </nav>
+          <DesktopMenu onLogin={handleLogin} onSignUp={handleSignUp} />
 
           <button
             className="md:hidden flex items-center text-plush-600"
@@ -82,55 +50,12 @@ const Navbar = () => {
           </button>
         </div>
 
-        {isMobileMenuOpen && (
-          <div className="fixed inset-0 top-16 bg-white/95 backdrop-blur-sm z-40 flex flex-col md:hidden">
-            <div className="container mx-auto px-4 py-8 flex flex-col space-y-6">
-              <Link
-                to="/"
-                className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Início
-              </Link>
-              <Link
-                to="#features"
-                className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Funcionalidades
-              </Link>
-              <Link
-                to="#pricing"
-                className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Planos
-              </Link>
-              <Link
-                to="#testimonials"
-                className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Depoimentos
-              </Link>
-              <div className="flex flex-col space-y-3 pt-4">
-                <Button 
-                  variant="outline" 
-                  className="w-full border-plush-200 hover:border-plush-400 text-plush-700"
-                  onClick={handleLogin}
-                >
-                  Entrar
-                </Button>
-                <Button 
-                  className="w-full bg-plush-600 hover:bg-plush-700 text-white"
-                  onClick={handleSignUp}
-                >
-                  Começar Grátis
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <MobileMenu 
+          isOpen={isMobileMenuOpen}
+          onLogin={handleLogin}
+          onSignUp={handleSignUp}
+          onClose={() => setIsMobileMenuOpen(false)}
+        />
       </header>
 
       <LoginModal 
