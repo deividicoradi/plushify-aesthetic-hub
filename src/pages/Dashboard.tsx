@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { LayoutDashboard, Users, Calendar, DollarSign, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Import new components we'll create
+// Import components
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
+import { UpcomingAppointments } from '@/components/dashboard/UpcomingAppointments';
 
 const Dashboard = () => {
   return (
@@ -57,16 +56,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Próximos Agendamentos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-muted-foreground">
-                Em desenvolvimento...
-              </div>
-            </CardContent>
-          </Card>
+          <UpcomingAppointments />
         </div>
       </div>
     </div>
