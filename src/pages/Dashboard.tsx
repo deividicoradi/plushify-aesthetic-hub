@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { LayoutDashboard, Users, Calendar, DollarSign, TrendingUp } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Import components
 import { MetricCard } from '@/components/dashboard/MetricCard';
