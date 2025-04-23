@@ -1,21 +1,33 @@
 
-import React from 'react';
-import { Users, Search, PlusCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users, Search } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ClientList from '@/components/clients/ClientList';
+import NewClientDrawer from "@/components/clients/NewClientDrawer";
+import ClientFiltersPopover from "@/components/clients/ClientFiltersPopover";
 
 const Clients = () => {
+  // Estados de abertura dos popups
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    status: 'Todos',
+    lastVisit: 'Todos'
+  });
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users className="w-6 h-6 text-plush-600" />
+            <Users className="w-6 h-6 text-pink-500" />
             <h1 className="text-2xl font-bold">Clientes</h1>
           </div>
-          <Button>
-            <PlusCircle className="mr-2" />
+          <Button
+            className="bg-pink-500 hover:bg-pink-600 transition-colors"
+            onClick={() => setDrawerOpen(true)}
+          >
+            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             Novo Cliente
           </Button>
         </div>
@@ -26,15 +38,25 @@ const Clients = () => {
             <Input
               placeholder="Buscar clientes..."
               className="pl-9 max-w-md"
+              // O ideal é implementar busca futuramente
             />
           </div>
-          <Button variant="outline">Filtros</Button>
+          <ClientFiltersPopover
+            filters={filters}
+            setFilters={setFilters}
+          />
         </div>
 
-        <ClientList />
+        <ClientList filters={filters} />
+
+        <NewClientDrawer
+          open={isDrawerOpen}
+          onOpenChange={setDrawerOpen}
+        />
       </div>
     </div>
   );
 };
 
 export default Clients;
+
