@@ -11,10 +11,28 @@ export type Note = {
   created_at: string;
 };
 
-// Use tipos personalizados para superar as limitações da definição automática de tipos do Supabase
-type SupabaseNote = Note & {
-  user_id: string;
-  updated_at?: string;
+// Use a generic type to fix the TypeScript errors when working with Supabase
+type Tables = {
+  notes: {
+    Row: {
+      id: string;
+      user_id: string;
+      title: string;
+      content: string;
+      created_at: string;
+      updated_at?: string;
+    };
+    Insert: {
+      user_id: string;
+      title: string;
+      content: string;
+    };
+    Update: {
+      title?: string;
+      content?: string;
+      updated_at?: string;
+    };
+  };
 };
 
 export const useNotes = () => {
@@ -28,7 +46,7 @@ export const useNotes = () => {
 
       setLoading(true);
       const { data, error } = await supabase
-        .from('notes' as any)
+        .from<Tables['notes']['Row']>('notes')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -49,8 +67,8 @@ export const useNotes = () => {
       }
 
       const { data, error } = await supabase
-        .from('notes' as any)
-        .insert([{ user_id: user?.id, title, content }] as any)
+        .from<Tables['notes']['Row']>('notes')
+        .insert([{ user_id: user?.id, title, content } as Tables['notes']['Insert']])
         .select()
         .single();
 
@@ -73,8 +91,12 @@ export const useNotes = () => {
       }
 
       const { error } = await supabase
-        .from('notes' as any)
-        .update({ title, content, updated_at: new Date().toISOString() } as any)
+        .from<Tables['notes']['Row']>('notes')
+        .update({ 
+          title, 
+          content, 
+          updated_at: new Date().toISOString() 
+        } as Tables['notes']['Update'])
         .eq('id', id);
 
       if (error) throw error;
@@ -94,7 +116,7 @@ export const useNotes = () => {
   const deleteNote = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('notes' as any)
+        .from<Tables['notes']['Row']>('notes')
         .delete()
         .eq('id', id);
 
