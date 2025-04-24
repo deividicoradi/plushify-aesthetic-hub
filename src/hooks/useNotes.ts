@@ -11,6 +11,12 @@ export type Note = {
   created_at: string;
 };
 
+// Use tipos personalizados para superar as limitações da definição automática de tipos do Supabase
+type SupabaseNote = Note & {
+  user_id: string;
+  updated_at?: string;
+};
+
 export const useNotes = () => {
   const { user } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
@@ -22,7 +28,7 @@ export const useNotes = () => {
 
       setLoading(true);
       const { data, error } = await supabase
-        .from('notes')
+        .from('notes' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -43,8 +49,8 @@ export const useNotes = () => {
       }
 
       const { data, error } = await supabase
-        .from('notes')
-        .insert([{ user_id: user?.id, title, content }])
+        .from('notes' as any)
+        .insert([{ user_id: user?.id, title, content }] as any)
         .select()
         .single();
 
@@ -67,8 +73,8 @@ export const useNotes = () => {
       }
 
       const { error } = await supabase
-        .from('notes')
-        .update({ title, content, updated_at: new Date().toISOString() })
+        .from('notes' as any)
+        .update({ title, content, updated_at: new Date().toISOString() } as any)
         .eq('id', id);
 
       if (error) throw error;
@@ -88,7 +94,7 @@ export const useNotes = () => {
   const deleteNote = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('notes')
+        .from('notes' as any)
         .delete()
         .eq('id', id);
 
