@@ -5,12 +5,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import LoginModal from './LoginModal';
 import DesktopMenu from './navbar/DesktopMenu';
 import MobileMenu from './navbar/MobileMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,11 +24,15 @@ const Navbar = () => {
   }, []);
 
   const handleLogin = () => {
-    setIsLoginModalOpen(true);
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      setIsLoginModalOpen(true);
+    }
   };
 
   const handleSignUp = () => {
-    navigate('/cadastro');
+    navigate('/auth?tab=signup');
     setIsMobileMenuOpen(false);
   };
 
