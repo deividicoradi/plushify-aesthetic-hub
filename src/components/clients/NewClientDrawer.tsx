@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/sonner";
 
 type NewClientDrawerProps = {
   open: boolean;
@@ -11,6 +14,7 @@ type NewClientDrawerProps = {
 };
 
 const NewClientDrawer: React.FC<NewClientDrawerProps> = ({ open, onOpenChange }) => {
+  const { user } = useAuth();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -23,14 +27,56 @@ const NewClientDrawer: React.FC<NewClientDrawerProps> = ({ open, onOpenChange })
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!form.name.trim()) {
+      toast.error("Nome é obrigatório");
+      return;
+    }
+
+    // Check if user is logged in
+    if (!user) {
+      toast.error("Você precisa estar logado para adicionar um cliente");
+      return;
+    }
+
     setSubmitting(true);
-    // Aqui você enviaria os dados para o backend.
-    setTimeout(() => {
-      setSubmitting(false);
+
+    try {
+      const { data, error } = await supabase
+        .from('clients')
+        .insert({
+          user_id: user.id,
+          name: form.name,
+          email: form.email || null,
+          phone: form.phone || null,
+          status: form.status,
+          last_visit: null
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Cliente adicionado com sucesso!");
+      
+      // Reset form and close drawer
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        status: "Ativo"
+      });
       onOpenChange(false);
-    }, 1100);
+    } catch (error: any) {
+      toast.error("Erro ao adicionar cliente: " + error.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -43,15 +89,33 @@ const NewClientDrawer: React.FC<NewClientDrawerProps> = ({ open, onOpenChange })
         <form className="space-y-5 px-6 pb-6" onSubmit={handleSubmit} autoComplete="off">
           <div>
             <Label htmlFor="name">Nome</Label>
-            <Input id="name" name="name" required value={form.name} onChange={handleInput}/>
+            <Input 
+              id="name" 
+              name="name" 
+              required 
+              value={form.name} 
+              onChange={handleInput}
+            />
           </div>
           <div>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required value={form.email} onChange={handleInput}/>
+            <Input 
+              id="email" 
+              name="email" 
+              type="email" 
+              value={form.email} 
+              onChange={handleInput}
+            />
           </div>
           <div>
             <Label htmlFor="phone">Telefone</Label>
-            <Input id="phone" name="phone" required value={form.phone} onChange={handleInput} placeholder="(99) 99999-9999"/>
+            <Input 
+              id="phone" 
+              name="phone" 
+              value={form.phone} 
+              onChange={handleInput} 
+              placeholder="(99) 99999-9999"
+            />
           </div>
           <div>
             <Label htmlFor="status">Status</Label>
@@ -67,11 +131,17 @@ const NewClientDrawer: React.FC<NewClientDrawerProps> = ({ open, onOpenChange })
             </select>
           </div>
           <DrawerFooter>
-            <Button className="w-full bg-pink-500 hover:bg-pink-600" type="submit" disabled={submitting}>
+            <Button 
+              className="w-full bg-pink-500 hover:bg-pink-600" 
+              type="submit" 
+              disabled={submitting}
+            >
               {submitting ? "Salvando..." : "Salvar Cliente"}
             </Button>
             <DrawerClose asChild>
-              <Button variant="outline" className="w-full" type="button">Cancelar</Button>
+              <Button variant="outline" className="w-full" type="button">
+                Cancelar
+              </Button>
             </DrawerClose>
           </DrawerFooter>
         </form>

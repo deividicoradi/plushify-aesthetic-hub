@@ -1,88 +1,75 @@
 
+import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/sonner";
 
 type Client = {
-  id: number;
+  id: string;
   name: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   status: "Ativo" | "Inativo";
-  lastVisit: string;
+  created_at: string;
+  last_visit: string | null;
 };
 
-const allClients: Client[] = [
-  {
-    id: 1,
-    name: "Maria Silva",
-    email: "maria.silva@email.com",
-    phone: "(11) 98765-4321",
-    status: "Ativo",
-    lastVisit: "15/04/2024",
-  },
-  {
-    id: 2,
-    name: "João Santos",
-    email: "joao.santos@email.com",
-    phone: "(11) 91234-5678",
-    status: "Inativo",
-    lastVisit: "01/03/2024",
-  },
-  {
-    id: 3,
-    name: "Ana Oliveira",
-    email: "ana.oliveira@email.com",
-    phone: "(11) 99876-5432",
-    status: "Ativo",
-    lastVisit: "10/04/2024",
-  },
-];
-
-// Função de filtro simples para a UI
-const filterClients = (
-  clients: Client[],
-  filters: { status: string; lastVisit: string }
-) => {
-  let filtered = clients;
-  if (filters.status !== "Todos") {
-    filtered = filtered.filter(c => c.status === filters.status);
-  }
-  // Filtro por visitas: apenas efeito visual/mock
-  // (para produção, deve-se tratar datas!)
-  if (filters.lastVisit === "Hoje") {
-    // Simulando por demo
-    return [];
-  }
-  if (filters.lastVisit === "Últimos 7 dias") {
-    // Simulando por demo
-    return [];
-  }
-  if (filters.lastVisit === "Últimos 30 dias") {
-    // Simulando por demo
-    return [];
-  }
-  return filtered;
-};
-
-const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-};
-
-type Props = {
+const ClientList: React.FC<{
   filters: {
     status: string;
     lastVisit: string;
-  };
-};
+  }
+}> = ({ filters }) => {
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
-const ClientList: React.FC<Props> = ({ filters }) => {
-  const clients = filterClients(allClients, filters);
+  useEffect(() => {
+    const fetchClients = async () => {
+      if (!user) return;
+
+      setLoading(true);
+      try {
+        let query = supabase
+          .from('clients')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        // Apply status filter
+        if (filters.status !== "Todos") {
+          query = query.eq('status', filters.status);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        setClients(data || []);
+      } catch (error: any) {
+        toast.error("Erro ao carregar clientes: " + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClients();
+  }, [user, filters]);
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
+  if (loading) {
+    return <div>Carregando clientes...</div>;
+  }
 
   return (
     <div className="rounded-md border bg-white/70 shadow animate-fade-in">
@@ -99,7 +86,9 @@ const ClientList: React.FC<Props> = ({ filters }) => {
         <TableBody>
           {clients.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground">Nenhum cliente encontrado com os filtros selecionados.</TableCell>
+              <TableCell colSpan={5} className="text-center text-muted-foreground">
+                Nenhum cliente encontrado com os filtros selecionados.
+              </TableCell>
             </TableRow>
           )}
           {clients.map((client) => (
@@ -112,8 +101,8 @@ const ClientList: React.FC<Props> = ({ filters }) => {
                   <span className="font-medium">{client.name}</span>
                 </div>
               </TableCell>
-              <TableCell>{client.email}</TableCell>
-              <TableCell>{client.phone}</TableCell>
+              <TableCell>{client.email || 'Não informado'}</TableCell>
+              <TableCell>{client.phone || 'Não informado'}</TableCell>
               <TableCell>
                 <Badge
                   className={cn(
@@ -125,7 +114,7 @@ const ClientList: React.FC<Props> = ({ filters }) => {
                   {client.status}
                 </Badge>
               </TableCell>
-              <TableCell>{client.lastVisit}</TableCell>
+              <TableCell>{client.last_visit || 'Sem visitas'}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -135,4 +124,3 @@ const ClientList: React.FC<Props> = ({ filters }) => {
 };
 
 export default ClientList;
-
