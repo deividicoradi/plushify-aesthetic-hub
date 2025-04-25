@@ -13,7 +13,7 @@ type Client = {
   name: string;
   email: string | null;
   phone: string | null;
-  status: "Ativo" | "Inativo";
+  status: string; // Changed from "Ativo" | "Inativo" to string to match Supabase data
   created_at: string;
   last_visit: string | null;
 };
@@ -48,7 +48,16 @@ const ClientList: React.FC<{
 
         if (error) throw error;
 
-        setClients(data || []);
+        // Explicitly cast the data to match our Client type
+        setClients(data?.map(client => ({
+          id: client.id,
+          name: client.name,
+          email: client.email,
+          phone: client.phone,
+          status: client.status || 'Ativo', // Ensure status is not null
+          created_at: client.created_at,
+          last_visit: client.last_visit
+        })) || []);
       } catch (error: any) {
         toast.error("Erro ao carregar clientes: " + error.message);
       } finally {
