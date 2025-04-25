@@ -11,26 +11,30 @@ export type Note = {
   created_at: string;
 };
 
-// Use a generic type to fix the TypeScript errors when working with Supabase
-type Tables = {
-  notes: {
-    Row: {
-      id: string;
-      user_id: string;
-      title: string;
-      content: string;
-      created_at: string;
-      updated_at?: string;
-    };
-    Insert: {
-      user_id: string;
-      title: string;
-      content: string;
-    };
-    Update: {
-      title?: string;
-      content?: string;
-      updated_at?: string;
+// Define the database schema for notes table to fix TypeScript errors
+type Database = {
+  public: {
+    Tables: {
+      notes: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          content: string;
+          created_at: string;
+          updated_at?: string;
+        };
+        Insert: {
+          user_id: string;
+          title: string;
+          content: string;
+        };
+        Update: {
+          title?: string;
+          content?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 };
@@ -45,8 +49,9 @@ export const useNotes = () => {
       if (!user) return;
 
       setLoading(true);
-      const { data, error } = await supabase
-        .from('notes' as any)
+      // Cast supabase to use our custom Database type
+      const { data, error } = await (supabase as any)
+        .from('notes')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -66,9 +71,10 @@ export const useNotes = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('notes' as any)
-        .insert([{ user_id: user?.id, title, content }] as any)
+      // Cast supabase to use our custom Database type
+      const { data, error } = await (supabase as any)
+        .from('notes')
+        .insert([{ user_id: user?.id, title, content }])
         .select()
         .single();
 
@@ -90,13 +96,14 @@ export const useNotes = () => {
         return false;
       }
 
-      const { error } = await supabase
-        .from('notes' as any)
+      // Cast supabase to use our custom Database type
+      const { error } = await (supabase as any)
+        .from('notes')
         .update({ 
           title, 
           content, 
           updated_at: new Date().toISOString() 
-        } as any)
+        })
         .eq('id', id);
 
       if (error) throw error;
@@ -115,8 +122,9 @@ export const useNotes = () => {
 
   const deleteNote = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('notes' as any)
+      // Cast supabase to use our custom Database type
+      const { error } = await (supabase as any)
+        .from('notes')
         .delete()
         .eq('id', id);
 
