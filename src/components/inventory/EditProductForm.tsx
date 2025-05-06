@@ -1,8 +1,15 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +33,8 @@ type EditProductFormProps = {
 };
 
 export const EditProductForm = ({ product, onSuccess }: EditProductFormProps) => {
+  const [categories, setCategories] = useState<string[]>([]);
+  
   const form = useForm<EditProductFormData>({
     defaultValues: {
       name: "",
@@ -33,6 +42,30 @@ export const EditProductForm = ({ product, onSuccess }: EditProductFormProps) =>
       minStock: 0
     }
   });
+
+  // Fetch all existing categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('category')
+          .order('category');
+        
+        if (error) throw error;
+        
+        // Get unique categories
+        const uniqueCategories = [...new Set(data?.map(p => p.category))]
+          .filter(Boolean) as string[];
+        
+        setCategories(uniqueCategories);
+      } catch (error: any) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   // Preencher o formulário com os dados do produto quando o componente é montado
   useEffect(() => {
@@ -89,9 +122,34 @@ export const EditProductForm = ({ product, onSuccess }: EditProductFormProps) =>
           render={({ field }) => (
             <FormItem>
               <FormLabel>Categoria</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ex: Esmaltes" />
-              </FormControl>
+              <div className="flex gap-2">
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  placeholder="Ou digite uma nova"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      field.onChange(e.target.value);
+                    }
+                  }}
+                  className="w-1/2"
+                />
+              </div>
               <FormMessage />
             </FormItem>
           )}

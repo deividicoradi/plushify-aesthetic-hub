@@ -26,6 +26,7 @@ import { StatCards } from "@/components/inventory/StatCards";
 import { ProductsTable } from "@/components/inventory/ProductsTable";
 import { BannerAside } from "@/components/inventory/BannerAside";
 import { TransactionHistory } from "@/components/inventory/TransactionHistory";
+import { CategoryManagement } from "@/components/inventory/CategoryManagement";
 
 type Product = {
   id: string;
@@ -47,6 +48,7 @@ const Inventory = () => {
   const [isEditProductOpen, setIsEditProductOpen] = useState(false);
   const [isTransactionOpen, setIsTransactionOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'entrada' | 'saida'>('entrada');
   const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
@@ -97,10 +99,13 @@ const Inventory = () => {
           <InventoryHeader 
             onAddProduct={() => setIsNewProductOpen(true)} 
             onShowTransactionHistory={() => setIsHistoryOpen(true)}
+            onManageCategories={() => setIsCategoriesOpen(true)}
           />
           
           {isHistoryOpen ? (
             <TransactionHistory />
+          ) : isCategoriesOpen ? (
+            <CategoryManagement />
           ) : (
             <>
               <StatCards {...stats} />
@@ -181,6 +186,15 @@ const Inventory = () => {
             <DialogTitle>Histórico de Transações</DialogTitle>
           </DialogHeader>
           <TransactionHistory />
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isCategoriesOpen} onOpenChange={setIsCategoriesOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Gerenciamento de Categorias</DialogTitle>
+          </DialogHeader>
+          <CategoryManagement />
         </DialogContent>
       </Dialog>
     </div>
