@@ -11,6 +11,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 import { ProductForm } from "@/components/inventory/ProductForm";
 import { EditProductForm } from "@/components/inventory/EditProductForm";
 import { StockTransaction } from "@/components/inventory/StockTransaction";
@@ -18,6 +25,7 @@ import { InventoryHeader } from "@/components/inventory/InventoryHeader";
 import { StatCards } from "@/components/inventory/StatCards";
 import { ProductsTable } from "@/components/inventory/ProductsTable";
 import { BannerAside } from "@/components/inventory/BannerAside";
+import { TransactionHistory } from "@/components/inventory/TransactionHistory";
 
 type Product = {
   id: string;
@@ -38,6 +46,7 @@ const Inventory = () => {
   const [isNewProductOpen, setIsNewProductOpen] = useState(false);
   const [isEditProductOpen, setIsEditProductOpen] = useState(false);
   const [isTransactionOpen, setIsTransactionOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'entrada' | 'saida'>('entrada');
   const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
@@ -85,15 +94,25 @@ const Inventory = () => {
     <div className="min-h-screen bg-background py-12 px-4 sm:px-8 animate-fade-in">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 items-start">
         <main>
-          <InventoryHeader onAddProduct={() => setIsNewProductOpen(true)} />
-          <StatCards {...stats} />
-          <ProductsTable 
-            products={products}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onTransaction={handleTransaction}
-            onEditProduct={handleEditProduct}
+          <InventoryHeader 
+            onAddProduct={() => setIsNewProductOpen(true)} 
+            onShowTransactionHistory={() => setIsHistoryOpen(true)}
           />
+          
+          {isHistoryOpen ? (
+            <TransactionHistory />
+          ) : (
+            <>
+              <StatCards {...stats} />
+              <ProductsTable 
+                products={products}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                onTransaction={handleTransaction}
+                onEditProduct={handleEditProduct}
+              />
+            </>
+          )}
         </main>
 
         <aside className="hidden lg:block">
@@ -155,6 +174,15 @@ const Inventory = () => {
           </div>
         </SheetContent>
       </Sheet>
+      
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Histórico de Transações</DialogTitle>
+          </DialogHeader>
+          <TransactionHistory />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

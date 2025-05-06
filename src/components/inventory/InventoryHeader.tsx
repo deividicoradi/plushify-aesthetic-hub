@@ -1,13 +1,14 @@
 
 import React from "react";
-import { Package, Plus } from "lucide-react";
+import { Package, Plus, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type InventoryHeaderProps = {
   onAddProduct: () => void;
+  onShowTransactionHistory: () => void;
 };
 
-export const InventoryHeader = ({ onAddProduct }: InventoryHeaderProps) => {
+export const InventoryHeader = ({ onAddProduct, onShowTransactionHistory }: InventoryHeaderProps) => {
   return (
     <div className="flex flex-col gap-2 mb-7">
       <div className="flex items-center justify-between">
@@ -17,10 +18,16 @@ export const InventoryHeader = ({ onAddProduct }: InventoryHeaderProps) => {
             Estoque
           </h1>
         </div>
-        <Button onClick={onAddProduct} className="gap-2 bg-pink-600 hover:bg-pink-700">
-          <Plus className="w-4 h-4" />
-          Novo Produto
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={onShowTransactionHistory} className="gap-2">
+            <History className="w-4 h-4" />
+            Histórico
+          </Button>
+          <Button onClick={onAddProduct} className="gap-2 bg-pink-600 hover:bg-pink-700">
+            <Plus className="w-4 h-4" />
+            Novo Produto
+          </Button>
+        </div>
       </div>
       <p className="text-gray-500 text-sm">
         Gerencie seu inventário, adicione novos produtos, atualize o estoque e edite detalhes dos produtos existentes.
