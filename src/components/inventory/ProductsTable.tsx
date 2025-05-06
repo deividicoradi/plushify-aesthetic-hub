@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ArrowDownCircle, ArrowUpCircle, Search } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Search, Pencil } from "lucide-react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,13 +26,15 @@ type ProductsTableProps = {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   onTransaction: (product: Product, type: 'entrada' | 'saida') => void;
+  onEditProduct: (product: Product) => void;
 };
 
 export const ProductsTable = ({
   products,
   searchTerm,
   setSearchTerm,
-  onTransaction
+  onTransaction,
+  onEditProduct
 }: ProductsTableProps) => {
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -89,6 +91,14 @@ export const ProductsTable = ({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEditProduct(product)}
+                      className="hover:bg-purple-50"
+                    >
+                      <Pencil className="w-4 h-4 text-purple-600" />
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"

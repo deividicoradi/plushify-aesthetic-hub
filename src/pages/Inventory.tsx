@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { ProductForm } from "@/components/inventory/ProductForm";
+import { EditProductForm } from "@/components/inventory/EditProductForm";
 import { StockTransaction } from "@/components/inventory/StockTransaction";
 import { InventoryHeader } from "@/components/inventory/InventoryHeader";
 import { StatCards } from "@/components/inventory/StatCards";
@@ -35,6 +36,7 @@ const Inventory = () => {
   });
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isNewProductOpen, setIsNewProductOpen] = useState(false);
+  const [isEditProductOpen, setIsEditProductOpen] = useState(false);
   const [isTransactionOpen, setIsTransactionOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'entrada' | 'saida'>('entrada');
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,6 +75,11 @@ const Inventory = () => {
     setTransactionType(type);
     setIsTransactionOpen(true);
   };
+  
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setIsEditProductOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background py-12 px-4 sm:px-8 animate-fade-in">
@@ -85,6 +92,7 @@ const Inventory = () => {
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             onTransaction={handleTransaction}
+            onEditProduct={handleEditProduct}
           />
         </main>
 
@@ -103,6 +111,25 @@ const Inventory = () => {
               setIsNewProductOpen(false);
               fetchProducts();
             }} />
+          </div>
+        </SheetContent>
+      </Sheet>
+      
+      <Sheet open={isEditProductOpen} onOpenChange={setIsEditProductOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Editar Produto</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            {selectedProduct && (
+              <EditProductForm
+                product={selectedProduct}
+                onSuccess={() => {
+                  setIsEditProductOpen(false);
+                  fetchProducts();
+                }}
+              />
+            )}
           </div>
         </SheetContent>
       </Sheet>
