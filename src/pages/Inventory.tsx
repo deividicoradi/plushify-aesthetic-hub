@@ -17,6 +17,7 @@ const Inventory = () => {
     products,
     stats,
     selectedProduct,
+    selectedProducts,
     isNewProductOpen,
     isEditProductOpen,
     isTransactionOpen,
@@ -34,9 +35,12 @@ const Inventory = () => {
     setIsReportsOpen,
     setIsBarcodeScannerOpen,
     setSearchTerm,
+    setSelectedProducts,
     fetchProducts,
     handleTransaction,
     handleEditProduct,
+    toggleProductSelection,
+    selectAllProducts,
   } = useInventory();
 
   return (
@@ -47,6 +51,10 @@ const Inventory = () => {
         onManageCategories={() => setIsCategoriesOpen(true)}
         onShowReports={() => setIsReportsOpen(true)}
         onScanBarcode={() => setIsBarcodeScannerOpen(true)}
+        selectedProducts={selectedProducts}
+        setSelectedProducts={setSelectedProducts}
+        allProducts={products}
+        fetchProducts={fetchProducts}
       />
       
       <InventoryContainer
@@ -59,6 +67,9 @@ const Inventory = () => {
         isHistoryOpen={isHistoryOpen}
         isCategoriesOpen={isCategoriesOpen}
         isReportsOpen={isReportsOpen}
+        selectedProducts={selectedProducts}
+        onToggleSelect={toggleProductSelection}
+        onSelectAll={selectAllProducts}
       />
       
       <InventoryDialogs

@@ -2,6 +2,8 @@
 import React from "react";
 import { Package, Plus, History, Folder, BarChart, ScanBarcode } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BatchActions } from "./BatchActions";
+import { Product } from "@/hooks/useInventory";
 
 type InventoryHeaderProps = {
   onAddProduct: () => void;
@@ -9,6 +11,10 @@ type InventoryHeaderProps = {
   onManageCategories: () => void;
   onShowReports: () => void;
   onScanBarcode: () => void;
+  selectedProducts: Product[];
+  setSelectedProducts: (products: Product[]) => void;
+  allProducts: Product[];
+  fetchProducts: () => void;
 };
 
 export const InventoryHeader = ({ 
@@ -16,7 +22,11 @@ export const InventoryHeader = ({
   onShowTransactionHistory, 
   onManageCategories,
   onShowReports,
-  onScanBarcode
+  onScanBarcode,
+  selectedProducts,
+  setSelectedProducts,
+  allProducts,
+  fetchProducts
 }: InventoryHeaderProps) => {
   return (
     <div className="flex flex-col gap-2 mb-7">
@@ -50,9 +60,17 @@ export const InventoryHeader = ({
           </Button>
         </div>
       </div>
-      <p className="text-gray-500 text-sm">
-        Gerencie seu inventário, adicione novos produtos, atualize o estoque e edite detalhes dos produtos existentes.
-      </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <p className="text-gray-500 text-sm">
+          Gerencie seu inventário, adicione novos produtos, atualize o estoque e edite detalhes dos produtos existentes.
+        </p>
+        <BatchActions 
+          selectedProducts={selectedProducts}
+          setSelectedProducts={setSelectedProducts}
+          onSuccess={fetchProducts}
+          allProducts={allProducts}
+        />
+      </div>
     </div>
   );
 };

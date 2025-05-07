@@ -14,6 +14,7 @@ type Product = {
   category: string;
   stock: number;
   min_stock: number;
+  barcode?: string | null;
 };
 
 type InventoryContainerProps = {
@@ -30,6 +31,9 @@ type InventoryContainerProps = {
   isHistoryOpen: boolean;
   isCategoriesOpen: boolean;
   isReportsOpen: boolean;
+  selectedProducts: Product[];
+  onToggleSelect: (product: Product) => void;
+  onSelectAll: () => void;
 };
 
 export const InventoryContainer = ({
@@ -41,7 +45,10 @@ export const InventoryContainer = ({
   onEditProduct,
   isHistoryOpen,
   isCategoriesOpen,
-  isReportsOpen
+  isReportsOpen,
+  selectedProducts,
+  onToggleSelect,
+  onSelectAll
 }: InventoryContainerProps) => {
   return (
     <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 items-start">
@@ -65,6 +72,9 @@ export const InventoryContainer = ({
               setSearchTerm={setSearchTerm}
               onTransaction={onTransaction}
               onEditProduct={onEditProduct}
+              selectedProducts={selectedProducts}
+              onToggleSelect={onToggleSelect}
+              onSelectAll={onSelectAll}
             />
           </>
         )}

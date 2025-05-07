@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
@@ -21,6 +20,7 @@ export const useInventory = () => {
     categories: 0
   });
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [isNewProductOpen, setIsNewProductOpen] = useState(false);
   const [isEditProductOpen, setIsEditProductOpen] = useState(false);
   const [isTransactionOpen, setIsTransactionOpen] = useState(false);
@@ -71,11 +71,33 @@ export const useInventory = () => {
     setIsEditProductOpen(true);
   };
 
+  const toggleProductSelection = (product: Product) => {
+    setSelectedProducts(prev => {
+      const isSelected = prev.find(p => p.id === product.id);
+      if (isSelected) {
+        return prev.filter(p => p.id !== product.id);
+      } else {
+        return [...prev, product];
+      }
+    });
+  };
+
+  const selectAllProducts = () => {
+    if (selectedProducts.length === products.length) {
+      // If all are selected, unselect all
+      setSelectedProducts([]);
+    } else {
+      // Otherwise select all
+      setSelectedProducts([...products]);
+    }
+  };
+
   return {
     // State
     products,
     stats,
     selectedProduct,
+    selectedProducts,
     isNewProductOpen,
     isEditProductOpen,
     isTransactionOpen,
@@ -94,9 +116,12 @@ export const useInventory = () => {
     setIsReportsOpen,
     setIsBarcodeScannerOpen,
     setSearchTerm,
+    setSelectedProducts,
     // Actions
     fetchProducts,
     handleTransaction,
     handleEditProduct,
+    toggleProductSelection,
+    selectAllProducts,
   };
 };
