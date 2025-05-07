@@ -27,6 +27,8 @@ import { ProductsTable } from "@/components/inventory/ProductsTable";
 import { BannerAside } from "@/components/inventory/BannerAside";
 import { TransactionHistory } from "@/components/inventory/TransactionHistory";
 import { CategoryManagement } from "@/components/inventory/CategoryManagement";
+import { StockAlerts } from "@/components/inventory/StockAlerts";
+import { InventoryReports } from "@/components/inventory/InventoryReports";
 
 type Product = {
   id: string;
@@ -49,6 +51,7 @@ const Inventory = () => {
   const [isTransactionOpen, setIsTransactionOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isReportsOpen, setIsReportsOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'entrada' | 'saida'>('entrada');
   const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
@@ -100,14 +103,21 @@ const Inventory = () => {
             onAddProduct={() => setIsNewProductOpen(true)} 
             onShowTransactionHistory={() => setIsHistoryOpen(true)}
             onManageCategories={() => setIsCategoriesOpen(true)}
+            onShowReports={() => setIsReportsOpen(true)}
           />
           
           {isHistoryOpen ? (
             <TransactionHistory />
           ) : isCategoriesOpen ? (
             <CategoryManagement />
+          ) : isReportsOpen ? (
+            <InventoryReports />
           ) : (
             <>
+              <StockAlerts 
+                products={products}
+                onTransaction={handleTransaction}
+              />
               <StatCards {...stats} />
               <ProductsTable 
                 products={products}
@@ -195,6 +205,15 @@ const Inventory = () => {
             <DialogTitle>Gerenciamento de Categorias</DialogTitle>
           </DialogHeader>
           <CategoryManagement />
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isReportsOpen} onOpenChange={setIsReportsOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Relatórios de Estoque</DialogTitle>
+          </DialogHeader>
+          <InventoryReports />
         </DialogContent>
       </Dialog>
     </div>

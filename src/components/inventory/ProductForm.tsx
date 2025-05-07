@@ -10,10 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Archive } from "lucide-react";
 
 type ProductFormData = {
   name: string;
@@ -29,7 +30,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
     defaultValues: {
       name: "",
       category: "",
-      minStock: 0
+      minStock: 5
     }
   });
 
@@ -139,10 +140,18 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
           name="minStock"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Estoque Mínimo</FormLabel>
+              <FormLabel>
+                <div className="flex items-center gap-1">
+                  <Archive className="h-4 w-4 text-muted-foreground" />
+                  <span>Estoque Mínimo</span>
+                </div>
+              </FormLabel>
               <FormControl>
                 <Input {...field} type="number" min="0" />
               </FormControl>
+              <FormDescription>
+                Você será alertado quando o estoque estiver abaixo deste valor
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

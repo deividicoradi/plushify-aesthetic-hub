@@ -1,18 +1,20 @@
 
 import React from "react";
-import { Package, Plus, History, Folder } from "lucide-react";
+import { Package, Plus, History, Folder, FileChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type InventoryHeaderProps = {
   onAddProduct: () => void;
   onShowTransactionHistory: () => void;
   onManageCategories: () => void;
+  onShowReports: () => void;
 };
 
 export const InventoryHeader = ({ 
   onAddProduct, 
   onShowTransactionHistory, 
-  onManageCategories 
+  onManageCategories,
+  onShowReports 
 }: InventoryHeaderProps) => {
   return (
     <div className="flex flex-col gap-2 mb-7">
@@ -24,6 +26,10 @@ export const InventoryHeader = ({
           </h1>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={onShowReports} className="gap-2">
+            <FileChart className="w-4 h-4" />
+            Relatórios
+          </Button>
           <Button variant="outline" onClick={onManageCategories} className="gap-2">
             <Folder className="w-4 h-4" />
             Categorias
