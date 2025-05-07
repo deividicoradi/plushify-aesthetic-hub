@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Package, Plus, History, Folder, BarChart } from "lucide-react";
+import { Package, Plus, History, Folder, BarChart, ScanBarcode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type InventoryHeaderProps = {
@@ -8,13 +8,15 @@ type InventoryHeaderProps = {
   onShowTransactionHistory: () => void;
   onManageCategories: () => void;
   onShowReports: () => void;
+  onScanBarcode: () => void;
 };
 
 export const InventoryHeader = ({ 
   onAddProduct, 
   onShowTransactionHistory, 
   onManageCategories,
-  onShowReports 
+  onShowReports,
+  onScanBarcode
 }: InventoryHeaderProps) => {
   return (
     <div className="flex flex-col gap-2 mb-7">
@@ -26,21 +28,25 @@ export const InventoryHeader = ({
           </h1>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={onScanBarcode} className="gap-2">
+            <ScanBarcode className="w-4 h-4" />
+            <span className="hidden sm:inline">Escanear</span>
+          </Button>
           <Button variant="outline" onClick={onShowReports} className="gap-2">
             <BarChart className="w-4 h-4" />
-            Relatórios
+            <span className="hidden sm:inline">Relatórios</span>
           </Button>
           <Button variant="outline" onClick={onManageCategories} className="gap-2">
             <Folder className="w-4 h-4" />
-            Categorias
+            <span className="hidden sm:inline">Categorias</span>
           </Button>
           <Button variant="outline" onClick={onShowTransactionHistory} className="gap-2">
             <History className="w-4 h-4" />
-            Histórico
+            <span className="hidden sm:inline">Histórico</span>
           </Button>
           <Button onClick={onAddProduct} className="gap-2 bg-pink-600 hover:bg-pink-700">
             <Plus className="w-4 h-4" />
-            Novo Produto
+            <span className="hidden sm:inline">Novo Produto</span>
           </Button>
         </div>
       </div>

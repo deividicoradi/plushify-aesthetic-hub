@@ -20,6 +20,7 @@ type ProductFormData = {
   name: string;
   category: string;
   minStock: number;
+  barcode: string;
 };
 
 export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
@@ -30,9 +31,19 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
     defaultValues: {
       name: "",
       category: "",
-      minStock: 5
+      minStock: 5,
+      barcode: ""
     }
   });
+
+  // Check for pending barcode from scanner
+  useEffect(() => {
+    const pendingBarcode = sessionStorage.getItem('pendingBarcode');
+    if (pendingBarcode) {
+      form.setValue('barcode', pendingBarcode);
+      sessionStorage.removeItem('pendingBarcode');
+    }
+  }, [form]);
 
   // Fetch all existing categories
   useEffect(() => {
@@ -66,6 +77,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
           name: data.name,
           category: data.category,
           min_stock: data.minStock,
+          barcode: data.barcode || null,
           user_id: user?.id
         });
 
@@ -91,6 +103,23 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
               <FormControl>
                 <Input {...field} placeholder="Ex: Esmalte Rosa" />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="barcode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código de Barras</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ex: 7891234567890" />
+              </FormControl>
+              <FormDescription>
+                Opcional. Pode ser escaneado utilizando a câmera do dispositivo.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

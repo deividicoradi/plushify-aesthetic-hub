@@ -4,6 +4,13 @@ import { useInventory } from "@/hooks/useInventory";
 import { InventoryHeader } from "@/components/inventory/InventoryHeader";
 import { InventoryContainer } from "@/components/inventory/InventoryContainer";
 import { InventoryDialogs } from "@/components/inventory/InventoryDialogs";
+import { BarcodeScanner } from "@/components/inventory/BarcodeScanner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Inventory = () => {
   const {
@@ -16,6 +23,7 @@ const Inventory = () => {
     isHistoryOpen,
     isCategoriesOpen,
     isReportsOpen,
+    isBarcodeScannerOpen,
     transactionType,
     searchTerm,
     setIsNewProductOpen,
@@ -24,6 +32,7 @@ const Inventory = () => {
     setIsHistoryOpen,
     setIsCategoriesOpen,
     setIsReportsOpen,
+    setIsBarcodeScannerOpen,
     setSearchTerm,
     fetchProducts,
     handleTransaction,
@@ -37,6 +46,7 @@ const Inventory = () => {
         onShowTransactionHistory={() => setIsHistoryOpen(true)}
         onManageCategories={() => setIsCategoriesOpen(true)}
         onShowReports={() => setIsReportsOpen(true)}
+        onScanBarcode={() => setIsBarcodeScannerOpen(true)}
       />
       
       <InventoryContainer
@@ -68,6 +78,21 @@ const Inventory = () => {
         transactionType={transactionType}
         onSuccess={fetchProducts}
       />
+
+      <Dialog open={isBarcodeScannerOpen} onOpenChange={setIsBarcodeScannerOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Escanear Código de Barras</DialogTitle>
+          </DialogHeader>
+          <BarcodeScanner 
+            onClose={() => setIsBarcodeScannerOpen(false)} 
+            onSuccess={() => {
+              setIsBarcodeScannerOpen(false);
+              setIsNewProductOpen(true);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

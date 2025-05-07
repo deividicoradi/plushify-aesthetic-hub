@@ -10,6 +10,7 @@ export type Product = {
   category: string;
   stock: number;
   min_stock: number;
+  barcode?: string | null;
 };
 
 export const useInventory = () => {
@@ -26,6 +27,7 @@ export const useInventory = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isReportsOpen, setIsReportsOpen] = useState(false);
+  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'entrada' | 'saida'>('entrada');
   const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
@@ -80,6 +82,7 @@ export const useInventory = () => {
     isHistoryOpen,
     isCategoriesOpen,
     isReportsOpen,
+    isBarcodeScannerOpen,
     transactionType,
     searchTerm,
     // Setters
@@ -89,6 +92,7 @@ export const useInventory = () => {
     setIsHistoryOpen,
     setIsCategoriesOpen,
     setIsReportsOpen,
+    setIsBarcodeScannerOpen,
     setSearchTerm,
     // Actions
     fetchProducts,
