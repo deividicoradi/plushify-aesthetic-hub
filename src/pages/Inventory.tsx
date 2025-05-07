@@ -1,221 +1,73 @@
 
-import React, { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/sonner";
-import { useAuth } from "@/contexts/AuthContext";
-
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-import { ProductForm } from "@/components/inventory/ProductForm";
-import { EditProductForm } from "@/components/inventory/EditProductForm";
-import { StockTransaction } from "@/components/inventory/StockTransaction";
+import React from "react";
+import { useInventory } from "@/hooks/useInventory";
 import { InventoryHeader } from "@/components/inventory/InventoryHeader";
-import { StatCards } from "@/components/inventory/StatCards";
-import { ProductsTable } from "@/components/inventory/ProductsTable";
-import { BannerAside } from "@/components/inventory/BannerAside";
-import { TransactionHistory } from "@/components/inventory/TransactionHistory";
-import { CategoryManagement } from "@/components/inventory/CategoryManagement";
-import { StockAlerts } from "@/components/inventory/StockAlerts";
-import { InventoryReports } from "@/components/inventory/InventoryReports";
-
-type Product = {
-  id: string;
-  name: string;
-  category: string;
-  stock: number;
-  min_stock: number;
-};
+import { InventoryContainer } from "@/components/inventory/InventoryContainer";
+import { InventoryDialogs } from "@/components/inventory/InventoryDialogs";
 
 const Inventory = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [stats, setStats] = useState({
-    total: 0,
-    lowStock: 0,
-    categories: 0
-  });
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isNewProductOpen, setIsNewProductOpen] = useState(false);
-  const [isEditProductOpen, setIsEditProductOpen] = useState(false);
-  const [isTransactionOpen, setIsTransactionOpen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
-  const [isReportsOpen, setIsReportsOpen] = useState(false);
-  const [transactionType, setTransactionType] = useState<'entrada' | 'saida'>('entrada');
-  const [searchTerm, setSearchTerm] = useState('');
-  const { user } = useAuth();
-
-  const fetchProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
-
-      setProducts(data || []);
-      
-      const uniqueCategories = new Set(data?.map(p => p.category));
-      setStats({
-        total: data?.length || 0,
-        lowStock: data?.filter(p => p.stock <= p.min_stock).length || 0,
-        categories: uniqueCategories.size
-      });
-    } catch (error: any) {
-      toast.error("Erro ao carregar produtos: " + error.message);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchProducts();
-    }
-  }, [user]);
-
-  const handleTransaction = (product: Product, type: 'entrada' | 'saida') => {
-    setSelectedProduct(product);
-    setTransactionType(type);
-    setIsTransactionOpen(true);
-  };
-  
-  const handleEditProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setIsEditProductOpen(true);
-  };
+  const {
+    products,
+    stats,
+    selectedProduct,
+    isNewProductOpen,
+    isEditProductOpen,
+    isTransactionOpen,
+    isHistoryOpen,
+    isCategoriesOpen,
+    isReportsOpen,
+    transactionType,
+    searchTerm,
+    setIsNewProductOpen,
+    setIsEditProductOpen,
+    setIsTransactionOpen,
+    setIsHistoryOpen,
+    setIsCategoriesOpen,
+    setIsReportsOpen,
+    setSearchTerm,
+    fetchProducts,
+    handleTransaction,
+    handleEditProduct,
+  } = useInventory();
 
   return (
     <div className="min-h-screen bg-background py-12 px-4 sm:px-8 animate-fade-in">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 items-start">
-        <main>
-          <InventoryHeader 
-            onAddProduct={() => setIsNewProductOpen(true)} 
-            onShowTransactionHistory={() => setIsHistoryOpen(true)}
-            onManageCategories={() => setIsCategoriesOpen(true)}
-            onShowReports={() => setIsReportsOpen(true)}
-          />
-          
-          {isHistoryOpen ? (
-            <TransactionHistory />
-          ) : isCategoriesOpen ? (
-            <CategoryManagement />
-          ) : isReportsOpen ? (
-            <InventoryReports />
-          ) : (
-            <>
-              <StockAlerts 
-                products={products}
-                onTransaction={handleTransaction}
-              />
-              <StatCards {...stats} />
-              <ProductsTable 
-                products={products}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                onTransaction={handleTransaction}
-                onEditProduct={handleEditProduct}
-              />
-            </>
-          )}
-        </main>
-
-        <aside className="hidden lg:block">
-          <BannerAside />
-        </aside>
-      </div>
-
-      <Sheet open={isNewProductOpen} onOpenChange={setIsNewProductOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Novo Produto</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            <ProductForm onSuccess={() => {
-              setIsNewProductOpen(false);
-              fetchProducts();
-            }} />
-          </div>
-        </SheetContent>
-      </Sheet>
+      <InventoryHeader 
+        onAddProduct={() => setIsNewProductOpen(true)} 
+        onShowTransactionHistory={() => setIsHistoryOpen(true)}
+        onManageCategories={() => setIsCategoriesOpen(true)}
+        onShowReports={() => setIsReportsOpen(true)}
+      />
       
-      <Sheet open={isEditProductOpen} onOpenChange={setIsEditProductOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Editar Produto</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            {selectedProduct && (
-              <EditProductForm
-                product={selectedProduct}
-                onSuccess={() => {
-                  setIsEditProductOpen(false);
-                  fetchProducts();
-                }}
-              />
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      <Sheet open={isTransactionOpen} onOpenChange={setIsTransactionOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>
-              {transactionType === 'entrada' ? 'Entrada' : 'Saída'} de Estoque - {selectedProduct?.name}
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            {selectedProduct && (
-              <StockTransaction
-                productId={selectedProduct.id}
-                type={transactionType}
-                onSuccess={() => {
-                  setIsTransactionOpen(false);
-                  fetchProducts();
-                }}
-              />
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+      <InventoryContainer
+        products={products}
+        stats={stats}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onTransaction={handleTransaction}
+        onEditProduct={handleEditProduct}
+        isHistoryOpen={isHistoryOpen}
+        isCategoriesOpen={isCategoriesOpen}
+        isReportsOpen={isReportsOpen}
+      />
       
-      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Histórico de Transações</DialogTitle>
-          </DialogHeader>
-          <TransactionHistory />
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={isCategoriesOpen} onOpenChange={setIsCategoriesOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Gerenciamento de Categorias</DialogTitle>
-          </DialogHeader>
-          <CategoryManagement />
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={isReportsOpen} onOpenChange={setIsReportsOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Relatórios de Estoque</DialogTitle>
-          </DialogHeader>
-          <InventoryReports />
-        </DialogContent>
-      </Dialog>
+      <InventoryDialogs
+        isNewProductOpen={isNewProductOpen}
+        setIsNewProductOpen={setIsNewProductOpen}
+        isEditProductOpen={isEditProductOpen}
+        setIsEditProductOpen={setIsEditProductOpen}
+        isTransactionOpen={isTransactionOpen}
+        setIsTransactionOpen={setIsTransactionOpen}
+        isHistoryOpen={isHistoryOpen}
+        setIsHistoryOpen={setIsHistoryOpen}
+        isCategoriesOpen={isCategoriesOpen}
+        setIsCategoriesOpen={setIsCategoriesOpen}
+        isReportsOpen={isReportsOpen}
+        setIsReportsOpen={setIsReportsOpen}
+        selectedProduct={selectedProduct}
+        transactionType={transactionType}
+        onSuccess={fetchProducts}
+      />
     </div>
   );
 };

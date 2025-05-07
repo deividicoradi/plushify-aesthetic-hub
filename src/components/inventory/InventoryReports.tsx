@@ -17,6 +17,7 @@ import {
   Pie,
   Cell,
   Legend,
+  Tooltip
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
@@ -139,9 +140,7 @@ export const InventoryReports = () => {
               ))}
             </Pie>
             <Legend />
-            <ChartTooltip>
-              <ChartTooltipContent />
-            </ChartTooltip>
+            <Tooltip content={<ChartTooltipContent />} />
           </PieChart>
         </ChartContainer>
       </div>
@@ -190,9 +189,7 @@ export const InventoryReports = () => {
           <YAxis />
           <Bar dataKey="stock" name="Estoque Atual" fill="var(--color-stock, #9b87f5)" />
           <Bar dataKey="minStock" name="Estoque Mínimo" fill="var(--color-minStock, #F97316)" />
-          <ChartTooltip>
-            <ChartTooltipContent />
-          </ChartTooltip>
+          <Tooltip content={<ChartTooltipContent />} />
         </BarChart>
       </ChartContainer>
     </div>
