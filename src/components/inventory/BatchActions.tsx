@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Import, Export, Check, Trash2 } from "lucide-react";
+import { Import, FileUp, Check, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -90,7 +90,8 @@ export const BatchActions = ({
             }
             
             for (const product of products) {
-              const { name, category, stock, min_stock, barcode } = product;
+              const { name, category, stock, min_stock } = product;
+              const barcode = product.barcode; // Extraímos separadamente pois não faz parte do tipo principal
               
               // Check if product with same name already exists
               const existingProduct = allProducts.find(p => p.name === name);
@@ -99,15 +100,15 @@ export const BatchActions = ({
                 // Update existing product
                 const { error } = await supabase
                   .from('products')
-                  .update({ category, stock, min_stock, barcode })
+                  .update({ category, stock, min_stock })
                   .eq('id', existingProduct.id);
                   
                 if (error) throw error;
               } else {
-                // Insert new product
+                // Insert new product - Note: removed barcode field as it's not in the DB schema
                 const { error } = await supabase
                   .from('products')
-                  .insert({ name, category, stock, min_stock, barcode });
+                  .insert({ name, category, stock, min_stock });
                   
                 if (error) throw error;
               }
@@ -250,7 +251,7 @@ export const BatchActions = ({
         onClick={handleExport} 
         disabled={isExporting}
       >
-        <Export className="w-4 h-4" />
+        <FileUp className="w-4 h-4" />
         Exportar
       </Button>
 

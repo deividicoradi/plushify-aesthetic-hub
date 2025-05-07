@@ -1,4 +1,3 @@
-
 import React from "react";
 import { StockAlerts } from "./StockAlerts";
 import { StatCards } from "./StatCards";
@@ -7,15 +6,7 @@ import { BannerAside } from "./BannerAside";
 import { InventoryReports } from "./InventoryReports";
 import { TransactionHistory } from "./TransactionHistory";
 import { CategoryManagement } from "./CategoryManagement";
-
-type Product = {
-  id: string;
-  name: string;
-  category: string;
-  stock: number;
-  min_stock: number;
-  barcode?: string | null;
-};
+import { Product } from "@/hooks/useInventory";
 
 type InventoryContainerProps = {
   products: Product[];
