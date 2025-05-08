@@ -1,9 +1,15 @@
 
-import React, { useState } from "react";
-import { FileUp } from "lucide-react";
+import React from "react";
+import { FileDown, FileJson, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/sonner";
-import { Product } from "@/hooks/useInventory";
+import { Product } from "@/hooks/inventory/useProductsData";
 import { convertToCSV, downloadFile } from "@/utils/fileUtils";
 
 interface ExportHandlerProps {
@@ -12,65 +18,70 @@ interface ExportHandlerProps {
   allProducts: Product[];
 }
 
-export const ExportHandler = ({ 
+export const ExportHandler: React.FC<ExportHandlerProps> = ({ 
   selectedProducts, 
-  setSelectedProducts, 
+  setSelectedProducts,
   allProducts 
-}: ExportHandlerProps) => {
-  const [isExporting, setIsExporting] = useState(false);
+}) => {
+  const isAnySelected = selectedProducts.length > 0;
 
-  const handleExport = async () => {
+  const handleExport = (format: 'csv' | 'json') => {
+    const dataToExport = selectedProducts.length > 0 ? selectedProducts : allProducts;
+    
     try {
-      setIsExporting(true);
-      
-      // If products are selected, export only those. Otherwise, export all products.
-      const productsToExport = selectedProducts.length > 0 ? selectedProducts : allProducts;
-      
-      // Create a simplified version without internal fields
-      const cleanedProducts = productsToExport.map(({ id, name, category, stock, min_stock, barcode }) => ({
-        id, name, category, stock, min_stock, barcode
-      }));
-      
-      // Create CSV and JSON data
-      const jsonData = JSON.stringify(cleanedProducts, null, 2);
-      const csvData = convertToCSV(cleanedProducts);
-      
-      // Prompt user for format
-      const format = window.confirm(
-        'Escolha o formato de exportação:\nOK para JSON, Cancelar para CSV'
-      ) ? 'json' : 'csv';
-      
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const fileName = `inventario-${timestamp}.${format}`;
-      
-      if (format === 'json') {
-        downloadFile(jsonData, fileName, 'application/json');
-      } else {
-        downloadFile(csvData, fileName, 'text/csv');
+      if (dataToExport.length === 0) {
+        toast.error("Não há dados para exportar");
+        return;
       }
+
+      let content = '';
+      let fileName = `produtos-${new Date().toISOString().split('T')[0]}`;
+      let contentType = '';
+
+      if (format === 'csv') {
+        content = convertToCSV(dataToExport);
+        fileName += '.csv';
+        contentType = 'text/csv';
+      } else {
+        content = JSON.stringify(dataToExport, null, 2);
+        fileName += '.json';
+        contentType = 'application/json';
+      }
+
+      downloadFile(content, fileName, contentType);
+      toast.success(`Exportação para ${format.toUpperCase()} concluída!`);
       
-      toast.success(`${productsToExport.length} produtos exportados com sucesso!`);
-      
-      // Clear selection after export if any were selected
-      if (selectedProducts.length > 0) {
+      // Clear selection after export
+      if (isAnySelected) {
         setSelectedProducts([]);
       }
     } catch (error: any) {
       toast.error(`Erro ao exportar: ${error.message}`);
-    } finally {
-      setIsExporting(false);
     }
   };
 
   return (
-    <Button 
-      variant="outline" 
-      className="gap-2" 
-      onClick={handleExport} 
-      disabled={isExporting}
-    >
-      <FileUp className="w-4 h-4" />
-      Exportar
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <FileDown className="w-4 h-4" />
+          <span className="hidden sm:inline">
+            {isAnySelected 
+              ? `Exportar (${selectedProducts.length})` 
+              : 'Exportar Todos'}
+          </span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={() => handleExport('csv')}>
+          <FileText className="w-4 h-4 mr-2" />
+          Exportar como CSV
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleExport('json')}>
+          <FileJson className="w-4 h-4 mr-2" />
+          Exportar como JSON
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

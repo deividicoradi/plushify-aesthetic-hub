@@ -1,144 +1,170 @@
 
 import React, { useState } from "react";
-import { Import } from "lucide-react";
+import { Upload, FileJson, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { 
+import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Product } from "@/hooks/inventory/useProductsData";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuLabel
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { toast } from "@/components/ui/sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { Product } from "@/hooks/useInventory";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface ImportHandlerProps {
   onSuccess: () => void;
   allProducts: Product[];
 }
 
-export const ImportHandler = ({ onSuccess, allProducts }: ImportHandlerProps) => {
-  const [isImporting, setIsImporting] = useState(false);
+export const ImportHandler: React.FC<ImportHandlerProps> = ({ onSuccess, allProducts }) => {
   const { user } = useAuth();
-
-  const handleImport = () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.csv,.json';
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [importMethod, setImportMethod] = useState<'csv' | 'json' | null>(null);
+  
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
     
-    fileInput.onchange = async (e: any) => {
-      try {
-        setIsImporting(true);
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          try {
-            const result = event.target?.result as string;
-            let products: Product[] = [];
-            
-            if (file.name.endsWith('.json')) {
-              products = JSON.parse(result);
-            } else if (file.name.endsWith('.csv')) {
-              // Simple CSV parser - this could be improved
-              const lines = result.split('\n');
-              const headers = lines[0].split(',');
-              
-              for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                
-                const values = lines[i].split(',');
-                const product: any = {};
-                
-                headers.forEach((header, index) => {
-                  const value = values[index];
-                  product[header.trim()] = value?.trim();
-                });
-                
-                // Convert string numbers to actual numbers
-                if (product.stock) product.stock = Number(product.stock);
-                if (product.min_stock) product.min_stock = Number(product.min_stock);
-                
-                // Generate an ID if not present
-                if (!product.id) product.id = crypto.randomUUID();
-                
-                products.push(product as Product);
-              }
-            }
-            
-            for (const product of products) {
-              const { name, category, stock, min_stock } = product;
-              
-              // Check if product with same name already exists
-              const existingProduct = allProducts.find(p => p.name === name);
-              
-              if (existingProduct) {
-                // Update existing product
-                const { error } = await supabase
-                  .from('products')
-                  .update({ category, stock, min_stock })
-                  .eq('id', existingProduct.id);
-                  
-                if (error) throw error;
-              } else {
-                // Insert new product
-                const { error } = await supabase
-                  .from('products')
-                  .insert({ 
-                    name, 
-                    category, 
-                    stock, 
-                    min_stock,
-                    user_id: user?.id
-                  });
-                  
-                if (error) throw error;
-              }
-            }
-            
-            toast.success(`Importados ${products.length} produtos com sucesso!`);
-            onSuccess();
-          } catch (error: any) {
-            toast.error(`Erro ao processar arquivo: ${error.message}`);
-          }
-        };
-        
-        if (file.name.endsWith('.json') || file.name.endsWith('.csv')) {
-          reader.readAsText(file);
-        } else {
-          toast.error('Formato de arquivo não suportado. Use CSV ou JSON.');
-        }
-      } catch (error: any) {
-        toast.error(`Erro ao importar: ${error.message}`);
-      } finally {
-        setIsImporting(false);
+    try {
+      // Read file content
+      const text = await file.text();
+      let products: any[] = [];
+      
+      // Parse based on file type
+      if (importMethod === 'csv') {
+        products = parseCSV(text);
+      } else if (importMethod === 'json') {
+        products = JSON.parse(text);
       }
-    };
-    
-    fileInput.click();
+      
+      // Process and validate products
+      const validProducts = validateProducts(products);
+      
+      if (validProducts.length === 0) {
+        toast.error("Nenhum produto válido encontrado no arquivo");
+        return;
+      }
+      
+      // Insert products into database
+      await insertProducts(validProducts);
+      
+      toast.success(`${validProducts.length} produtos importados com sucesso!`);
+      onSuccess();
+      setIsDialogOpen(false);
+    } catch (error: any) {
+      toast.error(`Erro ao importar: ${error.message}`);
+    }
   };
 
+  const parseCSV = (text: string): any[] => {
+    const lines = text.split('\n');
+    if (lines.length <= 1) throw new Error("Arquivo CSV vazio ou inválido");
+    
+    const headers = lines[0].split(',').map(h => h.trim());
+    
+    return lines.slice(1)
+      .filter(line => line.trim() !== '')
+      .map(line => {
+        const values = line.split(',').map(v => v.trim());
+        const product: any = {};
+        
+        headers.forEach((header, index) => {
+          const value = values[index];
+          if (header === 'stock' || header === 'min_stock') {
+            product[header] = parseInt(value) || 0;
+          } else {
+            product[header] = value;
+          }
+        });
+        
+        return product;
+      });
+  };
+
+  const validateProducts = (products: any[]): any[] => {
+    // Check required fields, add user_id
+    return products.filter(p => p.name && p.category)
+      .map(p => ({
+        name: p.name,
+        category: p.category,
+        stock: p.stock || 0,
+        min_stock: p.min_stock || 5,
+        barcode: p.barcode || null,
+        user_id: user!.id
+      }));
+  };
+
+  const insertProducts = async (products: any[]) => {
+    const { error } = await supabase
+      .from('products')
+      .insert(products);
+    
+    if (error) throw error;
+  };
+  
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Import className="w-4 h-4" />
-          Importar
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>Importar produtos</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleImport} disabled={isImporting}>
-          Importar arquivo CSV
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleImport} disabled={isImporting}>
-          Importar arquivo JSON
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">Importar</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={() => {
+            setImportMethod('csv');
+            setIsDialogOpen(true);
+          }}>
+            <FileUp className="w-4 h-4 mr-2" />
+            Importar CSV
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => {
+            setImportMethod('json');
+            setIsDialogOpen(true);
+          }}>
+            <FileJson className="w-4 h-4 mr-2" />
+            Importar JSON
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {importMethod === 'csv' ? 'Importar CSV' : 'Importar JSON'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              {importMethod === 'csv' ? 
+                'Selecione um arquivo CSV com cabeçalhos: name, category, stock, min_stock, barcode (opcional)' :
+                'Selecione um arquivo JSON com uma lista de produtos'
+              }
+            </p>
+            <input
+              type="file"
+              accept={importMethod === 'csv' ? '.csv' : '.json'}
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-md file:border-0
+                file:text-sm file:font-semibold
+                file:bg-purple-50 file:text-purple-700
+                hover:file:bg-purple-100"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
