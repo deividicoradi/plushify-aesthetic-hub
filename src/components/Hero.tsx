@@ -2,8 +2,23 @@
 import React from 'react';
 import { ArrowRight, Calendar, MessageSquare, Award, PenTool } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
+  const handleStartFree = () => {
+    navigate('/auth?tab=signup');
+  };
+
+  const handleShowDemo = () => {
+    // Scroll to features section
+    const featuresSection = document.getElementById('features');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
   return (
     <section className="relative pt-28 pb-20 overflow-hidden">
       {/* Background decorations */}
@@ -24,11 +39,20 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button size="lg" className="bg-plush-600 hover:bg-plush-700 text-white h-12 px-8 rounded-full shadow-md">
+              <Button 
+                size="lg" 
+                className="bg-plush-600 hover:bg-plush-700 text-white h-12 px-8 rounded-full shadow-md"
+                onClick={handleStartFree}
+              >
                 Começar Grátis
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
-              <Button size="lg" variant="outline" className="border-plush-200 hover:border-plush-400 text-plush-700 h-12 px-8 rounded-full">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-plush-200 hover:border-plush-400 text-plush-700 h-12 px-8 rounded-full"
+                onClick={handleShowDemo}
+              >
                 Ver Demonstração
               </Button>
             </div>

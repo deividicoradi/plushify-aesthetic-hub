@@ -21,7 +21,7 @@ const Feature = ({ icon, title, description, path }: { icon: React.ReactNode, ti
 
 const Features = () => {
   return (
-    <section className="py-20 bg-secondary/50" id="features">
+    <section id="features" className="py-16 bg-gradient-to-b from-white to-plush-50/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif">
