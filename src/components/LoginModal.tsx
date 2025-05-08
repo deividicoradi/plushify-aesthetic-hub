@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { LogIn, User } from "lucide-react";
+import { LogIn, User, Eye, EyeOff } from "lucide-react";
 
 interface LoginModalProps {
   open: boolean;
@@ -23,13 +23,27 @@ interface LoginModalProps {
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Validação de email
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validações simples
     if (!email || !password) {
       toast.error("Por favor, preencha todos os campos");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      toast.error("Por favor, insira um e-mail válido");
       return;
     }
 
@@ -46,7 +60,11 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
       onOpenChange(false);
       navigate('/dashboard');
     } catch (error: any) {
-      toast.error(error.message || "Erro ao fazer login");
+      if (error.message.includes("Invalid login credentials")) {
+        toast.error("Email ou senha inválidos");
+      } else {
+        toast.error(error.message || "Erro ao fazer login");
+      }
     } finally {
       setLoading(false);
     }
@@ -73,6 +91,11 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
     navigate('/auth?tab=signup');
   };
 
+  const handleForgotPassword = () => {
+    onOpenChange(false);
+    navigate('/auth?recovery=true');
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -97,16 +120,36 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Sua senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              required
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Sua senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                required
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+              </button>
+            </div>
           </div>
+          
+          <div className="text-right">
+            <button
+              type="button"
+              className="text-sm text-plush-600 hover:underline"
+              onClick={handleForgotPassword}
+            >
+              Esqueceu sua senha?
+            </button>
+          </div>
+          
           <Button className="w-full bg-plush-600 hover:bg-plush-700 text-white" type="submit" disabled={loading}>
             <LogIn className="mr-2 h-4 w-4" />
             {loading ? "Entrando..." : "Entrar com E-mail"}

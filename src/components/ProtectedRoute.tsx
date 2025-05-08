@@ -1,11 +1,12 @@
 
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     if (!loading) setIsLoading(false);
@@ -19,7 +20,12 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     );
   }
 
-  if (!user) return <Navigate to="/auth" replace />;
+  // Redireciona para o dashboard se o usuário tentar acessar a página de login estando já autenticado
+  if (user && (location.pathname === '/auth' || location.pathname === '/cadastro')) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (!user) return <Navigate to="/auth" replace state={{ from: location }} />;
 
   return <>{children}</>;
 }
