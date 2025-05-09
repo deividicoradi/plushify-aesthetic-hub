@@ -8,20 +8,36 @@ interface DesktopMenuProps {
 }
 
 const DesktopMenu = ({ onLogin, onSignUp }: DesktopMenuProps) => {
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <nav className="hidden md:flex items-center space-x-8">
       <Link to="/" className="text-foreground/80 hover:text-plush-600 transition-colors">
         Início
       </Link>
-      <Link to="#features" className="text-foreground/80 hover:text-plush-600 transition-colors">
+      <button 
+        onClick={() => scrollToSection('features')} 
+        className="text-foreground/80 hover:text-plush-600 transition-colors bg-transparent"
+      >
         Funcionalidades
-      </Link>
-      <Link to="#pricing" className="text-foreground/80 hover:text-plush-600 transition-colors">
+      </button>
+      <button 
+        onClick={() => scrollToSection('pricing')} 
+        className="text-foreground/80 hover:text-plush-600 transition-colors bg-transparent"
+      >
         Planos
-      </Link>
-      <Link to="#testimonials" className="text-foreground/80 hover:text-plush-600 transition-colors">
+      </button>
+      <button 
+        onClick={() => scrollToSection('testimonials')} 
+        className="text-foreground/80 hover:text-plush-600 transition-colors bg-transparent"
+      >
         Depoimentos
-      </Link>
+      </button>
       <div className="flex items-center space-x-3">
         <Button 
           variant="outline" 

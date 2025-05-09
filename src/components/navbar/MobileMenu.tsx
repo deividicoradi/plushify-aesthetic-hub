@@ -12,6 +12,14 @@ interface MobileMenuProps {
 const MobileMenu = ({ isOpen, onLogin, onSignUp, onClose }: MobileMenuProps) => {
   if (!isOpen) return null;
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      onClose(); // Close the mobile menu after clicking
+    }
+  };
+
   return (
     <div className="fixed inset-0 top-16 bg-white/95 backdrop-blur-sm z-40 flex flex-col md:hidden">
       <div className="container mx-auto px-4 py-8 flex flex-col space-y-6">
@@ -22,27 +30,24 @@ const MobileMenu = ({ isOpen, onLogin, onSignUp, onClose }: MobileMenuProps) => 
         >
           Início
         </Link>
-        <Link
-          to="#features"
-          className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors"
-          onClick={onClose}
+        <button
+          onClick={() => scrollToSection('features')}
+          className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors text-left bg-transparent w-full"
         >
           Funcionalidades
-        </Link>
-        <Link
-          to="#pricing"
-          className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors"
-          onClick={onClose}
+        </button>
+        <button
+          onClick={() => scrollToSection('pricing')}
+          className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors text-left bg-transparent w-full"
         >
           Planos
-        </Link>
-        <Link
-          to="#testimonials"
-          className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors"
-          onClick={onClose}
+        </button>
+        <button
+          onClick={() => scrollToSection('testimonials')}
+          className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors text-left bg-transparent w-full"
         >
           Depoimentos
-        </Link>
+        </button>
         <div className="flex flex-col space-y-3 pt-4">
           <Button 
             variant="outline" 
