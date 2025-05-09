@@ -12,14 +12,19 @@ const DesktopMenu = ({ onLogin, onSignUp }: DesktopMenuProps) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
+    } else if (id === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   return (
     <nav className="hidden md:flex items-center space-x-8">
-      <Link to="/" className="text-foreground/80 hover:text-plush-600 transition-colors">
+      <button 
+        onClick={() => scrollToSection('top')} 
+        className="text-foreground/80 hover:text-plush-600 transition-colors bg-transparent"
+      >
         Início
-      </Link>
+      </button>
       <button 
         onClick={() => scrollToSection('features')} 
         className="text-foreground/80 hover:text-plush-600 transition-colors bg-transparent"

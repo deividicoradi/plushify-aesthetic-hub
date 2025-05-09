@@ -17,19 +17,21 @@ const MobileMenu = ({ isOpen, onLogin, onSignUp, onClose }: MobileMenuProps) => 
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
       onClose(); // Close the mobile menu after clicking
+    } else if (id === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      onClose(); // Close the mobile menu after clicking
     }
   };
 
   return (
     <div className="fixed inset-0 top-16 bg-white/95 backdrop-blur-sm z-40 flex flex-col md:hidden">
       <div className="container mx-auto px-4 py-8 flex flex-col space-y-6">
-        <Link
-          to="/"
-          className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors"
-          onClick={onClose}
+        <button
+          onClick={() => scrollToSection('top')}
+          className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors text-left bg-transparent w-full"
         >
           Início
-        </Link>
+        </button>
         <button
           onClick={() => scrollToSection('features')}
           className="text-lg font-medium py-2 px-4 hover:bg-plush-50 rounded-md transition-colors text-left bg-transparent w-full"
