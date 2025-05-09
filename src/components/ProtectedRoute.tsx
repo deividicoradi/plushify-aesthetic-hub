@@ -20,12 +20,19 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     );
   }
 
-  // Redireciona para o dashboard se o usuário tentar acessar a página de login estando já autenticado
+  // Redirect to dashboard if user tries to access login page while already authenticated
   if (user && (location.pathname === '/auth' || location.pathname === '/cadastro')) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (!user) return <Navigate to="/auth" replace state={{ from: location }} />;
+  // Get redirect path from URL if present
+  const searchParams = new URLSearchParams(location.search);
+  const redirect = searchParams.get('redirect');
+  
+  // If not authenticated, redirect to auth page with the current location as redirect param
+  if (!user) {
+    return <Navigate to={`/auth${redirect ? `?redirect=${redirect}` : ''}`} replace state={{ from: location }} />;
+  }
 
   return <>{children}</>;
 }

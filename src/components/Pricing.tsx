@@ -2,6 +2,10 @@
 import React, { useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription, SubscriptionTier } from '@/hooks/useSubscription';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/sonner';
 
 const PricingTier = ({
   tier,
@@ -13,6 +17,9 @@ const PricingTier = ({
   description,
   features,
   buttonText,
+  isLoading,
+  isCurrentPlan,
+  onSubscribe,
 }: {
   tier: string;
   isPopular?: boolean;
@@ -23,6 +30,9 @@ const PricingTier = ({
   description: string;
   features: { included: boolean; text: string }[];
   buttonText: string;
+  isLoading?: boolean;
+  isCurrentPlan?: boolean;
+  onSubscribe: () => void;
 }) => {
   const displayPrice = isYearly ? yearlyPrice : price;
   const formattedPrice = new Intl.NumberFormat('pt-BR', {
@@ -70,8 +80,10 @@ const PricingTier = ({
               : 'bg-white border border-plush-200 text-plush-600 hover:bg-plush-50'
           }`}
           variant={isPopular ? 'default' : 'outline'}
+          onClick={onSubscribe}
+          disabled={isLoading || isCurrentPlan}
         >
-          {buttonText}
+          {isLoading ? 'Carregando...' : isCurrentPlan ? 'Plano Atual' : buttonText}
         </Button>
         
         <div className="mt-8 space-y-4">
@@ -97,6 +109,27 @@ const PricingTier = ({
 
 const Pricing = () => {
   const [isYearly, setIsYearly] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { isLoading, tier: currentTier, subscribeToPlan } = useSubscription();
+  
+  const handleSubscribe = async (planTier: SubscriptionTier) => {
+    if (!user) {
+      toast.error("Você precisa estar logado para assinar um plano");
+      navigate('/auth?redirect=planos');
+      return;
+    }
+    
+    if (planTier === 'free') {
+      toast.success("Você já está no plano gratuito!");
+      return;
+    }
+    
+    const checkoutUrl = await subscribeToPlan(planTier, isYearly);
+    if (checkoutUrl) {
+      window.location.href = checkoutUrl;
+    }
+  };
   
   const pricingPlans = [
     {
@@ -219,6 +252,9 @@ const Pricing = () => {
               description={plan.description}
               features={plan.features}
               buttonText={plan.buttonText}
+              isLoading={isLoading}
+              isCurrentPlan={currentTier === plan.tier}
+              onSubscribe={() => handleSubscribe(plan.tier as SubscriptionTier)}
             />
           ))}
         </div>

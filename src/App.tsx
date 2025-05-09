@@ -21,6 +21,7 @@ import Clients from "./pages/Clients";
 import Loyalty from "./pages/Loyalty";
 import Signup from "./pages/Signup";
 import Notes from "./pages/Notes";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -80,6 +81,11 @@ const App = () => {
               <Route path="/fidelidade" element={
                 <ProtectedRoute>
                   <Loyalty />
+                </ProtectedRoute>
+              } />
+              <Route path="/payment-success" element={
+                <ProtectedRoute>
+                  <PaymentSuccess />
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
