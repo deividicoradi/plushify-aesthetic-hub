@@ -1,98 +1,78 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
+import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Menu, X } from 'lucide-react';
+import DashboardSidebar from './layout/DashboardSidebar';
+import { useSubscription } from '@/hooks/useSubscription';
+import { toast } from "@/components/ui/sonner";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
 };
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
-
-  const navLinks = [
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Anotações', path: '/notes' },
-    { name: 'Agendamentos', path: '/agendamentos' },
-    { name: 'Clientes', path: '/clientes' },
-    { name: 'Comunicação', path: '/comunicacao' },
-    { name: 'Inventário', path: '/estoque' },
-  ];
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const { tier, isSubscribed } = useSubscription();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-4 lg:px-8">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden text-plush-600"
-          >
-            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          <img src="/logo.svg" alt="Plushify" className="h-8" />
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium hidden sm:block">
-            {user?.email}
-          </span>
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4 mr-1" />
-            Sair
-          </Button>
-        </div>
-      </header>
+    <div className="flex h-screen bg-gray-50">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block">
+        <DashboardSidebar 
+          collapsed={sidebarCollapsed} 
+          setCollapsed={setSidebarCollapsed} 
+        />
+      </div>
 
-      <div className="flex flex-1">
-        {/* Sidebar - Desktop */}
-        <aside className="hidden lg:block w-64 border-r bg-white">
-          <nav className="flex flex-col p-4">
-            {navLinks.map((link) => (
-              <Button
-                key={link.path}
-                variant="ghost"
-                className="justify-start mb-1"
-                onClick={() => navigate(link.path)}
-              >
-                {link.name}
-              </Button>
-            ))}
-          </nav>
-        </aside>
+      {/* Mobile Sidebar */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div 
+            className="fixed inset-0 bg-black/30"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="fixed inset-y-0 left-0 w-64 bg-white">
+            <DashboardSidebar setCollapsed={() => setMobileMenuOpen(false)} />
+          </div>
+        </div>
+      )}
 
-        {/* Sidebar - Mobile */}
-        {sidebarOpen && (
-          <aside className="fixed inset-0 top-16 z-40 w-64 bg-white border-r lg:hidden">
-            <nav className="flex flex-col p-4">
-              {navLinks.map((link) => (
-                <Button
-                  key={link.path}
-                  variant="ghost"
-                  className="justify-start mb-1"
-                  onClick={() => {
-                    navigate(link.path);
-                    setSidebarOpen(false);
-                  }}
-                >
-                  {link.name}
-                </Button>
-              ))}
-            </nav>
-          </aside>
-        )}
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {/* Top Navigation */}
+        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4">
+          <div className="flex items-center">
+            {/* Mobile menu button */}
+            <button 
+              className="block md:hidden mr-4"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu size={24} />
+            </button>
+            <div className="flex items-center">
+              <h1 className="text-xl font-semibold text-gray-800">
+                Painel de Controle
+              </h1>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {isSubscribed && (
+              <div className="hidden sm:block px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-plush-100 to-plush-200 text-plush-800">
+                Plano {tier === 'starter' ? 'Starter' : tier === 'pro' ? 'Pro' : 'Premium'}
+              </div>
+            )}
+            <span className="text-sm text-gray-600">
+              {user?.email}
+            </span>
+          </div>
+        </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto p-4">
           {children}
         </main>
       </div>

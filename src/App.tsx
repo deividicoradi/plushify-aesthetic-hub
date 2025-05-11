@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import DashboardLayout from "./components/DashboardLayout";
 
 // Page imports
 import Index from "./pages/Index";
@@ -22,6 +23,8 @@ import Loyalty from "./pages/Loyalty";
 import Signup from "./pages/Signup";
 import Notes from "./pages/Notes";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Settings from "./pages/Settings";
+import Help from "./pages/Help";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -38,54 +41,88 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/cadastro" element={<Signup />} />
+              <Route path="/payment-success" element={
+                <ProtectedRoute>
+                  <PaymentSuccess />
+                </ProtectedRoute>
+              } />
+
+              {/* Dashboard Routes with Layout */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <DashboardLayout>
+                    <Dashboard />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/notes" element={
                 <ProtectedRoute>
-                  <Notes />
+                  <DashboardLayout>
+                    <Notes />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/agendamentos" element={
                 <ProtectedRoute>
-                  <Appointments />
+                  <DashboardLayout>
+                    <Appointments />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/comunicacao" element={
                 <ProtectedRoute>
-                  <Communication />
+                  <DashboardLayout>
+                    <Communication />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/cursos" element={
                 <ProtectedRoute>
-                  <Courses />
+                  <DashboardLayout>
+                    <Courses />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/estoque" element={
                 <ProtectedRoute>
-                  <Inventory />
+                  <DashboardLayout>
+                    <Inventory />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/planos" element={
                 <ProtectedRoute>
-                  <Plans />
+                  <DashboardLayout>
+                    <Plans />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/clientes" element={
                 <ProtectedRoute>
-                  <Clients />
+                  <DashboardLayout>
+                    <Clients />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/fidelidade" element={
                 <ProtectedRoute>
-                  <Loyalty />
+                  <DashboardLayout>
+                    <Loyalty />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/payment-success" element={
+              <Route path="/settings" element={
                 <ProtectedRoute>
-                  <PaymentSuccess />
+                  <DashboardLayout>
+                    <Settings />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/help" element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <Help />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
