@@ -35,7 +35,7 @@ serve(async (req) => {
     // Obter dados da requisição
     const { planId, isYearly } = await req.json();
 
-    // Converter planId para preços
+    // Converter planId para preços com os IDs corretos da Stripe
     let priceId;
     let planName;
     let planDescription;
@@ -44,17 +44,17 @@ serve(async (req) => {
       case 'starter':
         planName = "Starter";
         planDescription = "Plano Starter - Ideal para profissionais individuais";
-        priceId = isYearly ? "price_starter_yearly" : "price_starter_monthly";
+        priceId = isYearly ? "price_1RNNv2RkF2Xmse9MjGNrg4wk" : "price_1RNNtORkF2Xmse9MudMyCXMt";
         break;
       case 'pro':
         planName = "Pro";
         planDescription = "Plano Pro - Para profissionais em crescimento";
-        priceId = isYearly ? "price_pro_yearly" : "price_pro_monthly";
+        priceId = isYearly ? "price_1RNNx3RkF2Xmse9Mz9Hu9f22" : "price_1RNNw9RkF2Xmse9MVAoYhg3u";
         break;
       case 'premium':
         planName = "Premium";
         planDescription = "Plano Premium - Para quem tem equipe ou rede";
-        priceId = isYearly ? "price_premium_yearly" : "price_premium_monthly";
+        priceId = isYearly ? "price_1RNNzFRkF2Xmse9Mr6D34kM9" : "price_1RNNxgRkF2Xmse9MGKFxwHZc";
         break;
       default:
         throw new Error("Plano inválido");
