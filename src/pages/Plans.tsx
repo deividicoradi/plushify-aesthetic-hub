@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { DollarSign } from 'lucide-react';
-import Pricing from '@/components/Pricing';
+import Pricing from '@/components/pricing/Pricing';
 
 const Plans = () => {
   return (
@@ -21,4 +21,3 @@ const Plans = () => {
 };
 
 export default Plans;
-
