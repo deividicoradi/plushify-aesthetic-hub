@@ -10,6 +10,7 @@ type PricingTierProps = {
   title: string;
   price: number;
   yearlyPrice: number;
+  parcelValue: number;
   description: string;
   features: { included: boolean; text: string }[];
   buttonText: string;
@@ -25,6 +26,7 @@ export const PricingTier = ({
   title,
   price,
   yearlyPrice,
+  parcelValue,
   description,
   features,
   buttonText,
@@ -33,11 +35,24 @@ export const PricingTier = ({
   onSubscribe,
 }: PricingTierProps) => {
   const displayPrice = isYearly ? yearlyPrice : price;
+  const annualTotal = isYearly ? yearlyPrice * 12 : 0;
   const formattedPrice = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
     minimumFractionDigits: 2,
   }).format(displayPrice);
+  
+  const formattedAnnualTotal = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+  }).format(annualTotal);
+
+  const formattedParcelValue = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+  }).format(parcelValue);
 
   return (
     <div
@@ -67,6 +82,16 @@ export const PricingTier = ({
                 style: 'currency',
                 currency: 'BRL',
               }).format((price * 12) - yearlyPrice * 12)} por ano
+            </p>
+          )}
+          
+          {isYearly ? (
+            <p className="text-sm text-gray-600 mt-2">
+              Total anual: {formattedAnnualTotal}
+            </p>
+          ) : (
+            <p className="text-sm text-gray-600 mt-2">
+              Ou 10x de {formattedParcelValue}
             </p>
           )}
         </div>

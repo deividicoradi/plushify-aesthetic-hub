@@ -17,9 +17,9 @@ export const ComparisonTable = () => {
             <tr className="border-b border-plush-100">
               <th className="text-left pb-4 pl-4">Recursos</th>
               <th className="text-center pb-4">Free</th>
-              <th className="text-center pb-4">Starter</th>
-              <th className="text-center pb-4 text-plush-600">Pro</th>
-              <th className="text-center pb-4">Premium</th>
+              <th className="text-center pb-4">Starter<br/><span className="text-xs font-normal">R$69,90/mês</span></th>
+              <th className="text-center pb-4 text-plush-600">Pro<br/><span className="text-xs font-normal">R$119,90/mês</span></th>
+              <th className="text-center pb-4">Premium<br/><span className="text-xs font-normal">R$199,90/mês</span></th>
             </tr>
           </thead>
           <tbody>
@@ -36,6 +36,7 @@ export const ComparisonTable = () => {
               { name: 'Biolink Personalizado', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
               { name: 'Programa de Afiliados', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
               { name: 'Suporte', free: 'Email', starter: 'Email e Chat', pro: 'Email e Chat', premium: 'Prioritário' },
+              { name: 'Opção de Parcelamento', free: '❌', starter: 'Até 10x', pro: 'Até 10x', premium: 'Até 10x' },
             ].map((feature, index) => (
               <tr key={index} className="border-b border-plush-50">
                 <td className="py-4 pl-4 font-medium">{feature.name}</td>

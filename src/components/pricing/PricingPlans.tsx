@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/sonner';
 import { useSubscription, SubscriptionTier } from '@/hooks/useSubscription';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const PricingPlans = () => {
   const [isYearly, setIsYearly] = useState(false);
@@ -30,12 +31,14 @@ export const PricingPlans = () => {
     }
   };
   
+  // Valores atualizados com preços mensais, anuais e parcelados
   const pricingPlans = [
     {
       tier: 'free',
       title: 'Free',
       price: 0,
       yearlyPrice: 0,
+      parcelValue: 0,
       description: 'Para profissionais iniciando a carreira',
       features: [
         { included: true, text: 'Até 5 agendamentos' },
@@ -52,8 +55,9 @@ export const PricingPlans = () => {
     {
       tier: 'starter',
       title: 'Starter',
-      price: 59.90,
-      yearlyPrice: 47.90,
+      price: 69.90,
+      yearlyPrice: 55.90,
+      parcelValue: 6.99,
       description: 'Para profissionais individuais',
       features: [
         { included: true, text: 'Agendamentos ilimitados' },
@@ -71,8 +75,9 @@ export const PricingPlans = () => {
       tier: 'pro',
       isPopular: true,
       title: 'Pro',
-      price: 99.90,
-      yearlyPrice: 79.90,
+      price: 119.90,
+      yearlyPrice: 95.90,
+      parcelValue: 11.99,
       description: 'Para profissionais em crescimento',
       features: [
         { included: true, text: 'Agendamentos ilimitados' },
@@ -89,8 +94,9 @@ export const PricingPlans = () => {
     {
       tier: 'premium',
       title: 'Premium',
-      price: 179.90,
-      yearlyPrice: 143.90,
+      price: 199.90,
+      yearlyPrice: 159.90,
+      parcelValue: 19.99,
       description: 'Para quem tem equipe ou rede',
       features: [
         { included: true, text: 'Tudo do plano Pro' },
@@ -108,44 +114,37 @@ export const PricingPlans = () => {
 
   return (
     <div>
-      <div className="mt-8 inline-flex items-center border border-plush-200 p-1 rounded-full bg-white">
-        <button
-          className={`px-4 py-2 text-sm rounded-full transition-colors ${
-            !isYearly ? 'bg-plush-600 text-white' : 'text-foreground hover:bg-plush-50'
-          }`}
-          onClick={() => setIsYearly(false)}
-        >
-          Mensal
-        </button>
-        <button
-          className={`px-4 py-2 text-sm rounded-full transition-colors ${
-            isYearly ? 'bg-plush-600 text-white' : 'text-foreground hover:bg-plush-50'
-          }`}
-          onClick={() => setIsYearly(true)}
-        >
-          Anual <span className="text-xs font-medium ml-1">(-20%)</span>
-        </button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4 mt-8">
-        {pricingPlans.map((plan) => (
-          <PricingTier
-            key={plan.tier}
-            tier={plan.tier}
-            isPopular={plan.isPopular}
-            isYearly={isYearly}
-            title={plan.title}
-            price={plan.price}
-            yearlyPrice={plan.yearlyPrice}
-            description={plan.description}
-            features={plan.features}
-            buttonText={plan.buttonText}
-            isLoading={isLoading}
-            isCurrentPlan={currentTier === plan.tier}
-            onSubscribe={() => handleSubscribe(plan.tier as SubscriptionTier)}
-          />
-        ))}
-      </div>
+      <Tabs defaultValue="mensal" className="w-full mt-8">
+        <TabsList className="mx-auto mb-4 border border-plush-200 bg-white">
+          <TabsTrigger value="mensal" onClick={() => setIsYearly(false)}>
+            Mensal
+          </TabsTrigger>
+          <TabsTrigger value="anual" onClick={() => setIsYearly(true)}>
+            Anual <span className="text-xs font-medium ml-1">(-20%)</span>
+          </TabsTrigger>
+        </TabsList>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4 mt-8">
+          {pricingPlans.map((plan) => (
+            <PricingTier
+              key={plan.tier}
+              tier={plan.tier}
+              isPopular={plan.isPopular}
+              isYearly={isYearly}
+              title={plan.title}
+              price={plan.price}
+              yearlyPrice={plan.yearlyPrice}
+              parcelValue={plan.parcelValue}
+              description={plan.description}
+              features={plan.features}
+              buttonText={plan.buttonText}
+              isLoading={isLoading}
+              isCurrentPlan={currentTier === plan.tier}
+              onSubscribe={() => handleSubscribe(plan.tier as SubscriptionTier)}
+            />
+          ))}
+        </div>
+      </Tabs>
     </div>
   );
 };
