@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -30,6 +30,7 @@ type NavItem = {
 
 const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boolean, setCollapsed?: (value: boolean) => void }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { signOut } = useAuth();
   const { tier, isSubscribed } = useSubscription();
 
@@ -57,6 +58,13 @@ const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boo
     };
     
     return tierLevels[tier as keyof typeof tierLevels] >= tierLevels[requiredTier];
+  };
+
+  const handleNavigate = (path: string, available: boolean, e: React.MouseEvent) => {
+    if (!available) {
+      e.preventDefault();
+      return;
+    }
   };
 
   return (
@@ -93,8 +101,8 @@ const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boo
               <Tooltip key={item.path} delayDuration={300}>
                 <TooltipTrigger asChild>
                   <Link
-                    to={available ? item.path : "#"}
-                    onClick={(e) => !available && e.preventDefault()}
+                    to={item.path}
+                    onClick={(e) => handleNavigate(item.path, available, e)}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 transition-colors relative",
                       isActive ? "bg-plush-50 text-plush-700" : "hover:bg-gray-50",
