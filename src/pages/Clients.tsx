@@ -14,6 +14,7 @@ const Clients = () => {
     status: 'Todos',
     lastVisit: 'Todos'
   });
+  const [searchTerm, setSearchTerm] = useState('');
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -38,7 +39,8 @@ const Clients = () => {
             <Input
               placeholder="Buscar clientes..."
               className="pl-9 max-w-md"
-              // O ideal é implementar busca futuramente
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <ClientFiltersPopover
@@ -59,4 +61,3 @@ const Clients = () => {
 };
 
 export default Clients;
-
