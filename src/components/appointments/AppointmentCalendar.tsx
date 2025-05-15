@@ -1,42 +1,36 @@
 
 import { useState } from 'react';
 import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar"
+import { ptBR } from "date-fns/locale";
+import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const AppointmentCalendar = () => {
-  const [date, setDate] = useState<Date>();
+interface AppointmentCalendarProps {
+  selectedDate: Date | undefined;
+  onDateChange: (date: Date | undefined) => void;
+}
 
+const AppointmentCalendar = ({ selectedDate, onDateChange }: AppointmentCalendarProps) => {
   return (
     <Card>
       <CardContent className="pt-6">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : <span>Selecionar data</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              initialFocus
-              className="p-3 pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="space-y-4">
+          <h3 className="font-medium text-sm">Calendário</h3>
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={onDateChange}
+            locale={ptBR}
+            className="rounded-md border shadow-sm pointer-events-auto"
+            initialFocus
+          />
+          {selectedDate && (
+            <div className="text-sm text-muted-foreground">
+              Data selecionada: <span className="font-medium text-foreground">{format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</span>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
