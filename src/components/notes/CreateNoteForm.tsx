@@ -4,7 +4,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Loader2 } from "lucide-react";
+import { toast } from '@/components/ui/sonner';
 
 interface CreateNoteFormProps {
   onSubmit: (title: string, content: string) => Promise<void>;
@@ -14,15 +15,29 @@ interface CreateNoteFormProps {
 export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    await onSubmit(title, content);
-    setTitle('');
-    setContent('');
+    if (!title.trim()) {
+      toast.error("O título é obrigatório");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await onSubmit(title, content);
+      setTitle('');
+      setContent('');
+    } catch (error) {
+      console.error("Erro ao salvar nota:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <Card className="mb-8">
+    <Card className="mb-8 shadow-md animate-in fade-in duration-300">
       <CardHeader>
         <CardTitle>Nova Nota</CardTitle>
       </CardHeader>
@@ -32,6 +47,8 @@ export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
             placeholder="Título da nota"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            className="focus:ring-2 focus:ring-plush-500"
+            disabled={isSubmitting}
           />
         </div>
         <div className="space-y-2">
@@ -40,23 +57,31 @@ export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={5}
+            className="resize-none focus:ring-2 focus:ring-plush-500"
+            disabled={isSubmitting}
           />
         </div>
       </CardContent>
       <CardFooter>
         <Button 
           onClick={handleSubmit}
-          className="bg-plush-600 hover:bg-plush-700"
+          className="bg-plush-600 hover:bg-plush-700 transition-colors"
+          disabled={isSubmitting}
         >
-          <Plus className="mr-2" />
+          {isSubmitting ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Plus className="mr-2 h-4 w-4" />
+          )}
           Salvar Nota
         </Button>
         <Button 
           variant="outline" 
           onClick={onCancel}
-          className="ml-2"
+          className="ml-2 transition-colors"
+          disabled={isSubmitting}
         >
-          <X className="mr-2" />
+          <X className="mr-2 h-4 w-4" />
           Cancelar
         </Button>
       </CardFooter>

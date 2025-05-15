@@ -9,6 +9,7 @@ export type Note = {
   title: string;
   content: string;
   created_at: string;
+  updated_at?: string;
 };
 
 // Define the database schema for notes table to fix TypeScript errors
@@ -46,7 +47,10 @@ export const useNotes = () => {
 
   const fetchNotes = async () => {
     try {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       setLoading(true);
       // Cast supabase to use our custom Database type
@@ -58,7 +62,8 @@ export const useNotes = () => {
       if (error) throw error;
       setNotes(data || []);
     } catch (error: any) {
-      toast.error("Erro ao carregar notas: " + error.message);
+      console.error("Erro ao carregar notas:", error);
+      toast.error("Erro ao carregar notas: " + (error.message || "Erro desconhecido"));
     } finally {
       setLoading(false);
     }
@@ -66,15 +71,24 @@ export const useNotes = () => {
 
   const createNote = async (title: string, content: string) => {
     try {
+      if (!user) {
+        toast.error("Usuário não autenticado");
+        return null;
+      }
+
       if (!title.trim()) {
         toast.error("O título é obrigatório");
-        return;
+        return null;
       }
 
       // Cast supabase to use our custom Database type
       const { data, error } = await (supabase as any)
         .from('notes')
-        .insert([{ user_id: user?.id, title, content }])
+        .insert([{ 
+          user_id: user.id, 
+          title, 
+          content 
+        }])
         .select()
         .single();
 
@@ -84,13 +98,19 @@ export const useNotes = () => {
       toast.success("Nota criada com sucesso!");
       return data;
     } catch (error: any) {
-      toast.error("Erro ao criar nota: " + error.message);
+      console.error("Erro ao criar nota:", error);
+      toast.error("Erro ao criar nota: " + (error.message || "Erro desconhecido"));
       return null;
     }
   };
 
   const updateNote = async (id: string, title: string, content: string) => {
     try {
+      if (!user) {
+        toast.error("Usuário não autenticado");
+        return false;
+      }
+
       if (!title.trim()) {
         toast.error("O título é obrigatório");
         return false;
@@ -104,7 +124,8 @@ export const useNotes = () => {
           content, 
           updated_at: new Date().toISOString() 
         })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -115,25 +136,33 @@ export const useNotes = () => {
       toast.success("Nota atualizada com sucesso!");
       return true;
     } catch (error: any) {
-      toast.error("Erro ao atualizar nota: " + error.message);
+      console.error("Erro ao atualizar nota:", error);
+      toast.error("Erro ao atualizar nota: " + (error.message || "Erro desconhecido"));
       return false;
     }
   };
 
   const deleteNote = async (id: string) => {
     try {
+      if (!user) {
+        toast.error("Usuário não autenticado");
+        return;
+      }
+      
       // Cast supabase to use our custom Database type
       const { error } = await (supabase as any)
         .from('notes')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
       setNotes(notes.filter(note => note.id !== id));
       toast.success("Nota excluída com sucesso!");
     } catch (error: any) {
-      toast.error("Erro ao excluir nota: " + error.message);
+      console.error("Erro ao excluir nota:", error);
+      toast.error("Erro ao excluir nota: " + (error.message || "Erro desconhecido"));
     }
   };
 
