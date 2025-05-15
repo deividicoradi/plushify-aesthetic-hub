@@ -27,4 +27,4 @@ export {
   SidebarTrigger,
   sidebarMenuButtonVariants,
   useSidebar,
-} from "./sidebar"
+} from "./sidebar/index"
