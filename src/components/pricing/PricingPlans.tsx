@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PricingTier } from './PricingTier';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,16 +29,20 @@ export const PricingPlans = () => {
       return;
     }
     
-    // Primeiro tenta usar o sistema real de pagamento
+    console.log('Tentando assinar plano:', planTier);
+    
     try {
       const checkoutUrl = await subscribeToPlan(planTier, isYearly);
+      
       if (checkoutUrl) {
-        // Abrir em nova aba
+        console.log('Redirecionando para Stripe:', checkoutUrl);
         window.open(checkoutUrl, '_blank');
+        toast.success("Redirecionando para o pagamento...");
       } else {
-        // Se não funcionar, oferece simulação para demonstração
+        // Só oferece simulação se o pagamento real falhar completamente
+        console.log('Checkout URL não recebida, oferecendo simulação');
         const shouldSimulate = window.confirm(
-          'O sistema de pagamento real não está disponível no momento. Deseja simular a assinatura para testar a funcionalidade?'
+          'Houve um problema com o sistema de pagamento. Deseja simular a assinatura para testar a funcionalidade?'
         );
         
         if (shouldSimulate) {
@@ -48,15 +51,7 @@ export const PricingPlans = () => {
       }
     } catch (error) {
       console.error('Erro no processo de assinatura:', error);
-      
-      // Oferecer simulação como fallback
-      const shouldSimulate = window.confirm(
-        'Ocorreu um erro no sistema de pagamento. Deseja simular a assinatura para testar a funcionalidade?'
-      );
-      
-      if (shouldSimulate) {
-        await simulateSubscription(planTier);
-      }
+      toast.error("Erro ao processar assinatura. Tente novamente.");
     }
   };
   
