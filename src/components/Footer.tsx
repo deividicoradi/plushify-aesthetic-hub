@@ -19,13 +19,13 @@ const Footer = () => {
               clientes, cursos e marketing com ferramentas inteligentes de IA.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="w-9 h-9 rounded-full bg-plush-50 flex items-center justify-center text-plush-600 hover:bg-plush-100 transition-colors">
+              <a href="https://instagram.com/plushify" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-plush-50 flex items-center justify-center text-plush-600 hover:bg-plush-100 transition-colors">
                 <Instagram className="w-4 h-4" />
               </a>
-              <a href="#" className="w-9 h-9 rounded-full bg-plush-50 flex items-center justify-center text-plush-600 hover:bg-plush-100 transition-colors">
+              <a href="https://facebook.com/plushify" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-plush-50 flex items-center justify-center text-plush-600 hover:bg-plush-100 transition-colors">
                 <Facebook className="w-4 h-4" />
               </a>
-              <a href="#" className="w-9 h-9 rounded-full bg-plush-50 flex items-center justify-center text-plush-600 hover:bg-plush-100 transition-colors">
+              <a href="https://youtube.com/plushify" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-plush-50 flex items-center justify-center text-plush-600 hover:bg-plush-100 transition-colors">
                 <Youtube className="w-4 h-4" />
               </a>
             </div>
@@ -34,33 +34,33 @@ const Footer = () => {
           <div>
             <h3 className="font-medium text-lg mb-4">Empresa</h3>
             <ul className="space-y-3">
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Sobre nós</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Blog</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Carreiras</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Imprensa</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Parceiros</Link></li>
+              <li><Link to="/about" className="text-foreground/70 hover:text-plush-600 transition-colors">Sobre nós</Link></li>
+              <li><Link to="/blog" className="text-foreground/70 hover:text-plush-600 transition-colors">Blog</Link></li>
+              <li><Link to="/careers" className="text-foreground/70 hover:text-plush-600 transition-colors">Carreiras</Link></li>
+              <li><Link to="/press" className="text-foreground/70 hover:text-plush-600 transition-colors">Imprensa</Link></li>
+              <li><Link to="/partners" className="text-foreground/70 hover:text-plush-600 transition-colors">Parceiros</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-medium text-lg mb-4">Produto</h3>
             <ul className="space-y-3">
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Funcionalidades</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Preços</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Integraçoes</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Roteiro</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Atualizações</Link></li>
+              <li><button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-foreground/70 hover:text-plush-600 transition-colors bg-transparent text-left">Funcionalidades</button></li>
+              <li><button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="text-foreground/70 hover:text-plush-600 transition-colors bg-transparent text-left">Preços</button></li>
+              <li><Link to="/integrations" className="text-foreground/70 hover:text-plush-600 transition-colors">Integrações</Link></li>
+              <li><Link to="/roadmap" className="text-foreground/70 hover:text-plush-600 transition-colors">Roteiro</Link></li>
+              <li><Link to="/updates" className="text-foreground/70 hover:text-plush-600 transition-colors">Atualizações</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-medium text-lg mb-4">Suporte</h3>
             <ul className="space-y-3">
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Ajuda & FAQ</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Documentação</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Comunidade</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Status</Link></li>
-              <li><Link to="#" className="text-foreground/70 hover:text-plush-600 transition-colors">Contato</Link></li>
+              <li><Link to="/help" className="text-foreground/70 hover:text-plush-600 transition-colors">Ajuda & FAQ</Link></li>
+              <li><Link to="/docs" className="text-foreground/70 hover:text-plush-600 transition-colors">Documentação</Link></li>
+              <li><Link to="/community" className="text-foreground/70 hover:text-plush-600 transition-colors">Comunidade</Link></li>
+              <li><Link to="/status" className="text-foreground/70 hover:text-plush-600 transition-colors">Status</Link></li>
+              <li><Link to="/contact" className="text-foreground/70 hover:text-plush-600 transition-colors">Contato</Link></li>
             </ul>
           </div>
         </div>
@@ -74,10 +74,10 @@ const Footer = () => {
             </div>
             
             <div className="flex flex-wrap justify-center gap-4 text-sm text-foreground/60">
-              <Link to="#" className="hover:text-plush-600 transition-colors">Termos de Serviço</Link>
-              <Link to="#" className="hover:text-plush-600 transition-colors">Privacidade</Link>
-              <Link to="#" className="hover:text-plush-600 transition-colors">Cookies</Link>
-              <Link to="#" className="hover:text-plush-600 transition-colors">Acessibilidade</Link>
+              <Link to="/terms" className="hover:text-plush-600 transition-colors">Termos de Serviço</Link>
+              <Link to="/privacy" className="hover:text-plush-600 transition-colors">Privacidade</Link>
+              <Link to="/cookies" className="hover:text-plush-600 transition-colors">Cookies</Link>
+              <Link to="/accessibility" className="hover:text-plush-600 transition-colors">Acessibilidade</Link>
             </div>
           </div>
           
