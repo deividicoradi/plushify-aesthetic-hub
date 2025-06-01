@@ -32,7 +32,7 @@ const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boo
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { tier, isSubscribed } = useSubscription();
+  const { hasFeature, getCurrentPlanInfo } = useSubscription();
 
   const navItems: NavItem[] = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -46,26 +46,15 @@ const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boo
     { name: 'Planos', path: '/planos', icon: CreditCard },
   ];
 
-  const isFeatureAvailable = (requiredTier?: 'free' | 'starter' | 'pro' | 'premium') => {
-    if (!requiredTier) return true;
-    if (!isSubscribed) return requiredTier === 'free';
-    
-    const tierLevels = {
-      'free': 0,
-      'starter': 1,
-      'pro': 2,
-      'premium': 3
-    };
-    
-    return tierLevels[tier as keyof typeof tierLevels] >= tierLevels[requiredTier];
-  };
-
   const handleNavigate = (path: string, available: boolean, e: React.MouseEvent) => {
     if (!available) {
       e.preventDefault();
+      navigate('/planos');
       return;
     }
   };
+
+  const currentPlan = getCurrentPlanInfo();
 
   return (
     <div className={cn(
@@ -88,6 +77,14 @@ const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boo
         </button>
       </div>
       
+      {/* Indicador do plano atual */}
+      {!collapsed && (
+        <div className="px-4 py-3 border-b border-gray-100">
+          <div className="text-xs text-gray-500 mb-1">Plano atual</div>
+          <div className="text-sm font-medium text-plush-600">{currentPlan.name}</div>
+        </div>
+      )}
+      
       <div className="py-4">
         <div className={cn(
           "flex flex-col gap-1 px-2",
@@ -95,7 +92,7 @@ const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boo
         )}>
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
-            const available = isFeatureAvailable(item.requiredTier);
+            const available = hasFeature(item.requiredTier || 'free');
             
             return (
               <Tooltip key={item.path} delayDuration={300}>
@@ -106,7 +103,7 @@ const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boo
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 transition-colors relative",
                       isActive ? "bg-plush-50 text-plush-700" : "hover:bg-gray-50",
-                      !available && "opacity-50 cursor-not-allowed",
+                      !available && "opacity-50 cursor-pointer",
                       collapsed && "justify-center"
                     )}
                   >
@@ -114,7 +111,13 @@ const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boo
                     {!collapsed && (
                       <>
                         <span>{item.name}</span>
-                        {item.badge && (
+                        {!available && (
+                          <Badge className="ml-auto bg-orange-100 text-orange-700 text-xs" variant="secondary">
+                            {item.requiredTier === 'starter' ? 'Starter' : 
+                             item.requiredTier === 'pro' ? 'Pro' : 'Premium'}
+                          </Badge>
+                        )}
+                        {item.badge && available && (
                           <Badge className="ml-auto bg-plush-500" variant="secondary">{item.badge}</Badge>
                         )}
                       </>

@@ -34,11 +34,13 @@ export const useSubscription = () => {
 
     try {
       setIsLoading(true);
+      console.log('🔍 Verificando assinatura para usuário:', user.email);
 
       const { data, error } = await supabase.functions.invoke('verify-subscription');
 
       if (error) {
-        console.error('Erro na função verify-subscription:', error);
+        console.error('❌ Erro na função verify-subscription:', error);
+        // Se há erro na verificação, mantém o estado como free mas não é um erro crítico
         setSubscriptionInfo({
           isSubscribed: false,
           tier: 'free',
@@ -47,13 +49,17 @@ export const useSubscription = () => {
         return;
       }
 
+      console.log('📊 Dados de assinatura recebidos:', data);
+
       if (data && data.subscribed && data.subscription_tier) {
+        console.log('✅ Assinatura ativa encontrada:', data.subscription_tier);
         setSubscriptionInfo({
           isSubscribed: true,
           tier: data.subscription_tier as SubscriptionTier,
           expiresAt: data.subscription_end ? new Date(data.subscription_end) : null,
         });
       } else {
+        console.log('📝 Nenhuma assinatura ativa, mantendo como free');
         setSubscriptionInfo({
           isSubscribed: false,
           tier: 'free',
@@ -61,7 +67,8 @@ export const useSubscription = () => {
         });
       }
     } catch (error) {
-      console.error('Erro ao verificar assinatura:', error);
+      console.error('💥 Erro ao verificar assinatura:', error);
+      // Em caso de erro, assume free mas não mostra erro ao usuário
       setSubscriptionInfo({
         isSubscribed: false,
         tier: 'free',
@@ -80,60 +87,63 @@ export const useSubscription = () => {
 
     try {
       setIsLoading(true);
-      console.log('Iniciando assinatura:', { planId, isYearly });
+      console.log('💳 Iniciando processo de assinatura:', { planId, isYearly });
 
+      // Primeiro, vamos tentar criar a sessão de checkout
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { planId, isYearly },
       });
 
       if (error) {
-        console.error('Erro na função create-checkout-session:', error);
-        toast.error("Erro ao processar o pagamento. Tente novamente.");
+        console.error('❌ Erro na função create-checkout-session:', error);
+        toast.error("Sistema de pagamento temporariamente indisponível. Tente novamente em alguns minutos.");
         return null;
       }
 
       if (data && data.url) {
-        console.log('URL de checkout recebida:', data.url);
+        console.log('🔗 URL de checkout recebida, redirecionando...');
         return data.url;
       } else {
-        console.error('Resposta sem URL:', data);
-        toast.error("Não foi possível gerar o link de pagamento.");
+        console.error('❌ Resposta inválida da função:', data);
+        toast.error("Erro interno no sistema de pagamento.");
         return null;
       }
     } catch (error) {
-      console.error('Erro ao iniciar assinatura:', error);
-      toast.error("Erro interno do sistema.");
+      console.error('💥 Erro crítico ao processar pagamento:', error);
+      toast.error("Erro interno do sistema. Entre em contato com o suporte.");
       return null;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Função para simular assinatura (apenas para desenvolvimento/teste)
-  const simulateSubscription = async (planTier: SubscriptionTier) => {
-    if (planTier === 'free') {
-      setSubscriptionInfo({
-        isSubscribed: false,
-        tier: 'free',
-        expiresAt: null,
-      });
-      toast.success("Plano alterado para Gratuito!");
-      return;
-    }
-
-    setSubscriptionInfo({
-      isSubscribed: true,
-      tier: planTier,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias
-    });
+  // Função para verificar se uma funcionalidade está disponível
+  const hasFeature = (requiredTier: SubscriptionTier) => {
+    const tierLevels = {
+      'free': 0,
+      'starter': 1,
+      'pro': 2,
+      'premium': 3
+    };
     
+    return tierLevels[subscriptionInfo.tier] >= tierLevels[requiredTier];
+  };
+
+  // Função para obter informações do plano atual
+  const getCurrentPlanInfo = () => {
     const planNames = {
+      free: 'Gratuito',
       starter: 'Starter',
       pro: 'Pro',
       premium: 'Premium'
     };
     
-    toast.success(`Assinatura do plano ${planNames[planTier]} ativada com sucesso! (Simulação)`);
+    return {
+      name: planNames[subscriptionInfo.tier],
+      tier: subscriptionInfo.tier,
+      isSubscribed: subscriptionInfo.isSubscribed,
+      expiresAt: subscriptionInfo.expiresAt
+    };
   };
 
   useEffect(() => {
@@ -145,6 +155,7 @@ export const useSubscription = () => {
     isLoading,
     fetchSubscription,
     subscribeToPlan,
-    simulateSubscription,
+    hasFeature,
+    getCurrentPlanInfo,
   };
 };
