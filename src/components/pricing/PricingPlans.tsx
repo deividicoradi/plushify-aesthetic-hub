@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PricingTier } from './PricingTier';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,36 +34,21 @@ export const PricingPlans = () => {
     console.log('🚀 Iniciando assinatura do plano:', planTier);
     
     try {
+      // Aguardar um momento para mostrar o estado de loading
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const checkoutUrl = await subscribeToPlan(planTier, isYearly);
       
       if (checkoutUrl) {
         console.log('🔗 Redirecionando para checkout:', checkoutUrl);
-        toast.success("Redirecionando para o pagamento...");
+        toast.success("Abrindo página de pagamento...");
         
-        // Abre o checkout em uma nova aba
-        const newWindow = window.open(checkoutUrl, '_blank');
-        
-        if (!newWindow) {
-          toast.error("Pop-ups bloqueados. Por favor, permita pop-ups e tente novamente.");
-          return;
-        }
-        
-        // Monitora quando o usuário volta da página de pagamento
-        const checkClosed = setInterval(() => {
-          if (newWindow.closed) {
-            clearInterval(checkClosed);
-            console.log('🔄 Usuário retornou, verificando status da assinatura...');
-            toast.info("Verificando status da assinatura...");
-            
-            // Aguarda um pouco e verifica novamente a assinatura
-            setTimeout(() => {
-              window.location.reload();
-            }, 2000);
-          }
-        }, 1000);
+        // Redirecionar diretamente na mesma aba
+        window.location.href = checkoutUrl;
         
       } else {
-        toast.error("Não foi possível processar o pagamento. Tente novamente.");
+        console.error('❌ URL de checkout não recebida');
+        toast.error("Não foi possível processar o pagamento. Verifique sua conexão e tente novamente.");
       }
     } catch (error) {
       console.error('💥 Erro no processo de assinatura:', error);
@@ -169,6 +153,11 @@ export const PricingPlans = () => {
             Válido até: {new Date(currentPlanInfo.expiresAt).toLocaleDateString('pt-BR')}
           </p>
         )}
+        {!user && (
+          <p className="text-sm text-orange-600 mt-2">
+            ⚠️ Faça login para gerenciar sua assinatura
+          </p>
+        )}
       </div>
 
       <Tabs defaultValue="mensal" className="w-full mt-8">
@@ -205,12 +194,17 @@ export const PricingPlans = () => {
       
       {/* Status da integração */}
       <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h4 className="font-semibold text-blue-800 mb-2">Status do Sistema de Pagamentos</h4>
-        <p className="text-sm text-blue-700">
-          ✅ Integração com Stripe ativa<br/>
-          ✅ Edge functions configuradas<br/>
-          ✅ Sistema de assinatura funcionando
-        </p>
+        <h4 className="font-semibold text-blue-800 mb-2">Sistema de Pagamentos</h4>
+        <div className="text-sm text-blue-700">
+          <p>✅ Integração com Stripe ativa</p>
+          <p>✅ Edge functions configuradas</p>
+          <p>✅ Sistema de checkout pronto</p>
+          {user && (
+            <p className="mt-2">
+              🔐 Usuário logado: <span className="font-medium">{user.email}</span>
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

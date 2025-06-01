@@ -40,7 +40,6 @@ export const useSubscription = () => {
 
       if (error) {
         console.error('❌ Erro na função verify-subscription:', error);
-        // Se há erro na verificação, mantém o estado como free mas não é um erro crítico
         setSubscriptionInfo({
           isSubscribed: false,
           tier: 'free',
@@ -68,7 +67,6 @@ export const useSubscription = () => {
       }
     } catch (error) {
       console.error('💥 Erro ao verificar assinatura:', error);
-      // Em caso de erro, assume free mas não mostra erro ao usuário
       setSubscriptionInfo({
         isSubscribed: false,
         tier: 'free',
@@ -87,21 +85,44 @@ export const useSubscription = () => {
 
     try {
       setIsLoading(true);
-      console.log('💳 Iniciando processo de assinatura:', { planId, isYearly });
+      console.log('💳 Iniciando processo de assinatura:', { planId, isYearly, userEmail: user.email });
 
-      // Primeiro, vamos tentar criar a sessão de checkout
+      // Verificar se o usuário tem um token válido
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Sessão expirada. Faça login novamente.");
+        return null;
+      }
+
+      console.log('🔑 Token de autenticação válido encontrado');
+
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { planId, isYearly },
+        body: { 
+          planId, 
+          isYearly,
+          userEmail: user.email 
+        },
       });
 
       if (error) {
         console.error('❌ Erro na função create-checkout-session:', error);
-        toast.error("Sistema de pagamento temporariamente indisponível. Tente novamente em alguns minutos.");
+        
+        // Verificar se é um erro de configuração
+        if (error.message?.includes('STRIPE_SECRET_KEY')) {
+          toast.error("Sistema de pagamento não configurado. Entre em contato com o suporte.");
+        } else if (error.message?.includes('User not authenticated')) {
+          toast.error("Erro de autenticação. Faça login novamente.");
+        } else {
+          toast.error("Erro no sistema de pagamento. Tente novamente em alguns minutos.");
+        }
         return null;
       }
 
+      console.log('📦 Resposta da função create-checkout-session:', data);
+
       if (data && data.url) {
-        console.log('🔗 URL de checkout recebida, redirecionando...');
+        console.log('🔗 URL de checkout recebida:', data.url);
+        toast.success("Redirecionando para o pagamento...");
         return data.url;
       } else {
         console.error('❌ Resposta inválida da função:', data);
