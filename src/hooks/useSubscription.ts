@@ -35,14 +35,21 @@ export const useSubscription = () => {
     try {
       setIsLoading(true);
 
-      // Verificar assinatura no servidor
+      // Verificar assinatura no servidor - com tratamento de erro melhorado
       const { data, error } = await supabase.functions.invoke('verify-subscription');
 
       if (error) {
-        throw error;
+        console.error('Erro na função verify-subscription:', error);
+        // Se a função não existir ou der erro, continuar com estado padrão
+        setSubscriptionInfo({
+          isSubscribed: false,
+          tier: 'free',
+          expiresAt: null,
+        });
+        return;
       }
 
-      if (data.subscribed && data.subscription_tier) {
+      if (data && data.subscribed && data.subscription_tier) {
         setSubscriptionInfo({
           isSubscribed: true,
           tier: data.subscription_tier as SubscriptionTier,
@@ -57,6 +64,12 @@ export const useSubscription = () => {
       }
     } catch (error) {
       console.error('Erro ao verificar assinatura:', error);
+      // Em caso de erro, manter estado padrão
+      setSubscriptionInfo({
+        isSubscribed: false,
+        tier: 'free',
+        expiresAt: null,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -69,20 +82,65 @@ export const useSubscription = () => {
         return null;
       }
 
+      setIsLoading(true);
+
+      // Verificar se a função existe antes de chamar
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { planId, isYearly },
       });
 
       if (error) {
-        throw error;
+        console.error('Erro na função create-checkout-session:', error);
+        
+        // Se a função não existir, mostrar mensagem mais específica
+        if (error.message?.includes('not found') || error.message?.includes('404')) {
+          toast.error("Sistema de pagamento ainda não configurado. Entre em contato com o suporte.");
+        } else {
+          toast.error("Erro ao processar o pagamento. Por favor, tente novamente em alguns instantes.");
+        }
+        return null;
       }
 
-      return data.url;
+      if (data && data.url) {
+        return data.url;
+      } else {
+        toast.error("Não foi possível gerar o link de pagamento. Tente novamente.");
+        return null;
+      }
     } catch (error) {
       console.error('Erro ao iniciar assinatura:', error);
-      toast.error("Erro ao processar o pagamento. Por favor, tente novamente.");
+      toast.error("Erro interno do sistema. Por favor, entre em contato com o suporte.");
       return null;
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Função para simular assinatura (desenvolvimento)
+  const simulateSubscription = async (planTier: SubscriptionTier) => {
+    if (planTier === 'free') {
+      setSubscriptionInfo({
+        isSubscribed: false,
+        tier: 'free',
+        expiresAt: null,
+      });
+      toast.success("Plano alterado para Gratuito!");
+      return;
+    }
+
+    setSubscriptionInfo({
+      isSubscribed: true,
+      tier: planTier,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias
+    });
+    
+    const planNames = {
+      starter: 'Starter',
+      pro: 'Pro',
+      premium: 'Premium'
+    };
+    
+    toast.success(`Assinatura do plano ${planNames[planTier]} ativada com sucesso! (Simulação)`);
   };
 
   // Verificar assinatura ao carregar e quando o usuário mudar
@@ -95,5 +153,6 @@ export const useSubscription = () => {
     isLoading,
     fetchSubscription,
     subscribeToPlan,
+    simulateSubscription, // Para desenvolvimento/demonstração
   };
 };

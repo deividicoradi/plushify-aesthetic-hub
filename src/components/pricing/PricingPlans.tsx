@@ -11,7 +11,7 @@ export const PricingPlans = () => {
   const [isYearly, setIsYearly] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { isLoading, tier: currentTier, subscribeToPlan } = useSubscription();
+  const { isLoading, tier: currentTier, subscribeToPlan, simulateSubscription } = useSubscription();
   
   const handleSubscribe = async (planTier: SubscriptionTier) => {
     if (!user) {
@@ -21,13 +21,42 @@ export const PricingPlans = () => {
     }
     
     if (planTier === 'free') {
-      toast.success("Você já está no plano gratuito!");
+      await simulateSubscription('free');
       return;
     }
     
-    const checkoutUrl = await subscribeToPlan(planTier, isYearly);
-    if (checkoutUrl) {
-      window.location.href = checkoutUrl;
+    if (planTier === currentTier) {
+      toast.info("Você já está neste plano!");
+      return;
+    }
+    
+    // Primeiro tenta usar o sistema real de pagamento
+    try {
+      const checkoutUrl = await subscribeToPlan(planTier, isYearly);
+      if (checkoutUrl) {
+        // Abrir em nova aba
+        window.open(checkoutUrl, '_blank');
+      } else {
+        // Se não funcionar, oferece simulação para demonstração
+        const shouldSimulate = window.confirm(
+          'O sistema de pagamento real não está disponível no momento. Deseja simular a assinatura para testar a funcionalidade?'
+        );
+        
+        if (shouldSimulate) {
+          await simulateSubscription(planTier);
+        }
+      }
+    } catch (error) {
+      console.error('Erro no processo de assinatura:', error);
+      
+      // Oferecer simulação como fallback
+      const shouldSimulate = window.confirm(
+        'Ocorreu um erro no sistema de pagamento. Deseja simular a assinatura para testar a funcionalidade?'
+      );
+      
+      if (shouldSimulate) {
+        await simulateSubscription(planTier);
+      }
     }
   };
   
@@ -145,6 +174,16 @@ export const PricingPlans = () => {
           ))}
         </div>
       </Tabs>
+      
+      {/* Indicador de modo de desenvolvimento */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Modo de desenvolvimento:</strong> Se o sistema de pagamento não estiver configurado, 
+            você pode simular assinaturas para testar a funcionalidade.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

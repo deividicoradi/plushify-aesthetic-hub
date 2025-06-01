@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check, X } from 'lucide-react';
+import { Check, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type PricingTierProps = {
@@ -54,19 +54,37 @@ export const PricingTier = ({
     minimumFractionDigits: 2,
   }).format(parcelValue);
 
+  const getButtonText = () => {
+    if (isLoading) return 'Processando...';
+    if (isCurrentPlan) return 'Plano Atual';
+    return buttonText;
+  };
+
+  const getButtonVariant = () => {
+    if (isCurrentPlan) return 'outline';
+    return isPopular ? 'default' : 'outline';
+  };
+
   return (
     <div
-      className={`rounded-xl overflow-hidden border transition-all duration-300 ${
+      className={`rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-lg ${
         isPopular
           ? 'border-plush-400 shadow-lg shadow-plush-100/50 scale-105 relative lg:-mt-6'
           : 'border-muted bg-white hover:border-plush-200 hover:shadow-md'
-      }`}
+      } ${isCurrentPlan ? 'ring-2 ring-plush-500 ring-opacity-50' : ''}`}
     >
       {isPopular && (
         <div className="bg-plush-600 text-white text-center py-1.5 text-sm font-medium">
           Mais Popular
         </div>
       )}
+      
+      {isCurrentPlan && (
+        <div className="bg-green-600 text-white text-center py-1.5 text-sm font-medium">
+          Seu Plano Atual
+        </div>
+      )}
+      
       <div className="p-6 sm:p-8">
         <h3 className="text-xl font-bold mb-2 font-serif">{title}</h3>
         <p className="text-foreground/70 text-sm mb-6">{description}</p>
@@ -76,7 +94,7 @@ export const PricingTier = ({
             <span className="text-3xl font-bold">{formattedPrice}</span>
             <span className="text-foreground/70 ml-2 mb-1">/mês</span>
           </div>
-          {isYearly && (
+          {isYearly && price > 0 && (
             <p className="text-sm text-plush-600 mt-1">
               Economia de {new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
@@ -85,28 +103,31 @@ export const PricingTier = ({
             </p>
           )}
           
-          {isYearly ? (
+          {isYearly && price > 0 ? (
             <p className="text-sm text-gray-600 mt-2">
               Total anual: {formattedAnnualTotal}
             </p>
-          ) : (
+          ) : price > 0 ? (
             <p className="text-sm text-gray-600 mt-2">
               Ou 10x de {formattedParcelValue}
             </p>
-          )}
+          ) : null}
         </div>
         
         <Button 
-          className={`w-full ${
-            isPopular 
+          className={`w-full transition-all duration-200 ${
+            isPopular && !isCurrentPlan
               ? 'bg-plush-600 hover:bg-plush-700 text-white' 
+              : isCurrentPlan
+              ? 'bg-green-100 border-green-300 text-green-700 hover:bg-green-200'
               : 'bg-white border border-plush-200 text-plush-600 hover:bg-plush-50'
           }`}
-          variant={isPopular ? 'default' : 'outline'}
+          variant={getButtonVariant()}
           onClick={onSubscribe}
           disabled={isLoading || isCurrentPlan}
         >
-          {isLoading ? 'Carregando...' : isCurrentPlan ? 'Plano Atual' : buttonText}
+          {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          {getButtonText()}
         </Button>
         
         <div className="mt-8 space-y-4">
