@@ -101,7 +101,17 @@ const AppointmentDialog = ({
 
   const onSubmit = (data: FormValues) => {
     try {
-      onSave(isEditing ? { ...data, id: appointment.id } : data);
+      // Garantir que todos os campos obrigatórios estão presentes
+      const appointmentData = {
+        client: data.client,
+        service: data.service,
+        time: data.time,
+        date: data.date,
+        status: data.status,
+        ...(isEditing && { id: appointment.id })
+      };
+      
+      onSave(appointmentData);
       onOpenChange(false);
       toast({
         title: isEditing ? "Agendamento atualizado" : "Agendamento criado",
