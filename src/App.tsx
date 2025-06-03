@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { useSubscription } from './hooks/useSubscription';
 import Index from './pages/Index';
 import Auth from './pages/Auth';
 import Signup from './pages/Signup';
@@ -17,7 +18,7 @@ import Settings from './pages/Settings';
 import Help from './pages/Help';
 import Courses from './pages/Courses';
 import NotFound from './pages/NotFound';
-import DashboardLayout from './components/layout/DashboardLayout';
+import DashboardLayout from './components/DashboardLayout';
 import PaymentSuccess from './pages/PaymentSuccess';
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -28,17 +29,37 @@ import Press from './pages/Press';
 import Partners from './pages/Partners';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const { isSubscribed, isLoading: subscriptionLoading } = useSubscription();
+  
+  // Show loading while checking auth and subscription
+  if (loading || subscriptionLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-plush-600"></div>
+      </div>
+    );
+  }
+  
+  // If not authenticated, redirect to auth
   if (!user) {
     return <Navigate to="/auth" />;
   }
+  
+  // If authenticated but no subscription, redirect to plans
+  if (!isSubscribed) {
+    return <Navigate to="/planos" />;
+  }
+  
   return <>{children}</>;
 };
 
 function App() {
+  const queryClient = new QueryClient();
+
   return (
     <BrowserRouter>
-      <QueryClient>
+      <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
@@ -178,7 +199,7 @@ function App() {
             </div>
           </TooltipProvider>
         </AuthProvider>
-      </QueryClient>
+      </QueryClientProvider>
     </BrowserRouter>
   );
 }
