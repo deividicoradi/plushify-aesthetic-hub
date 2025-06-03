@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -54,6 +55,26 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const PlansRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-plush-600"></div>
+      </div>
+    );
+  }
+  
+  // If not authenticated, redirect to auth with plans redirect
+  if (!user) {
+    return <Navigate to="/auth?redirect=planos" />;
+  }
+  
+  return <>{children}</>;
+};
+
 function App() {
   const queryClient = new QueryClient();
 
@@ -74,6 +95,16 @@ function App() {
                 <Route path="/press" element={<Press />} />
                 <Route path="/partners" element={<Partners />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route 
+                  path="/planos" 
+                  element={
+                    <PlansRoute>
+                      <DashboardLayout>
+                        <Plans />
+                      </DashboardLayout>
+                    </PlansRoute>
+                  } 
+                />
                 <Route 
                   path="/dashboard" 
                   element={
@@ -150,16 +181,6 @@ function App() {
                     <ProtectedRoute>
                       <DashboardLayout>
                         <div>Módulo Financeiro</div>
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/planos" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Plans />
                       </DashboardLayout>
                     </ProtectedRoute>
                   } 

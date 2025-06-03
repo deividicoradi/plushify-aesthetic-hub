@@ -1,9 +1,15 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DollarSign } from 'lucide-react';
 import Pricing from '@/components/pricing/Pricing';
 
 const Plans = () => {
+  useEffect(() => {
+    console.log('🎯 Plans page mounted successfully');
+  }, []);
+
+  console.log('🔄 Plans page rendering...');
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
