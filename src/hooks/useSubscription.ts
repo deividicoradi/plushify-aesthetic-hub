@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +13,7 @@ export type SubscriptionInfo = {
 };
 
 export const useSubscription = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [subscriptionInfo, setSubscriptionInfo] = useState<{
     isSubscribed: boolean;
@@ -27,7 +26,7 @@ export const useSubscription = () => {
   });
 
   const fetchSubscription = async () => {
-    if (!user) {
+    if (!user || !session) {
       setIsLoading(false);
       return;
     }
@@ -36,7 +35,11 @@ export const useSubscription = () => {
       setIsLoading(true);
       console.log('🔍 Verificando assinatura para usuário:', user.email);
 
-      const { data, error } = await supabase.functions.invoke('verify-subscription');
+      const { data, error } = await supabase.functions.invoke('verify-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
       if (error) {
         console.error('❌ Erro na função verify-subscription:', error);
@@ -78,23 +81,19 @@ export const useSubscription = () => {
   };
 
   const subscribeToPlan = async (planId: string, isYearly: boolean) => {
-    if (!user) {
+    if (!user || !session) {
       toast.error("Você precisa estar logado para assinar um plano");
       return null;
     }
 
     try {
       setIsLoading(true);
-      console.log('💳 Iniciando processo de assinatura:', { planId, isYearly, userEmail: user.email });
-
-      // Verificar se o usuário tem um token válido
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error("Sessão expirada. Faça login novamente.");
-        return null;
-      }
-
-      console.log('🔑 Token de autenticação válido encontrado');
+      console.log('💳 Criando sessão de checkout:', { 
+        planId, 
+        isYearly, 
+        userEmail: user.email,
+        sessionToken: session.access_token ? 'Presente' : 'Ausente'
+      });
 
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { 
@@ -102,18 +101,21 @@ export const useSubscription = () => {
           isYearly,
           userEmail: user.email 
         },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (error) {
         console.error('❌ Erro na função create-checkout-session:', error);
         
-        // Verificar se é um erro de configuração
         if (error.message?.includes('STRIPE_SECRET_KEY')) {
           toast.error("Sistema de pagamento não configurado. Entre em contato com o suporte.");
         } else if (error.message?.includes('User not authenticated')) {
           toast.error("Erro de autenticação. Faça login novamente.");
         } else {
-          toast.error("Erro no sistema de pagamento. Tente novamente em alguns minutos.");
+          toast.error(`Erro no sistema de pagamento: ${error.message}`);
         }
         return null;
       }
@@ -122,7 +124,6 @@ export const useSubscription = () => {
 
       if (data && data.url) {
         console.log('🔗 URL de checkout recebida:', data.url);
-        toast.success("Redirecionando para o pagamento...");
         return data.url;
       } else {
         console.error('❌ Resposta inválida da função:', data);
@@ -167,9 +168,19 @@ export const useSubscription = () => {
     };
   };
 
+  // Verificar assinatura quando o usuário faz login ou a sessão muda
   useEffect(() => {
-    fetchSubscription();
-  }, [user]);
+    if (user && session) {
+      fetchSubscription();
+    } else {
+      setSubscriptionInfo({
+        isSubscribed: false,
+        tier: 'free',
+        expiresAt: null,
+      });
+      setIsLoading(false);
+    }
+  }, [user, session]);
 
   return {
     ...subscriptionInfo,

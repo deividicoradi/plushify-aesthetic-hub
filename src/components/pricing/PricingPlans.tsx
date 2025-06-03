@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PricingTier } from './PricingTier';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +15,8 @@ export const PricingPlans = () => {
   const { isLoading, tier: currentTier, subscribeToPlan, getCurrentPlanInfo } = useSubscription();
   
   const handleSubscribe = async (planTier: SubscriptionTier) => {
+    console.log('🎯 Tentando assinar plano:', { planTier, isYearly, user: user?.email });
+    
     if (!user) {
       toast.error("Você precisa estar logado para assinar um plano");
       navigate('/auth?redirect=planos');
@@ -21,7 +24,7 @@ export const PricingPlans = () => {
     }
     
     if (planTier === 'free') {
-      toast.info("Você já está no plano gratuito!");
+      toast.info("Escolha um plano pago para acessar o dashboard!");
       return;
     }
     
@@ -31,28 +34,27 @@ export const PricingPlans = () => {
     }
     
     setProcessingPlan(planTier);
-    console.log('🚀 Iniciando assinatura do plano:', planTier);
     
     try {
-      // Aguardar um momento para mostrar o estado de loading
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('💳 Iniciando processo de pagamento...');
+      toast.loading("Preparando pagamento...");
       
       const checkoutUrl = await subscribeToPlan(planTier, isYearly);
       
       if (checkoutUrl) {
-        console.log('🔗 Redirecionando para checkout:', checkoutUrl);
-        toast.success("Abrindo página de pagamento...");
+        console.log('🔗 URL de checkout recebida:', checkoutUrl);
+        toast.success("Redirecionando para pagamento...");
         
-        // Redirecionar diretamente na mesma aba
+        // Redirecionar para o Stripe Checkout
         window.location.href = checkoutUrl;
         
       } else {
         console.error('❌ URL de checkout não recebida');
-        toast.error("Não foi possível processar o pagamento. Verifique sua conexão e tente novamente.");
+        toast.error("Erro ao processar pagamento. Tente novamente.");
       }
     } catch (error) {
-      console.error('💥 Erro no processo de assinatura:', error);
-      toast.error("Erro ao processar assinatura. Tente novamente.");
+      console.error('💥 Erro no processo de pagamento:', error);
+      toast.error("Erro ao processar pagamento. Tente novamente.");
     } finally {
       setProcessingPlan(null);
     }
@@ -60,7 +62,7 @@ export const PricingPlans = () => {
   
   const currentPlanInfo = getCurrentPlanInfo();
   
-  // Valores atualizados com preços mensais, anuais e parcelados
+  // Planos com preços corretos
   const pricingPlans = [
     {
       tier: 'free',
@@ -68,16 +70,16 @@ export const PricingPlans = () => {
       price: 0,
       yearlyPrice: 0,
       parcelValue: 0,
-      description: 'Para profissionais iniciando a carreira',
+      description: 'Apenas para conhecer a plataforma',
       features: [
-        { included: true, text: 'Até 5 agendamentos' },
-        { included: true, text: 'Lembretes simples por WhatsApp' },
-        { included: true, text: 'Cadastro básico de clientes' },
-        { included: false, text: 'Gestão de insumos' },
-        { included: false, text: 'Marketing por IA' },
-        { included: false, text: 'Painel analítico' },
-        { included: false, text: 'Cursos e certificados' },
-        { included: false, text: 'Programa de fidelidade' },
+        { included: true, text: 'Acesso limitado à demonstração' },
+        { included: true, text: 'Visualização das funcionalidades' },
+        { included: false, text: 'Acesso ao dashboard completo' },
+        { included: false, text: 'Gestão de clientes' },
+        { included: false, text: 'Agendamentos' },
+        { included: false, text: 'Relatórios' },
+        { included: false, text: 'Suporte técnico' },
+        { included: false, text: 'Todas as funcionalidades' },
       ],
       buttonText: 'Plano Atual',
     },
@@ -89,14 +91,14 @@ export const PricingPlans = () => {
       parcelValue: 6.99,
       description: 'Para profissionais individuais',
       features: [
+        { included: true, text: 'Acesso completo ao dashboard' },
         { included: true, text: 'Agendamentos ilimitados' },
-        { included: true, text: 'Lembretes automáticos personalizados' },
         { included: true, text: 'Gestão completa de clientes' },
+        { included: true, text: 'Lembretes automáticos' },
         { included: true, text: 'Controle de insumos' },
-        { included: true, text: 'Marketing básico' },
-        { included: true, text: 'Painel analítico simplificado' },
-        { included: false, text: 'Cursos e certificados' },
-        { included: false, text: 'Programa de fidelidade avançado' },
+        { included: true, text: 'Relatórios básicos' },
+        { included: false, text: 'Marketing com IA' },
+        { included: false, text: 'Programa de fidelidade' },
       ],
       buttonText: 'Escolher Starter',
     },
@@ -109,14 +111,14 @@ export const PricingPlans = () => {
       parcelValue: 11.99,
       description: 'Para profissionais em crescimento',
       features: [
-        { included: true, text: 'Agendamentos ilimitados' },
-        { included: true, text: 'Lembretes automáticos personalizados' },
-        { included: true, text: 'Gestão avançada de clientes' },
-        { included: true, text: 'Controle completo de insumos' },
+        { included: true, text: 'Tudo do plano Starter' },
         { included: true, text: 'Marketing com IA' },
         { included: true, text: 'Painel analítico completo' },
+        { included: true, text: 'Automação avançada' },
         { included: true, text: 'Cursos e certificados' },
         { included: true, text: 'Programa de fidelidade básico' },
+        { included: true, text: 'Relatórios avançados' },
+        { included: false, text: 'Gestão de equipe' },
       ],
       buttonText: 'Escolher Pro',
     },
@@ -130,8 +132,8 @@ export const PricingPlans = () => {
       features: [
         { included: true, text: 'Tudo do plano Pro' },
         { included: true, text: 'Gestão de equipe multiusuário' },
-        { included: true, text: 'Automação avançada com IA' },
-        { included: true, text: 'Campanhas inteligentes' },
+        { included: true, text: 'Automação com IA avançada' },
+        { included: true, text: 'Campanias inteligentes' },
         { included: true, text: 'Programa de afiliados' },
         { included: true, text: 'Biolink personalizado' },
         { included: true, text: 'Programa de fidelidade avançado' },
@@ -155,17 +157,29 @@ export const PricingPlans = () => {
         )}
         {!user && (
           <p className="text-sm text-orange-600 mt-2">
-            ⚠️ Faça login para gerenciar sua assinatura
+            ⚠️ Faça login para assinar um plano
           </p>
         )}
       </div>
 
       <Tabs defaultValue="mensal" className="w-full mt-8">
         <TabsList className="mx-auto mb-4 border border-plush-200 bg-white">
-          <TabsTrigger value="mensal" onClick={() => setIsYearly(false)}>
+          <TabsTrigger 
+            value="mensal" 
+            onClick={() => {
+              console.log('🗓️ Alternando para planos mensais');
+              setIsYearly(false);
+            }}
+          >
             Mensal
           </TabsTrigger>
-          <TabsTrigger value="anual" onClick={() => setIsYearly(true)}>
+          <TabsTrigger 
+            value="anual" 
+            onClick={() => {
+              console.log('📅 Alternando para planos anuais');
+              setIsYearly(true);
+            }}
+          >
             Anual <span className="text-xs font-medium ml-1">(-20%)</span>
           </TabsTrigger>
         </TabsList>
@@ -192,17 +206,19 @@ export const PricingPlans = () => {
         </div>
       </Tabs>
       
-      {/* Status da integração */}
+      {/* Debug Info */}
       <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h4 className="font-semibold text-blue-800 mb-2">Sistema de Pagamentos</h4>
-        <div className="text-sm text-blue-700">
-          <p>✅ Integração com Stripe ativa</p>
-          <p>✅ Edge functions configuradas</p>
+        <h4 className="font-semibold text-blue-800 mb-2">Status do Sistema</h4>
+        <div className="text-sm text-blue-700 space-y-1">
+          <p>✅ Price IDs configurados para Stripe</p>
+          <p>✅ Edge functions criadas</p>
           <p>✅ Sistema de checkout pronto</p>
+          <p>📊 Modo atual: {isYearly ? 'Anual' : 'Mensal'}</p>
           {user && (
-            <p className="mt-2">
-              🔐 Usuário logado: <span className="font-medium">{user.email}</span>
-            </p>
+            <p>👤 Usuário: <span className="font-medium">{user.email}</span></p>
+          )}
+          {processingPlan && (
+            <p>⏳ Processando: <span className="font-medium">{processingPlan}</span></p>
           )}
         </div>
       </div>
