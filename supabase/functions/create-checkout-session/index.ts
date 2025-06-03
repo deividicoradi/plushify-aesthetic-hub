@@ -53,9 +53,29 @@ serve(async (req) => {
 
     console.log("✅ Usuário autenticado:", user.email);
 
-    // Obter dados da requisição
-    const requestBody = await req.json();
+    // Obter dados da requisição com validação melhorada
+    let requestBody;
+    try {
+      const bodyText = await req.text();
+      console.log("📋 Corpo da requisição (texto):", bodyText);
+      
+      if (!bodyText || bodyText.trim() === '') {
+        throw new Error("Corpo da requisição vazio");
+      }
+      
+      requestBody = JSON.parse(bodyText);
+      console.log("📋 Dados da requisição parseados:", requestBody);
+    } catch (parseError) {
+      console.error("❌ Erro ao fazer parse do JSON:", parseError);
+      throw new Error("Dados da requisição inválidos");
+    }
+
     const { planId, isYearly } = requestBody;
+
+    if (!planId) {
+      console.error("❌ planId não fornecido");
+      throw new Error("planId é obrigatório");
+    }
 
     console.log("📋 Dados da requisição:", { planId, isYearly, userEmail: user.email });
 

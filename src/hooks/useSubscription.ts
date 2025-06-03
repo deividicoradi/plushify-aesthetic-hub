@@ -95,17 +95,23 @@ export const useSubscription = () => {
         sessionToken: session.access_token ? 'Presente' : 'Ausente'
       });
 
+      const requestBody = { 
+        planId, 
+        isYearly,
+        userEmail: user.email 
+      };
+
+      console.log('📤 Enviando dados:', JSON.stringify(requestBody));
+
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { 
-          planId, 
-          isYearly,
-          userEmail: user.email 
-        },
+        body: JSON.stringify(requestBody),
         headers: {
           Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
+
+      console.log('📦 Resposta completa da função:', { data, error });
 
       if (error) {
         console.error('❌ Erro na função create-checkout-session:', error);
@@ -114,6 +120,8 @@ export const useSubscription = () => {
           toast.error("Sistema de pagamento não configurado. Entre em contato com o suporte.");
         } else if (error.message?.includes('User not authenticated')) {
           toast.error("Erro de autenticação. Faça login novamente.");
+        } else if (error.message?.includes('Dados da requisição inválidos')) {
+          toast.error("Erro nos dados enviados. Tente novamente.");
         } else {
           toast.error(`Erro no sistema de pagamento: ${error.message}`);
         }
