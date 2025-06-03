@@ -15,7 +15,11 @@ export const PricingPlans = () => {
   const { isLoading, tier: currentTier, subscribeToPlan, getCurrentPlanInfo } = useSubscription();
   
   const handleSubscribe = async (planTier: SubscriptionTier) => {
-    console.log('🎯 Tentando assinar plano:', { planTier, isYearly, user: user?.email });
+    console.log('🎯 Tentando assinar plano:', { 
+      planTier, 
+      isYearly: isYearly ? 'ANUAL' : 'MENSAL', 
+      user: user?.email 
+    });
     
     if (!user) {
       toast.error("Você precisa estar logado para assinar um plano");
@@ -36,14 +40,21 @@ export const PricingPlans = () => {
     setProcessingPlan(planTier);
     
     try {
-      console.log('💳 Iniciando processo de pagamento...');
-      toast.loading("Preparando pagamento...");
+      console.log('💳 Iniciando processo de pagamento...', {
+        plano: planTier,
+        modo: isYearly ? 'ANUAL (20% desconto)' : 'MENSAL',
+        usuario: user.email
+      });
+      
+      toast.loading(`Preparando pagamento ${isYearly ? 'anual' : 'mensal'}...`);
       
       const checkoutUrl = await subscribeToPlan(planTier, isYearly);
       
       if (checkoutUrl) {
-        console.log('🔗 URL de checkout recebida:', checkoutUrl);
-        toast.success("Redirecionando para pagamento...");
+        console.log('✅ URL de checkout recebida:', checkoutUrl);
+        console.log('🔄 Redirecionando para Stripe...');
+        
+        toast.success(`Redirecionando para pagamento ${isYearly ? 'anual' : 'mensal'}...`);
         
         // Redirecionar para o Stripe Checkout
         window.location.href = checkoutUrl;
@@ -167,7 +178,7 @@ export const PricingPlans = () => {
           <TabsTrigger 
             value="mensal" 
             onClick={() => {
-              console.log('🗓️ Alternando para planos mensais');
+              console.log('🗓️ Alternando para planos MENSAIS');
               setIsYearly(false);
             }}
           >
@@ -176,7 +187,7 @@ export const PricingPlans = () => {
           <TabsTrigger 
             value="anual" 
             onClick={() => {
-              console.log('📅 Alternando para planos anuais');
+              console.log('📅 Alternando para planos ANUAIS (economia de 20%)');
               setIsYearly(true);
             }}
           >
@@ -184,41 +195,66 @@ export const PricingPlans = () => {
           </TabsTrigger>
         </TabsList>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4 mt-8">
-          {pricingPlans.map((plan) => (
-            <PricingTier
-              key={plan.tier}
-              tier={plan.tier}
-              isPopular={plan.isPopular}
-              isYearly={isYearly}
-              title={plan.title}
-              price={plan.price}
-              yearlyPrice={plan.yearlyPrice}
-              parcelValue={plan.parcelValue}
-              description={plan.description}
-              features={plan.features}
-              buttonText={plan.buttonText}
-              isLoading={isLoading || processingPlan === plan.tier}
-              isCurrentPlan={currentTier === plan.tier}
-              onSubscribe={() => handleSubscribe(plan.tier as SubscriptionTier)}
-            />
-          ))}
-        </div>
+        <TabsContent value="mensal">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4 mt-8">
+            {pricingPlans.map((plan) => (
+              <PricingTier
+                key={`mensal-${plan.tier}`}
+                tier={plan.tier}
+                isPopular={plan.isPopular}
+                isYearly={false}
+                title={plan.title}
+                price={plan.price}
+                yearlyPrice={plan.yearlyPrice}
+                parcelValue={plan.parcelValue}
+                description={plan.description}
+                features={plan.features}
+                buttonText={plan.buttonText}
+                isLoading={isLoading || processingPlan === plan.tier}
+                isCurrentPlan={currentTier === plan.tier}
+                onSubscribe={() => handleSubscribe(plan.tier as SubscriptionTier)}
+              />
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="anual">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4 mt-8">
+            {pricingPlans.map((plan) => (
+              <PricingTier
+                key={`anual-${plan.tier}`}
+                tier={plan.tier}
+                isPopular={plan.isPopular}
+                isYearly={true}
+                title={plan.title}
+                price={plan.price}
+                yearlyPrice={plan.yearlyPrice}
+                parcelValue={plan.parcelValue}
+                description={plan.description}
+                features={plan.features}
+                buttonText={plan.buttonText}
+                isLoading={isLoading || processingPlan === plan.tier}
+                isCurrentPlan={currentTier === plan.tier}
+                onSubscribe={() => handleSubscribe(plan.tier as SubscriptionTier)}
+              />
+            ))}
+          </div>
+        </TabsContent>
       </Tabs>
       
-      {/* Debug Info */}
+      {/* Status do Sistema */}
       <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <h4 className="font-semibold text-blue-800 mb-2">Status do Sistema</h4>
         <div className="text-sm text-blue-700 space-y-1">
           <p>✅ Price IDs configurados para Stripe</p>
           <p>✅ Edge functions criadas</p>
           <p>✅ Sistema de checkout pronto</p>
-          <p>📊 Modo atual: {isYearly ? 'Anual' : 'Mensal'}</p>
+          <p className="font-semibold">📊 Modo atual: {isYearly ? '📅 ANUAL (20% desconto)' : '🗓️ MENSAL'}</p>
           {user && (
             <p>👤 Usuário: <span className="font-medium">{user.email}</span></p>
           )}
           {processingPlan && (
-            <p>⏳ Processando: <span className="font-medium">{processingPlan}</span></p>
+            <p>⏳ Processando plano: <span className="font-medium">{processingPlan.toUpperCase()}</span> ({isYearly ? 'ANUAL' : 'MENSAL'})</p>
           )}
         </div>
       </div>
