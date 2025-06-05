@@ -11,6 +11,9 @@ import { StatsChart } from '@/components/dashboard/StatsChart';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { WeeklyOverview } from '@/components/dashboard/WeeklyOverview';
+import { AIPersonalizedPanel } from '@/components/premium/AIPersonalizedPanel';
+import { TeamManagement } from '@/components/premium/TeamManagement';
+import { AdvancedCRM } from '@/components/premium/AdvancedCRM';
 import { useSubscription } from '@/hooks/useSubscription';
 
 const Dashboard = () => {
@@ -89,7 +92,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Informações do plano atual - mais compacta */}
+      {/* Informações do plano atual */}
       <div className="bg-gradient-to-r from-plush-50 to-purple-50 p-4 rounded-lg border border-plush-100">
         <div className="flex items-center justify-between">
           <div>
@@ -138,26 +141,56 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Layout principal em grid responsivo */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-        {/* Sidebar esquerda - Ações rápidas e overview */}
-        <div className="xl:col-span-1 space-y-4">
-          <QuickActions />
-          <WeeklyOverview />
-        </div>
+      {/* Layout responsivo baseado no plano */}
+      {hasFeature('premium') ? (
+        // Layout Premium - 4 colunas com recursos avançados
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          {/* Coluna 1 - Ações rápidas */}
+          <div className="xl:col-span-2 space-y-4">
+            <QuickActions />
+            <WeeklyOverview />
+          </div>
 
-        {/* Coluna central - Gráficos */}
-        <div className="xl:col-span-2 space-y-4">
-          <StatsChart />
-        </div>
+          {/* Coluna 2 - IA Personalizada */}
+          <div className="xl:col-span-3">
+            <AIPersonalizedPanel />
+          </div>
 
-        {/* Sidebar direita - Alertas */}
-        <div className="xl:col-span-1">
-          <AlertsPanel />
-        </div>
-      </div>
+          {/* Coluna 3 - Gráficos */}
+          <div className="xl:col-span-4 space-y-4">
+            <StatsChart />
+          </div>
 
-      {/* Conteúdo adicional baseado no plano */}
+          {/* Coluna 4 - Alertas */}
+          <div className="xl:col-span-3">
+            <AlertsPanel />
+          </div>
+        </div>
+      ) : (
+        // Layout padrão para outros planos
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+          <div className="xl:col-span-1 space-y-4">
+            <QuickActions />
+            <WeeklyOverview />
+          </div>
+          <div className="xl:col-span-2 space-y-4">
+            <StatsChart />
+          </div>
+          <div className="xl:col-span-1">
+            <AlertsPanel />
+          </div>
+        </div>
+      )}
+
+      {/* Recursos Premium adicionais */}
+      {hasFeature('premium') && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TeamManagement />
+          <AdvancedCRM />
+        </div>
+      )}
+
+      {/* Conteúdo baseado no plano */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="animate-fade-in">
           <CardHeader className="pb-3">
