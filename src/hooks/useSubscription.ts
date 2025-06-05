@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,7 +34,7 @@ export const useSubscription = () => {
 
     try {
       setIsLoading(true);
-      console.log('🔍 Verificando assinatura para usuário:', user.email);
+      console.log('🔍 Verificando assinatura para:', user.email);
 
       const { data, error } = await supabase.functions.invoke('verify-subscription', {
         headers: {
@@ -42,7 +43,7 @@ export const useSubscription = () => {
       });
 
       if (error) {
-        console.error('❌ Erro na função verify-subscription:', error);
+        console.error('❌ Erro na verificação:', error);
         setSubscriptionInfo({
           isSubscribed: false,
           tier: 'free',
@@ -51,17 +52,15 @@ export const useSubscription = () => {
         return;
       }
 
-      console.log('📊 Dados de assinatura recebidos:', data);
+      console.log('📊 Dados recebidos:', data);
 
       if (data && data.subscribed && data.subscription_tier) {
-        console.log('✅ Assinatura ativa encontrada:', data.subscription_tier);
         setSubscriptionInfo({
           isSubscribed: true,
           tier: data.subscription_tier as SubscriptionTier,
           expiresAt: data.subscription_end ? new Date(data.subscription_end) : null,
         });
       } else {
-        console.log('📝 Nenhuma assinatura ativa, mantendo como free');
         setSubscriptionInfo({
           isSubscribed: false,
           tier: 'free',
@@ -81,76 +80,45 @@ export const useSubscription = () => {
   };
 
   const subscribeToPlan = async (planId: string, isYearly: boolean = false) => {
-    console.log('🎯 Iniciando subscribeToPlan:', { planId, isYearly, userEmail: user?.email });
+    console.log('🎯 Iniciando assinatura:', { planId, isYearly, userEmail: user?.email });
     
     if (!user || !session) {
-      console.error('❌ Usuário não autenticado');
       toast.error("Você precisa estar logado para assinar um plano");
-      return null;
-    }
-
-    if (!session.access_token) {
-      console.error('❌ Token de acesso não encontrado');
-      toast.error("Erro de autenticação. Faça login novamente.");
       return null;
     }
 
     try {
       setIsLoading(true);
-      console.log('💳 Enviando dados para create-checkout-session:', { 
-        planId, 
-        isYearly,
-        userEmail: user.email
-      });
-
-      const requestData = { 
-        planId, 
-        isYearly: isYearly || false,
-        userEmail: user.email 
-      };
-
-      console.log('📤 Dados sendo enviados:', JSON.stringify(requestData));
+      console.log('💳 Criando sessão de checkout...');
 
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: requestData,
+        body: { 
+          planId, 
+          isYearly 
+        },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
 
-      console.log('📦 Resposta da edge function:', { data, error });
+      console.log('📦 Resposta:', { data, error });
 
       if (error) {
-        console.error('❌ Erro retornado pela função:', error);
-        
-        if (error.message?.includes('STRIPE_SECRET_KEY')) {
-          toast.error("Sistema de pagamento não configurado");
-        } else if (error.message?.includes('não autenticado')) {
-          toast.error("Erro de autenticação. Faça login novamente");
-        } else if (error.message?.includes('Formato de dados inválido')) {
-          toast.error("Erro nos dados do plano. Tente novamente");
-        } else {
-          toast.error(`Erro: ${error.message}`);
-        }
+        console.error('❌ Erro:', error);
+        toast.error(`Erro: ${error.message}`);
         return null;
       }
 
-      if (!data) {
-        console.error('❌ Resposta vazia da função');
-        toast.error("Erro interno. Tente novamente");
-        return null;
-      }
-
-      if (data.success && data.url) {
-        console.log('✅ URL de checkout recebida:', data.url);
-        toast.success("Redirecionando para pagamento...");
-        return data.url;
-      } else {
+      if (!data || !data.success || !data.url) {
         console.error('❌ Resposta inválida:', data);
-        toast.error(data.error || "Erro ao processar pagamento");
+        toast.error("Erro ao processar pagamento");
         return null;
       }
+
+      console.log('✅ URL de checkout:', data.url);
+      toast.success("Redirecionando para pagamento...");
+      return data.url;
 
     } catch (error) {
       console.error('💥 Erro crítico:', error);
@@ -161,7 +129,6 @@ export const useSubscription = () => {
     }
   };
 
-  // Função para verificar se uma funcionalidade está disponível
   const hasFeature = (requiredTier: SubscriptionTier) => {
     const tierLevels = {
       'free': 0,

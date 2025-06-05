@@ -15,11 +15,7 @@ export const PricingPlans = () => {
   const { isLoading, tier: currentTier, subscribeToPlan, getCurrentPlanInfo } = useSubscription();
   
   const handleSubscribe = async (planTier: SubscriptionTier) => {
-    console.log('🎯 Tentando assinar plano:', { 
-      planTier, 
-      isYearly: isYearly ? 'ANUAL' : 'MENSAL', 
-      user: user?.email 
-    });
+    console.log('🎯 Tentando assinar:', { planTier, isYearly, user: user?.email });
     
     if (!user) {
       toast.error("Você precisa estar logado para assinar um plano");
@@ -40,31 +36,22 @@ export const PricingPlans = () => {
     setProcessingPlan(planTier);
     
     try {
-      console.log('💳 Iniciando processo de pagamento...', {
+      console.log('💳 Iniciando pagamento:', {
         plano: planTier,
-        modo: isYearly ? 'ANUAL (20% desconto)' : 'MENSAL',
+        modo: isYearly ? 'ANUAL' : 'MENSAL',
         usuario: user.email
       });
-      
-      toast.loading(`Preparando pagamento ${isYearly ? 'anual' : 'mensal'}...`);
       
       const checkoutUrl = await subscribeToPlan(planTier, isYearly);
       
       if (checkoutUrl) {
-        console.log('✅ URL de checkout recebida:', checkoutUrl);
-        console.log('🔄 Redirecionando para Stripe...');
-        
-        toast.success(`Redirecionando para pagamento ${isYearly ? 'anual' : 'mensal'}...`);
-        
-        // Redirecionar para o Stripe Checkout
+        console.log('✅ Redirecionando para:', checkoutUrl);
         window.location.href = checkoutUrl;
-        
       } else {
-        console.error('❌ URL de checkout não recebida');
         toast.error("Erro ao processar pagamento. Tente novamente.");
       }
     } catch (error) {
-      console.error('💥 Erro no processo de pagamento:', error);
+      console.error('💥 Erro:', error);
       toast.error("Erro ao processar pagamento. Tente novamente.");
     } finally {
       setProcessingPlan(null);
@@ -73,7 +60,6 @@ export const PricingPlans = () => {
   
   const currentPlanInfo = getCurrentPlanInfo();
   
-  // Planos com preços corretos
   const pricingPlans = [
     {
       tier: 'free',
@@ -156,7 +142,6 @@ export const PricingPlans = () => {
 
   return (
     <div>
-      {/* Status do plano atual */}
       <div className="mb-6 p-4 bg-gradient-to-r from-plush-50 to-purple-50 rounded-lg border border-plush-200">
         <h3 className="text-lg font-semibold text-plush-800 mb-2">
           Plano atual: {currentPlanInfo.name}
@@ -177,19 +162,13 @@ export const PricingPlans = () => {
         <TabsList className="mx-auto mb-4 border border-plush-200 bg-white">
           <TabsTrigger 
             value="mensal" 
-            onClick={() => {
-              console.log('🗓️ Alternando para planos MENSAIS');
-              setIsYearly(false);
-            }}
+            onClick={() => setIsYearly(false)}
           >
             Mensal
           </TabsTrigger>
           <TabsTrigger 
             value="anual" 
-            onClick={() => {
-              console.log('📅 Alternando para planos ANUAIS (economia de 20%)');
-              setIsYearly(true);
-            }}
+            onClick={() => setIsYearly(true)}
           >
             Anual <span className="text-xs font-medium ml-1">(-20%)</span>
           </TabsTrigger>
@@ -242,19 +221,18 @@ export const PricingPlans = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Status do Sistema */}
       <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <h4 className="font-semibold text-blue-800 mb-2">Status do Sistema</h4>
         <div className="text-sm text-blue-700 space-y-1">
-          <p>✅ Price IDs configurados para Stripe</p>
-          <p>✅ Edge functions criadas</p>
+          <p>✅ Sistema de pagamento Stripe configurado</p>
+          <p>✅ Edge functions criadas e funcionais</p>
           <p>✅ Sistema de checkout pronto</p>
-          <p className="font-semibold">📊 Modo atual: {isYearly ? '📅 ANUAL (20% desconto)' : '🗓️ MENSAL'}</p>
+          <p className="font-semibold">📊 Modo: {isYearly ? '📅 ANUAL (20% desconto)' : '🗓️ MENSAL'}</p>
           {user && (
             <p>👤 Usuário: <span className="font-medium">{user.email}</span></p>
           )}
           {processingPlan && (
-            <p>⏳ Processando plano: <span className="font-medium">{processingPlan.toUpperCase()}</span> ({isYearly ? 'ANUAL' : 'MENSAL'})</p>
+            <p>⏳ Processando: <span className="font-medium">{processingPlan.toUpperCase()}</span></p>
           )}
         </div>
       </div>
