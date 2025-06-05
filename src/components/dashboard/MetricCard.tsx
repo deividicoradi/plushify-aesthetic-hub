@@ -6,7 +6,7 @@ import { LucideIcon } from 'lucide-react';
 interface MetricCardProps {
   title: string;
   value: string;
-  trend: string;
+  trend?: string; // Tornando opcional
   description: string;
   icon: LucideIcon;
   onClick?: () => void;
@@ -28,7 +28,7 @@ export const MetricCard = ({
   role = undefined,
   ariaLabel = undefined,
 }: MetricCardProps) => {
-  const isTrendPositive = trend.startsWith('+');
+  const isTrendPositive = trend ? trend.startsWith('+') : false;
 
   return (
     <button
@@ -50,9 +50,11 @@ export const MetricCard = ({
             <div className={`p-2 rounded-lg bg-gradient-to-br ${gradientClass} group-hover:scale-110 transition-transform duration-200`}>
               <Icon className="w-5 h-5 text-white" />
             </div>
-            <span className={`text-sm font-medium ${isTrendPositive ? "text-green-600" : "text-red-600"}`}>
-              {trend}
-            </span>
+            {trend && (
+              <span className={`text-sm font-medium ${isTrendPositive ? "text-green-600" : "text-red-600"}`}>
+                {trend}
+              </span>
+            )}
           </div>
           <div className="space-y-1">
             <h3 className="font-medium text-muted-foreground">{title}</h3>
