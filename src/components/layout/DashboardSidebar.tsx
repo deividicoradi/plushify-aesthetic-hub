@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   LayoutDashboard,
@@ -125,7 +126,7 @@ export default function DashboardSidebar() {
     <div className="flex flex-col h-full bg-white border-r py-4">
       <div className="px-6 pb-4 flex justify-center">
         <NavLink to="/dashboard" className="flex items-center">
-          <img src="/logo.svg" alt="Plushify Logo" className="w-12 h-12" />
+          <img src="/logo.svg" alt="Plushify Logo" className="w-20 h-20" />
         </NavLink>
       </div>
 
