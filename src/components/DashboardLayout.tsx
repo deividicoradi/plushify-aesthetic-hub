@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { DashboardSidebar } from './layout/DashboardSidebar';
+import DashboardSidebar from './layout/DashboardSidebar';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from "@/components/ui/sonner";
 
