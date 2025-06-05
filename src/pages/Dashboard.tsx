@@ -50,9 +50,9 @@ const Dashboard = () => {
       trend: "+4.3%",
       icon: TrendingUp,
       description: "Comparado ao mês anterior",
-      to: null, // Não navega para lugar nenhum - apenas informativo
+      to: "/relatorios",
       color: "from-[#33C3F0] to-[#9b87f5]",
-      clickable: false,
+      clickable: true,
     },
   ];
 

@@ -18,6 +18,7 @@ import Plans from './pages/Plans';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
 import Courses from './pages/Courses';
+import Reports from './pages/Reports';
 import NotFound from './pages/NotFound';
 import DashboardLayout from './components/DashboardLayout';
 import PaymentSuccess from './pages/PaymentSuccess';
@@ -176,6 +177,16 @@ function App() {
                     <ProtectedRoute>
                       <DashboardLayout>
                         <div>Módulo Financeiro</div>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/relatorios" 
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Reports />
                       </DashboardLayout>
                     </ProtectedRoute>
                   } 
