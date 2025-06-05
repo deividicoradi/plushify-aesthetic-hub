@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   LayoutDashboard,
@@ -124,10 +123,9 @@ export default function DashboardSidebar() {
 
   return (
     <div className="flex flex-col h-full bg-white border-r py-4">
-      <div className="px-6 pb-4">
-        <NavLink to="/dashboard" className="flex items-center gap-2 font-bold">
-          <img src="/logo.svg" alt="Plushify Logo" className="w-8 h-8" />
-          <span>Plushify</span>
+      <div className="px-6 pb-4 flex justify-center">
+        <NavLink to="/dashboard" className="flex items-center">
+          <img src="/logo.svg" alt="Plushify Logo" className="w-12 h-12" />
         </NavLink>
       </div>
 
