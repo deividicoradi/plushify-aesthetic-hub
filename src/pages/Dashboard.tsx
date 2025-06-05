@@ -5,7 +5,9 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 const Dashboard = () => {
   return (
     <DashboardLayout>
-      {/* Dashboard content will be rendered by DashboardLayout components */}
+      <div className="space-y-4">
+        {/* Dashboard content is handled by DashboardLayout components */}
+      </div>
     </DashboardLayout>
   );
 };
