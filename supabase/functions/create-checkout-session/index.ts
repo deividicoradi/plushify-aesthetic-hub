@@ -1,4 +1,5 @@
 
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@13.2.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
@@ -79,7 +80,7 @@ serve(async (req) => {
 
     console.log("✅ Stripe inicializado");
 
-    // Em vez de usar Price IDs hardcodados, vamos criar preços dinamicamente
+    // Configurar preços dos planos
     let planName;
     let unitAmount;
     
@@ -149,7 +150,7 @@ serve(async (req) => {
             currency: "brl",
             product_data: {
               name: planName,
-              description: `${planName} - ${isYearly ? 'Plano Anual' : 'Plano Mensal'}`,
+              description: `${planName} - ${isYearly ? 'Anual' : 'Mensal'}`,
             },
             unit_amount: unitAmount,
             recurring: {
@@ -214,3 +215,4 @@ serve(async (req) => {
     );
   }
 });
+
