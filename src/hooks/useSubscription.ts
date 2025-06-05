@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -106,17 +105,16 @@ export const useSubscription = () => {
 
       const requestData = { 
         planId, 
-        isYearly,
+        isYearly: isYearly || false,
         userEmail: user.email 
       };
 
-      console.log('📤 Dados preparados:', requestData);
+      console.log('📤 Dados sendo enviados:', JSON.stringify(requestData));
 
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: JSON.stringify(requestData),
+        body: requestData,
         headers: {
           Authorization: `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
         },
       });
 

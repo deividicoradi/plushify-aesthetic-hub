@@ -53,29 +53,22 @@ serve(async (req) => {
 
     console.log("✅ Usuário autenticado:", user.email);
 
-    // Processar dados da requisição com melhor tratamento
+    // Processar dados da requisição
     let requestBody;
     try {
-      const contentType = req.headers.get("content-type");
-      console.log("📋 Content-Type:", contentType);
+      // Primeiro tentar ler como JSON diretamente
+      const text = await req.text();
+      console.log("📋 Texto recebido:", text);
       
-      if (contentType?.includes("application/json")) {
-        requestBody = await req.json();
-      } else {
-        const bodyText = await req.text();
-        console.log("📋 Corpo como texto:", bodyText);
-        
-        if (bodyText && bodyText.trim() !== '') {
-          requestBody = JSON.parse(bodyText);
-        } else {
-          throw new Error("Corpo da requisição vazio");
-        }
+      if (!text || text.trim() === '') {
+        throw new Error("Corpo da requisição vazio");
       }
       
-      console.log("📋 Dados recebidos:", requestBody);
+      requestBody = JSON.parse(text);
+      console.log("📋 Dados parseados:", requestBody);
     } catch (parseError) {
       console.error("❌ Erro ao processar dados:", parseError);
-      throw new Error("Formato de dados inválido");
+      throw new Error("Formato de dados inválido: " + parseError.message);
     }
 
     const { planId, isYearly } = requestBody;
