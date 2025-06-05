@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -12,7 +11,8 @@ import {
   Settings,
   HelpCircle,
   Bell,
-  LogOut
+  LogOut,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -41,6 +41,7 @@ const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boo
     { name: 'Comunicação', path: '/comunicacao', icon: MessageSquare, requiredTier: 'starter' },
     { name: 'Inventário', path: '/estoque', icon: Package, requiredTier: 'pro' },
     { name: 'Anotações', path: '/notes', icon: FileText },
+    { name: 'Relatórios', path: '/relatorios', icon: TrendingUp, requiredTier: 'pro' },
     { name: 'Fidelidade', path: '/fidelidade', icon: Bell, requiredTier: 'premium', badge: 'Novo' },
     { name: 'Financeiro', path: '/financeiro', icon: CreditCard, requiredTier: 'pro' },
     { name: 'Planos', path: '/planos', icon: CreditCard },

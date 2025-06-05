@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LayoutDashboard, Users, CalendarDays, Receipt, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,12 +46,12 @@ const Dashboard = () => {
       clickable: true,
     },
     {
-      title: "Taxa de Crescimento",
-      value: "18.2%",
-      trend: "+4.3%",
+      title: "Relatórios",
+      value: hasFeature('pro') ? "Disponível" : "Pro",
+      trend: hasFeature('pro') ? "+4.3%" : undefined,
       icon: TrendingUp,
-      description: "Comparado ao mês anterior",
-      to: "/relatorios",
+      description: hasFeature('pro') ? "Análises avançadas" : "Upgrade para Pro",
+      to: hasFeature('pro') ? "/relatorios" : "/planos",
       color: "from-[#33C3F0] to-[#9b87f5]",
       clickable: true,
     },
@@ -199,6 +200,10 @@ const Dashboard = () => {
                       <span className="h-2 w-2 rounded-full bg-green-400"></span>
                       <span>Comunicação avançada</span>
                     </li>
+                    <li className="flex items-center gap-2 text-sm">
+                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
+                      <span>Relatórios básicos</span>
+                    </li>
                   </>
                 )}
                 {hasFeature('pro') && (
@@ -209,7 +214,11 @@ const Dashboard = () => {
                     </li>
                     <li className="flex items-center gap-2 text-sm">
                       <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                      <span>Relatórios financeiros</span>
+                      <span>Relatórios avançados com gráficos</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-sm">
+                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
+                      <span>Insights e análises inteligentes</span>
                     </li>
                   </>
                 )}
@@ -233,10 +242,16 @@ const Dashboard = () => {
                 <h4 className="font-medium text-gray-500">Disponíveis com upgrade</h4>
                 <ul className="space-y-1">
                   {!hasFeature('starter') && (
-                    <li className="flex items-center gap-2 text-sm text-gray-500">
-                      <span className="h-2 w-2 rounded-full bg-gray-300"></span>
-                      <span>Comunicação avançada (Starter)</span>
-                    </li>
+                    <>
+                      <li className="flex items-center gap-2 text-sm text-gray-500">
+                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
+                        <span>Comunicação avançada (Starter)</span>
+                      </li>
+                      <li className="flex items-center gap-2 text-sm text-gray-500">
+                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
+                        <span>Relatórios básicos (Starter)</span>
+                      </li>
+                    </>
                   )}
                   {!hasFeature('pro') && (
                     <>
@@ -246,7 +261,11 @@ const Dashboard = () => {
                       </li>
                       <li className="flex items-center gap-2 text-sm text-gray-500">
                         <span className="h-2 w-2 rounded-full bg-gray-300"></span>
-                        <span>Relatórios financeiros (Pro)</span>
+                        <span>Relatórios avançados (Pro)</span>
+                      </li>
+                      <li className="flex items-center gap-2 text-sm text-gray-500">
+                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
+                        <span>Análises inteligentes (Pro)</span>
                       </li>
                     </>
                   )}
