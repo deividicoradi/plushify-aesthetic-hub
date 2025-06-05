@@ -6,6 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { UpcomingAppointments } from '@/components/dashboard/UpcomingAppointments';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { StatsChart } from '@/components/dashboard/StatsChart';
+import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
+import { QuickActions } from '@/components/dashboard/QuickActions';
+import { WeeklyOverview } from '@/components/dashboard/WeeklyOverview';
 import { useSubscription } from '@/hooks/useSubscription';
 
 const Dashboard = () => {
@@ -73,9 +78,14 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-2">
-        <LayoutDashboard className="w-6 h-6 text-plush-600" />
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 mb-2">
+          <LayoutDashboard className="w-6 h-6 text-plush-600" />
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+        </div>
+        <div className="hidden lg:block">
+          <NotificationCenter />
+        </div>
       </div>
 
       {/* Informações do plano atual */}
@@ -127,6 +137,21 @@ const Dashboard = () => {
         ))}
       </div>
 
+      {/* Layout em grid responsivo */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Coluna principal - gráficos */}
+        <div className="xl:col-span-2 space-y-6">
+          <StatsChart />
+        </div>
+
+        {/* Sidebar direita */}
+        <div className="space-y-6">
+          <QuickActions />
+          <WeeklyOverview />
+          <AlertsPanel />
+        </div>
+      </div>
+
       {/* Conteúdo baseado no plano */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="animate-fade-in">
@@ -172,121 +197,10 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Funcionalidades desbloqueadas */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Funcionalidades do seu plano</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <h4 className="font-medium text-green-700">Disponíveis</h4>
-              <ul className="space-y-1">
-                <li className="flex items-center gap-2 text-sm">
-                  <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                  <span>Gestão de clientes</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm">
-                  <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                  <span>Agendamentos básicos</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm">
-                  <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                  <span>Anotações ilimitadas</span>
-                </li>
-                {hasFeature('starter') && (
-                  <>
-                    <li className="flex items-center gap-2 text-sm">
-                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                      <span>Comunicação avançada</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                      <span>Relatórios básicos</span>
-                    </li>
-                  </>
-                )}
-                {hasFeature('pro') && (
-                  <>
-                    <li className="flex items-center gap-2 text-sm">
-                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                      <span>Controle de estoque</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                      <span>Relatórios avançados com gráficos</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                      <span>Insights e análises inteligentes</span>
-                    </li>
-                  </>
-                )}
-                {hasFeature('premium') && (
-                  <>
-                    <li className="flex items-center gap-2 text-sm">
-                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                      <span>Programa de fidelidade</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-sm">
-                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
-                      <span>Gestão de equipe</span>
-                    </li>
-                  </>
-                )}
-              </ul>
-            </div>
-            
-            {!hasFeature('premium') && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-500">Disponíveis com upgrade</h4>
-                <ul className="space-y-1">
-                  {!hasFeature('starter') && (
-                    <>
-                      <li className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
-                        <span>Comunicação avançada (Starter)</span>
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
-                        <span>Relatórios básicos (Starter)</span>
-                      </li>
-                    </>
-                  )}
-                  {!hasFeature('pro') && (
-                    <>
-                      <li className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
-                        <span>Controle de estoque (Pro)</span>
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
-                        <span>Relatórios avançados (Pro)</span>
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
-                        <span>Análises inteligentes (Pro)</span>
-                      </li>
-                    </>
-                  )}
-                  {!hasFeature('premium') && (
-                    <>
-                      <li className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
-                        <span>Programa de fidelidade (Premium)</span>
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="h-2 w-2 rounded-full bg-gray-300"></span>
-                        <span>Gestão de equipe (Premium)</span>
-                      </li>
-                    </>
-                  )}
-                </ul>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Mobile notification center */}
+      <div className="lg:hidden">
+        <NotificationCenter />
+      </div>
     </div>
   );
 };
