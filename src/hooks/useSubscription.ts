@@ -115,6 +115,7 @@ export const useSubscription = () => {
         body: requestData,
         headers: {
           Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
         },
       });
 

@@ -53,22 +53,14 @@ serve(async (req) => {
 
     console.log("✅ Usuário autenticado:", user.email);
 
-    // Processar dados da requisição
+    // Processar dados da requisição de forma mais robusta
     let requestBody;
     try {
-      // Primeiro tentar ler como JSON diretamente
-      const text = await req.text();
-      console.log("📋 Texto recebido:", text);
-      
-      if (!text || text.trim() === '') {
-        throw new Error("Corpo da requisição vazio");
-      }
-      
-      requestBody = JSON.parse(text);
-      console.log("📋 Dados parseados:", requestBody);
+      requestBody = await req.json();
+      console.log("📋 Dados recebidos:", requestBody);
     } catch (parseError) {
-      console.error("❌ Erro ao processar dados:", parseError);
-      throw new Error("Formato de dados inválido: " + parseError.message);
+      console.error("❌ Erro ao processar JSON:", parseError);
+      throw new Error("Formato de dados inválido");
     }
 
     const { planId, isYearly } = requestBody;
@@ -80,36 +72,36 @@ serve(async (req) => {
 
     console.log("📋 Processando plano:", { planId, isYearly: isYearly || false, userEmail: user.email });
 
-    // Configurar preços da Stripe
-    let priceId;
-    let planName;
-    
-    switch(planId) {
-      case 'starter':
-        planName = "Starter";
-        priceId = isYearly ? "price_1RNNv2RkF2Xmse9MjGNrg4wk" : "price_1RNNtORkF2Xmse9MudMyCXMt";
-        break;
-      case 'pro':
-        planName = "Pro";
-        priceId = isYearly ? "price_1RNNx3RkF2Xmse9Mz9Hu9f22" : "price_1RNNw9RkF2Xmse9MVAoYhg3u";
-        break;
-      case 'premium':
-        planName = "Premium";
-        priceId = isYearly ? "price_1RNNzFRkF2Xmse9Mr6D34kM9" : "price_1RNNxgRkF2Xmse9MGKFxwHZc";
-        break;
-      default:
-        console.error("❌ Plano inválido recebido:", planId);
-        throw new Error(`Plano '${planId}' não é válido`);
-    }
-
-    console.log("💳 Configuração do plano:", { planName, priceId, isYearly: isYearly || false });
-
     // Inicializar Stripe
     const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
 
     console.log("✅ Stripe inicializado");
+
+    // Em vez de usar Price IDs hardcodados, vamos criar preços dinamicamente
+    let planName;
+    let unitAmount;
+    
+    switch(planId) {
+      case 'starter':
+        planName = "Plano Starter";
+        unitAmount = isYearly ? 5590 : 6990; // R$ 55.90 anual ou R$ 69.90 mensal
+        break;
+      case 'pro':
+        planName = "Plano Pro";
+        unitAmount = isYearly ? 9590 : 11990; // R$ 95.90 anual ou R$ 119.90 mensal
+        break;
+      case 'premium':
+        planName = "Plano Premium";
+        unitAmount = isYearly ? 15990 : 19990; // R$ 159.90 anual ou R$ 199.90 mensal
+        break;
+      default:
+        console.error("❌ Plano inválido recebido:", planId);
+        throw new Error(`Plano '${planId}' não é válido`);
+    }
+
+    console.log("💳 Configuração do plano:", { planName, unitAmount, isYearly: isYearly || false });
 
     // Verificar se o usuário já tem um cliente Stripe
     const { data: subscriber } = await supabase
@@ -153,7 +145,17 @@ serve(async (req) => {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: "brl",
+            product_data: {
+              name: planName,
+              description: `${planName} - ${isYearly ? 'Plano Anual' : 'Plano Mensal'}`,
+            },
+            unit_amount: unitAmount,
+            recurring: {
+              interval: isYearly ? "year" : "month",
+            },
+          },
           quantity: 1,
         },
       ],
