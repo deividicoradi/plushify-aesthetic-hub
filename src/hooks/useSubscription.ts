@@ -113,7 +113,7 @@ export const useSubscription = () => {
       console.log('📤 Dados preparados:', requestData);
 
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: requestData,
+        body: JSON.stringify(requestData),
         headers: {
           Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',

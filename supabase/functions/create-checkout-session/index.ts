@@ -53,28 +53,35 @@ serve(async (req) => {
 
     console.log("✅ Usuário autenticado:", user.email);
 
-    // Obter dados da requisição - simplificando o processo
+    // Processar dados da requisição com melhor tratamento
     let requestBody;
     try {
-      const bodyText = await req.text();
-      console.log("📋 Corpo da requisição recebido:", bodyText);
+      const contentType = req.headers.get("content-type");
+      console.log("📋 Content-Type:", contentType);
       
-      if (!bodyText || bodyText.trim() === '') {
-        console.error("❌ Corpo da requisição está vazio");
-        throw new Error("Corpo da requisição vazio");
+      if (contentType?.includes("application/json")) {
+        requestBody = await req.json();
+      } else {
+        const bodyText = await req.text();
+        console.log("📋 Corpo como texto:", bodyText);
+        
+        if (bodyText && bodyText.trim() !== '') {
+          requestBody = JSON.parse(bodyText);
+        } else {
+          throw new Error("Corpo da requisição vazio");
+        }
       }
       
-      requestBody = JSON.parse(bodyText);
-      console.log("📋 JSON parseado com sucesso:", requestBody);
+      console.log("📋 Dados recebidos:", requestBody);
     } catch (parseError) {
-      console.error("❌ Erro ao processar JSON:", parseError);
+      console.error("❌ Erro ao processar dados:", parseError);
       throw new Error("Formato de dados inválido");
     }
 
     const { planId, isYearly } = requestBody;
 
     if (!planId) {
-      console.error("❌ planId não fornecido no body:", requestBody);
+      console.error("❌ planId não fornecido:", requestBody);
       throw new Error("Plano não especificado");
     }
 
@@ -83,22 +90,18 @@ serve(async (req) => {
     // Configurar preços da Stripe
     let priceId;
     let planName;
-    let planDescription;
     
     switch(planId) {
       case 'starter':
         planName = "Starter";
-        planDescription = "Plano Starter - Ideal para profissionais individuais";
         priceId = isYearly ? "price_1RNNv2RkF2Xmse9MjGNrg4wk" : "price_1RNNtORkF2Xmse9MudMyCXMt";
         break;
       case 'pro':
         planName = "Pro";
-        planDescription = "Plano Pro - Para profissionais em crescimento";
         priceId = isYearly ? "price_1RNNx3RkF2Xmse9Mz9Hu9f22" : "price_1RNNw9RkF2Xmse9MVAoYhg3u";
         break;
       case 'premium':
         planName = "Premium";
-        planDescription = "Plano Premium - Para quem tem equipe ou rede";
         priceId = isYearly ? "price_1RNNzFRkF2Xmse9Mr6D34kM9" : "price_1RNNxgRkF2Xmse9MGKFxwHZc";
         break;
       default:
@@ -150,7 +153,7 @@ serve(async (req) => {
     // Criar sessão de checkout
     console.log("🛒 Criando sessão de checkout Stripe");
     
-    const origin = req.headers.get("origin") || "http://localhost:3000";
+    const origin = req.headers.get("origin") || "https://09df458b-dedc-46e2-af46-e15d28209b01.lovableproject.com";
     
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
