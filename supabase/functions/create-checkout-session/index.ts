@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@13.2.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
@@ -38,12 +37,12 @@ const getPlanConfig = (planId: string, isYearly: boolean): PlanConfig => {
     case 'pro':
       return {
         name: "Plano Pro", 
-        priceId: isYearly ? "price_pro_yearly" : "price_pro_monthly" // Você precisa fornecer estes IDs
+        priceId: isYearly ? "price_1RNNx3RkF2Xmse9Mz9Hu9f22" : "price_1RNNw9RkF2Xmse9MVAoYhg3u"
       };
     case 'premium':
       return {
         name: "Plano Premium",
-        priceId: isYearly ? "price_premium_yearly" : "price_premium_monthly" // Você precisa fornecer estes IDs
+        priceId: isYearly ? "price_1RNNzFRkF2Xmse9Mr6D34kM9" : "price_1RNNxgRkF2Xmse9MGKFxwHZc"
       };
     default:
       throw new Error(`Plano '${planId}' não é válido`);
