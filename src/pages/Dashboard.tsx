@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LayoutDashboard, Users, CalendarDays, Receipt, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
