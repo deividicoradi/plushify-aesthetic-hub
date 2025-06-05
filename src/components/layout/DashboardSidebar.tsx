@@ -1,200 +1,184 @@
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  CalendarDays, 
-  MessageSquare,
+import React from "react";
+import {
+  LayoutDashboard,
+  Users,
+  CalendarDays,
   Package,
+  MessageSquare,
   FileText,
-  CreditCard,
-  Settings,
-  HelpCircle,
-  Bell,
-  LogOut,
-  TrendingUp
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useSubscription } from '@/hooks/useSubscription';
-import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
+  BarChart3,
+  Megaphone,
+  Brain,
+  Zap,
+  Heart,
+  Settings as SettingsIcon,
+} from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useSubscription } from "@/hooks/useSubscription";
 
-type NavItem = {
-  name: string;
-  path: string;
-  icon: React.ElementType;
-  requiredTier?: 'free' | 'starter' | 'pro' | 'premium';
-  badge?: string;
-};
-
-const DashboardSidebar = ({ collapsed = false, setCollapsed }: { collapsed?: boolean, setCollapsed?: (value: boolean) => void }) => {
+export function DashboardSidebar() {
+  const { hasFeature } = useSubscription();
   const location = useLocation();
-  const navigate = useNavigate();
-  const { signOut } = useAuth();
-  const { hasFeature, getCurrentPlanInfo } = useSubscription();
 
-  const navItems: NavItem[] = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Clientes', path: '/clientes', icon: Users },
-    { name: 'Agendamentos', path: '/agendamentos', icon: CalendarDays },
-    { name: 'Comunicação', path: '/comunicacao', icon: MessageSquare, requiredTier: 'starter' },
-    { name: 'Inventário', path: '/estoque', icon: Package, requiredTier: 'pro' },
-    { name: 'Anotações', path: '/notes', icon: FileText },
-    { name: 'Relatórios', path: '/relatorios', icon: TrendingUp, requiredTier: 'pro' },
-    { name: 'Fidelidade', path: '/fidelidade', icon: Bell, requiredTier: 'premium', badge: 'Novo' },
-    { name: 'Financeiro', path: '/financeiro', icon: CreditCard, requiredTier: 'pro' },
-    { name: 'Planos', path: '/planos', icon: CreditCard },
+  const isActive = (path: string) => location.pathname === path;
+
+  const menuItems = [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+      isActive: isActive("/dashboard"),
+    },
+    {
+      title: "Clientes",
+      url: "/clientes",
+      icon: Users,
+      isActive: isActive("/clientes"),
+    },
+    {
+      title: "Agendamentos",
+      url: "/agendamentos",
+      icon: CalendarDays,
+      isActive: isActive("/agendamentos"),
+    },
+    {
+      title: "Estoque",
+      url: "/estoque",
+      icon: Package,
+      isActive: isActive("/estoque"),
+    },
+    {
+      title: "Comunicação",
+      url: "/comunicacao",
+      icon: MessageSquare,
+      isActive: isActive("/comunicacao"),
+    },
+    ...(hasFeature('pro') ? [{
+      title: "Marketing",
+      url: "/marketing",
+      icon: Megaphone,
+      isActive: isActive("/marketing"),
+      isPremium: true,
+    }] : []),
+    ...(hasFeature('premium') ? [
+      {
+        title: "Analytics IA",
+        url: "/analytics",
+        icon: Brain,
+        isActive: isActive("/analytics"),
+        isPremium: true,
+      },
+      {
+        title: "Automações",
+        url: "/automacoes",
+        icon: Zap,
+        isActive: isActive("/automacoes"),
+        isPremium: true,
+      }
+    ] : []),
+    {
+      title: "Relatórios",
+      url: "/relatorios",
+      icon: BarChart3,
+      isActive: isActive("/relatorios"),
+    },
+    {
+      title: "Fidelidade",
+      url: "/fidelidade",
+      icon: Heart,
+      isActive: isActive("/fidelidade"),
+    },
+    {
+      title: "Anotações",
+      url: "/anotacoes",
+      icon: FileText,
+      isActive: isActive("/anotacoes"),
+    },
   ];
 
-  const handleNavigate = (path: string, available: boolean, e: React.MouseEvent) => {
-    if (!available) {
-      e.preventDefault();
-      navigate('/planos');
-      return;
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Redirect to home page after logout
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
     }
   };
 
-  const currentPlan = getCurrentPlanInfo();
+  const footerItems = [
+    {
+      title: "Configurações",
+      url: "/configuracoes",
+      icon: SettingsIcon,
+      isActive: isActive("/configuracoes"),
+    },
+  ];
 
   return (
-    <div className={cn(
-      "h-screen bg-white border-r border-gray-100 transition-all duration-300",
-      collapsed ? "w-20" : "w-64"
-    )}>
-      <div className="flex items-center justify-between h-16 border-b border-gray-100 px-4">
-        <Link to="/dashboard" className="flex items-center">
-          {collapsed ? (
-            <img src="/logo.svg" alt="Plushify" className="h-8 w-8" />
-          ) : (
-            <img src="/logo.svg" alt="Plushify" className="h-8" />
-          )}
-        </Link>
-        <button 
-          onClick={() => setCollapsed && setCollapsed(!collapsed)} 
-          className="p-2 rounded-md hover:bg-gray-100"
-        >
-          {collapsed ? "→" : "←"}
-        </button>
+    <div className="flex flex-col h-full bg-white border-r py-4">
+      <div className="px-6 pb-4">
+        <NavLink to="/dashboard" className="flex items-center gap-2 font-bold">
+          <img src="/logo.svg" alt="PlushCare Logo" className="w-8 h-8" />
+          <span>PlushCare</span>
+        </NavLink>
       </div>
-      
-      {/* Indicador do plano atual */}
-      {!collapsed && (
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="text-xs text-gray-500 mb-1">Plano atual</div>
-          <div className="text-sm font-medium text-plush-600">{currentPlan.name}</div>
-        </div>
-      )}
-      
-      <div className="py-4">
-        <div className={cn(
-          "flex flex-col gap-1 px-2",
-          collapsed ? "items-center" : ""
-        )}>
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            const available = hasFeature(item.requiredTier || 'free');
-            
-            return (
-              <Tooltip key={item.path} delayDuration={300}>
-                <TooltipTrigger asChild>
-                  <Link
-                    to={item.path}
-                    onClick={(e) => handleNavigate(item.path, available, e)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 transition-colors relative",
-                      isActive ? "bg-plush-50 text-plush-700" : "hover:bg-gray-50",
-                      !available && "opacity-50 cursor-pointer",
-                      collapsed && "justify-center"
-                    )}
-                  >
-                    <item.icon size={20} />
-                    {!collapsed && (
-                      <>
-                        <span>{item.name}</span>
-                        {!available && (
-                          <Badge className="ml-auto bg-orange-100 text-orange-700 text-xs" variant="secondary">
-                            {item.requiredTier === 'starter' ? 'Starter' : 
-                             item.requiredTier === 'pro' ? 'Pro' : 'Premium'}
-                          </Badge>
-                        )}
-                        {item.badge && available && (
-                          <Badge className="ml-auto bg-plush-500" variant="secondary">{item.badge}</Badge>
-                        )}
-                      </>
-                    )}
-                  </Link>
-                </TooltipTrigger>
-                {(collapsed || !available) && (
-                  <TooltipContent side="right">
-                    <p>{item.name}</p>
-                    {!available && (
-                      <p className="text-xs text-gray-500">
-                        Disponível no plano {item.requiredTier === 'starter' ? 'Starter' : 
-                                           item.requiredTier === 'pro' ? 'Pro' : 'Premium'}
-                      </p>
-                    )}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            );
-          })}
-        </div>
-        
-        <div className="mt-auto pt-4 px-2">
-          <div className="border-t border-gray-200 pt-4">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link 
-                  to="/settings" 
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 transition-colors",
-                    collapsed && "justify-center"
-                  )}
+
+      <div className="flex-1 px-3 space-y-1">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.title}
+            to={item.url}
+            className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-100 transition-colors ${item.isActive ? 'bg-gray-100 text-plush-700' : 'text-gray-500'
+              }`}
+          >
+            <item.icon className="w-4 h-4" />
+            <span>{item.title}</span>
+            {item.isPremium && (
+              <span className="ml-auto w-fit rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold text-white">
+                IA
+              </span>
+            )}
+          </NavLink>
+        ))}
+      </div>
+
+      <div className="px-6 pt-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-full rounded-md">
+              <Avatar className="mr-2 h-6 w-6">
+                <AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium leading-none">
+                {user?.email || "Meu Perfil"}
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" forceMount className="w-40">
+            {footerItems.map((item) => (
+              <DropdownMenuItem key={item.title} asChild>
+                <NavLink
+                  to={item.url}
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-gray-100 transition-colors"
                 >
-                  <Settings size={20} />
-                  {!collapsed && <span>Configurações</span>}
-                </Link>
-              </TooltipTrigger>
-              {collapsed && <TooltipContent side="right">Configurações</TooltipContent>}
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link 
-                  to="/help" 
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 transition-colors",
-                    collapsed && "justify-center"
-                  )}
-                >
-                  <HelpCircle size={20} />
-                  {!collapsed && <span>Ajuda</span>}
-                </Link>
-              </TooltipTrigger>
-              {collapsed && <TooltipContent side="right">Ajuda</TooltipContent>}
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button 
-                  onClick={signOut}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 transition-colors w-full text-left",
-                    collapsed && "justify-center"
-                  )}
-                >
-                  <LogOut size={20} />
-                  {!collapsed && <span>Sair</span>}
-                </button>
-              </TooltipTrigger>
-              {collapsed && <TooltipContent side="right">Sair</TooltipContent>}
-            </Tooltip>
-          </div>
-        </div>
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.title}</span>
+                </NavLink>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+              Sair
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
-};
-
-export default DashboardSidebar;
+}
