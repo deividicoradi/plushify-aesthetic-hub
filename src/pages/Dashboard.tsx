@@ -77,9 +77,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Header com notificações */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2">
           <LayoutDashboard className="w-6 h-6 text-plush-600" />
           <h1 className="text-2xl font-bold">Dashboard</h1>
         </div>
@@ -88,28 +89,28 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Informações do plano atual */}
-      <div className="bg-gradient-to-r from-plush-50 to-purple-50 p-6 rounded-lg border border-plush-100">
+      {/* Informações do plano atual - mais compacta */}
+      <div className="bg-gradient-to-r from-plush-50 to-purple-50 p-4 rounded-lg border border-plush-100">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-plush-800 mb-2">
+            <h2 className="text-lg font-semibold text-plush-800 mb-1">
               Plano {currentPlan.name}
             </h2>
-            <p className="text-plush-700">
+            <p className="text-sm text-plush-700">
               {isSubscribed ? 
                 `Acesso completo às funcionalidades do plano ${currentPlan.name}` :
                 'Acesso às funcionalidades básicas'
               }
             </p>
             {currentPlan.expiresAt && (
-              <p className="text-sm text-plush-600 mt-1">
+              <p className="text-xs text-plush-600 mt-1">
                 Válido até: {new Date(currentPlan.expiresAt).toLocaleDateString('pt-BR')}
               </p>
             )}
           </div>
           {!isSubscribed && (
             <button 
-              className="bg-plush-600 hover:bg-plush-700 text-white px-4 py-2 rounded-md transition-colors"
+              className="bg-plush-600 hover:bg-plush-700 text-white px-4 py-2 rounded-md transition-colors text-sm"
               onClick={() => navigate('/planos')}
             >
               Fazer upgrade
@@ -119,7 +120,7 @@ const Dashboard = () => {
       </div>
 
       {/* Métricas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {metricItems.map((item, idx) => (
           <MetricCard
             key={item.title}
@@ -137,36 +138,40 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Layout em grid responsivo */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Coluna principal - gráficos */}
-        <div className="xl:col-span-2 space-y-6">
+      {/* Layout principal em grid responsivo */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+        {/* Sidebar esquerda - Ações rápidas e overview */}
+        <div className="xl:col-span-1 space-y-4">
+          <QuickActions />
+          <WeeklyOverview />
+        </div>
+
+        {/* Coluna central - Gráficos */}
+        <div className="xl:col-span-2 space-y-4">
           <StatsChart />
         </div>
 
-        {/* Sidebar direita */}
-        <div className="space-y-6">
-          <QuickActions />
-          <WeeklyOverview />
+        {/* Sidebar direita - Alertas */}
+        <div className="xl:col-span-1">
           <AlertsPanel />
         </div>
       </div>
 
-      {/* Conteúdo baseado no plano */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Conteúdo adicional baseado no plano */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="animate-fade-in">
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle>Atividade Recente</CardTitle>
           </CardHeader>
           <CardContent>
             {hasFeature('starter') ? (
               <RecentActivity />
             ) : (
-              <div className="text-center py-8">
+              <div className="text-center py-6">
                 <p className="text-gray-500 mb-4">Funcionalidade disponível no plano Starter</p>
                 <button 
                   onClick={() => navigate('/planos')}
-                  className="text-plush-600 hover:underline"
+                  className="text-plush-600 hover:underline text-sm"
                 >
                   Ver planos
                 </button>
@@ -179,15 +184,15 @@ const Dashboard = () => {
           <UpcomingAppointments />
         ) : (
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <CardTitle>Próximos Agendamentos</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
+              <div className="text-center py-6">
                 <p className="text-gray-500 mb-4">Funcionalidade disponível no plano Starter</p>
                 <button 
                   onClick={() => navigate('/planos')}
-                  className="text-plush-600 hover:underline"
+                  className="text-plush-600 hover:underline text-sm"
                 >
                   Ver planos
                 </button>
