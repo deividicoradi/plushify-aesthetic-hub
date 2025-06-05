@@ -11,7 +11,7 @@ interface CheckoutRequest {
 
 interface PlanConfig {
   name: string;
-  unitAmount: number;
+  priceId: string;
 }
 
 interface CheckoutResponse {
@@ -27,23 +27,23 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Plan configuration
+// Plan configuration with Stripe Price IDs
 const getPlanConfig = (planId: string, isYearly: boolean): PlanConfig => {
   switch(planId) {
     case 'starter':
       return {
         name: "Plano Starter",
-        unitAmount: isYearly ? 5590 : 6990
+        priceId: isYearly ? "price_1RNNv2RkF2Xmse9MjGNrg4wk" : "price_1RNNtORkF2Xmse9MudMyCXMt"
       };
     case 'pro':
       return {
         name: "Plano Pro", 
-        unitAmount: isYearly ? 9590 : 11990
+        priceId: isYearly ? "price_pro_yearly" : "price_pro_monthly" // Você precisa fornecer estes IDs
       };
     case 'premium':
       return {
         name: "Plano Premium",
-        unitAmount: isYearly ? 15990 : 19990
+        priceId: isYearly ? "price_premium_yearly" : "price_premium_monthly" // Você precisa fornecer estes IDs
       };
     default:
       throw new Error(`Plano '${planId}' não é válido`);
@@ -125,17 +125,7 @@ const createCheckoutSession = async (
     payment_method_types: ["card"],
     line_items: [
       {
-        price_data: {
-          currency: "brl",
-          product_data: {
-            name: planConfig.name,
-            description: `${planConfig.name} - ${isYearly ? 'Anual' : 'Mensal'}`,
-          },
-          unit_amount: planConfig.unitAmount,
-          recurring: {
-            interval: isYearly ? "year" : "month",
-          },
-        },
+        price: planConfig.priceId,
         quantity: 1,
       },
     ],
