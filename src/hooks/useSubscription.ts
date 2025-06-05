@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -80,67 +81,81 @@ export const useSubscription = () => {
     }
   };
 
-  const subscribeToPlan = async (planId: string, isYearly: boolean) => {
+  const subscribeToPlan = async (planId: string, isYearly: boolean = false) => {
+    console.log('🎯 Iniciando subscribeToPlan:', { planId, isYearly, userEmail: user?.email });
+    
     if (!user || !session) {
+      console.error('❌ Usuário não autenticado');
       toast.error("Você precisa estar logado para assinar um plano");
+      return null;
+    }
+
+    if (!session.access_token) {
+      console.error('❌ Token de acesso não encontrado');
+      toast.error("Erro de autenticação. Faça login novamente.");
       return null;
     }
 
     try {
       setIsLoading(true);
-      console.log('💳 Criando sessão de checkout:', { 
+      console.log('💳 Enviando dados para create-checkout-session:', { 
         planId, 
-        isYearly, 
-        userEmail: user.email,
-        sessionToken: session.access_token ? 'Presente' : 'Ausente'
+        isYearly,
+        userEmail: user.email
       });
 
-      const requestBody = { 
+      const requestData = { 
         planId, 
         isYearly,
         userEmail: user.email 
       };
 
-      console.log('📤 Enviando dados:', JSON.stringify(requestBody));
+      console.log('📤 Dados preparados:', requestData);
 
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: JSON.stringify(requestBody),
+        body: requestData,
         headers: {
           Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
 
-      console.log('📦 Resposta completa da função:', { data, error });
+      console.log('📦 Resposta da edge function:', { data, error });
 
       if (error) {
-        console.error('❌ Erro na função create-checkout-session:', error);
+        console.error('❌ Erro retornado pela função:', error);
         
         if (error.message?.includes('STRIPE_SECRET_KEY')) {
-          toast.error("Sistema de pagamento não configurado. Entre em contato com o suporte.");
-        } else if (error.message?.includes('User not authenticated')) {
-          toast.error("Erro de autenticação. Faça login novamente.");
-        } else if (error.message?.includes('Dados da requisição inválidos')) {
-          toast.error("Erro nos dados enviados. Tente novamente.");
+          toast.error("Sistema de pagamento não configurado");
+        } else if (error.message?.includes('não autenticado')) {
+          toast.error("Erro de autenticação. Faça login novamente");
+        } else if (error.message?.includes('Formato de dados inválido')) {
+          toast.error("Erro nos dados do plano. Tente novamente");
         } else {
-          toast.error(`Erro no sistema de pagamento: ${error.message}`);
+          toast.error(`Erro: ${error.message}`);
         }
         return null;
       }
 
-      console.log('📦 Resposta da função create-checkout-session:', data);
-
-      if (data && data.url) {
-        console.log('🔗 URL de checkout recebida:', data.url);
-        return data.url;
-      } else {
-        console.error('❌ Resposta inválida da função:', data);
-        toast.error("Erro interno no sistema de pagamento.");
+      if (!data) {
+        console.error('❌ Resposta vazia da função');
+        toast.error("Erro interno. Tente novamente");
         return null;
       }
+
+      if (data.success && data.url) {
+        console.log('✅ URL de checkout recebida:', data.url);
+        toast.success("Redirecionando para pagamento...");
+        return data.url;
+      } else {
+        console.error('❌ Resposta inválida:', data);
+        toast.error(data.error || "Erro ao processar pagamento");
+        return null;
+      }
+
     } catch (error) {
-      console.error('💥 Erro crítico ao processar pagamento:', error);
-      toast.error("Erro interno do sistema. Entre em contato com o suporte.");
+      console.error('💥 Erro crítico:', error);
+      toast.error("Erro interno do sistema");
       return null;
     } finally {
       setIsLoading(false);
@@ -159,7 +174,6 @@ export const useSubscription = () => {
     return tierLevels[subscriptionInfo.tier] >= tierLevels[requiredTier];
   };
 
-  // Função para obter informações do plano atual
   const getCurrentPlanInfo = () => {
     const planNames = {
       free: 'Gratuito',
@@ -176,7 +190,6 @@ export const useSubscription = () => {
     };
   };
 
-  // Verificar assinatura quando o usuário faz login ou a sessão muda
   useEffect(() => {
     if (user && session) {
       fetchSubscription();

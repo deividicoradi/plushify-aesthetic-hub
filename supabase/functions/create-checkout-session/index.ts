@@ -53,33 +53,34 @@ serve(async (req) => {
 
     console.log("✅ Usuário autenticado:", user.email);
 
-    // Obter dados da requisição com validação melhorada
+    // Obter dados da requisição - simplificando o processo
     let requestBody;
     try {
       const bodyText = await req.text();
-      console.log("📋 Corpo da requisição (texto):", bodyText);
+      console.log("📋 Corpo da requisição recebido:", bodyText);
       
       if (!bodyText || bodyText.trim() === '') {
+        console.error("❌ Corpo da requisição está vazio");
         throw new Error("Corpo da requisição vazio");
       }
       
       requestBody = JSON.parse(bodyText);
-      console.log("📋 Dados da requisição parseados:", requestBody);
+      console.log("📋 JSON parseado com sucesso:", requestBody);
     } catch (parseError) {
-      console.error("❌ Erro ao fazer parse do JSON:", parseError);
-      throw new Error("Dados da requisição inválidos");
+      console.error("❌ Erro ao processar JSON:", parseError);
+      throw new Error("Formato de dados inválido");
     }
 
     const { planId, isYearly } = requestBody;
 
     if (!planId) {
-      console.error("❌ planId não fornecido");
-      throw new Error("planId é obrigatório");
+      console.error("❌ planId não fornecido no body:", requestBody);
+      throw new Error("Plano não especificado");
     }
 
-    console.log("📋 Dados da requisição:", { planId, isYearly, userEmail: user.email });
+    console.log("📋 Processando plano:", { planId, isYearly: isYearly || false, userEmail: user.email });
 
-    // Converter planId para preços com os IDs corretos da Stripe
+    // Configurar preços da Stripe
     let priceId;
     let planName;
     let planDescription;
@@ -101,11 +102,11 @@ serve(async (req) => {
         priceId = isYearly ? "price_1RNNzFRkF2Xmse9Mr6D34kM9" : "price_1RNNxgRkF2Xmse9MGKFxwHZc";
         break;
       default:
-        console.error("❌ Plano inválido:", planId);
-        throw new Error("Plano inválido");
+        console.error("❌ Plano inválido recebido:", planId);
+        throw new Error(`Plano '${planId}' não é válido`);
     }
 
-    console.log("💳 Configuração do plano:", { planName, priceId, isYearly });
+    console.log("💳 Configuração do plano:", { planName, priceId, isYearly: isYearly || false });
 
     // Inicializar Stripe
     const stripe = new Stripe(stripeSecretKey, {
@@ -125,7 +126,7 @@ serve(async (req) => {
 
     // Se não tiver, criar um
     if (!customerId) {
-      console.log("🆕 Criando novo cliente Stripe");
+      console.log("🆕 Criando novo cliente Stripe para:", user.email);
       const customer = await stripe.customers.create({
         email: user.email,
         metadata: {
@@ -147,9 +148,9 @@ serve(async (req) => {
     }
 
     // Criar sessão de checkout
-    console.log("🛒 Criando sessão de checkout");
+    console.log("🛒 Criando sessão de checkout Stripe");
     
-    const origin = new URL(req.url).origin;
+    const origin = req.headers.get("origin") || "http://localhost:3000";
     
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -177,11 +178,15 @@ serve(async (req) => {
       }
     });
 
-    console.log("✅ Sessão de checkout criada:", session.id);
-    console.log("🔗 URL do checkout:", session.url);
+    console.log("✅ Sessão criada com sucesso:", session.id);
+    console.log("🔗 URL de checkout:", session.url);
 
     return new Response(
-      JSON.stringify({ url: session.url }),
+      JSON.stringify({ 
+        success: true,
+        url: session.url,
+        sessionId: session.id 
+      }),
       { 
         status: 200, 
         headers: { 
@@ -193,8 +198,14 @@ serve(async (req) => {
 
   } catch (error) {
     console.error("💥 Erro na create-checkout-session:", error);
+    console.error("Stack trace:", error.stack);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: false,
+        error: error.message,
+        details: "Erro interno no processamento do pagamento" 
+      }),
       { 
         status: 400, 
         headers: { 
