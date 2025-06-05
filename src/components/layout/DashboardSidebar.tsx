@@ -124,9 +124,9 @@ export default function DashboardSidebar() {
 
   return (
     <div className="flex flex-col h-full bg-white border-r py-4">
-      <div className="px-6 pb-4 flex justify-center">
+      <div className="px-6 pb-6 flex justify-center">
         <NavLink to="/dashboard" className="flex items-center">
-          <img src="/logo.svg" alt="Plushify Logo" className="w-20 h-20" />
+          <img src="/logo.svg" alt="Plushify Logo" className="w-32 h-32" />
         </NavLink>
       </div>
 
