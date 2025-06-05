@@ -4,7 +4,7 @@ import { Users, UserPlus, Shield, Award, Calendar, TrendingUp } from 'lucide-rea
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarContent, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const TeamManagement = () => {
   const teamMembers = [
@@ -73,7 +73,6 @@ export const TeamManagement = () => {
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <Avatar>
-                        <AvatarContent>{member.avatar}</AvatarContent>
                         <AvatarFallback>{member.avatar}</AvatarFallback>
                       </Avatar>
                       <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${

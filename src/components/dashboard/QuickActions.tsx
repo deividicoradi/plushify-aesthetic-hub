@@ -7,11 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/useSubscription';
 
+interface QuickAction {
+  icon: React.ComponentType<any>;
+  label: string;
+  description: string;
+  onClick: () => void;
+  color: string;
+  isPremium?: boolean;
+}
+
 export const QuickActions = () => {
   const navigate = useNavigate();
   const { hasFeature } = useSubscription();
 
-  const basicActions = [
+  const basicActions: QuickAction[] = [
     {
       icon: Plus,
       label: 'Novo Agendamento',
@@ -42,7 +51,7 @@ export const QuickActions = () => {
     }
   ];
 
-  const premiumActions = [
+  const premiumActions: QuickAction[] = [
     {
       icon: Brain,
       label: 'IA Personalizada',
