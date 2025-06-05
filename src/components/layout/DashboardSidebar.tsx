@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useSubscription } from "@/hooks/useSubscription";
 
-export function DashboardSidebar() {
+export default function DashboardSidebar() {
   const { hasFeature } = useSubscription();
   const location = useLocation();
 
@@ -100,11 +100,11 @@ export function DashboardSidebar() {
     },
   ];
 
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       // Redirect to home page after logout
       window.location.href = "/";
     } catch (error) {

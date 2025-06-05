@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import DashboardSidebar from './layout/DashboardSidebar';
+import { DashboardSidebar } from './layout/DashboardSidebar';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from "@/components/ui/sonner";
 
@@ -21,10 +21,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <div className="flex h-screen bg-gray-50">
       {/* Desktop Sidebar */}
       <div className="hidden md:block">
-        <DashboardSidebar 
-          collapsed={sidebarCollapsed} 
-          setCollapsed={setSidebarCollapsed} 
-        />
+        <DashboardSidebar />
       </div>
 
       {/* Mobile Sidebar */}
@@ -35,7 +32,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             onClick={() => setMobileMenuOpen(false)}
           />
           <div className="fixed inset-y-0 left-0 w-64 bg-white">
-            <DashboardSidebar setCollapsed={() => setMobileMenuOpen(false)} />
+            <DashboardSidebar />
           </div>
         </div>
       )}

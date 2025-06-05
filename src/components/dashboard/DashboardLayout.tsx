@@ -7,23 +7,12 @@ import { DashboardContent } from '@/components/dashboard/DashboardContent';
 import { useSubscription } from '@/hooks/useSubscription';
 
 interface DashboardLayoutProps {
-  isLoading: boolean;
+  children: React.ReactNode;
 }
 
-export const DashboardLayout = ({ isLoading }: DashboardLayoutProps) => {
+export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { isSubscribed, getCurrentPlanInfo } = useSubscription();
   const currentPlan = getCurrentPlanInfo();
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <DashboardHeader />
-        <div className="text-center py-8">
-          <p>Carregando...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">
@@ -31,6 +20,7 @@ export const DashboardLayout = ({ isLoading }: DashboardLayoutProps) => {
       <PlanInfoBanner currentPlan={currentPlan} isSubscribed={isSubscribed} />
       <DashboardMetrics />
       <DashboardContent />
+      {children}
     </div>
   );
 };
