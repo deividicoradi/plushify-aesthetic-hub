@@ -68,12 +68,17 @@ export const createCheckoutSession = async (
 
   try {
     console.log('💳 Criando sessão de checkout...');
+    
+    // Preparar o payload de forma explícita
+    const payload = {
+      planId: planId,
+      isYearly: isYearly
+    };
+    
+    console.log('📋 Payload sendo enviado:', payload);
 
     const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-      body: { 
-        planId, 
-        isYearly 
-      },
+      body: JSON.stringify(payload),
       headers: {
         Authorization: `Bearer ${session.access_token}`,
         'Content-Type': 'application/json',
