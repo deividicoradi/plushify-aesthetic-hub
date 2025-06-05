@@ -23,6 +23,7 @@ const Dashboard = () => {
       description: "Últimos 30 dias",
       to: "/clientes",
       color: "from-[#9b87f5] to-[#7E69AB]",
+      clickable: true,
     },
     {
       title: "Agendamentos",
@@ -32,6 +33,7 @@ const Dashboard = () => {
       description: "Esta semana",
       to: "/agendamentos",
       color: "from-[#6E59A5] to-[#9b87f5]",
+      clickable: true,
     },
     {
       title: "Receita",
@@ -41,6 +43,7 @@ const Dashboard = () => {
       description: "Este mês",
       to: hasFeature('pro') ? "/financeiro" : "/planos",
       color: "from-[#8B5CF6] to-[#D6BCFA]",
+      clickable: true,
     },
     {
       title: "Taxa de Crescimento",
@@ -48,8 +51,9 @@ const Dashboard = () => {
       trend: "+4.3%",
       icon: TrendingUp,
       description: "Comparado ao mês anterior",
-      to: "/dashboard",
+      to: null, // Não navega para lugar nenhum - apenas informativo
       color: "from-[#33C3F0] to-[#9b87f5]",
+      clickable: false,
     },
   ];
 
@@ -114,11 +118,11 @@ const Dashboard = () => {
             trend={item.trend}
             icon={item.icon}
             description={item.description}
-            onClick={() => navigate(item.to)}
+            onClick={item.clickable && item.to ? () => navigate(item.to) : undefined}
             gradientClass={item.color}
-            tabIndex={0}
-            role="button"
-            aria-label={`Acessar ${item.title}`}
+            tabIndex={item.clickable ? 0 : -1}
+            role={item.clickable ? "button" : undefined}
+            aria-label={item.clickable ? `Acessar ${item.title}` : undefined}
           />
         ))}
       </div>
