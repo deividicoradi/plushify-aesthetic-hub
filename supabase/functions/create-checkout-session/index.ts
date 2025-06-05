@@ -23,7 +23,22 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     const { user, supabase } = await authenticateUser(authHeader);
 
-    const requestBody: CheckoutRequest = await req.json();
+    // Better error handling for JSON parsing
+    let requestBody: CheckoutRequest;
+    try {
+      const bodyText = await req.text();
+      console.log("📦 Request body text:", bodyText);
+      
+      if (!bodyText.trim()) {
+        throw new Error("Corpo da requisição vazio");
+      }
+      
+      requestBody = JSON.parse(bodyText);
+    } catch (jsonError) {
+      console.error("❌ Erro ao parsear JSON:", jsonError);
+      throw new Error("Formato de dados inválido na requisição");
+    }
+
     const { planId, isYearly } = requestBody;
 
     if (!planId) {
