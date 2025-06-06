@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowRight, Calendar, MessageSquare, Award, PenTool } from 'lucide-react';
+import { ArrowRight, Calendar, MessageSquare, Award, PenTool, Users, BarChart3, Box, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -62,25 +62,25 @@ const Hero = () => {
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                   <Calendar className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-sm text-muted-foreground">Agendamento Inteligente</span>
+                <span className="text-sm text-muted-foreground">Agenda Inteligente</span>
               </div>
               <div className="flex flex-col items-center lg:items-start">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  <MessageSquare className="w-5 h-5 text-primary" />
+                  <Users className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-sm text-muted-foreground">Comunicação com IA</span>
+                <span className="text-sm text-muted-foreground">Gestão de Clientes</span>
               </div>
               <div className="flex flex-col items-center lg:items-start">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  <Award className="w-5 h-5 text-primary" />
+                  <BarChart3 className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-sm text-muted-foreground">Cursos & Certificados</span>
+                <span className="text-sm text-muted-foreground">Relatórios</span>
               </div>
               <div className="flex flex-col items-center lg:items-start">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  <PenTool className="w-5 h-5 text-primary" />
+                  <Star className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-sm text-muted-foreground">Controle de Insumos</span>
+                <span className="text-sm text-muted-foreground">Programa Fidelidade</span>
               </div>
             </div>
           </div>
@@ -88,26 +88,26 @@ const Hero = () => {
           <div className="relative">
             <div className="bg-card rounded-xl p-8 border border-border shadow-lg">
               <div className="text-center">
-                <h3 className="text-2xl font-bold mb-4 font-serif text-foreground">Sistema Completo</h3>
+                <h3 className="text-2xl font-bold mb-4 font-serif text-foreground">Funcionalidades Principais</h3>
                 <p className="text-muted-foreground mb-6">
-                  Uma plataforma integrada para gerenciar todos os aspectos do seu negócio de estética
+                  Tudo que você precisa para gerenciar seu negócio de estética com eficiência
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <Calendar className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-foreground">Agenda Online</p>
+                    <p className="text-sm font-medium text-foreground">Agendamentos</p>
                   </div>
                   <div className="p-4 bg-muted/50 rounded-lg">
-                    <MessageSquare className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-foreground">IA Integrada</p>
+                    <Users className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-foreground">Clientes</p>
                   </div>
                   <div className="p-4 bg-muted/50 rounded-lg">
-                    <Award className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-foreground">Cursos Online</p>
+                    <Box className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-foreground">Estoque</p>
                   </div>
                   <div className="p-4 bg-muted/50 rounded-lg">
-                    <PenTool className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-foreground">Gestão Completa</p>
+                    <BarChart3 className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-foreground">Financeiro</p>
                   </div>
                 </div>
               </div>
