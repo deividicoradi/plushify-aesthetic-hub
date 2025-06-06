@@ -34,10 +34,9 @@ export const ComparisonTable = () => {
               { name: 'Notas e Observações', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
               
               // Relatórios e Análises
-              { category: 'RELATÓRIOS E ANÁLISES', free: '', starter: '', pro: '', premium: '', isHeader: true },
+              { category: 'RELATÓRIOS', free: '', starter: '', pro: '', premium: '', isHeader: true },
               { name: 'Relatórios Básicos', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
               { name: 'Análises Avançadas', free: '❌', starter: '❌', pro: '✓', premium: '✓' },
-              { name: 'Análises com IA', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
               { name: 'Exportação de Dados', free: '❌', starter: 'Básica', pro: 'Completa', premium: 'Personalizada' },
               
               // Comunicação
@@ -46,20 +45,16 @@ export const ComparisonTable = () => {
               { name: 'Templates de Mensagens', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
               { name: 'Integração WhatsApp', free: '❌', starter: '❌', pro: '✓', premium: '✓' },
               
-              // Recursos Premium
-              { category: 'RECURSOS PREMIUM', free: '', starter: '', pro: '', premium: '', isHeader: true },
+              // Sistema de Fidelidade
+              { category: 'FIDELIDADE', free: '', starter: '', pro: '', premium: '', isHeader: true },
               { name: 'Sistema de Fidelidade', free: '❌', starter: '❌', pro: '✓', premium: '✓' },
-              { name: 'Gestão de Equipe', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
-              { name: 'IA Personalizada', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
-              { name: 'CRM Avançado', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
-              { name: 'Automação Avançada', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
+              { name: 'Automação de Pontos', free: '❌', starter: '❌', pro: '✓', premium: '✓' },
               
               // Suporte
               { category: 'SUPORTE', free: '', starter: '', pro: '', premium: '', isHeader: true },
               { name: 'Documentação', free: '✓', starter: '✓', pro: '✓', premium: '✓' },
               { name: 'Suporte por Email', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
               { name: 'Suporte Prioritário', free: '❌', starter: '❌', pro: '✓', premium: '✓' },
-              { name: 'Suporte 24/7', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
               
               // Facilidades de Pagamento
               { category: 'FACILIDADES DE PAGAMENTO', free: '', starter: '', pro: '', premium: '', isHeader: true },
@@ -84,8 +79,8 @@ export const ComparisonTable = () => {
       <div className="mt-8 p-6 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
         <h4 className="text-lg font-bold text-primary mb-2">🚀 Por que escolher o Premium?</h4>
         <p className="text-card-foreground text-sm leading-relaxed">
-          O plano Premium oferece todas as funcionalidades desenvolvidas, incluindo análises avançadas com IA, 
-          gestão de equipe completa, CRM integrado e automação personalizada para seu negócio.
+          O plano Premium oferece todas as funcionalidades desenvolvidas, incluindo análises avançadas, 
+          sistema de fidelidade completo, integração WhatsApp e automação personalizada para seu negócio.
         </p>
       </div>
     </div>
