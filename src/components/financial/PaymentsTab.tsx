@@ -24,12 +24,40 @@ const PaymentsTab = () => {
         .from('payments')
         .select(`
           *,
-          payment_methods (name, type),
-          clients (name),
-          appointments (title)
+          payment_methods (name, type)
         `)
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Buscar nomes de clientes separadamente se client_id estiver presente
+  const { data: clients } = useQuery({
+    queryKey: ['clients', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name')
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Buscar agendamentos separadamente se appointment_id estiver presente
+  const { data: appointments } = useQuery({
+    queryKey: ['appointments', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('id, title')
+        .eq('user_id', user?.id);
 
       if (error) throw error;
       return data;
@@ -56,9 +84,21 @@ const PaymentsTab = () => {
     }).format(value);
   };
 
+  const getClientName = (clientId: string | null) => {
+    if (!clientId || !clients) return null;
+    const client = clients.find(c => c.id === clientId);
+    return client?.name;
+  };
+
+  const getAppointmentTitle = (appointmentId: string | null) => {
+    if (!appointmentId || !appointments) return null;
+    const appointment = appointments.find(a => a.id === appointmentId);
+    return appointment?.title;
+  };
+
   const filteredPayments = payments?.filter(payment =>
     payment.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.clients?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    getClientName(payment.client_id)?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -94,47 +134,52 @@ const PaymentsTab = () => {
             </CardContent>
           </Card>
         ) : (
-          filteredPayments?.map((payment) => (
-            <Card key={payment.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">
-                        {payment.description || 'Pagamento sem descrição'}
-                      </h3>
-                      {getStatusBadge(payment.status)}
+          filteredPayments?.map((payment) => {
+            const clientName = getClientName(payment.client_id);
+            const appointmentTitle = getAppointmentTitle(payment.appointment_id);
+            
+            return (
+              <Card key={payment.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">
+                          {payment.description || 'Pagamento sem descrição'}
+                        </h3>
+                        {getStatusBadge(payment.status)}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                        {clientName && (
+                          <p>Cliente: {clientName}</p>
+                        )}
+                        {appointmentTitle && (
+                          <p>Serviço: {appointmentTitle}</p>
+                        )}
+                        <p>Método: {payment.payment_methods?.name}</p>
+                        <p>Criado em: {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                      {payment.clients && (
-                        <p>Cliente: {payment.clients.name}</p>
+                    <div className="text-right space-y-1">
+                      <p className="text-lg font-bold">
+                        {formatCurrency(Number(payment.amount))}
+                      </p>
+                      {Number(payment.paid_amount) > 0 && (
+                        <p className="text-sm text-green-600">
+                          Pago: {formatCurrency(Number(payment.paid_amount))}
+                        </p>
                       )}
-                      {payment.appointments && (
-                        <p>Serviço: {payment.appointments.title}</p>
+                      {Number(payment.discount) > 0 && (
+                        <p className="text-sm text-orange-600">
+                          Desconto: {formatCurrency(Number(payment.discount))}
+                        </p>
                       )}
-                      <p>Método: {payment.payment_methods?.name}</p>
-                      <p>Criado em: {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
                     </div>
                   </div>
-                  <div className="text-right space-y-1">
-                    <p className="text-lg font-bold">
-                      {formatCurrency(Number(payment.amount))}
-                    </p>
-                    {Number(payment.paid_amount) > 0 && (
-                      <p className="text-sm text-green-600">
-                        Pago: {formatCurrency(Number(payment.paid_amount))}
-                      </p>
-                    )}
-                    {Number(payment.discount) > 0 && (
-                      <p className="text-sm text-orange-600">
-                        Desconto: {formatCurrency(Number(payment.discount))}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </div>
 

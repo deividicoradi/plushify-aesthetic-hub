@@ -19,16 +19,45 @@ const InstallmentsTab = () => {
       const { data, error } = await supabase
         .from('installments')
         .select(`
-          *,
-          payments!inner (
-            description,
-            amount as total_amount,
-            clients (name),
-            payment_methods (name)
-          )
+          *
         `)
         .eq('user_id', user?.id)
         .order('due_date', { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Buscar dados dos pagamentos separadamente
+  const { data: payments } = useQuery({
+    queryKey: ['payments-for-installments', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('payments')
+        .select(`
+          id,
+          description,
+          amount,
+          payment_methods (name)
+        `)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Buscar clientes separadamente
+  const { data: clients } = useQuery({
+    queryKey: ['clients-for-installments', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name')
+        .eq('user_id', user?.id);
 
       if (error) throw error;
       return data;
@@ -60,11 +89,22 @@ const InstallmentsTab = () => {
     }).format(value);
   };
 
+  const getPaymentData = (paymentId: string) => {
+    return payments?.find(p => p.id === paymentId);
+  };
+
+  const getClientName = (paymentId: string) => {
+    const payment = payments?.find(p => p.id === paymentId);
+    // Como não temos relação direta, retornamos null por enquanto
+    return null;
+  };
+
   const groupedInstallments = installments?.reduce((acc, installment) => {
     const paymentId = installment.payment_id;
     if (!acc[paymentId]) {
+      const paymentData = getPaymentData(paymentId);
       acc[paymentId] = {
-        payment: installment.payments,
+        payment: paymentData,
         installments: []
       };
     }
@@ -94,24 +134,21 @@ const InstallmentsTab = () => {
           </Card>
         ) : (
           Object.values(groupedInstallments).map((group: any) => (
-            <Card key={group.payment.id} className="overflow-hidden">
+            <Card key={group.payment?.id || 'unknown'} className="overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">
-                      {group.payment.description}
+                      {group.payment?.description || 'Pagamento sem descrição'}
                     </CardTitle>
                     <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {group.payment.clients && (
-                        <p>Cliente: {group.payment.clients.name}</p>
-                      )}
-                      <p>Total: {formatCurrency(Number(group.payment.total_amount))}</p>
+                      <p>Total: {group.payment ? formatCurrency(Number(group.payment.amount)) : 'N/A'}</p>
                       <p>Parcelas: {group.installments.length}x</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-gray-500">
-                      Método: {group.payment.payment_methods?.name}
+                      Método: {group.payment?.payment_methods?.name || 'N/A'}
                     </div>
                   </div>
                 </div>
