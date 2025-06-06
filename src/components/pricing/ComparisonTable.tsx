@@ -3,10 +3,10 @@ import React from 'react';
 
 export const ComparisonTable = () => {
   return (
-    <div className="mt-16 bg-white rounded-xl border border-plush-100 p-8 shadow-sm">
+    <div className="mt-16 bg-card rounded-xl border border-border p-8 shadow-sm">
       <div className="text-center mb-8">
-        <h3 className="text-2xl font-bold mb-2 font-serif">Comparação Detalhada de Recursos</h3>
-        <p className="text-foreground/70">
+        <h3 className="text-2xl font-bold mb-2 font-serif text-card-foreground">Comparação Detalhada de Recursos</h3>
+        <p className="text-muted-foreground">
           Veja em detalhes todas as funcionalidades incluídas em cada plano
         </p>
       </div>
@@ -14,12 +14,12 @@ export const ComparisonTable = () => {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1000px]">
           <thead>
-            <tr className="border-b border-plush-100">
-              <th className="text-left pb-4 pl-4 font-semibold">Recursos</th>
-              <th className="text-center pb-4 font-semibold">Free</th>
-              <th className="text-center pb-4 font-semibold">Starter<br/><span className="text-xs font-normal text-gray-600">R$69,90/mês</span></th>
-              <th className="text-center pb-4 font-semibold text-plush-600">Pro<br/><span className="text-xs font-normal text-gray-600">R$119,90/mês</span></th>
-              <th className="text-center pb-4 font-semibold">Premium<br/><span className="text-xs font-normal text-gray-600">R$199,90/mês</span></th>
+            <tr className="border-b border-border">
+              <th className="text-left pb-4 pl-4 font-semibold text-card-foreground">Recursos</th>
+              <th className="text-center pb-4 font-semibold text-card-foreground">Free</th>
+              <th className="text-center pb-4 font-semibold text-card-foreground">Starter<br/><span className="text-xs font-normal text-muted-foreground">R$69,90/mês</span></th>
+              <th className="text-center pb-4 font-semibold text-primary">Pro<br/><span className="text-xs font-normal text-muted-foreground">R$119,90/mês</span></th>
+              <th className="text-center pb-4 font-semibold text-card-foreground">Premium<br/><span className="text-xs font-normal text-muted-foreground">R$199,90/mês</span></th>
             </tr>
           </thead>
           <tbody>
@@ -77,23 +77,23 @@ export const ComparisonTable = () => {
               { name: 'Desconto Anual', free: '❌', starter: '20%', pro: '20%', premium: '20%' },
               { name: 'Período de Teste', free: '❌', starter: '7 dias', pro: '14 dias', premium: '30 dias' },
             ].map((feature, index) => (
-              <tr key={index} className={`border-b border-plush-50 ${feature.isHeader ? 'bg-gray-50' : ''}`}>
-                <td className={`py-4 pl-4 ${feature.isHeader ? 'font-bold text-gray-800 text-sm uppercase tracking-wide' : 'font-medium'}`}>
+              <tr key={index} className={`border-b border-border ${feature.isHeader ? 'bg-muted' : ''}`}>
+                <td className={`py-4 pl-4 ${feature.isHeader ? 'font-bold text-card-foreground text-sm uppercase tracking-wide' : 'font-medium text-card-foreground'}`}>
                   {feature.name || feature.category}
                 </td>
-                <td className={`py-4 text-center text-sm ${feature.isHeader ? '' : ''}`}>{feature.free}</td>
-                <td className={`py-4 text-center text-sm ${feature.isHeader ? '' : ''}`}>{feature.starter}</td>
-                <td className={`py-4 text-center text-sm ${feature.isHeader ? '' : 'font-medium text-plush-600'}`}>{feature.pro}</td>
-                <td className={`py-4 text-center text-sm ${feature.isHeader ? '' : 'font-medium text-purple-600'}`}>{feature.premium}</td>
+                <td className={`py-4 text-center text-sm text-card-foreground ${feature.isHeader ? '' : ''}`}>{feature.free}</td>
+                <td className={`py-4 text-center text-sm text-card-foreground ${feature.isHeader ? '' : ''}`}>{feature.starter}</td>
+                <td className={`py-4 text-center text-sm ${feature.isHeader ? 'text-card-foreground' : 'font-medium text-primary'}`}>{feature.pro}</td>
+                <td className={`py-4 text-center text-sm ${feature.isHeader ? 'text-card-foreground' : 'font-medium text-purple-600 dark:text-purple-400'}`}>{feature.premium}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       
-      <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-plush-50 rounded-lg border border-purple-200">
-        <h4 className="text-lg font-bold text-purple-800 mb-2">🚀 Por que escolher o Premium?</h4>
-        <p className="text-purple-700 text-sm leading-relaxed">
+      <div className="mt-8 p-6 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
+        <h4 className="text-lg font-bold text-primary mb-2">🚀 Por que escolher o Premium?</h4>
+        <p className="text-card-foreground text-sm leading-relaxed">
           O plano Premium foi desenvolvido para empresas que querem uma solução completa e personalizada. 
           Com IA exclusiva para seu negócio, gestão de equipe completa, integrações avançadas e consultoria estratégica, 
           você terá tudo que precisa para escalar seu negócio de forma inteligente e automatizada.

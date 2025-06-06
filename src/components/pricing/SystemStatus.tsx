@@ -11,9 +11,9 @@ export const SystemStatus = ({ isYearly, processingPlan }: SystemStatusProps) =>
   const { user } = useAuth();
 
   return (
-    <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-      <h4 className="font-semibold text-blue-800 mb-2">Status do Sistema</h4>
-      <div className="text-sm text-blue-700 space-y-1">
+    <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+      <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Status do Sistema</h4>
+      <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
         <p>✅ Sistema de pagamento Stripe configurado</p>
         <p>✅ Edge functions criadas e funcionais</p>
         <p>✅ Sistema de checkout pronto</p>

@@ -26,16 +26,18 @@ export const PricingTabs = ({
 }: PricingTabsProps) => {
   return (
     <Tabs defaultValue="mensal" className="w-full mt-8">
-      <TabsList className="mx-auto mb-4 border border-plush-200 bg-white">
+      <TabsList className="mx-auto mb-4 border border-border bg-card">
         <TabsTrigger 
           value="mensal" 
           onClick={() => setIsYearly(false)}
+          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
         >
           Mensal
         </TabsTrigger>
         <TabsTrigger 
           value="anual" 
           onClick={() => setIsYearly(true)}
+          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
         >
           Anual <span className="text-xs font-medium ml-1">(-20%)</span>
         </TabsTrigger>
