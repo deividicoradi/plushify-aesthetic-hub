@@ -213,8 +213,8 @@ export default function Loyalty() {
                         </TableCell>
                         <TableCell>{client.appointmentsCount}</TableCell>
                         <TableCell>
-                          {client.lastVisita 
-                            ? new Date(client.lastVisita).toLocaleDateString('pt-BR')
+                          {client.lastVisit 
+                            ? new Date(client.lastVisit).toLocaleDateString('pt-BR')
                             : 'Nunca'
                           }
                         </TableCell>
