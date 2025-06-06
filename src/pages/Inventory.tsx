@@ -1,109 +1,80 @@
 
-import React from "react";
-import { useInventory } from "@/hooks/useInventory";
-import { InventoryHeader } from "@/components/inventory/InventoryHeader";
-import { InventoryContainer } from "@/components/inventory/InventoryContainer";
-import { InventoryDialogs } from "@/components/inventory/InventoryDialogs";
-import { BarcodeScanner } from "@/components/inventory/BarcodeScanner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import React, { useState, useEffect } from 'react';
+import { Package, Plus } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { InventoryContainer } from '@/components/inventory/InventoryContainer';
+import { InventoryDialogs } from '@/components/inventory/InventoryDialogs';
+import { InventoryHeader } from '@/components/inventory/InventoryHeader';
+import { useInventoryDialogs } from '@/hooks/inventory/useInventoryDialogs';
+import { useProductsData } from '@/hooks/inventory/useProductsData';
+import { useProductActions } from '@/hooks/inventory/useProductActions';
+import { useProductSelection } from '@/hooks/inventory/useProductSelection';
 
 const Inventory = () => {
-  const {
-    products,
-    stats,
-    selectedProduct,
-    selectedProducts,
-    isNewProductOpen,
-    isEditProductOpen,
-    isTransactionOpen,
-    isHistoryOpen,
-    isCategoriesOpen,
-    isReportsOpen,
-    isBarcodeScannerOpen,
-    transactionType,
-    searchTerm,
-    setIsNewProductOpen,
-    setIsEditProductOpen,
-    setIsTransactionOpen,
-    setIsHistoryOpen,
-    setIsCategoriesOpen,
-    setIsReportsOpen,
-    setIsBarcodeScannerOpen,
-    setSearchTerm,
-    setSelectedProducts,
-    fetchProducts,
-    handleTransaction,
-    handleEditProduct,
-    toggleProductSelection,
-    selectAllProducts,
-  } = useInventory();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isReportsOpen, setIsReportsOpen] = useState(false);
+
+  const { products, stats, refetch } = useProductsData();
+  const { dialogs, openDialog, closeDialog } = useInventoryDialogs();
+  const { handleStockTransaction, handleEditProduct } = useProductActions(refetch);
+  const { selectedProducts, toggleSelect, selectAll, clearSelection } = useProductSelection(products);
+
+  const handleViewChange = (view: string) => {
+    setIsHistoryOpen(view === 'history');
+    setIsCategoriesOpen(view === 'categories');
+    setIsReportsOpen(view === 'reports');
+  };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 sm:px-8 animate-fade-in">
-      <InventoryHeader 
-        onAddProduct={() => setIsNewProductOpen(true)} 
-        onShowTransactionHistory={() => setIsHistoryOpen(true)}
-        onManageCategories={() => setIsCategoriesOpen(true)}
-        onShowReports={() => setIsReportsOpen(true)}
-        onScanBarcode={() => setIsBarcodeScannerOpen(true)}
-        selectedProducts={selectedProducts}
-        setSelectedProducts={setSelectedProducts}
-        allProducts={products}
-        fetchProducts={fetchProducts}
-      />
-      
-      <InventoryContainer
-        products={products}
-        stats={stats}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        onTransaction={handleTransaction}
-        onEditProduct={handleEditProduct}
-        isHistoryOpen={isHistoryOpen}
-        isCategoriesOpen={isCategoriesOpen}
-        isReportsOpen={isReportsOpen}
-        selectedProducts={selectedProducts}
-        onToggleSelect={toggleProductSelection}
-        onSelectAll={selectAllProducts}
-      />
-      
-      <InventoryDialogs
-        isNewProductOpen={isNewProductOpen}
-        setIsNewProductOpen={setIsNewProductOpen}
-        isEditProductOpen={isEditProductOpen}
-        setIsEditProductOpen={setIsEditProductOpen}
-        isTransactionOpen={isTransactionOpen}
-        setIsTransactionOpen={setIsTransactionOpen}
-        isHistoryOpen={isHistoryOpen}
-        setIsHistoryOpen={setIsHistoryOpen}
-        isCategoriesOpen={isCategoriesOpen}
-        setIsCategoriesOpen={setIsCategoriesOpen}
-        isReportsOpen={isReportsOpen}
-        setIsReportsOpen={setIsReportsOpen}
-        selectedProduct={selectedProduct}
-        transactionType={transactionType}
-        onSuccess={fetchProducts}
-      />
+    <div className="min-h-screen bg-background dark:bg-background p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Package className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">Estoque</h1>
+          </div>
+          <Button
+            className="bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
+            onClick={() => openDialog('productForm')}
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Novo Produto
+          </Button>
+        </div>
 
-      <Dialog open={isBarcodeScannerOpen} onOpenChange={setIsBarcodeScannerOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Escanear Código de Barras</DialogTitle>
-          </DialogHeader>
-          <BarcodeScanner 
-            onClose={() => setIsBarcodeScannerOpen(false)} 
-            onSuccess={() => {
-              setIsBarcodeScannerOpen(false);
-              setIsNewProductOpen(true);
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+        <p className="text-muted-foreground">
+          Gerencie seu inventário, adicione novos produtos, atualize o estoque e edite detalhes dos produtos existentes.
+        </p>
+
+        <InventoryHeader 
+          onViewChange={handleViewChange}
+          selectedProductsCount={selectedProducts.length}
+          onClearSelection={clearSelection}
+        />
+
+        <InventoryContainer
+          products={products}
+          stats={stats}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onTransaction={handleStockTransaction}
+          onEditProduct={handleEditProduct}
+          isHistoryOpen={isHistoryOpen}
+          isCategoriesOpen={isCategoriesOpen}
+          isReportsOpen={isReportsOpen}
+          selectedProducts={selectedProducts}
+          onToggleSelect={toggleSelect}
+          onSelectAll={selectAll}
+        />
+
+        <InventoryDialogs
+          dialogs={dialogs}
+          onClose={closeDialog}
+          onSuccess={refetch}
+        />
+      </div>
     </div>
   );
 };
