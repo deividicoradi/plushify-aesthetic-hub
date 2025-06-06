@@ -17,8 +17,26 @@ const Inventory = () => {
   const [isReportsOpen, setIsReportsOpen] = useState(false);
 
   const { products, stats, refetch } = useProductsData();
-  const { dialogs, openDialog, closeDialog } = useInventoryDialogs();
-  const { handleStockTransaction, handleEditProduct } = useProductActions(refetch);
+  const { 
+    dialogs, 
+    openDialog, 
+    closeDialog,
+    isNewProductOpen,
+    setIsNewProductOpen,
+    isEditProductOpen,
+    setIsEditProductOpen,
+    isTransactionOpen,
+    setIsTransactionOpen,
+    isHistoryOpen: dialogHistoryOpen,
+    setIsHistoryOpen: setDialogHistoryOpen,
+    isCategoriesOpen: dialogCategoriesOpen,
+    setIsCategoriesOpen: setDialogCategoriesOpen,
+    isReportsOpen: dialogReportsOpen,
+    setIsReportsOpen: setDialogReportsOpen,
+    transactionType
+  } = useInventoryDialogs();
+  
+  const { selectedProduct, handleStockTransaction, handleEditProduct } = useProductActions(refetch);
   const { selectedProducts, toggleSelect, selectAll, clearSelection } = useProductSelection(products);
 
   const handleViewChange = (view: string) => {
@@ -28,7 +46,7 @@ const Inventory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background dark:bg-background p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -49,9 +67,15 @@ const Inventory = () => {
         </p>
 
         <InventoryHeader 
-          onViewChange={handleViewChange}
-          selectedProductsCount={selectedProducts.length}
-          onClearSelection={clearSelection}
+          onAddProduct={() => openDialog('productForm')}
+          onShowTransactionHistory={() => handleViewChange('history')}
+          onManageCategories={() => handleViewChange('categories')}
+          onShowReports={() => handleViewChange('reports')}
+          onScanBarcode={() => openDialog('barcodeScanner')}
+          selectedProducts={selectedProducts}
+          setSelectedProducts={() => {}}
+          allProducts={products}
+          fetchProducts={refetch}
         />
 
         <InventoryContainer
@@ -70,8 +94,20 @@ const Inventory = () => {
         />
 
         <InventoryDialogs
-          dialogs={dialogs}
-          onClose={closeDialog}
+          isNewProductOpen={isNewProductOpen}
+          setIsNewProductOpen={setIsNewProductOpen}
+          isEditProductOpen={isEditProductOpen}
+          setIsEditProductOpen={setIsEditProductOpen}
+          isTransactionOpen={isTransactionOpen}
+          setIsTransactionOpen={setIsTransactionOpen}
+          isHistoryOpen={dialogHistoryOpen}
+          setIsHistoryOpen={setDialogHistoryOpen}
+          isCategoriesOpen={dialogCategoriesOpen}
+          setIsCategoriesOpen={setDialogCategoriesOpen}
+          isReportsOpen={dialogReportsOpen}
+          setIsReportsOpen={setDialogReportsOpen}
+          selectedProduct={selectedProduct}
+          transactionType={transactionType}
           onSuccess={refetch}
         />
       </div>

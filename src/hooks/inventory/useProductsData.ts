@@ -28,7 +28,7 @@ export const useProductsData = () => {
   });
   const { user } = useAuth();
 
-  const fetchProducts = async () => {
+  const refetch = async () => {
     try {
       const { data, error } = await supabase
         .from('products')
@@ -52,13 +52,13 @@ export const useProductsData = () => {
 
   useEffect(() => {
     if (user) {
-      fetchProducts();
+      refetch();
     }
   }, [user]);
 
   return {
     products,
     stats,
-    fetchProducts,
+    refetch,
   };
 };

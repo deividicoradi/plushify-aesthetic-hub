@@ -1,28 +1,16 @@
-
 import { useState, useCallback } from "react";
 import { Product } from "./useProductsData";
 import { toast } from "@/components/ui/sonner";
 
 export const useProductSelection = (products: Product[]) => {
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Validation helper to check if a product is valid
   const isValidProduct = useCallback((product: Product): boolean => {
     return !!product && typeof product === 'object' && 'id' in product && !!product.id;
   }, []);
 
-  // Set selected product with validation
-  const safeSetSelectedProduct = useCallback((product: Product | null) => {
-    if (product !== null && !isValidProduct(product)) {
-      console.error("Attempted to select an invalid product:", product);
-      toast.error("Erro ao selecionar produto");
-      return;
-    }
-    setSelectedProduct(product);
-  }, [isValidProduct]);
-
-  const toggleProductSelection = useCallback((product: Product) => {
+  const toggleSelect = useCallback((product: Product) => {
     if (!isValidProduct(product)) {
       console.error("Attempted to toggle selection of an invalid product:", product);
       toast.error("Erro ao selecionar produto");
@@ -39,7 +27,7 @@ export const useProductSelection = (products: Product[]) => {
     });
   }, [isValidProduct]);
 
-  const selectAllProducts = useCallback(() => {
+  const selectAll = useCallback(() => {
     if (selectedProducts.length === products.length) {
       // Se todos estão selecionados, deseleciona todos
       setSelectedProducts([]);
@@ -54,12 +42,18 @@ export const useProductSelection = (products: Product[]) => {
     }
   }, [selectedProducts.length, products, isValidProduct]);
 
+  const clearSelection = useCallback(() => {
+    setSelectedProducts([]);
+  }, []);
+
   return {
-    selectedProduct,
     selectedProducts,
-    setSelectedProduct: safeSetSelectedProduct,
+    toggleSelect,
+    selectAll,
+    clearSelection,
+    // Keep backward compatibility
+    toggleProductSelection: toggleSelect,
+    selectAllProducts: selectAll,
     setSelectedProducts,
-    toggleProductSelection,
-    selectAllProducts,
   };
 };
