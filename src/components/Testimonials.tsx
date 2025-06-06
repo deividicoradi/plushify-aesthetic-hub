@@ -16,25 +16,25 @@ const Testimonial = ({
   callout?: string;
 }) => {
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-plush-100 flex flex-col h-full card-hover">
+    <div className="bg-card rounded-xl p-6 shadow-sm border border-border flex flex-col h-full card-hover">
       <div className="flex space-x-1 mb-4">
         {Array.from({ length: 5 }).map((_, index) => (
           <Star 
             key={index} 
-            className={`w-4 h-4 ${index < stars ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'}`} 
+            className={`w-4 h-4 ${index < stars ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/30'}`} 
           />
         ))}
       </div>
       
       {callout && (
-        <div className="text-plush-600 font-medium text-lg mb-3 font-serif">"{callout}"</div>
+        <div className="text-primary font-medium text-lg mb-3 font-serif">"{callout}"</div>
       )}
       
-      <p className="text-foreground/80 text-sm flex-grow italic">"{quote}"</p>
+      <p className="text-muted-foreground text-sm flex-grow italic">"{quote}"</p>
       
-      <div className="mt-4 pt-4 border-t border-plush-50">
-        <p className="font-medium">{author}</p>
-        <p className="text-foreground/60 text-sm">{role}</p>
+      <div className="mt-4 pt-4 border-t border-border">
+        <p className="font-medium text-foreground">{author}</p>
+        <p className="text-muted-foreground text-sm">{role}</p>
       </div>
     </div>
   );
@@ -84,13 +84,13 @@ const Testimonials = () => {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-b from-white to-secondary/30" id="testimonials">
+    <section className="py-20 bg-gradient-to-b from-background to-muted/30" id="testimonials">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif text-foreground">
             Histórias de <span className="gradient-text">Sucesso</span>
           </h2>
-          <p className="text-lg text-foreground/70">
+          <p className="text-lg text-muted-foreground">
             Veja como o Plushify está transformando a realidade de profissionais 
             de estética em todo o Brasil.
           </p>
@@ -110,8 +110,8 @@ const Testimonials = () => {
         </div>
         
         <div className="mt-16 text-center">
-          <div className="inline-block rounded-full bg-plush-50 border border-plush-100 px-8 py-3">
-            <p className="text-plush-700 font-medium">
+          <div className="inline-block rounded-full bg-primary/10 border border-primary/20 px-8 py-3">
+            <p className="text-primary font-medium">
               +1.200 profissionais já utilizam o Plushify para gerenciar seus negócios
             </p>
           </div>
