@@ -63,33 +63,38 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Plushify custom colors
+				// Plushify custom colors - simplified and more consistent
 				plush: {
-					50: '#fcf4f9',
-					100: '#f9e8f3',
-					200: '#f5d5e8',
-					300: '#edb5d4',
-					400: '#e289b9',
-					500: '#d65e9a',
-					600: '#c53d7c',
-					700: '#ab2d65',
-					800: '#8e2754',
-					900: '#762347',
-					950: '#460f27',
+					50: '#fef7f0',
+					100: '#fdeee0',
+					200: '#fad5b8',
+					300: '#f7b87f',
+					400: '#f39144',
+					500: '#f17316',
+					600: '#e25a0c',
+					700: '#bb450c',
+					800: '#953811',
+					900: '#793011',
+					950: '#411706',
 				},
+				// Accent colors that work well with plush
 				accent2: {
-					50: '#f0f8ff',
-					100: '#e0f0fe',
-					200: '#b9e1fe',
-					300: '#7ccbfd',
-					400: '#36b0fa',
-					500: '#0c96eb',
-					600: '#0177c9',
-					700: '#0260a3',
-					800: '#065186',
-					900: '#0a446e',
-					950: '#062a49',
+					50: '#f0f9ff',
+					100: '#e0f2fe',
+					200: '#bae6fd',
+					300: '#7dd3fc',
+					400: '#38bdf8',
+					500: '#0ea5e9',
+					600: '#0284c7',
+					700: '#0369a1',
+					800: '#075985',
+					900: '#0c4a6e',
+					950: '#082f49',
 				},
+				// Theme-aware colors
+				'soft-purple': 'hsl(var(--soft-purple))',
+				'soft-gray': 'hsl(var(--soft-gray))',
+				'gold': 'hsl(var(--gold))',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -113,6 +118,16 @@ export default {
 						height: '0'
 					}
 				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
 				'float': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-10px)' },
@@ -125,6 +140,7 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
 				'float': 'float 6s ease-in-out infinite',
 				'pulse-soft': 'pulse-soft 3s ease-in-out infinite',
 			},

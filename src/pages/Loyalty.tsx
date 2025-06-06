@@ -12,10 +12,10 @@ import { useLoyalty, LoyaltyClient } from "@/hooks/useLoyalty";
 
 const getTierColor = (tier: string) => {
   switch (tier) {
-    case 'Diamante': return 'bg-gradient-to-r from-blue-400 to-blue-600 text-white';
-    case 'Ouro': return 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-gray-800';
-    case 'Prata': return 'bg-gradient-to-r from-gray-300 to-gray-500 text-gray-800';
-    default: return 'bg-gradient-to-r from-orange-400 to-orange-600 text-white';
+    case 'Diamante': return 'bg-gradient-to-r from-blue-400 to-blue-600 text-white dark:from-blue-500 dark:to-blue-700';
+    case 'Ouro': return 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-gray-800 dark:from-yellow-300 dark:to-yellow-500';
+    case 'Prata': return 'bg-gradient-to-r from-gray-300 to-gray-500 text-gray-800 dark:from-gray-400 dark:to-gray-600';
+    default: return 'bg-gradient-to-r from-orange-400 to-orange-600 text-white dark:from-orange-500 dark:to-orange-700';
   }
 };
 
@@ -37,22 +37,22 @@ export default function Loyalty() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-soft-purple/40 to-soft-gray/80 dark:from-plush-800 dark:to-zinc-950 py-12 px-3 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-plush-600"></div>
+      <div className="min-h-screen bg-gradient-soft py-12 px-3 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
       </div>
     );
   }
 
   const topClients = clients.slice(0, 5);
-  const cardGlass = "backdrop-blur-lg bg-white/40 dark:bg-card/50 border-0 shadow-xl";
+  const cardGlass = "backdrop-blur-lg bg-card/95 border border-border shadow-xl";
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gradient-to-br from-soft-purple/40 to-soft-gray/80 dark:from-plush-800 dark:to-zinc-950 py-12 px-3 animate-fade-in">
+      <div className="min-h-screen bg-gradient-soft py-12 px-3 animate-fade-in">
         <div className="max-w-7xl mx-auto flex flex-col gap-8">
           {/* Header */}
           <div className="flex items-center gap-3 mb-3 animate-fade-in">
-            <Award className="w-9 h-9 text-plush-600 animate-float" />
+            <Award className="w-9 h-9 text-primary animate-float" />
             <h1 className="text-3xl md:text-4xl font-extrabold font-serif gradient-text tracking-tight">Programa de Fidelidade</h1>
           </div>
 
@@ -111,7 +111,7 @@ export default function Loyalty() {
           {/* Top Clients Ranking */}
           <Card className={cardGlass}>
             <CardHeader>
-              <CardTitle className="text-lg font-serif text-plush-700 flex items-center gap-2">
+              <CardTitle className="text-lg font-serif text-primary flex items-center gap-2">
                 <Trophy className="w-6 h-6 text-gold" /> Top 5 Clientes Fidelizados
               </CardTitle>
               <CardDescription>Ranking dos clientes com mais pontos acumulados</CardDescription>
@@ -120,11 +120,11 @@ export default function Loyalty() {
               {topClients.length > 0 ? (
                 <div className="space-y-4">
                   {topClients.map((client, index) => (
-                    <div key={client.id} className="flex items-center gap-4 p-4 rounded-lg bg-white/30 dark:bg-card/30">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-plush-600 text-white font-bold text-sm">
+                    <div key={client.id} className="flex items-center gap-4 p-4 rounded-lg bg-accent/50 dark:bg-accent/30">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
                         {index + 1}
                       </div>
-                      <Avatar className="bg-pink-100 text-pink-700">
+                      <Avatar className="bg-primary/10 text-primary">
                         <AvatarFallback>{getInitials(client.name)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
@@ -140,7 +140,7 @@ export default function Loyalty() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-plush-600">{client.totalPoints} pts</div>
+                        <div className="text-lg font-bold text-primary">{client.totalPoints} pts</div>
                         <div className="text-sm text-muted-foreground">
                           {new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
@@ -164,7 +164,7 @@ export default function Loyalty() {
           {/* All Clients Table */}
           <Card className={cardGlass}>
             <CardHeader>
-              <CardTitle className="text-lg font-serif text-plush-700">Todos os Clientes Fidelizados</CardTitle>
+              <CardTitle className="text-lg font-serif text-primary">Todos os Clientes Fidelizados</CardTitle>
               <CardDescription>Histórico completo de pontuação e tier dos clientes</CardDescription>
             </CardHeader>
             <CardContent>
@@ -185,7 +185,7 @@ export default function Loyalty() {
                       <TableRow key={client.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Avatar className="bg-pink-100 text-pink-700 w-8 h-8">
+                            <Avatar className="bg-primary/10 text-primary w-8 h-8">
                               <AvatarFallback className="text-xs">{getInitials(client.name)}</AvatarFallback>
                             </Avatar>
                             <div>
@@ -203,7 +203,7 @@ export default function Loyalty() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <span className="font-semibold text-plush-600">{client.totalPoints}</span>
+                          <span className="font-semibold text-primary">{client.totalPoints}</span>
                         </TableCell>
                         <TableCell>
                           {new Intl.NumberFormat('pt-BR', {
@@ -213,8 +213,8 @@ export default function Loyalty() {
                         </TableCell>
                         <TableCell>{client.appointmentsCount}</TableCell>
                         <TableCell>
-                          {client.lastVisit 
-                            ? new Date(client.lastVisit).toLocaleDateString('pt-BR')
+                          {client.lastVisita 
+                            ? new Date(client.lastVisita).toLocaleDateString('pt-BR')
                             : 'Nunca'
                           }
                         </TableCell>
@@ -264,7 +264,7 @@ export default function Loyalty() {
           </Card>
 
           <div className="text-center mt-4 text-muted-foreground text-sm opacity-80">
-            Powered by Plushify Club <Award className="inline w-4 h-4 ml-1 text-plush-600" />
+            Powered by Plushify Club <Award className="inline w-4 h-4 ml-1 text-primary" />
           </div>
         </div>
       </div>
