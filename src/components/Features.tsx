@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, BarChart3, Brain, Mail, Award, Box, Clock, Star } from 'lucide-react';
+import { Calendar, Users, BarChart3, Box, CreditCard, Star } from 'lucide-react';
 
 const Feature = ({ icon, title, description, path }: { icon: React.ReactNode, title: string, description: string, path?: string }) => {
   const navigate = useNavigate();
@@ -26,11 +25,11 @@ const Features = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif text-foreground">
-            Funcionalidades <span className="gradient-text">Poderosas</span>
+            Funcionalidades <span className="gradient-text">Disponíveis</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Uma plataforma completa para impulsionar seu negócio de estética
-            com ferramentas inteligentes e automatizadas.
+            Gerencie seu negócio de estética com as ferramentas já implementadas 
+            em nossa plataforma completa.
           </p>
         </div>
 
@@ -38,63 +37,42 @@ const Features = () => {
           <Feature 
             icon={<Calendar className="w-4 h-4 text-white" />}
             title="Agenda Inteligente"
-            description="Agendamentos online com lembretes automáticos e redistribuição de horários para evitar janelas vazias."
+            description="Sistema completo de agendamentos com visualização por dia, semana e mês. Gerencie seus horários de forma eficiente."
             path="/agendamentos"
-          />
-          
-          <Feature 
-            icon={<Brain className="w-4 h-4 text-white" />}
-            title="Comunicação com IA"
-            description="Gere campanhas automáticas e mensagens personalizadas com nossa inteligência artificial."
-            path="/comunicacao"
-          />
-          
-          <Feature 
-            icon={<Award className="w-4 h-4 text-white" />}
-            title="Cursos e Certificados"
-            description="Crie e venda cursos com certificados automáticos e área de alunos integrada."
-            path="/cursos"
-          />
-          
-          <Feature 
-            icon={<Box className="w-4 h-4 text-white" />}
-            title="Controle de Insumos"
-            description="Gerencie seu estoque com alertas de nível baixo e cálculo automático de consumo por procedimento."
-            path="/estoque"
           />
           
           <Feature 
             icon={<Users className="w-4 h-4 text-white" />}
             title="Gestão de Clientes"
-            description="Histórico completo, preferências, pontos de fidelidade e lembretes de retorno personalizados."
+            description="Cadastro completo de clientes com histórico, informações pessoais e controle de relacionamento."
             path="/clientes"
           />
           
           <Feature 
-            icon={<BarChart3 className="w-4 h-4 text-white" />}
-            title="Dashboard Analíticos"
-            description="Acompanhe métricas importantes do seu negócio com relatórios detalhados e insights valiosos."
-            path="/dashboard"
-          />
-          
-          <Feature 
-            icon={<Mail className="w-4 h-4 text-white" />}
-            title="Marketing Inteligente"
-            description="Campanhas automáticas de aniversário, retorno e fidelização com conteúdo gerado por IA."
-            path="/comunicacao"
-          />
-          
-          <Feature 
             icon={<Box className="w-4 h-4 text-white" />}
-            title="Planos e Assinaturas"
-            description="Apresente planos Free, Starter, Pro e Premium com integração Stripe."
-            path="/planos"
+            title="Controle de Estoque"
+            description="Gerencie seus produtos, insumos e materiais com controle de entrada, saída e alertas de estoque baixo."
+            path="/estoque"
+          />
+          
+          <Feature 
+            icon={<CreditCard className="w-4 h-4 text-white" />}
+            title="Gestão Financeira"
+            description="Controle de pagamentos, parcelamentos, fechamento de caixa e controle de despesas do seu negócio."
+            path="/financeiro"
+          />
+          
+          <Feature 
+            icon={<BarChart3 className="w-4 h-4 text-white" />}
+            title="Relatórios e Dashboard"
+            description="Acompanhe o desempenho do seu negócio com relatórios detalhados e métricas importantes."
+            path="/dashboard"
           />
           
           <Feature 
             icon={<Star className="w-4 h-4 text-white" />}
             title="Programa de Fidelidade"
-            description="Sistema de pontos, níveis de cliente e benefícios automáticos para fidelizar sua clientela."
+            description="Sistema de pontos e benefícios para seus clientes, com controle automático de recompensas."
             path="/fidelidade"
           />
         </div>
