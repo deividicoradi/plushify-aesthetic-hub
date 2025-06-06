@@ -8,9 +8,8 @@ import { StatsChart } from '@/components/dashboard/StatsChart';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { WeeklyOverview } from '@/components/dashboard/WeeklyOverview';
-import { AIPersonalizedPanel } from '@/components/premium/AIPersonalizedPanel';
+import { QuickHelp } from '@/components/dashboard/QuickHelp';
 import { TeamManagement } from '@/components/premium/TeamManagement';
-import { AdvancedCRM } from '@/components/premium/AdvancedCRM';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { useSubscription } from '@/hooks/useSubscription';
 
@@ -25,22 +24,18 @@ export const DashboardContent = () => {
         // Layout Premium - 4 colunas com recursos avançados
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
           {/* Coluna 1 - Ações rápidas */}
-          <div className="xl:col-span-2 space-y-4">
+          <div className="xl:col-span-3 space-y-4">
             <QuickActions />
             <WeeklyOverview />
+            <QuickHelp />
           </div>
 
-          {/* Coluna 2 - IA Personalizada */}
-          <div className="xl:col-span-3">
-            <AIPersonalizedPanel />
-          </div>
-
-          {/* Coluna 3 - Gráficos */}
-          <div className="xl:col-span-4 space-y-4">
+          {/* Coluna 2 - Gráficos */}
+          <div className="xl:col-span-6 space-y-4">
             <StatsChart />
           </div>
 
-          {/* Coluna 4 - Alertas */}
+          {/* Coluna 3 - Alertas */}
           <div className="xl:col-span-3">
             <AlertsPanel />
           </div>
@@ -51,6 +46,7 @@ export const DashboardContent = () => {
           <div className="xl:col-span-1 space-y-4">
             <QuickActions />
             <WeeklyOverview />
+            <QuickHelp />
           </div>
           <div className="xl:col-span-2 space-y-4">
             <StatsChart />
@@ -65,7 +61,6 @@ export const DashboardContent = () => {
       {hasFeature('premium') && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TeamManagement />
-          <AdvancedCRM />
         </div>
       )}
 
@@ -80,10 +75,10 @@ export const DashboardContent = () => {
               <RecentActivity />
             ) : (
               <div className="text-center py-6">
-                <p className="text-gray-500 mb-4">Funcionalidade disponível no plano Starter</p>
+                <p className="text-muted-foreground mb-4">Funcionalidade disponível no plano Starter</p>
                 <button 
                   onClick={() => navigate('/planos')}
-                  className="text-plush-600 hover:underline text-sm"
+                  className="text-primary hover:underline text-sm"
                 >
                   Ver planos
                 </button>
@@ -101,10 +96,10 @@ export const DashboardContent = () => {
             </CardHeader>
             <CardContent>
               <div className="text-center py-6">
-                <p className="text-gray-500 mb-4">Funcionalidade disponível no plano Starter</p>
+                <p className="text-muted-foreground mb-4">Funcionalidade disponível no plano Starter</p>
                 <button 
                   onClick={() => navigate('/planos')}
-                  className="text-plush-600 hover:underline text-sm"
+                  className="text-primary hover:underline text-sm"
                 >
                   Ver planos
                 </button>
