@@ -13,6 +13,7 @@ import Courses from './pages/Courses';
 import Blog from './pages/Blog';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
+import Services from './pages/Services';
 import Appointments from './pages/Appointments';
 import Inventory from './pages/Inventory';
 import Reports from './pages/Reports';
@@ -60,6 +61,16 @@ function App() {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <Clients />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/servicos" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <Services />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } 
