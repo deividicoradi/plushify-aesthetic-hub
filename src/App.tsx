@@ -1,9 +1,12 @@
+
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 import Index from './pages/Index';
 import About from './pages/About';
 import Auth from './pages/Auth';
@@ -26,6 +29,20 @@ import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
 
+// Layout component for protected routes with sidebar
+const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          {children}
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
+  );
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -39,7 +56,9 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <ProtectedLayout>
+                  <Dashboard />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -47,7 +66,9 @@ function App() {
             path="/agendamentos"
             element={
               <ProtectedRoute>
-                <Appointments />
+                <ProtectedLayout>
+                  <Appointments />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -55,7 +76,9 @@ function App() {
             path="/clientes"
             element={
               <ProtectedRoute>
-                <Clients />
+                <ProtectedLayout>
+                  <Clients />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -63,7 +86,9 @@ function App() {
             path="/servicos"
             element={
               <ProtectedRoute>
-                <Services />
+                <ProtectedLayout>
+                  <Services />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -71,7 +96,9 @@ function App() {
             path="/estoque"
             element={
               <ProtectedRoute>
-                <Inventory />
+                <ProtectedLayout>
+                  <Inventory />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -79,7 +106,9 @@ function App() {
             path="/financeiro"
             element={
               <ProtectedRoute>
-                <Financial />
+                <ProtectedLayout>
+                  <Financial />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -87,7 +116,9 @@ function App() {
             path="/relatorios"
             element={
               <ProtectedRoute>
-                <Reports />
+                <ProtectedLayout>
+                  <Reports />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -95,7 +126,9 @@ function App() {
             path="/anotacoes"
             element={
               <ProtectedRoute>
-                <Notes />
+                <ProtectedLayout>
+                  <Notes />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -103,7 +136,9 @@ function App() {
             path="/fidelidade"
             element={
               <ProtectedRoute>
-                <Loyalty />
+                <ProtectedLayout>
+                  <Loyalty />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -111,7 +146,9 @@ function App() {
             path="/cursos"
             element={
               <ProtectedRoute>
-                <Courses />
+                <ProtectedLayout>
+                  <Courses />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -119,7 +156,9 @@ function App() {
             path="/help"
             element={
               <ProtectedRoute>
-                <Help />
+                <ProtectedLayout>
+                  <Help />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -127,7 +166,9 @@ function App() {
             path="/configuracoes"
             element={
               <ProtectedRoute>
-                <Settings />
+                <ProtectedLayout>
+                  <Settings />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -135,7 +176,9 @@ function App() {
             path="/planos"
             element={
               <ProtectedRoute>
-                <Plans />
+                <ProtectedLayout>
+                  <Plans />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />
@@ -143,7 +186,9 @@ function App() {
             path="/payment-success"
             element={
               <ProtectedRoute>
-                <PaymentSuccess />
+                <ProtectedLayout>
+                  <PaymentSuccess />
+                </ProtectedLayout>
               </ProtectedRoute>
             }
           />

@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
+import { Package } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { InventoryContainer } from '@/components/inventory/InventoryContainer';
 import { InventoryDialogs } from '@/components/inventory/InventoryDialogs';
 import { InventoryHeader } from '@/components/inventory/InventoryHeader';
@@ -43,8 +45,18 @@ const Inventory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="flex flex-col min-h-screen w-full">
+      {/* Header with sidebar trigger */}
+      <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+        <SidebarTrigger />
+        <div className="flex items-center gap-2">
+          <Package className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Estoque</h1>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="flex-1 p-6 space-y-6">
         <InventoryHeader 
           onAddProduct={() => openDialog('productForm')}
           onShowTransactionHistory={() => handleViewChange('history')}
@@ -89,7 +101,7 @@ const Inventory = () => {
           transactionType={transactionType}
           onSuccess={refetch}
         />
-      </div>
+      </main>
     </div>
   );
 };

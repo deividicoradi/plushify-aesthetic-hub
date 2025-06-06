@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Calendar, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { toast } from "@/hooks/use-toast";
 import AppointmentCalendar from '@/components/appointments/AppointmentCalendar';
 import AppointmentList from '@/components/appointments/AppointmentList';
@@ -85,9 +86,11 @@ const Appointments = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+    <div className="flex flex-col min-h-screen w-full">
+      {/* Header with sidebar trigger */}
+      <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+        <SidebarTrigger />
+        <div className="flex items-center justify-between flex-1">
           <div className="flex items-center gap-2">
             <Calendar className="w-6 h-6 text-plush-600" />
             <h1 className="text-2xl font-bold">Agendamentos</h1>
@@ -100,7 +103,10 @@ const Appointments = () => {
             Novo Agendamento
           </Button>
         </div>
+      </header>
 
+      {/* Main content */}
+      <main className="flex-1 p-6">
         <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8">
           <AppointmentCalendar 
             selectedDate={selectedDate} 
@@ -113,7 +119,7 @@ const Appointments = () => {
             onDelete={handleDeleteAppointment}
           />
         </div>
-      </div>
+      </main>
 
       {/* Dialogs */}
       <AppointmentDialog 

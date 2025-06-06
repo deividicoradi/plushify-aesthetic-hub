@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditCard, Calculator, Receipt, TrendingUp } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import PaymentsTab from '@/components/financial/PaymentsTab';
 import CashClosureTab from '@/components/financial/CashClosureTab';
 import InstallmentsTab from '@/components/financial/InstallmentsTab';
@@ -12,19 +12,20 @@ const Financial = () => {
   const [activeTab, setActiveTab] = useState('payments');
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Financeiro
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-2">
-              Gerencie pagamentos, fechamento de caixa e parcelamentos
-            </p>
-          </div>
+    <div className="flex flex-col min-h-screen w-full">
+      {/* Header with sidebar trigger */}
+      <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+        <SidebarTrigger />
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-foreground">Financeiro</h1>
+          <p className="text-muted-foreground text-sm">
+            Gerencie pagamentos, fechamento de caixa e parcelamentos
+          </p>
         </div>
+      </header>
 
+      {/* Main content */}
+      <main className="flex-1 p-6 space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
             <TabsTrigger value="payments" className="flex items-center gap-2">
@@ -61,8 +62,8 @@ const Financial = () => {
             <ExpensesTab />
           </TabsContent>
         </Tabs>
-      </div>
-    </DashboardLayout>
+      </main>
+    </div>
   );
 };
 

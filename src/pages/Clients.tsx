@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import { Users, Search } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import ClientList from '@/components/clients/ClientList';
 import NewClientDrawer from "@/components/clients/NewClientDrawer";
 import ClientFiltersPopover from "@/components/clients/ClientFiltersPopover";
 
 const Clients = () => {
-  // Estados de abertura dos popups
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: 'Todos',
@@ -17,9 +17,11 @@ const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+    <div className="flex flex-col min-h-screen w-full">
+      {/* Header with sidebar trigger */}
+      <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+        <SidebarTrigger />
+        <div className="flex items-center justify-between flex-1">
           <div className="flex items-center gap-2">
             <Users className="w-6 h-6 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
@@ -32,7 +34,10 @@ const Clients = () => {
             Novo Cliente
           </Button>
         </div>
+      </header>
 
+      {/* Main content */}
+      <main className="flex-1 p-6 space-y-6">
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -55,7 +60,7 @@ const Clients = () => {
           open={isDrawerOpen}
           onOpenChange={setDrawerOpen}
         />
-      </div>
+      </main>
     </div>
   );
 };
