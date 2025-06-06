@@ -1,169 +1,98 @@
 
-import React from "react";
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Calendar,
   Users,
-  CalendarDays,
+  Settings,
   Package,
-  FileText,
   BarChart3,
+  Wrench,
+  StickyNote,
   Heart,
-  Settings as SettingsIcon,
-  Sun,
-  Moon,
-  Scissors,
-} from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useTheme } from "next-themes";
+  GraduationCap,
+  HelpCircle,
+  CreditCard
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
-export default function DashboardSidebar() {
+const DashboardSidebar = () => {
   const location = useLocation();
-  const { theme, setTheme } = useTheme();
-
-  const isActive = (path: string) => location.pathname === path;
+  const { signOut } = useAuth();
 
   const menuItems = [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-      isActive: isActive("/dashboard"),
-    },
-    {
-      title: "Clientes",
-      url: "/clientes",
-      icon: Users,
-      isActive: isActive("/clientes"),
-    },
-    {
-      title: "Serviços",
-      url: "/servicos",
-      icon: Scissors,
-      isActive: isActive("/servicos"),
-    },
-    {
-      title: "Agendamentos",
-      url: "/agendamentos",
-      icon: CalendarDays,
-      isActive: isActive("/agendamentos"),
-    },
-    {
-      title: "Estoque",
-      url: "/estoque",
-      icon: Package,
-      isActive: isActive("/estoque"),
-    },
-    {
-      title: "Relatórios",
-      url: "/relatorios",
-      icon: BarChart3,
-      isActive: isActive("/relatorios"),
-    },
-    {
-      title: "Fidelidade",
-      url: "/fidelidade",
-      icon: Heart,
-      isActive: isActive("/fidelidade"),
-    },
-    {
-      title: "Anotações",
-      url: "/anotacoes",
-      icon: FileText,
-      isActive: isActive("/anotacoes"),
-    },
-  ];
-
-  const { user, signOut } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      // Redirect to home page after logout
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-    }
-  };
-
-  const footerItems = [
-    {
-      title: "Configurações",
-      url: "/configuracoes",
-      icon: SettingsIcon,
-      isActive: isActive("/configuracoes"),
-    },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: Calendar, label: 'Agendamentos', path: '/agendamentos' },
+    { icon: Users, label: 'Clientes', path: '/clientes' },
+    { icon: Wrench, label: 'Serviços', path: '/servicos' },
+    { icon: Package, label: 'Estoque', path: '/estoque' },
+    { icon: CreditCard, label: 'Financeiro', path: '/financeiro' },
+    { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
+    { icon: StickyNote, label: 'Anotações', path: '/anotacoes' },
+    { icon: Heart, label: 'Fidelidade', path: '/fidelidade' },
+    { icon: GraduationCap, label: 'Cursos', path: '/cursos' },
+    { icon: HelpCircle, label: 'Ajuda', path: '/help' },
+    { icon: Settings, label: 'Configurações', path: '/configuracoes' },
   ];
 
   return (
-    <div className="flex flex-col h-full bg-background border-r border-border py-4">
-      <div className="px-6 pb-6 flex justify-center">
-        <NavLink to="/dashboard" className="flex items-center">
-          <img src="/logo.svg" alt="Plushify Logo" className="w-38 h-38" />
-        </NavLink>
+    <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 h-full flex flex-col">
+      {/* Logo */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+        <Link to="/dashboard" className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gradient-to-r from-plush-500 to-plush-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">P</span>
+          </div>
+          <span className="text-xl font-bold text-gray-900 dark:text-white">Plushify</span>
+        </Link>
       </div>
 
-      {/* Theme Toggle */}
-      <div className="px-6 pb-4 flex justify-end">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="h-8 w-8"
-        >
-          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </div>
-
-      <div className="flex-1 px-3 space-y-1">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.title}
-            to={item.url}
-            className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors ${item.isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
-              }`}
-          >
-            <item.icon className="w-4 h-4" />
-            <span>{item.title}</span>
-          </NavLink>
-        ))}
-      </div>
-
-      <div className="px-6 pt-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-full rounded-md">
-              <Avatar className="mr-2 h-6 w-6">
-                <AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium leading-none">
-                {user?.email || "Meu Perfil"}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" forceMount className="w-40">
-            {footerItems.map((item) => (
-              <DropdownMenuItem key={item.title} asChild>
-                <NavLink
-                  to={item.url}
-                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+      {/* Navigation */}
+      <nav className="flex-1 py-4">
+        <ul className="space-y-1 px-3">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <li key={item.path}>
+                <Link
+                  to={item.path}
+                  className={cn(
+                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-plush-100 dark:bg-plush-900/20 text-plush-900 dark:text-plush-100"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                  )}
                 >
-                  <item.icon className="w-4 h-4" />
-                  <span>{item.title}</span>
-                </NavLink>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-              Sair
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                  <Icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* Theme Toggle and Sign Out */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
+        <div className="flex justify-center">
+          <ThemeToggle />
+        </div>
+        <Button 
+          onClick={signOut}
+          variant="ghost" 
+          className="w-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+        >
+          Sair
+        </Button>
       </div>
     </div>
   );
-}
+};
+
+export default DashboardSidebar;

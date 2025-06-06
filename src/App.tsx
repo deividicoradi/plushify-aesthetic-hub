@@ -1,149 +1,157 @@
-
-import React from 'react';
-import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { AuthProvider } from '@/contexts/AuthContext';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import Index from './pages/Index';
 import About from './pages/About';
 import Auth from './pages/Auth';
 import Signup from './pages/Signup';
-import Help from './pages/Help';
-import Courses from './pages/Courses';
 import Dashboard from './pages/Dashboard';
+import Appointments from './pages/Appointments';
 import Clients from './pages/Clients';
 import Services from './pages/Services';
-import Appointments from './pages/Appointments';
 import Inventory from './pages/Inventory';
 import Reports from './pages/Reports';
-import Loyalty from './pages/Loyalty';
-import Notes from './pages/Notes';
 import Settings from './pages/Settings';
 import Plans from './pages/Plans';
-import NotFound from './pages/NotFound';
 import PaymentSuccess from './pages/PaymentSuccess';
-import DashboardLayout from './components/DashboardLayout';
-import { ThemeProvider } from './components/theme-provider';
+import Notes from './pages/Notes';
+import Loyalty from './pages/Loyalty';
+import Courses from './pages/Courses';
+import Help from './pages/Help';
+import Financial from './pages/Financial';
+import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem={false}
-        disableTransitionOnChange
-      >
-        <AuthProvider>
-          <BrowserRouter>
-            <div className="min-h-screen bg-background">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/help" element={<Help />} />
-                <Route path="/courses" element={<Courses />} />
-                <Route 
-                  path="/dashboard" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Dashboard />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/clientes" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Clients />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/servicos" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Services />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/agendamentos" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Appointments />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/estoque" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Inventory />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/relatorios" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Reports />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/fidelidade" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Loyalty />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/anotacoes" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Notes />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/configuracoes" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Settings />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route path="/planos" element={<Plans />} />
-                <Route path="/payment-success" element={<PaymentSuccess />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
-          </BrowserRouter>
-        </AuthProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/sobre" element={<About />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agendamentos"
+            element={
+              <ProtectedRoute>
+                <Appointments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clientes"
+            element={
+              <ProtectedRoute>
+                <Clients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/servicos"
+            element={
+              <ProtectedRoute>
+                <Services />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/estoque"
+            element={
+              <ProtectedRoute>
+                <Inventory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/financeiro"
+            element={
+              <ProtectedRoute>
+                <Financial />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/relatorios"
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/anotacoes"
+            element={
+              <ProtectedRoute>
+                <Notes />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fidelidade"
+            element={
+              <ProtectedRoute>
+                <Loyalty />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cursos"
+            element={
+              <ProtectedRoute>
+                <Courses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/help"
+            element={
+              <ProtectedRoute>
+                <Help />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/configuracoes"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/planos"
+            element={
+              <ProtectedRoute>
+                <Plans />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment-success"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+        <Sonner />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
