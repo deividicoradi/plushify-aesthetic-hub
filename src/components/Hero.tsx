@@ -163,15 +163,22 @@ const Hero = () => {
               </div>
             </div>
             
-            <div className="absolute -bottom-5 -left-10 bg-card rounded-lg p-3 shadow-lg border border-border animate-float hidden md:block" style={{ animationDelay: '1s' }}>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary text-xs">💬</span>
+            {/* Agenda do Dia floating element replacing AI Assistant */}
+            <div className="absolute -bottom-5 -left-10 bg-card rounded-lg shadow-lg border border-border animate-float hidden md:block overflow-hidden" style={{ animationDelay: '1s' }}>
+              <div className="bg-primary text-primary-foreground px-3 py-2 text-sm font-medium">
+                Agenda do Dia
+              </div>
+              <div className="p-3 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-foreground font-medium">Ana Silva</span>
+                  <span className="text-muted-foreground">09:00</span>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">IA Assistente</p>
-                  <p className="text-xs text-muted-foreground">Mensagem personalizada enviada</p>
+                <div className="text-xs text-muted-foreground">Limpeza de Pele</div>
+                <div className="flex items-center justify-between text-xs mt-2">
+                  <span className="text-foreground font-medium">Mariana Costa</span>
+                  <span className="text-muted-foreground">11:00</span>
                 </div>
+                <div className="text-xs text-muted-foreground">Design de Sobrancelhas</div>
               </div>
             </div>
           </div>
