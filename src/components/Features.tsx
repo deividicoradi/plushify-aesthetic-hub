@@ -99,6 +99,97 @@ const Features = () => {
           />
         </div>
         
+        {/* Seção da Agenda do Dia */}
+        <div className="mt-16 relative">
+          <div className="bg-card rounded-xl p-8 border border-border shadow-lg">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl font-bold mb-4 font-serif text-foreground">Agenda do Dia - Controle Total</h3>
+                <p className="text-muted-foreground mb-6">
+                  Visualize todos os seus agendamentos do dia em uma interface intuitiva e organizada. 
+                  Acompanhe horários, clientes e procedimentos de forma simples e eficiente.
+                </p>
+                <ul className="space-y-3">
+                  {[
+                    'Visualização clara de todos os agendamentos',
+                    'Informações detalhadas de cada cliente',
+                    'Horários precisos e organizados',
+                    'Fácil navegação entre diferentes dias',
+                    'Interface responsiva para qualquer dispositivo'
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="min-w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5">
+                        <span className="text-primary text-xs">✓</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="relative">
+                <div className="bg-muted rounded-lg p-6 relative z-10">
+                  <div className="rounded-lg overflow-hidden shadow-sm">
+                    <div className="p-4 bg-primary text-primary-foreground">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium">Agenda do Dia</h3>
+                        <span className="text-sm">Segunda, 19 Abril</span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-card p-4">
+                      <div className="space-y-4">
+                        <div className="flex items-center p-3 border rounded-lg border-border bg-muted/50">
+                          <div className="w-2 h-10 bg-primary rounded-full mr-4"></div>
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <p className="font-medium text-foreground">Ana Silva</p>
+                              <span className="text-sm text-muted-foreground">09:00 - 10:30</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">Limpeza de Pele Profunda</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center p-3 border rounded-lg border-border">
+                          <div className="w-2 h-10 bg-secondary rounded-full mr-4"></div>
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <p className="font-medium text-foreground">Mariana Costa</p>
+                              <span className="text-sm text-muted-foreground">11:00 - 12:00</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">Design de Sobrancelhas</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center p-3 border rounded-lg border-border">
+                          <div className="w-2 h-10 bg-accent rounded-full mr-4"></div>
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <p className="font-medium text-foreground">Regina Pires</p>
+                              <span className="text-sm text-muted-foreground">14:00 - 15:30</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">Massagem Relaxante</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 text-center">
+                        <button className="text-primary text-sm font-medium hover:text-primary/80">
+                          Ver agenda completa →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Decorative elements */}
+                <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-primary/10 rounded-full opacity-20 -z-10"></div>
+                <div className="absolute -top-6 -left-6 w-24 h-24 bg-accent/20 rounded-full opacity-20 -z-10"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div className="mt-16 relative">
           <div className="bg-card rounded-xl p-8 border border-border shadow-lg">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
