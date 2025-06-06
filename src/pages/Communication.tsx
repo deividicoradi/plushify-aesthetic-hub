@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   MessageSquare, 
@@ -25,6 +24,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
+// Importando os novos componentes
+import MessageTemplateCard from "@/components/communication/MessageTemplateCard";
+import TemplateEditor from "@/components/communication/TemplateEditor";
+import WhatsAppIntegration from "@/components/communication/WhatsAppIntegration";
+import QuickMessageSender from "@/components/communication/QuickMessageSender";
+
 const Communication = () => {
   const [message, setMessage] = useState('');
   const [selectedChannel, setSelectedChannel] = useState('all');
@@ -35,6 +40,33 @@ const Communication = () => {
     channel: 'email',
     audience: 'all'
   });
+
+  // Estados para templates
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [isTemplateEditorOpen, setIsTemplateEditorOpen] = useState(false);
+  const [templates, setTemplates] = useState([
+    {
+      id: 1,
+      title: "Confirmação de Agendamento",
+      description: "Confirma automaticamente novos agendamentos",
+      type: "Automático",
+      content: "Olá {nome}! Seu agendamento foi confirmado para {data} às {hora}. Local: {endereco}. Em caso de dúvidas, entre em contato conosco."
+    },
+    {
+      id: 2,
+      title: "Lembrete 24h",
+      description: "Lembra clientes sobre agendamentos",
+      type: "Automático",
+      content: "Oi {nome}! Lembrando que você tem um agendamento amanhã ({data}) às {hora}. Nos vemos lá! 😊"
+    },
+    {
+      id: 3,
+      title: "Promoção Mensal",
+      description: "Template para campanhas promocionais",
+      type: "Manual",
+      content: "🎉 Oferta especial para você, {nome}! Aproveite nossa promoção do mês com desconto especial. Válida até {data_limite}."
+    }
+  ]);
 
   const channels = [
     {
@@ -123,26 +155,22 @@ const Communication = () => {
     }
   ];
 
-  const templates = [
-    {
-      id: 1,
-      title: "Confirmação de Agendamento",
-      description: "Confirma automaticamente novos agendamentos",
-      type: "Automático"
-    },
-    {
-      id: 2,
-      title: "Lembrete 24h",
-      description: "Lembra clientes sobre agendamentos",
-      type: "Automático"
-    },
-    {
-      id: 3,
-      title: "Promoção Mensal",
-      description: "Template para campanhas promocionais",
-      type: "Manual"
-    }
-  ];
+  // Funções para templates
+  const handleEditTemplate = (template: any) => {
+    setSelectedTemplate(template);
+    setIsTemplateEditorOpen(true);
+  };
+
+  const handleUseTemplate = (template: any) => {
+    setMessage(template.content || '');
+    toast.success(`Template "${template.title}" aplicado!`);
+  };
+
+  const handleSaveTemplate = (updatedTemplate: any) => {
+    setTemplates(templates.map(t => 
+      t.id === updatedTemplate.id ? updatedTemplate : t
+    ));
+  };
 
   const handleSendMessage = () => {
     if (message.trim()) {
@@ -282,10 +310,11 @@ const Communication = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="campaigns">Campanhas</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="integrations">Integrações</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
@@ -343,56 +372,15 @@ const Communication = () => {
               ))}
             </div>
 
-            {/* Mensagem Rápida */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Send className="w-5 h-5 text-primary" />
-                  Mensagem Rápida
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <Select defaultValue="all">
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos os clientes</SelectItem>
-                        <SelectItem value="active">Clientes ativos</SelectItem>
-                        <SelectItem value="vip">Clientes VIP</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select defaultValue="whatsapp">
-                      <SelectTrigger className="w-40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                        <SelectItem value="sms">SMS</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Digite sua mensagem..."
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button onClick={handleSendMessage}>
-                      <Send className="w-4 h-4 mr-2" />
-                      Enviar
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Envio Rápido de Mensagens */}
+            <QuickMessageSender 
+              templates={templates} 
+              onUseTemplate={handleUseTemplate}
+            />
           </TabsContent>
 
           <TabsContent value="campaigns" className="space-y-6">
+            {/* ... keep existing campaigns code */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -450,32 +438,35 @@ const Communication = () => {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {templates.map((template) => (
-                    <Card key={template.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base">{template.title}</CardTitle>
-                        <Badge variant="outline" className="w-fit">
-                          {template.type}
-                        </Badge>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground mb-4">{template.description}</p>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" className="flex-1">
-                            Editar
-                          </Button>
-                          <Button size="sm" className="flex-1">
-                            Usar
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <MessageTemplateCard
+                      key={template.id}
+                      template={template}
+                      onEdit={handleEditTemplate}
+                      onUse={handleUseTemplate}
+                    />
                   ))}
                 </div>
               </CardContent>
             </Card>
+
+            {/* Template Editor Dialog */}
+            <TemplateEditor
+              template={selectedTemplate}
+              isOpen={isTemplateEditorOpen}
+              onClose={() => {
+                setIsTemplateEditorOpen(false);
+                setSelectedTemplate(null);
+              }}
+              onSave={handleSaveTemplate}
+            />
+          </TabsContent>
+
+          <TabsContent value="integrations" className="space-y-6">
+            <WhatsAppIntegration />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
+            {/* ... keep existing analytics code */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="pb-3">
