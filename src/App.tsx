@@ -10,7 +10,6 @@ import Auth from './pages/Auth';
 import Signup from './pages/Signup';
 import Help from './pages/Help';
 import Courses from './pages/Courses';
-import Blog from './pages/Blog';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import Services from './pages/Services';
@@ -24,9 +23,6 @@ import Plans from './pages/Plans';
 import NotFound from './pages/NotFound';
 import PaymentSuccess from './pages/PaymentSuccess';
 import DashboardLayout from './components/DashboardLayout';
-import Marketing from './pages/Marketing';
-import Analytics from './pages/Analytics';
-import Automation from './pages/Automation';
 import { ThemeProvider } from './components/theme-provider';
 
 const queryClient = new QueryClient();
@@ -50,7 +46,6 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/help" element={<Help />} />
                 <Route path="/courses" element={<Courses />} />
-                <Route path="/blog" element={<Blog />} />
                 <Route 
                   path="/dashboard" 
                   element={
@@ -107,36 +102,6 @@ function App() {
                     <ProtectedRoute>
                       <DashboardLayout>
                         <Reports />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/marketing" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Marketing />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/analytics" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Analytics />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/automacoes" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Automation />
                       </DashboardLayout>
                     </ProtectedRoute>
                   } 

@@ -7,9 +7,6 @@ import {
   Package,
   FileText,
   BarChart3,
-  Megaphone,
-  Brain,
-  Zap,
   Heart,
   Settings as SettingsIcon,
   Sun,
@@ -21,11 +18,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useSubscription } from "@/hooks/useSubscription";
 import { useTheme } from "next-themes";
 
 export default function DashboardSidebar() {
-  const { hasFeature } = useSubscription();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
 
@@ -62,29 +57,6 @@ export default function DashboardSidebar() {
       icon: Package,
       isActive: isActive("/estoque"),
     },
-    ...(hasFeature('pro') ? [{
-      title: "Marketing",
-      url: "/marketing",
-      icon: Megaphone,
-      isActive: isActive("/marketing"),
-      isPremium: true,
-    }] : []),
-    ...(hasFeature('premium') ? [
-      {
-        title: "Analytics IA",
-        url: "/analytics",
-        icon: Brain,
-        isActive: isActive("/analytics"),
-        isPremium: true,
-      },
-      {
-        title: "Automações",
-        url: "/automacoes",
-        icon: Zap,
-        isActive: isActive("/automacoes"),
-        isPremium: true,
-      }
-    ] : []),
     {
       title: "Relatórios",
       url: "/relatorios",
@@ -158,11 +130,6 @@ export default function DashboardSidebar() {
           >
             <item.icon className="w-4 h-4" />
             <span>{item.title}</span>
-            {item.isPremium && (
-              <span className="ml-auto w-fit rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold text-white">
-                IA
-              </span>
-            )}
           </NavLink>
         ))}
       </div>
