@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DashboardLayout } from '@/components/DashboardLayout';
+import DashboardLayout from '@/components/DashboardLayout';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServicesList } from '@/components/services/ServicesList';
 import { useServices, Service } from '@/hooks/useServices';
