@@ -55,17 +55,17 @@ export const ProductsTable = ({
     );
 
   return (
-    <Card className="rounded-2xl shadow-xl border-0 bg-white/80 dark:bg-card mb-10 animate-fade-in delay-100">
-      <CardHeader className="p-6 pb-3 border-b border-muted/30">
+    <Card className="rounded-2xl shadow-xl border-border bg-card mb-10 animate-fade-in delay-100">
+      <CardHeader className="p-6 pb-3 border-b border-border">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-serif text-pink-700">Produtos em Estoque</CardTitle>
+          <CardTitle className="text-xl font-serif text-primary">Produtos em Estoque</CardTitle>
           <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Buscar produtos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-background border-border"
             />
           </div>
         </div>
@@ -73,7 +73,7 @@ export const ProductsTable = ({
       <CardContent className="p-0">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="border-border">
               <TableHead className="w-[30px] pr-0">
                 <Checkbox 
                   checked={allSelected}
@@ -81,12 +81,12 @@ export const ProductsTable = ({
                   aria-label="Selecionar todos"
                 />
               </TableHead>
-              <TableHead>Produto</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead className="text-center">Quantidade</TableHead>
-              <TableHead className="text-center">Estoque Mínimo</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <TableHead className="text-foreground">Produto</TableHead>
+              <TableHead className="text-foreground">Categoria</TableHead>
+              <TableHead className="text-center text-foreground">Quantidade</TableHead>
+              <TableHead className="text-center text-foreground">Estoque Mínimo</TableHead>
+              <TableHead className="text-center text-foreground">Status</TableHead>
+              <TableHead className="text-right text-foreground">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -96,7 +96,7 @@ export const ProductsTable = ({
               return (
                 <TableRow 
                   key={product.id} 
-                  className={`hover:bg-pink-50/40 transition ${isSelected ? 'bg-pink-50/60' : ''}`}
+                  className={`hover:bg-muted/50 transition border-border ${isSelected ? 'bg-muted/30' : ''}`}
                 >
                   <TableCell className="pr-0">
                     <Checkbox 
@@ -106,23 +106,23 @@ export const ProductsTable = ({
                     />
                   </TableCell>
                   <TableCell>
-                    <span className="font-bold">{product.name}</span>
+                    <span className="font-bold text-foreground">{product.name}</span>
                     {product.barcode && (
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         Código: {product.barcode}
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell className="text-center font-mono">{product.stock}</TableCell>
-                  <TableCell className="text-center">{product.min_stock}</TableCell>
+                  <TableCell className="text-foreground">{product.category}</TableCell>
+                  <TableCell className="text-center font-mono text-foreground">{product.stock}</TableCell>
+                  <TableCell className="text-center text-foreground">{product.min_stock}</TableCell>
                   <TableCell className="text-center">
                     {product.stock > product.min_stock ? (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-600">
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
                         OK
                       </span>
                     ) : (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600 animate-pulse">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 animate-pulse">
                         Crítico
                       </span>
                     )}
@@ -133,25 +133,25 @@ export const ProductsTable = ({
                         variant="outline"
                         size="sm"
                         onClick={() => onEditProduct(product)}
-                        className="hover:bg-purple-50"
+                        className="hover:bg-secondary border-border"
                       >
-                        <Pencil className="w-4 h-4 text-purple-600" />
+                        <Pencil className="w-4 h-4 text-secondary-foreground" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => onTransaction(product, 'entrada')}
-                        className="hover:bg-green-50"
+                        className="hover:bg-green-50 dark:hover:bg-green-900/30 border-border"
                       >
-                        <ArrowDownCircle className="w-4 h-4 text-green-600" />
+                        <ArrowDownCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => onTransaction(product, 'saida')}
-                        className="hover:bg-red-50"
+                        className="hover:bg-red-50 dark:hover:bg-red-900/30 border-border"
                       >
-                        <ArrowUpCircle className="w-4 h-4 text-red-600" />
+                        <ArrowUpCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
                       </Button>
                     </div>
                   </TableCell>

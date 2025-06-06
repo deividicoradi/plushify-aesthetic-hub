@@ -18,7 +18,6 @@ const Inventory = () => {
 
   const { products, stats, refetch } = useProductsData();
   const { 
-    dialogs, 
     openDialog, 
     closeDialog,
     isNewProductOpen,
