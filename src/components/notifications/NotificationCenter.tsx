@@ -75,13 +75,13 @@ export const NotificationCenter = () => {
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md bg-card dark:bg-card border-border">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-plush-600" />
+        <CardTitle className="flex items-center gap-2 text-card-foreground">
+          <Bell className="w-5 h-5 text-primary" />
           Notificações
           {unreadCount > 0 && (
-            <Badge variant="secondary" className="bg-plush-500 text-white">
+            <Badge variant="secondary" className="bg-primary text-primary-foreground">
               {unreadCount}
             </Badge>
           )}
@@ -89,7 +89,7 @@ export const NotificationCenter = () => {
       </CardHeader>
       <CardContent className="space-y-3">
         {notifications.length === 0 ? (
-          <p className="text-center text-gray-500 py-4">
+          <p className="text-center text-muted-foreground py-4">
             Nenhuma notificação
           </p>
         ) : (
@@ -97,7 +97,9 @@ export const NotificationCenter = () => {
             <div
               key={notification.id}
               className={`p-3 rounded-lg border transition-colors ${
-                notification.read ? 'bg-gray-50' : 'bg-white border-plush-200'
+                notification.read 
+                  ? 'bg-muted/50 dark:bg-muted/20' 
+                  : 'bg-card dark:bg-card border-primary/20 dark:border-primary/30'
               }`}
             >
               <div className="flex items-start gap-3">
@@ -105,33 +107,33 @@ export const NotificationCenter = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <h4 className={`text-sm font-medium ${
-                      notification.read ? 'text-gray-600' : 'text-gray-900'
+                      notification.read ? 'text-muted-foreground' : 'text-card-foreground'
                     }`}>
                       {notification.title}
                     </h4>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 w-6 p-0"
+                      className="h-6 w-6 p-0 text-muted-foreground hover:text-card-foreground"
                       onClick={() => removeNotification(notification.id)}
                     >
                       <X className="w-3 h-3" />
                     </Button>
                   </div>
                   <p className={`text-xs ${
-                    notification.read ? 'text-gray-500' : 'text-gray-700'
+                    notification.read ? 'text-muted-foreground' : 'text-muted-foreground'
                   }`}>
                     {notification.message}
                   </p>
                   <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-muted-foreground">
                       {formatTime(notification.timestamp)}
                     </span>
                     {!notification.read && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 text-xs"
+                        className="h-6 text-xs text-primary hover:text-primary/80"
                         onClick={() => markAsRead(notification.id)}
                       >
                         Marcar como lida

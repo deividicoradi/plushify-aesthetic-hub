@@ -1,68 +1,66 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
 import { LucideIcon } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
 
 interface MetricCardProps {
   title: string;
   value: string;
-  trend?: string; // Tornando opcional
-  description: string;
+  trend?: string;
   icon: LucideIcon;
+  description: string;
   onClick?: () => void;
-  gradientClass?: string; // ex: 'from-[#9b87f5] to-[#7E69AB]'
+  gradientClass: string;
   tabIndex?: number;
   role?: string;
-  ariaLabel?: string;
+  'aria-label'?: string;
 }
 
-export const MetricCard = ({
-  title,
-  value,
-  trend,
-  description,
-  icon: Icon,
+export const MetricCard = ({ 
+  title, 
+  value, 
+  trend, 
+  icon: Icon, 
+  description, 
   onClick,
-  gradientClass = "from-[#9b87f5] to-[#7E69AB]",
-  tabIndex = -1,
-  role = undefined,
-  ariaLabel = undefined,
+  gradientClass,
+  tabIndex,
+  role,
+  'aria-label': ariaLabel
 }: MetricCardProps) => {
-  const isTrendPositive = trend ? trend.startsWith('+') : false;
-
+  const CardComponent = onClick ? 'button' : 'div';
+  
   return (
-    <button
-      className={`
-        w-full text-left rounded-xl border shadow-sm bg-white transition-all duration-300 
-        focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:outline-none 
-        hover:shadow-lg hover:-translate-y-1 group
-      `}
-      style={{ outline: 'none' }}
-      onClick={onClick}
-      tabIndex={tabIndex}
-      role={role}
-      aria-label={ariaLabel}
-      type="button"
+    <Card 
+      className={`bg-gradient-to-br ${gradientClass} border-0 hover:scale-105 transition-transform duration-200 ${
+        onClick ? 'cursor-pointer' : ''
+      }`}
     >
-      <Card className="border-0 bg-transparent shadow-none">
-        <CardContent className="pt-6">
+      <CardContent className="p-6">
+        <CardComponent
+          onClick={onClick}
+          tabIndex={tabIndex}
+          role={role}
+          aria-label={ariaLabel}
+          className={`w-full text-left ${onClick ? 'focus:outline-none focus:ring-2 focus:ring-white/50 rounded-lg' : ''}`}
+        >
           <div className="flex items-center justify-between mb-4">
-            <div className={`p-2 rounded-lg bg-gradient-to-br ${gradientClass} group-hover:scale-110 transition-transform duration-200`}>
+            <div className="p-2 rounded-lg bg-white/20">
               <Icon className="w-5 h-5 text-white" />
             </div>
             {trend && (
-              <span className={`text-sm font-medium ${isTrendPositive ? "text-green-600" : "text-red-600"}`}>
+              <span className="text-sm font-medium text-white/90 bg-white/20 px-2 py-1 rounded-full">
                 {trend}
               </span>
             )}
           </div>
           <div className="space-y-1">
-            <h3 className="font-medium text-muted-foreground">{title}</h3>
-            <p className="text-2xl font-semibold">{value}</p>
-            <p className="text-sm text-muted-foreground">{description}</p>
+            <h3 className="font-medium text-white/90">{title}</h3>
+            <p className="text-2xl font-semibold text-white">{value}</p>
+            <p className="text-sm text-white/80">{description}</p>
           </div>
-        </CardContent>
-      </Card>
-    </button>
+        </CardComponent>
+      </CardContent>
+    </Card>
   );
 };
