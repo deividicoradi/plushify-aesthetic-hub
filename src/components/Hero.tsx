@@ -86,79 +86,29 @@ const Hero = () => {
           </div>
           
           <div className="relative">
-            <div className="relative z-10 bg-card rounded-xl shadow-xl overflow-hidden border border-border">
-              <div className="bg-muted p-2 border-b border-border">
-                <div className="flex space-x-1.5">
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground/20"></div>
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground/20"></div>
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground/20"></div>
-                </div>
-              </div>
-              
-              <div className="p-4">
-                <div className="rounded-lg overflow-hidden shadow-sm">
-                  <div className="p-4 bg-primary text-primary-foreground">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-medium">Sistema Plushify</h3>
-                      <span className="text-sm">Painel de Controle</span>
-                    </div>
+            <div className="bg-card rounded-xl p-8 border border-border shadow-lg">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold mb-4 font-serif text-foreground">Sistema Completo</h3>
+                <p className="text-muted-foreground mb-6">
+                  Uma plataforma integrada para gerenciar todos os aspectos do seu negócio de estética
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <Calendar className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-foreground">Agenda Online</p>
                   </div>
-                  
-                  <div className="bg-card p-4">
-                    <div className="space-y-4">
-                      <div className="flex items-center p-3 border rounded-lg border-border bg-muted/50">
-                        <div className="w-2 h-10 bg-primary rounded-full mr-4"></div>
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <p className="font-medium text-foreground">Agendamentos</p>
-                            <span className="text-sm text-muted-foreground">24 hoje</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground">Gerencie sua agenda</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center p-3 border rounded-lg border-border">
-                        <div className="w-2 h-10 bg-secondary rounded-full mr-4"></div>
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <p className="font-medium text-foreground">Clientes</p>
-                            <span className="text-sm text-muted-foreground">156 ativos</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground">Cadastro completo</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center p-3 border rounded-lg border-border">
-                        <div className="w-2 h-10 bg-accent rounded-full mr-4"></div>
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <p className="font-medium text-foreground">Relatórios</p>
-                            <span className="text-sm text-muted-foreground">Dashboard</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground">Acompanhe resultados</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 text-center">
-                      <button className="text-primary text-sm font-medium hover:text-primary/80">
-                        Acessar sistema completo →
-                      </button>
-                    </div>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <MessageSquare className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-foreground">IA Integrada</p>
                   </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Floating notification element */}
-            <div className="absolute top-10 -right-10 bg-card rounded-lg p-3 shadow-lg border border-border animate-float hidden md:block">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                  <span className="text-green-600 dark:text-green-400 text-xs">✓</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">Novo agendamento</p>
-                  <p className="text-xs text-muted-foreground">Procedimento confirmado</p>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <Award className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-foreground">Cursos Online</p>
+                  </div>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <PenTool className="w-8 h-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-foreground">Gestão Completa</p>
+                  </div>
                 </div>
               </div>
             </div>
