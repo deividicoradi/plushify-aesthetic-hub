@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   LayoutDashboard,
@@ -15,6 +14,7 @@ import {
   Settings as SettingsIcon,
   Sun,
   Moon,
+  Scissors,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,6 +43,12 @@ export default function DashboardSidebar() {
       url: "/clientes",
       icon: Users,
       isActive: isActive("/clientes"),
+    },
+    {
+      title: "Serviços",
+      url: "/servicos",
+      icon: Scissors,
+      isActive: isActive("/servicos"),
     },
     {
       title: "Agendamentos",
