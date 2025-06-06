@@ -22,25 +22,25 @@ const DesktopMenu = ({ onLogin, onSignUp }: DesktopMenuProps) => {
     <nav className="hidden md:flex items-center space-x-8">
       <button 
         onClick={() => scrollToSection('top')} 
-        className="text-foreground/70 hover:text-foreground transition-colors"
+        className="text-muted-foreground hover:text-foreground transition-colors"
       >
         Início
       </button>
       <button 
         onClick={() => scrollToSection('features')} 
-        className="text-foreground/70 hover:text-foreground transition-colors"
+        className="text-muted-foreground hover:text-foreground transition-colors"
       >
         Funcionalidades
       </button>
       <button 
         onClick={() => scrollToSection('pricing')} 
-        className="text-foreground/70 hover:text-foreground transition-colors"
+        className="text-muted-foreground hover:text-foreground transition-colors"
       >
         Planos
       </button>
       <button 
         onClick={() => scrollToSection('testimonials')} 
-        className="text-foreground/70 hover:text-foreground transition-colors"
+        className="text-muted-foreground hover:text-foreground transition-colors"
       >
         Depoimentos
       </button>

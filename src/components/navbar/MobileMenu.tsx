@@ -28,25 +28,25 @@ const MobileMenu = ({ isOpen, onLogin, onSignUp, onClose }: MobileMenuProps) => 
       <div className="container mx-auto px-4 py-4 space-y-4">
         <button 
           onClick={() => scrollToSection('top')} 
-          className="block w-full text-left text-foreground/70 hover:text-foreground transition-colors py-2"
+          className="block w-full text-left text-muted-foreground hover:text-foreground transition-colors py-2"
         >
           Início
         </button>
         <button 
           onClick={() => scrollToSection('features')} 
-          className="block w-full text-left text-foreground/70 hover:text-foreground transition-colors py-2"
+          className="block w-full text-left text-muted-foreground hover:text-foreground transition-colors py-2"
         >
           Funcionalidades
         </button>
         <button 
           onClick={() => scrollToSection('pricing')} 
-          className="block w-full text-left text-foreground/70 hover:text-foreground transition-colors py-2"
+          className="block w-full text-left text-muted-foreground hover:text-foreground transition-colors py-2"
         >
           Planos
         </button>
         <button 
           onClick={() => scrollToSection('testimonials')} 
-          className="block w-full text-left text-foreground/70 hover:text-foreground transition-colors py-2"
+          className="block w-full text-left text-muted-foreground hover:text-foreground transition-colors py-2"
         >
           Depoimentos
         </button>
