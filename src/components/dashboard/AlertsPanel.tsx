@@ -65,17 +65,25 @@ export const AlertsPanel = () => {
 
   const getAlertColor = (type: Alert['type']) => {
     switch (type) {
-      case 'danger': return 'bg-red-50 border-red-200 text-red-800';
-      case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      default: return 'bg-blue-50 border-blue-200 text-blue-800';
+      case 'danger': return 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/30 text-red-800 dark:text-red-200';
+      case 'warning': return 'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800/30 text-yellow-800 dark:text-yellow-200';
+      default: return 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/30 text-blue-800 dark:text-blue-200';
     }
   };
 
   const getBadgeColor = (type: Alert['type']) => {
     switch (type) {
-      case 'danger': return 'bg-red-500';
-      case 'warning': return 'bg-yellow-500';
-      default: return 'bg-blue-500';
+      case 'danger': return 'bg-red-500 dark:bg-red-600 text-white';
+      case 'warning': return 'bg-yellow-500 dark:bg-yellow-600 text-white';
+      default: return 'bg-blue-500 dark:bg-blue-600 text-white';
+    }
+  };
+
+  const getDescriptionColor = (type: Alert['type']) => {
+    switch (type) {
+      case 'danger': return 'text-red-700 dark:text-red-300';
+      case 'warning': return 'text-yellow-700 dark:text-yellow-300';
+      default: return 'text-blue-700 dark:text-blue-300';
     }
   };
 
@@ -84,10 +92,10 @@ export const AlertsPanel = () => {
   };
 
   return (
-    <Card>
+    <Card className="bg-card dark:bg-card border-border">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-plush-600" />
+        <CardTitle className="flex items-center gap-2 text-card-foreground">
+          <AlertTriangle className="w-5 h-5 text-primary" />
           Alertas e Lembretes
         </CardTitle>
       </CardHeader>
@@ -102,11 +110,11 @@ export const AlertsPanel = () => {
                 <alert.icon className="w-5 h-5" />
                 <div>
                   <h4 className="font-medium">{alert.title}</h4>
-                  <p className="text-sm opacity-80">{alert.description}</p>
+                  <p className={`text-sm ${getDescriptionColor(alert.type)}`}>{alert.description}</p>
                 </div>
               </div>
               {alert.value && (
-                <Badge className={`${getBadgeColor(alert.type)} text-white`}>
+                <Badge className={`${getBadgeColor(alert.type)}`}>
                   {alert.value}
                 </Badge>
               )}
@@ -115,7 +123,7 @@ export const AlertsPanel = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="mt-2"
+                className="mt-2 border-current text-current hover:bg-current/10 dark:hover:bg-current/20"
                 onClick={() => handleActionClick(alert.actionRoute)}
               >
                 {alert.action}
