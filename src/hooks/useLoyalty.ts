@@ -1,0 +1,136 @@
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+export interface LoyaltyClient {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  totalPoints: number;
+  totalSpent: number;
+  appointmentsCount: number;
+  lastVisit?: string;
+  tier: 'Bronze' | 'Prata' | 'Ouro' | 'Diamante';
+}
+
+export interface LoyaltyStats {
+  totalClients: number;
+  totalAppointments: number;
+  totalRevenue: number;
+  averageTicket: number;
+  pointsDistributed: number;
+}
+
+export const useLoyalty = () => {
+  const [clients, setClients] = useState<LoyaltyClient[]>([]);
+  const [stats, setStats] = useState<LoyaltyStats>({
+    totalClients: 0,
+    totalAppointments: 0,
+    totalRevenue: 0,
+    averageTicket: 0,
+    pointsDistributed: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  const calculateTier = (totalSpent: number): 'Bronze' | 'Prata' | 'Ouro' | 'Diamante' => {
+    if (totalSpent >= 2000) return 'Diamante';
+    if (totalSpent >= 1000) return 'Ouro';
+    if (totalSpent >= 500) return 'Prata';
+    return 'Bronze';
+  };
+
+  const fetchLoyaltyData = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      // Buscar todos os clientes com seus agendamentos
+      const { data: clientsData, error: clientsError } = await supabase
+        .from('clients')
+        .select(`
+          id,
+          name,
+          email,
+          phone,
+          last_visit
+        `)
+        .eq('user_id', user.id);
+
+      if (clientsError) throw clientsError;
+
+      // Buscar agendamentos concluídos com preços
+      const { data: appointmentsData, error: appointmentsError } = await supabase
+        .from('appointments')
+        .select(`
+          id,
+          client_id,
+          price,
+          start_time,
+          status
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'concluido');
+
+      if (appointmentsError) throw appointmentsError;
+
+      // Processar dados de fidelidade
+      const loyaltyClients: LoyaltyClient[] = clientsData?.map(client => {
+        const clientAppointments = appointmentsData?.filter(apt => apt.client_id === client.id) || [];
+        const totalSpent = clientAppointments.reduce((sum, apt) => sum + (apt.price || 0), 0);
+        const totalPoints = Math.floor(totalSpent); // 1 ponto por real gasto
+        const appointmentsCount = clientAppointments.length;
+        const tier = calculateTier(totalSpent);
+
+        return {
+          id: client.id,
+          name: client.name,
+          email: client.email,
+          phone: client.phone,
+          totalPoints,
+          totalSpent,
+          appointmentsCount,
+          lastVisit: client.last_visit,
+          tier
+        };
+      }) || [];
+
+      // Ordenar por pontos (maior para menor)
+      loyaltyClients.sort((a, b) => b.totalPoints - a.totalPoints);
+
+      // Calcular estatísticas
+      const totalRevenue = appointmentsData?.reduce((sum, apt) => sum + (apt.price || 0), 0) || 0;
+      const totalAppointments = appointmentsData?.length || 0;
+      const pointsDistributed = loyaltyClients.reduce((sum, client) => sum + client.totalPoints, 0);
+
+      const statsData: LoyaltyStats = {
+        totalClients: clientsData?.length || 0,
+        totalAppointments,
+        totalRevenue,
+        averageTicket: totalAppointments > 0 ? totalRevenue / totalAppointments : 0,
+        pointsDistributed
+      };
+
+      setClients(loyaltyClients);
+      setStats(statsData);
+    } catch (error: any) {
+      console.error('Erro ao buscar dados de fidelidade:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLoyaltyData();
+  }, [user]);
+
+  return {
+    clients,
+    stats,
+    loading,
+    refetch: fetchLoyaltyData
+  };
+};
