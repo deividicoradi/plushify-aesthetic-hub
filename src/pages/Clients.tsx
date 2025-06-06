@@ -21,11 +21,11 @@ const Clients = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users className="w-6 h-6 text-pink-500" />
-            <h1 className="text-2xl font-bold">Clientes</h1>
+            <Users className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
           </div>
           <Button
-            className="bg-pink-500 hover:bg-pink-600 transition-colors"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
             onClick={() => setDrawerOpen(true)}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none"><path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -35,10 +35,10 @@ const Clients = () => {
 
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar clientes..."
-              className="pl-9 max-w-md"
+              className="pl-9 max-w-md bg-background border-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
