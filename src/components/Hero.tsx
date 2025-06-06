@@ -163,22 +163,31 @@ const Hero = () => {
               </div>
             </div>
             
-            {/* Agenda do Dia floating element replacing AI Assistant */}
-            <div className="absolute -bottom-5 -left-10 bg-card rounded-lg shadow-lg border border-border animate-float hidden md:block overflow-hidden" style={{ animationDelay: '1s' }}>
+            {/* Agenda do Dia floating element - simplified version */}
+            <div className="absolute -bottom-5 -left-10 bg-card rounded-lg shadow-lg border border-border animate-float hidden md:block overflow-hidden w-48" style={{ animationDelay: '1s' }}>
               <div className="bg-primary text-primary-foreground px-3 py-2 text-sm font-medium">
-                Agenda do Dia
+                📅 Agenda do Dia
               </div>
-              <div className="p-3 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-foreground font-medium">Ana Silva</span>
-                  <span className="text-muted-foreground">09:00</span>
+              <div className="p-3 space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-foreground font-medium">Ana Silva</span>
+                    <span className="text-muted-foreground">09:00</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">Limpeza de Pele</div>
                 </div>
-                <div className="text-xs text-muted-foreground">Limpeza de Pele</div>
-                <div className="flex items-center justify-between text-xs mt-2">
-                  <span className="text-foreground font-medium">Mariana Costa</span>
-                  <span className="text-muted-foreground">11:00</span>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-foreground font-medium">Mariana Costa</span>
+                    <span className="text-muted-foreground">11:00</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">Design de Sobrancelhas</div>
                 </div>
-                <div className="text-xs text-muted-foreground">Design de Sobrancelhas</div>
+                <div className="border-t border-border pt-2">
+                  <div className="text-xs text-center text-primary font-medium">
+                    Ver mais →
+                  </div>
+                </div>
               </div>
             </div>
           </div>
