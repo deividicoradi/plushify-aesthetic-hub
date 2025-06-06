@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -141,18 +140,18 @@ const WhatsAppQRScanner = () => {
       case 'error':
         return <AlertCircle className="w-5 h-5 text-red-600" />;
       default:
-        return <WifiOff className="w-5 h-5 text-gray-600" />;
+        return <WifiOff className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
   const getStatusBadge = () => {
     switch (connectionStatus.status) {
       case 'connected':
-        return <Badge className="bg-green-100 text-green-700">Conectado</Badge>;
+        return <Badge className="bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-400">Conectado</Badge>;
       case 'qr_ready':
-        return <Badge className="bg-blue-100 text-blue-700">Aguardando Scan</Badge>;
+        return <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400">Aguardando Scan</Badge>;
       case 'connecting':
-        return <Badge className="bg-yellow-100 text-yellow-700">Conectando</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-950/20 dark:text-yellow-400">Conectando</Badge>;
       case 'error':
         return <Badge variant="destructive">Erro</Badge>;
       default:
@@ -181,7 +180,7 @@ const WhatsAppQRScanner = () => {
               <div className="text-center space-y-4">
                 <div className="p-6 bg-accent/50 rounded-lg">
                   <Smartphone className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Conecte seu WhatsApp</h3>
+                  <h3 className="text-lg font-medium mb-2 text-foreground">Conecte seu WhatsApp</h3>
                   <p className="text-muted-foreground text-sm">
                     Escaneie o QR Code com seu WhatsApp para conectar e enviar mensagens automáticas
                   </p>
@@ -209,7 +208,7 @@ const WhatsAppQRScanner = () => {
 
             {connectionStatus.status === 'qr_ready' && connectionStatus.qr && (
               <div className="text-center space-y-4">
-                <div className="p-4 bg-white rounded-lg border-2 border-dashed inline-block">
+                <div className="p-4 bg-background rounded-lg border-2 border-dashed border-border inline-block">
                   <img 
                     src={connectionStatus.qr} 
                     alt="QR Code WhatsApp"
@@ -217,7 +216,7 @@ const WhatsAppQRScanner = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Escaneie o QR Code</h3>
+                  <h3 className="text-lg font-medium text-foreground">Escaneie o QR Code</h3>
                   <p className="text-muted-foreground text-sm">
                     1. Abra o WhatsApp no seu celular<br/>
                     2. Toque em "Dispositivos vinculados"<br/>
@@ -281,7 +280,7 @@ const WhatsAppQRScanner = () => {
           <TabsContent value="instructions" className="space-y-4">
             <div className="space-y-6">
               <div>
-                <h3 className="font-medium mb-3">Como funciona?</h3>
+                <h3 className="font-medium mb-3 text-foreground">Como funciona?</h3>
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <p>• Conecte seu WhatsApp pessoal ou comercial via QR Code</p>
                   <p>• O sistema usa seu WhatsApp para enviar mensagens automáticas</p>
@@ -291,7 +290,7 @@ const WhatsAppQRScanner = () => {
               </div>
 
               <div>
-                <h3 className="font-medium mb-3">Vantagens</h3>
+                <h3 className="font-medium mb-3 text-foreground">Vantagens</h3>
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <p>✅ Sem custos por mensagem</p>
                   <p>✅ Usa seu próprio WhatsApp</p>
@@ -301,7 +300,7 @@ const WhatsAppQRScanner = () => {
               </div>
 
               <div>
-                <h3 className="font-medium mb-3">Importante</h3>
+                <h3 className="font-medium mb-3 text-foreground">Importante</h3>
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <p>⚠️ Mantenha o WhatsApp conectado no celular</p>
                   <p>⚠️ Use com moderação para evitar bloqueios</p>

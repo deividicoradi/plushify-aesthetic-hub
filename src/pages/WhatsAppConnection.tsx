@@ -16,12 +16,12 @@ const WhatsAppConnection = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate('/communication')}
+            onClick={() => navigate('/comunicacao')}
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold font-serif">Conectar WhatsApp</h1>
+            <h1 className="text-3xl font-bold font-serif text-foreground">Conectar WhatsApp</h1>
             <p className="text-muted-foreground">
               Configure a conexão do seu WhatsApp para envio automático de mensagens
             </p>

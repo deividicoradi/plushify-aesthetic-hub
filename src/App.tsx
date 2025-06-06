@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -23,6 +24,7 @@ import Settings from './pages/Settings';
 import Plans from './pages/Plans';
 import NotFound from './pages/NotFound';
 import PaymentSuccess from './pages/PaymentSuccess';
+import WhatsAppConnection from './pages/WhatsAppConnection';
 import DashboardLayout from './components/DashboardLayout';
 import Marketing from './pages/Marketing';
 import Analytics from './pages/Analytics';
@@ -117,6 +119,16 @@ function App() {
                     <ProtectedRoute>
                       <DashboardLayout>
                         <Communication />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/whatsapp-connection" 
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <WhatsAppConnection />
                       </DashboardLayout>
                     </ProtectedRoute>
                   } 
