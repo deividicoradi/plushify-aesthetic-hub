@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Clock, TrendingDown, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,10 +13,13 @@ interface Alert {
   title: string;
   description: string;
   action?: string;
+  actionRoute?: string;
   value?: string;
 }
 
 export const AlertsPanel = () => {
+  const navigate = useNavigate();
+
   const alerts: Alert[] = [
     {
       id: '1',
@@ -24,6 +28,7 @@ export const AlertsPanel = () => {
       title: 'Produtos com Estoque Baixo',
       description: '3 produtos precisam de reposição',
       action: 'Ver Estoque',
+      actionRoute: '/estoque',
       value: '3'
     },
     {
@@ -33,6 +38,7 @@ export const AlertsPanel = () => {
       title: 'Agendamentos Pendentes',
       description: 'Confirmações aguardando resposta',
       action: 'Verificar',
+      actionRoute: '/agendamentos',
       value: '5'
     },
     {
@@ -42,6 +48,7 @@ export const AlertsPanel = () => {
       title: 'Queda no Faturamento',
       description: '15% menor que a semana passada',
       action: 'Analisar',
+      actionRoute: '/relatorios',
       value: '-15%'
     },
     {
@@ -51,6 +58,7 @@ export const AlertsPanel = () => {
       title: 'Novos Clientes',
       description: 'Cadastrados esta semana',
       action: 'Ver Clientes',
+      actionRoute: '/clientes',
       value: '8'
     }
   ];
@@ -69,6 +77,10 @@ export const AlertsPanel = () => {
       case 'warning': return 'bg-yellow-500';
       default: return 'bg-blue-500';
     }
+  };
+
+  const handleActionClick = (route: string) => {
+    navigate(route);
   };
 
   return (
@@ -99,8 +111,13 @@ export const AlertsPanel = () => {
                 </Badge>
               )}
             </div>
-            {alert.action && (
-              <Button variant="outline" size="sm" className="mt-2">
+            {alert.action && alert.actionRoute && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={() => handleActionClick(alert.actionRoute)}
+              >
                 {alert.action}
               </Button>
             )}
