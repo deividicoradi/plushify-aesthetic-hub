@@ -28,54 +28,44 @@ export const ComparisonTable = () => {
               { category: 'FUNCIONALIDADES BÁSICAS', free: '', starter: '', pro: '', premium: '', isHeader: true },
               { name: 'Cadastro de Clientes', free: '5 clientes', starter: 'Ilimitados', pro: 'Ilimitados', premium: 'Ilimitados' },
               { name: 'Agendamentos', free: '10/mês', starter: 'Ilimitados', pro: 'Ilimitados', premium: 'Ilimitados' },
-              { name: 'Dashboard', free: 'Limitado', starter: 'Completo', pro: 'Avançado', premium: 'Personalizado' },
-              { name: 'Backup de Dados', free: '❌', starter: '✓ Automático', pro: '✓ Automático', premium: '✓ Redundante' },
-              
-              // Comunicação e Marketing
-              { category: 'COMUNICAÇÃO E MARKETING', free: '', starter: '', pro: '', premium: '', isHeader: true },
-              { name: 'Lembretes por Email', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
-              { name: 'Lembretes por SMS', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
-              { name: 'WhatsApp Automático', free: '❌', starter: '❌', pro: '✓', premium: '✓ Avançado' },
-              { name: 'Campanhas de Marketing', free: '❌', starter: '❌', pro: '✓ Básicas', premium: '✓ IA Personalizada' },
-              { name: 'Integração Redes Sociais', free: '❌', starter: '❌', pro: '✓', premium: '✓ Completa' },
+              { name: 'Dashboard com Métricas', free: 'Limitado', starter: 'Completo', pro: 'Completo', premium: 'Completo' },
+              { name: 'Cadastro de Serviços', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
+              { name: 'Controle de Estoque', free: '❌', starter: '✓ Básico', pro: '✓ Completo', premium: '✓ Avançado' },
+              { name: 'Notas e Observações', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
               
               // Relatórios e Análises
               { category: 'RELATÓRIOS E ANÁLISES', free: '', starter: '', pro: '', premium: '', isHeader: true },
               { name: 'Relatórios Básicos', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
-              { name: 'Relatórios com IA', free: '❌', starter: '❌', pro: '✓', premium: '✓ Personalizados' },
-              { name: 'Análises Preditivas', free: '❌', starter: '❌', pro: '✓', premium: '✓ Avançadas' },
-              { name: 'Exportação PDF/Excel', free: '❌', starter: 'Básica', pro: 'Completa', premium: 'Personalizada' },
+              { name: 'Análises Avançadas', free: '❌', starter: '❌', pro: '✓', premium: '✓' },
+              { name: 'Análises com IA', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
+              { name: 'Exportação de Dados', free: '❌', starter: 'Básica', pro: 'Completa', premium: 'Personalizada' },
               
-              // Gestão Avançada
-              { category: 'GESTÃO AVANÇADA', free: '', starter: '', pro: '', premium: '', isHeader: true },
-              { name: 'Controle de Estoque', free: '❌', starter: 'Básico', pro: 'Completo', premium: 'IA Integrada' },
-              { name: 'Sistema de Fidelidade', free: '❌', starter: '❌', pro: '✓', premium: '✓ Personalizado' },
-              { name: 'CRM Integrado', free: '❌', starter: '❌', pro: 'Básico', premium: '✓ Completo' },
-              { name: 'Sistema de Vendas', free: '❌', starter: '❌', pro: '❌', premium: '✓ Com Comissões' },
+              // Comunicação
+              { category: 'COMUNICAÇÃO', free: '', starter: '', pro: '', premium: '', isHeader: true },
+              { name: 'Sistema de Comunicação', free: '❌', starter: '✓ Básico', pro: '✓ Completo', premium: '✓ Avançado' },
+              { name: 'Templates de Mensagens', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
+              { name: 'Integração WhatsApp', free: '❌', starter: '❌', pro: '✓', premium: '✓' },
               
-              // Recursos Premium Exclusivos
-              { category: 'RECURSOS PREMIUM EXCLUSIVOS', free: '', starter: '', pro: '', premium: '', isHeader: true },
-              { name: 'Gestão de Equipe Multi-usuário', free: '❌', starter: '❌', pro: '❌', premium: '✓ Completa' },
-              { name: 'IA Personalizada', free: '❌', starter: '❌', pro: '❌', premium: '✓ Seu Negócio' },
-              { name: 'API Personalizada', free: '❌', starter: '❌', pro: '❌', premium: '✓ Documentada' },
-              { name: 'Biolink Personalizado', free: '❌', starter: '❌', pro: '❌', premium: '✓ Seu Domínio' },
-              { name: 'Programa de Afiliados', free: '❌', starter: '❌', pro: '❌', premium: '✓ Completo' },
-              { name: 'Integração com ERPs', free: '❌', starter: '❌', pro: '❌', premium: '✓ SAP, Totvs, etc' },
+              // Recursos Premium
+              { category: 'RECURSOS PREMIUM', free: '', starter: '', pro: '', premium: '', isHeader: true },
+              { name: 'Sistema de Fidelidade', free: '❌', starter: '❌', pro: '✓', premium: '✓' },
+              { name: 'Gestão de Equipe', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
+              { name: 'IA Personalizada', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
+              { name: 'CRM Avançado', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
+              { name: 'Automação Avançada', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
               
-              // Suporte e Treinamento
-              { category: 'SUPORTE E TREINAMENTO', free: '', starter: '', pro: '', premium: '', isHeader: true },
+              // Suporte
+              { category: 'SUPORTE', free: '', starter: '', pro: '', premium: '', isHeader: true },
+              { name: 'Documentação', free: '✓', starter: '✓', pro: '✓', premium: '✓' },
               { name: 'Suporte por Email', free: '❌', starter: '✓', pro: '✓', premium: '✓' },
-              { name: 'Suporte por Chat', free: '❌', starter: '✓', pro: '✓', premium: '✓ Prioritário' },
+              { name: 'Suporte Prioritário', free: '❌', starter: '❌', pro: '✓', premium: '✓' },
               { name: 'Suporte 24/7', free: '❌', starter: '❌', pro: '❌', premium: '✓' },
-              { name: 'Consultoria Estratégica', free: '❌', starter: '❌', pro: '❌', premium: '✓ Mensal' },
-              { name: 'Treinamento da Equipe', free: '❌', starter: '❌', pro: '❌', premium: '✓ Incluído' },
-              { name: 'Cursos e Certificados', free: '❌', starter: '❌', pro: '✓', premium: '✓ Avançados' },
               
-              // Pagamento e Facilidades
+              // Facilidades de Pagamento
               { category: 'FACILIDADES DE PAGAMENTO', free: '', starter: '', pro: '', premium: '', isHeader: true },
-              { name: 'Opção de Parcelamento', free: '❌', starter: 'Até 10x', pro: 'Até 10x', premium: 'Até 12x' },
-              { name: 'Desconto Anual', free: '❌', starter: '20%', pro: '20%', premium: '20%' },
               { name: 'Período de Teste', free: '❌', starter: '7 dias', pro: '14 dias', premium: '30 dias' },
+              { name: 'Desconto Anual', free: '❌', starter: '20%', pro: '20%', premium: '20%' },
+              { name: 'Parcelamento', free: '❌', starter: 'Até 10x', pro: 'Até 10x', premium: 'Até 12x' },
             ].map((feature, index) => (
               <tr key={index} className={`border-b border-border ${feature.isHeader ? 'bg-muted' : ''}`}>
                 <td className={`py-4 pl-4 ${feature.isHeader ? 'font-bold text-card-foreground text-sm uppercase tracking-wide' : 'font-medium text-card-foreground'}`}>
@@ -94,9 +84,8 @@ export const ComparisonTable = () => {
       <div className="mt-8 p-6 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
         <h4 className="text-lg font-bold text-primary mb-2">🚀 Por que escolher o Premium?</h4>
         <p className="text-card-foreground text-sm leading-relaxed">
-          O plano Premium foi desenvolvido para empresas que querem uma solução completa e personalizada. 
-          Com IA exclusiva para seu negócio, gestão de equipe completa, integrações avançadas e consultoria estratégica, 
-          você terá tudo que precisa para escalar seu negócio de forma inteligente e automatizada.
+          O plano Premium oferece todas as funcionalidades desenvolvidas, incluindo análises avançadas com IA, 
+          gestão de equipe completa, CRM integrado e automação personalizada para seu negócio.
         </p>
       </div>
     </div>
