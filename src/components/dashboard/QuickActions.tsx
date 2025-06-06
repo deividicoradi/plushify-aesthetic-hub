@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Plus, Calendar, Users, Package, MessageSquare, Brain, Target, Zap } from 'lucide-react';
+import { Plus, Calendar, Users, Package, Brain, Target, Zap, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ interface QuickAction {
   description: string;
   onClick: () => void;
   color: string;
+  textColor?: string;
   isPremium?: boolean;
 }
 
@@ -26,28 +27,32 @@ export const QuickActions = () => {
       label: 'Novo Agendamento',
       description: 'Agendar serviço',
       onClick: () => navigate('/agendamentos'),
-      color: 'bg-plush-500 hover:bg-plush-600 dark:bg-plush-600 dark:hover:bg-plush-700'
+      color: 'from-blue-500 to-blue-600',
+      textColor: 'text-white'
     },
     {
       icon: Users,
       label: 'Adicionar Cliente',
       description: 'Cadastrar novo cliente',
       onClick: () => navigate('/clientes'),
-      color: 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700'
+      color: 'from-green-500 to-green-600',
+      textColor: 'text-white'
     },
     {
       icon: Package,
       label: 'Controlar Estoque',
       description: 'Gerenciar produtos',
       onClick: () => navigate('/estoque'),
-      color: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
+      color: 'from-orange-500 to-orange-600',
+      textColor: 'text-white'
     },
     {
-      icon: MessageSquare,
-      label: 'Enviar Mensagem',
-      description: 'Comunicar com clientes',
-      onClick: () => navigate('/comunicacao'),
-      color: 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700'
+      icon: Calendar,
+      label: 'Ver Agenda',
+      description: 'Visualizar agendamentos',
+      onClick: () => navigate('/agendamentos'),
+      color: 'from-purple-500 to-purple-600',
+      textColor: 'text-white'
     }
   ];
 
@@ -57,7 +62,8 @@ export const QuickActions = () => {
       label: 'IA Personalizada',
       description: 'Análises inteligentes',
       onClick: () => navigate('/ai-dashboard'),
-      color: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 dark:from-purple-600 dark:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700',
+      color: 'from-gradient-purple to-gradient-pink',
+      textColor: 'text-white',
       isPremium: true
     },
     {
@@ -65,72 +71,85 @@ export const QuickActions = () => {
       label: 'CRM Avançado',
       description: 'Gestão de vendas',
       onClick: () => navigate('/crm'),
-      color: 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 dark:from-green-600 dark:to-teal-600 dark:hover:from-green-700 dark:hover:to-teal-700',
-      isPremium: true
-    },
-    {
-      icon: Zap,
-      label: 'Automações',
-      description: 'Workflows inteligentes',
-      onClick: () => navigate('/automacoes'),
-      color: 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 dark:from-orange-600 dark:to-red-600 dark:hover:from-orange-700 dark:hover:to-red-700',
+      color: 'from-gradient-blue to-gradient-cyan',
+      textColor: 'text-white',
       isPremium: true
     }
   ];
 
   const allActions = hasFeature('premium') 
-    ? [...basicActions.slice(0, 2), ...premiumActions.slice(0, 2)]
+    ? [...basicActions.slice(0, 2), ...premiumActions]
     : basicActions;
 
   return (
-    <Card className="bg-card dark:bg-card border-border">
-      <CardHeader>
+    <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-gray-50/50 dark:from-card dark:to-card/50">
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border-b border-border/50">
         <CardTitle className="flex items-center justify-between text-card-foreground">
-          Ações Rápidas
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+              <Zap className="w-4 h-4 text-primary" />
+            </div>
+            Ações Rápidas
+          </div>
           {hasFeature('premium') && (
-            <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">Premium</Badge>
+            <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+              Premium
+            </Badge>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-3">
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {allActions.map((action, index) => (
             <Button
               key={index}
               variant="outline"
-              className={`h-auto p-4 flex flex-col items-center gap-2 text-white border-0 relative ${action.color}`}
+              className={`h-auto p-4 flex flex-col items-center gap-3 border-0 relative bg-gradient-to-br ${action.color} hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg group`}
               onClick={action.onClick}
             >
               {action.isPremium && (
-                <Badge className="absolute -top-1 -right-1 bg-yellow-400 dark:bg-yellow-500 text-yellow-900 dark:text-yellow-950 text-xs px-1">
+                <Badge className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-xs px-2 py-1 rounded-full shadow-sm">
                   AI
                 </Badge>
               )}
-              <action.icon className="w-6 h-6" />
+              <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-full group-hover:bg-white/30 transition-colors">
+                <action.icon className={`w-5 h-5 ${action.textColor || 'text-white'}`} />
+              </div>
               <div className="text-center">
-                <div className="text-sm font-medium">{action.label}</div>
-                <div className="text-xs opacity-90">{action.description}</div>
+                <div className={`text-sm font-semibold ${action.textColor || 'text-white'}`}>
+                  {action.label}
+                </div>
+                <div className={`text-xs opacity-90 ${action.textColor || 'text-white'}`}>
+                  {action.description}
+                </div>
               </div>
             </Button>
           ))}
         </div>
 
         {!hasFeature('premium') && (
-          <div className="mt-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-lg border border-purple-200 dark:border-purple-800/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Brain className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              <span className="text-sm font-medium text-purple-800 dark:text-purple-200">Recursos Premium</span>
+          <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                  <Brain className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-purple-900 dark:text-purple-100">Recursos Premium</h4>
+                  <p className="text-sm text-purple-700 dark:text-purple-300">
+                    IA personalizada, CRM avançado e automações
+                  </p>
+                </div>
+              </div>
+              <Button 
+                size="sm" 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 shadow-md"
+                onClick={() => navigate('/planos')}
+              >
+                Upgrade
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
             </div>
-            <p className="text-xs text-purple-700 dark:text-purple-300 mb-2">
-              Desbloqueie IA personalizada, CRM avançado e automações inteligentes
-            </p>
-            <Button 
-              size="sm" 
-              className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 text-xs"
-              onClick={() => navigate('/planos')}
-            >
-              Upgrade para Premium
-            </Button>
           </div>
         )}
       </CardContent>
