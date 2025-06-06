@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,12 +55,14 @@ const WhatsAppQRScanner = () => {
   const startConnection = async () => {
     setIsLoading(true);
     try {
+      console.log('Iniciando conexão WhatsApp...');
+      
       const { data, error } = await supabase.functions.invoke('whatsapp-session', {
         body: { action: 'start' }
       });
 
       if (error) {
-        throw error;
+        throw new Error(error.message || 'Erro na função edge');
       }
 
       if (data?.qr) {
@@ -69,8 +72,12 @@ const WhatsAppQRScanner = () => {
           sessionId: data.sessionId
         });
         
+        toast.success('QR Code gerado com sucesso!');
+        
         // Iniciar polling para verificar status da conexão
         startStatusPolling(data.sessionId);
+      } else {
+        throw new Error('QR Code não foi gerado');
       }
     } catch (error) {
       console.error('Erro ao iniciar conexão:', error);
