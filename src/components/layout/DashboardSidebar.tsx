@@ -1,10 +1,10 @@
+
 import React from "react";
 import {
   LayoutDashboard,
   Users,
   CalendarDays,
   Package,
-  MessageSquare,
   FileText,
   BarChart3,
   Megaphone,
@@ -61,12 +61,6 @@ export default function DashboardSidebar() {
       url: "/estoque",
       icon: Package,
       isActive: isActive("/estoque"),
-    },
-    {
-      title: "Comunicação",
-      url: "/comunicacao",
-      icon: MessageSquare,
-      isActive: isActive("/comunicacao"),
     },
     ...(hasFeature('pro') ? [{
       title: "Marketing",

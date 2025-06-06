@@ -17,14 +17,12 @@ import Services from './pages/Services';
 import Appointments from './pages/Appointments';
 import Inventory from './pages/Inventory';
 import Reports from './pages/Reports';
-import Communication from './pages/Communication';
 import Loyalty from './pages/Loyalty';
 import Notes from './pages/Notes';
 import Settings from './pages/Settings';
 import Plans from './pages/Plans';
 import NotFound from './pages/NotFound';
 import PaymentSuccess from './pages/PaymentSuccess';
-import WhatsAppConnection from './pages/WhatsAppConnection';
 import DashboardLayout from './components/DashboardLayout';
 import Marketing from './pages/Marketing';
 import Analytics from './pages/Analytics';
@@ -114,46 +112,6 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="/comunicacao" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Communication />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/whatsapp-connection" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <WhatsAppConnection />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/fidelidade" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Loyalty />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/anotacoes" 
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Notes />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
                   path="/marketing" 
                   element={
                     <ProtectedRoute>
@@ -179,6 +137,26 @@ function App() {
                     <ProtectedRoute>
                       <DashboardLayout>
                         <Automation />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/fidelidade" 
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Loyalty />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/anotacoes" 
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Notes />
                       </DashboardLayout>
                     </ProtectedRoute>
                   } 
