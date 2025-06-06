@@ -131,39 +131,43 @@ const Features = () => {
                 <div className="bg-muted rounded-lg p-6 relative z-10">
                   <div className="flex space-x-4 mb-6">
                     <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                      <Brain className="w-6 h-6" />
+                      <Calendar className="w-6 h-6" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-foreground">Assistente IA</h4>
-                      <p className="text-sm text-muted-foreground">Seu assistente pessoal inteligente</p>
+                      <h4 className="font-medium text-foreground">Agenda Inteligente</h4>
+                      <p className="text-sm text-muted-foreground">Controle total da sua agenda</p>
                     </div>
                   </div>
                   
                   <div className="space-y-4">
-                    <div className="bg-card p-4 rounded-lg rounded-tl-none shadow-sm border border-border">
-                      <p className="text-sm text-foreground">Como posso ajudar você hoje?</p>
-                      <p className="text-xs text-muted-foreground mt-1">Assistente Plushify, 10:30</p>
+                    <div className="bg-card p-4 rounded-lg shadow-sm border border-border">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-sm font-medium text-foreground">Ana Silva</p>
+                        <span className="text-xs text-muted-foreground">09:00</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Limpeza de Pele Profunda</p>
                     </div>
                     
-                    <div className="bg-primary/10 p-4 rounded-lg rounded-tr-none shadow-sm">
-                      <p className="text-sm text-foreground">Preciso enviar uma campanha para meus clientes que não retornam há mais de 30 dias</p>
-                      <p className="text-xs text-muted-foreground mt-1">Você, 10:32</p>
+                    <div className="bg-card p-4 rounded-lg shadow-sm border border-border">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-sm font-medium text-foreground">Mariana Costa</p>
+                        <span className="text-xs text-muted-foreground">11:00</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Design de Sobrancelhas</p>
                     </div>
                     
-                    <div className="bg-card p-4 rounded-lg rounded-tl-none shadow-sm border border-border">
-                      <p className="text-sm text-foreground">Criei uma campanha personalizada para reconquista de clientes. Você tem 28 clientes inativos há mais de 30 dias. Deseja enviar agora?</p>
-                      <p className="text-xs text-muted-foreground mt-1">Assistente Plushify, 10:33</p>
+                    <div className="bg-card p-4 rounded-lg shadow-sm border border-border">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-sm font-medium text-foreground">Regina Pires</p>
+                        <span className="text-xs text-muted-foreground">14:00</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Massagem Relaxante</p>
                     </div>
                   </div>
                   
-                  <div className="mt-4 relative">
-                    <input
-                      type="text"
-                      placeholder="Digite sua mensagem..."
-                      className="w-full bg-background border border-border rounded-full py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
-                    />
-                    <button className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                      <ArrowRight className="w-3 h-3 text-primary-foreground" />
+                  <div className="mt-4 text-center">
+                    <button className="text-primary text-sm font-medium hover:text-primary/80">
+                      Ver agenda completa →
                     </button>
                   </div>
                 </div>
@@ -179,11 +183,5 @@ const Features = () => {
     </section>
   );
 };
-
-const ArrowRight = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 12h14M12 5l7 7-7 7"/>
-  </svg>
-);
 
 export default Features;
