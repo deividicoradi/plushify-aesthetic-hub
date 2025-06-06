@@ -22,25 +22,25 @@ const DesktopMenu = ({ onLogin, onSignUp }: DesktopMenuProps) => {
     <nav className="hidden md:flex items-center space-x-8">
       <button 
         onClick={() => scrollToSection('top')} 
-        className="text-foreground/80 hover:text-primary transition-colors bg-transparent"
+        className="text-foreground/70 hover:text-foreground transition-colors"
       >
         Início
       </button>
       <button 
         onClick={() => scrollToSection('features')} 
-        className="text-foreground/80 hover:text-primary transition-colors bg-transparent"
+        className="text-foreground/70 hover:text-foreground transition-colors"
       >
         Funcionalidades
       </button>
       <button 
         onClick={() => scrollToSection('pricing')} 
-        className="text-foreground/80 hover:text-primary transition-colors bg-transparent"
+        className="text-foreground/70 hover:text-foreground transition-colors"
       >
         Planos
       </button>
       <button 
         onClick={() => scrollToSection('testimonials')} 
-        className="text-foreground/80 hover:text-primary transition-colors bg-transparent"
+        className="text-foreground/70 hover:text-foreground transition-colors"
       >
         Depoimentos
       </button>
@@ -49,12 +49,13 @@ const DesktopMenu = ({ onLogin, onSignUp }: DesktopMenuProps) => {
         <Button 
           variant="outline"
           onClick={onLogin}
+          className="border-border text-foreground hover:bg-accent hover:text-accent-foreground"
         >
           Entrar
         </Button>
         <Button 
-          className="bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={onSignUp}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           Começar Grátis
         </Button>
