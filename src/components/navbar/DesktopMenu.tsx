@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface DesktopMenuProps {
   onLogin: () => void;
@@ -44,6 +45,7 @@ const DesktopMenu = ({ onLogin, onSignUp }: DesktopMenuProps) => {
         Depoimentos
       </button>
       <div className="flex items-center space-x-3">
+        <ThemeToggle />
         <Button 
           variant="outline" 
           className="border-plush-200 hover:border-plush-400 text-plush-700"
