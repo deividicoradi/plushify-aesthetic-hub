@@ -150,7 +150,7 @@ const Hero = () => {
               </div>
             </div>
             
-            {/* Floating elements */}
+            {/* Floating notification element */}
             <div className="absolute top-10 -right-10 bg-card rounded-lg p-3 shadow-lg border border-border animate-float hidden md:block">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
@@ -163,7 +163,7 @@ const Hero = () => {
               </div>
             </div>
             
-            {/* Agenda do Dia floating element - simplified version */}
+            {/* Agenda do Dia floating element */}
             <div className="absolute -bottom-5 -left-10 bg-card rounded-lg shadow-lg border border-border animate-float hidden md:block overflow-hidden w-48" style={{ animationDelay: '1s' }}>
               <div className="bg-primary text-primary-foreground px-3 py-2 text-sm font-medium">
                 📅 Agenda do Dia
