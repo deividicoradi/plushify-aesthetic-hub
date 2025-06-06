@@ -43,7 +43,7 @@ const Navbar = () => {
       }`}>
         <div className="container mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center">
-            <img src="/logo.svg" alt="Plushify" className="h-10 filter dark:brightness-0 dark:invert" />
+            <img src="/logo.svg" alt="Plushify" className="h-10" />
           </Link>
 
           <DesktopMenu onLogin={handleLogin} onSignUp={handleSignUp} />
