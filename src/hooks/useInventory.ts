@@ -8,16 +8,17 @@ export type { Product } from "./inventory/useProductsData";
 
 export const useInventory = () => {
   // Get product data
-  const { products, stats, fetchProducts } = useProductsData();
+  const { products, stats, refetch } = useProductsData();
 
   // Get product selection functionality
   const { 
-    selectedProduct, 
     selectedProducts, 
-    setSelectedProduct, 
-    setSelectedProducts, 
+    toggleSelect, 
+    selectAll, 
+    clearSelection,
     toggleProductSelection, 
-    selectAllProducts 
+    selectAllProducts,
+    setSelectedProducts
   } = useProductSelection(products);
 
   // Get dialog state
@@ -37,26 +38,25 @@ export const useInventory = () => {
     setIsCategoriesOpen, 
     setIsReportsOpen, 
     setIsBarcodeScannerOpen,
-    setTransactionType
+    setTransactionType,
+    openDialog,
+    closeDialog
   } = useInventoryDialogs();
 
   // Get product actions
   const { 
     searchTerm, 
     setSearchTerm, 
-    handleTransaction, 
-    handleEditProduct 
-  } = useProductActions(
-    setSelectedProduct, 
-    setIsTransactionOpen, 
-    setTransactionType, 
-    setIsEditProductOpen
-  );
+    handleStockTransaction, 
+    handleEditProduct,
+    selectedProduct
+  } = useProductActions(refetch);
 
   return {
     // Product data
     products,
     stats,
+    refetch,
     // Selection state
     selectedProduct,
     selectedProducts,
@@ -82,10 +82,14 @@ export const useInventory = () => {
     setSearchTerm,
     setSelectedProducts,
     // Actions
-    fetchProducts,
-    handleTransaction,
+    handleStockTransaction,
     handleEditProduct,
     toggleProductSelection,
     selectAllProducts,
+    toggleSelect,
+    selectAll,
+    clearSelection,
+    openDialog,
+    closeDialog,
   };
 };
