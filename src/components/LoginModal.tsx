@@ -107,27 +107,31 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
         </DialogHeader>
         <form onSubmit={handleEmailLogin} className="flex flex-col gap-4">
           <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="login-email">E-mail</Label>
             <Input
-              id="email"
+              id="login-email"
+              name="username"
               type="email"
               placeholder="seu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
+              autoComplete="username"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+            <Label htmlFor="login-password">Senha</Label>
             <div className="relative">
               <Input
-                id="password"
+                id="login-password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Sua senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
+                autoComplete="current-password"
                 required
               />
               <button

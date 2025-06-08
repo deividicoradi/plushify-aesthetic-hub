@@ -198,10 +198,12 @@ const Auth = () => {
                 <Label htmlFor="recovery-email">E-mail</Label>
                 <Input 
                   id="recovery-email" 
+                  name="username"
                   type="email" 
                   placeholder="seu@email.com" 
                   value={recoveryEmail}
                   onChange={(e) => setRecoveryEmail(e.target.value)}
+                  autoComplete="username"
                   required
                 />
               </div>
@@ -244,10 +246,12 @@ const Auth = () => {
                 <Label htmlFor="recovery-email-confirm">E-mail</Label>
                 <Input 
                   id="recovery-email-confirm" 
+                  name="username"
                   type="email" 
                   placeholder="seu@email.com" 
                   value={recoveryEmail}
                   onChange={(e) => setRecoveryEmail(e.target.value)}
+                  autoComplete="username"
                   required
                 />
               </div>
@@ -269,10 +273,12 @@ const Auth = () => {
                 <div className="relative">
                   <Input 
                     id="new-password" 
+                    name="new-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Nova senha" 
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
                     required
                   />
                   <button
@@ -329,10 +335,12 @@ const Auth = () => {
                   <Label htmlFor="email-login">E-mail</Label>
                   <Input 
                     id="email-login" 
+                    name="username"
                     type="email" 
                     placeholder="seu@email.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="username"
                     required
                   />
                 </div>
@@ -341,10 +349,12 @@ const Auth = () => {
                   <div className="relative">
                     <Input 
                       id="password-login" 
+                      name="password"
                       type={showPassword ? "text" : "password"} 
                       placeholder="Sua senha" 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="current-password"
                       required
                     />
                     <button
@@ -382,10 +392,12 @@ const Auth = () => {
                   <Label htmlFor="fullname">Nome completo</Label>
                   <Input 
                     id="fullname" 
+                    name="fullname"
                     type="text" 
                     placeholder="Seu nome completo" 
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    autoComplete="name"
                     required
                   />
                 </div>
@@ -393,10 +405,12 @@ const Auth = () => {
                   <Label htmlFor="email-signup">E-mail</Label>
                   <Input 
                     id="email-signup" 
+                    name="username"
                     type="email" 
                     placeholder="seu@email.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="username"
                     required
                   />
                 </div>
@@ -405,10 +419,12 @@ const Auth = () => {
                   <div className="relative">
                     <Input 
                       id="password-signup" 
+                      name="new-password"
                       type={showPassword ? "text" : "password"} 
                       placeholder="Sua senha (mínimo 8 caracteres)" 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="new-password"
                       required
                       minLength={8}
                     />
@@ -426,10 +442,12 @@ const Auth = () => {
                   <div className="relative">
                     <Input 
                       id="confirmPassword" 
+                      name="confirm-password"
                       type={showConfirmPassword ? "text" : "password"} 
                       placeholder="Confirme sua senha" 
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
+                      autoComplete="new-password"
                       required
                     />
                     <button
