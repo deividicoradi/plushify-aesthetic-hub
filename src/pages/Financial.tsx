@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, Calculator, Receipt, TrendingUp } from 'lucide-react';
+import { CreditCard, Calculator, Receipt, TrendingUp, FileText } from 'lucide-react';
 import { SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import PaymentsTab from '@/components/financial/PaymentsTab';
 import CashClosureTab from '@/components/financial/CashClosureTab';
 import InstallmentsTab from '@/components/financial/InstallmentsTab';
 import ExpensesTab from '@/components/financial/ExpensesTab';
+import ReportsTab from '@/components/financial/ReportsTab';
 
 const Financial = () => {
   const [activeTab, setActiveTab] = useState('payments');
@@ -23,7 +24,7 @@ const Financial = () => {
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-foreground">Financeiro</h1>
               <p className="text-muted-foreground text-sm">
-                Gerencie pagamentos, fechamento de caixa e parcelamentos
+                Gerencie pagamentos, fechamento de caixa, parcelamentos e relatórios
               </p>
             </div>
           </header>
@@ -31,7 +32,7 @@ const Financial = () => {
           {/* Main content */}
           <main className="flex-1 p-6 space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
                 <TabsTrigger value="payments" className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
                   <span className="hidden sm:inline">Pagamentos</span>
@@ -47,6 +48,10 @@ const Financial = () => {
                 <TabsTrigger value="expenses" className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4" />
                   <span className="hidden sm:inline">Despesas</span>
+                </TabsTrigger>
+                <TabsTrigger value="reports" className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  <span className="hidden sm:inline">Relatórios</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -64,6 +69,10 @@ const Financial = () => {
 
               <TabsContent value="expenses" className="space-y-6">
                 <ExpensesTab />
+              </TabsContent>
+
+              <TabsContent value="reports" className="space-y-6">
+                <ReportsTab />
               </TabsContent>
             </Tabs>
           </main>
