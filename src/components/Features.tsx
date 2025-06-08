@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, BarChart3, Box, CreditCard, Star } from 'lucide-react';
+import { Calendar, Users, BarChart3, Box, CreditCard } from 'lucide-react';
 
 const Feature = ({ icon, title, description, path }: { icon: React.ReactNode, title: string, description: string, path?: string }) => {
   const navigate = useNavigate();
@@ -67,13 +68,6 @@ const Features = () => {
             title="Relatórios e Dashboard"
             description="Acompanhe o desempenho do seu negócio com relatórios detalhados e métricas importantes."
             path="/dashboard"
-          />
-          
-          <Feature 
-            icon={<Star className="w-4 h-4 text-white" />}
-            title="Programa de Fidelidade"
-            description="Sistema de pontos e benefícios para seus clientes, com controle automático de recompensas."
-            path="/fidelidade"
           />
         </div>
         
@@ -157,87 +151,6 @@ const Features = () => {
                         </button>
                       </div>
                     </div>
-                  </div>
-                </div>
-                
-                {/* Decorative elements */}
-                <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-primary/10 rounded-full opacity-20 -z-10"></div>
-                <div className="absolute -top-6 -left-6 w-24 h-24 bg-accent/20 rounded-full opacity-20 -z-10"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="mt-16 relative">
-          <div className="bg-card rounded-xl p-8 border border-border shadow-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="text-2xl font-bold mb-4 font-serif text-foreground">Aplicativo Web Completo</h3>
-                <p className="text-muted-foreground mb-6">
-                  O Plushify é um aplicativo web progressivo (PWA) que pode ser instalado 
-                  em qualquer dispositivo. Acesse de qualquer lugar e mantenha seu negócio 
-                  funcionando mesmo offline.
-                </p>
-                <ul className="space-y-3">
-                  {[
-                    'Funciona em qualquer dispositivo (computador, tablet, celular)',
-                    'Pode ser instalado como um aplicativo nativo',
-                    'Funciona mesmo sem internet (modo offline)',
-                    'Receba notificações de novos agendamentos',
-                    'Dados seguros e sempre sincronizados'
-                  ].map((item, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="min-w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5">
-                        <span className="text-primary text-xs">✓</span>
-                      </div>
-                      <span className="text-sm text-muted-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div className="relative">
-                <div className="bg-muted rounded-lg p-6 relative z-10">
-                  <div className="flex space-x-4 mb-6">
-                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                      <Calendar className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-foreground">Agenda Inteligente</h4>
-                      <p className="text-sm text-muted-foreground">Controle total da sua agenda</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="bg-card p-4 rounded-lg shadow-sm border border-border">
-                      <div className="flex justify-between items-center mb-2">
-                        <p className="text-sm font-medium text-foreground">Ana Silva</p>
-                        <span className="text-xs text-muted-foreground">09:00</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Limpeza de Pele Profunda</p>
-                    </div>
-                    
-                    <div className="bg-card p-4 rounded-lg shadow-sm border border-border">
-                      <div className="flex justify-between items-center mb-2">
-                        <p className="text-sm font-medium text-foreground">Mariana Costa</p>
-                        <span className="text-xs text-muted-foreground">11:00</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Design de Sobrancelhas</p>
-                    </div>
-                    
-                    <div className="bg-card p-4 rounded-lg shadow-sm border border-border">
-                      <div className="flex justify-between items-center mb-2">
-                        <p className="text-sm font-medium text-foreground">Regina Pires</p>
-                        <span className="text-xs text-muted-foreground">14:00</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Massagem Relaxante</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 text-center">
-                    <button className="text-primary text-sm font-medium hover:text-primary/80">
-                      Ver agenda completa →
-                    </button>
                   </div>
                 </div>
                 
