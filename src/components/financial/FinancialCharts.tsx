@@ -44,9 +44,9 @@ export const FinancialCharts = ({
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="animate-pulse">
+          <Card key={i} className="animate-pulse bg-card border-border">
             <CardContent className="p-6">
-              <div className="h-80 bg-gray-200 rounded"></div>
+              <div className="h-80 bg-muted rounded"></div>
             </CardContent>
           </Card>
         ))}
@@ -57,9 +57,9 @@ export const FinancialCharts = ({
   return (
     <div className="space-y-6">
       {/* Gráfico de Fluxo de Caixa Mensal */}
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Fluxo de Caixa - Últimos 6 Meses</CardTitle>
+          <CardTitle className="text-card-foreground">Fluxo de Caixa - Últimos 6 Meses</CardTitle>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-80">
@@ -67,17 +67,25 @@ export const FinancialCharts = ({
               <AreaChart data={monthlyData}>
                 <XAxis 
                   dataKey="month" 
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis 
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={(value) => formatCurrency(value)}
                 />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip 
+                  content={<ChartTooltipContent />}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--foreground))'
+                  }}
+                />
                 <Area 
                   type="monotone"
                   dataKey="receitas" 
@@ -109,9 +117,9 @@ export const FinancialCharts = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Receitas vs Despesas */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle>Receitas vs Despesas</CardTitle>
+            <CardTitle className="text-card-foreground">Receitas vs Despesas</CardTitle>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-80">
@@ -119,17 +127,25 @@ export const FinancialCharts = ({
                 <BarChart data={monthlyData}>
                   <XAxis 
                     dataKey="month" 
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis 
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(value) => formatCurrency(value)}
                   />
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent />}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
+                    }}
+                  />
                   <Bar 
                     dataKey="receitas" 
                     fill="#10b981"
@@ -147,9 +163,9 @@ export const FinancialCharts = ({
         </Card>
 
         {/* Despesas por Categoria */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle>Despesas por Categoria</CardTitle>
+            <CardTitle className="text-card-foreground">Despesas por Categoria</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -171,6 +187,12 @@ export const FinancialCharts = ({
                   </Pie>
                   <ChartTooltip 
                     formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -179,9 +201,9 @@ export const FinancialCharts = ({
         </Card>
 
         {/* Receitas por Método de Pagamento */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle>Receitas por Método</CardTitle>
+            <CardTitle className="text-card-foreground">Receitas por Método</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -203,6 +225,12 @@ export const FinancialCharts = ({
                   </Pie>
                   <ChartTooltip 
                     formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -211,9 +239,9 @@ export const FinancialCharts = ({
         </Card>
 
         {/* Previsão de Fluxo de Caixa */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle>Previsão de Fluxo de Caixa</CardTitle>
+            <CardTitle className="text-card-foreground">Previsão de Fluxo de Caixa</CardTitle>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-80">
@@ -221,17 +249,25 @@ export const FinancialCharts = ({
                 <LineChart data={monthlyData}>
                   <XAxis 
                     dataKey="month" 
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis 
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(value) => formatCurrency(value)}
                   />
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent />}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
+                    }}
+                  />
                   <Line 
                     type="monotone"
                     dataKey="saldoLiquido" 

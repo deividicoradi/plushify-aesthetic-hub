@@ -14,11 +14,11 @@ interface FinancialAlertsProps {
 export const FinancialAlerts = ({ metrics, loading = false }: FinancialAlertsProps) => {
   if (loading) {
     return (
-      <Card className="animate-pulse">
+      <Card className="animate-pulse bg-card border-border">
         <CardContent className="p-6">
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+              <div key={i} className="h-16 bg-muted rounded"></div>
             ))}
           </div>
         </CardContent>
@@ -101,13 +101,13 @@ export const FinancialAlerts = ({ metrics, loading = false }: FinancialAlertsPro
     });
   }
 
-  const getAlertVariant = (type: string) => {
+  const getAlertBorderColor = (type: string) => {
     switch (type) {
-      case 'error': return 'destructive';
-      case 'warning': return 'default';
-      case 'success': return 'default';
-      case 'info': return 'default';
-      default: return 'default';
+      case 'error': return 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20';
+      case 'warning': return 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/20';
+      case 'success': return 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20';
+      case 'info': return 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20';
+      default: return 'border-border bg-muted';
     }
   };
 
@@ -121,20 +121,10 @@ export const FinancialAlerts = ({ metrics, loading = false }: FinancialAlertsPro
     }
   };
 
-  const getAlertBorderColor = (type: string) => {
-    switch (type) {
-      case 'error': return 'border-red-200 bg-red-50';
-      case 'warning': return 'border-yellow-200 bg-yellow-50';
-      case 'success': return 'border-green-200 bg-green-50';
-      case 'info': return 'border-blue-200 bg-blue-50';
-      default: return 'border-gray-200 bg-gray-50';
-    }
-  };
-
   return (
-    <Card>
+    <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-card-foreground">
           <AlertTriangle className="w-5 h-5" />
           Alertas Financeiros
         </CardTitle>
@@ -142,9 +132,9 @@ export const FinancialAlerts = ({ metrics, loading = false }: FinancialAlertsPro
       <CardContent>
         <div className="space-y-4">
           {alerts.length === 0 ? (
-            <Alert className="border-green-200 bg-green-50">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
+            <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20">
+              <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <AlertDescription className="text-green-800 dark:text-green-200">
                 Tudo está funcionando bem! Nenhum alerta no momento.
               </AlertDescription>
             </Alert>
@@ -155,8 +145,8 @@ export const FinancialAlerts = ({ metrics, loading = false }: FinancialAlertsPro
                 <AlertDescription>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="font-medium mb-1">{alert.title}</div>
-                      <div className="text-sm">{alert.description}</div>
+                      <div className="font-medium mb-1 text-foreground">{alert.title}</div>
+                      <div className="text-sm text-muted-foreground">{alert.description}</div>
                     </div>
                     <Badge variant={getAlertBadgeVariant(alert.type)} className="ml-2">
                       {alert.badge}
