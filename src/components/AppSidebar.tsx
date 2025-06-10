@@ -1,23 +1,28 @@
-
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Calendar,
   Users,
-  Settings,
+  Calendar,
+  Briefcase,
   Package,
-  BarChart3,
-  Wrench,
-  StickyNote,
-  Heart,
-  GraduationCap,
+  FileText,
+  Settings,
+  CreditCard,
+  TrendingUp,
+  Book,
   HelpCircle,
-  CreditCard
+  LucideIcon
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
@@ -29,81 +34,189 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar"
+import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export function AppSidebar() {
-  const location = useLocation();
-  const { signOut } = useAuth();
+interface NavItemProps {
+  icon: LucideIcon;
+  label: string;
+  href: string;
+}
 
-  const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: Calendar, label: 'Agendamentos', path: '/agendamentos' },
-    { icon: Users, label: 'Clientes', path: '/clientes' },
-    { icon: Wrench, label: 'Serviços', path: '/servicos' },
-    { icon: Package, label: 'Estoque', path: '/estoque' },
-    { icon: CreditCard, label: 'Financeiro', path: '/financeiro' },
-    { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
-    { icon: StickyNote, label: 'Anotações', path: '/anotacoes' },
-    { icon: Heart, label: 'Fidelidade', path: '/fidelidade' },
-    { icon: GraduationCap, label: 'Cursos', path: '/cursos' },
-    { icon: HelpCircle, label: 'Ajuda', path: '/help' },
-    { icon: Settings, label: 'Configurações', path: '/configuracoes' },
-  ];
+const NavItem = ({ icon: Icon, label, href }: NavItemProps) => {
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild>
+        <Link to={href}>
+          <Icon className="w-4 h-4" />
+          <span>{label}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+};
+
+export const AppSidebar = () => {
+  const { user, logout } = useAuth();
 
   return (
-    <Sidebar className="bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
-      <SidebarHeader className="p-6 border-b border-gray-200 dark:border-gray-800">
-        <div className="flex items-center justify-between">
-          <Link to="/dashboard" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-plush-500 to-plush-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white group-data-[collapsible=icon]:hidden">
-              Plushify
-            </span>
-          </Link>
-          <SidebarTrigger className="md:hidden" />
-        </div>
-      </SidebarHeader>
+    <Sidebar>
+      <SidebarContent>
+        <SidebarHeader>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-0">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name} />
+                  <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="top" className="z-[200] pb-0">
+              <SheetHeader className="text-left">
+                <SheetTitle>Perfil</SheetTitle>
+              </SheetHeader>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium leading-none">
+                    {user?.user_metadata?.full_name}
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link to={item.path} className="flex items-center space-x-3">
-                        <Icon className="h-5 w-5" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/dashboard">
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/clients">
+                    <Users className="w-4 h-4" />
+                    <span>Clientes</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/appointments">
+                    <Calendar className="w-4 h-4" />
+                    <span>Agendamentos</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/services">
+                    <Briefcase className="w-4 h-4" />
+                    <span>Serviços</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/inventory">
+                    <Package className="w-4 h-4" />
+                    <span>Estoque</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Financeiro</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/financial">
+                    <CreditCard className="w-4 h-4" />
+                    <span>Financeiro</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/financial-dashboard">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Painel Financeiro</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/reports">
+                    <FileText className="w-4 h-4" />
+                    <span>Relatórios</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Outros</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/notes">
+                    <Book className="w-4 h-4" />
+                    <span>Anotações</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/settings">
+                    <Settings className="w-4 h-4" />
+                    <span>Configurações</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/help">
+                    <HelpCircle className="w-4 h-4" />
+                    <span>Ajuda</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
-        <div className="flex justify-center">
-          <ThemeToggle />
-        </div>
-        <Button 
-          onClick={signOut}
-          variant="ghost" 
-          className="w-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-        >
-          Sair
-        </Button>
-      </SidebarFooter>
+        <SidebarFooter>
+          <Button variant="outline" size="sm" className="w-full" onClick={logout}>
+            Sair
+          </Button>
+        </SidebarFooter>
+      </SidebarContent>
     </Sidebar>
   );
-}
+};

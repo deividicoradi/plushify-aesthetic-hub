@@ -1,188 +1,121 @@
-
-import { Routes, Route } from 'react-router-dom';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { AuthProvider } from '@/contexts/AuthContext';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import Index from './pages/Index';
-import About from './pages/About';
-import Auth from './pages/Auth';
-import Signup from './pages/Signup';
-import Dashboard from './pages/Dashboard';
-import Appointments from './pages/Appointments';
-import Clients from './pages/Clients';
-import Services from './pages/Services';
-import Inventory from './pages/Inventory';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
-import Plans from './pages/Plans';
-import PaymentSuccess from './pages/PaymentSuccess';
-import Notes from './pages/Notes';
-import Loyalty from './pages/Loyalty';
-import Courses from './pages/Courses';
-import Help from './pages/Help';
-import Financial from './pages/Financial';
-import NotFound from './pages/NotFound';
-
-const queryClient = new QueryClient();
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import { Auth } from './pages/Auth';
+import { Index } from './pages/Index';
+import { Signup } from './pages/Signup';
+import { Dashboard } from './pages/Dashboard';
+import { Clients } from './pages/Clients';
+import { Appointments } from './pages/Appointments';
+import { Services } from './pages/Services';
+import { Inventory } from './pages/Inventory';
+import { Notes } from './pages/Notes';
+import { Loyalty } from './pages/Loyalty';
+import { Financial } from './pages/Financial';
+import { Reports } from './pages/Reports';
+import { Settings } from './pages/Settings';
+import { Plans } from './pages/Plans';
+import { Courses } from './pages/Courses';
+import { About } from './pages/About';
+import { Help } from './pages/Help';
+import { NotFound } from './pages/NotFound';
+import { PaymentSuccess } from './pages/PaymentSuccess';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { QueryClient } from '@tanstack/react-query';
+import FinancialDashboard from './pages/FinancialDashboard';
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/sobre" element={<About />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
+    <QueryClient>
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <AuthProvider>
+          <BrowserRouter>
+            <Toaster />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/signup" element={<Signup />} />
+              
+              {/* Protected Routes */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
                   <Dashboard />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/agendamentos"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
-                  <Appointments />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/clientes"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/clients" element={
+                <ProtectedRoute>
                   <Clients />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/servicos"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/appointments" element={
+                <ProtectedRoute>
+                  <Appointments />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/services" element={
+                <ProtectedRoute>
                   <Services />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/estoque"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/inventory" element={
+                <ProtectedRoute>
                   <Inventory />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/financeiro"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
-                  <Financial />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/relatorios"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
-                  <Reports />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/anotacoes"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/notes" element={
+                <ProtectedRoute>
                   <Notes />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/fidelidade"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/loyalty" element={
+                <ProtectedRoute>
                   <Loyalty />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cursos"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
-                  <Courses />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/help"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
-                  <Help />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/configuracoes"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/financial" element={
+                <ProtectedRoute>
+                  <Financial />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/financial-dashboard" element={
+                <ProtectedRoute>
+                  <FinancialDashboard />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/reports" element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/settings" element={
+                <ProtectedRoute>
                   <Settings />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/planos"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
-                  <Plans />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/payment-success"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
-                  <PaymentSuccess />
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-        <Sonner />
-      </AuthProvider>
-    </QueryClientProvider>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/planos" element={<Plans />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClient>
   );
 }
 
