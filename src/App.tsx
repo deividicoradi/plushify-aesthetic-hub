@@ -1,34 +1,37 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import { Auth } from './pages/Auth';
-import { Index } from './pages/Index';
-import { Signup } from './pages/Signup';
-import { Dashboard } from './pages/Dashboard';
-import { Clients } from './pages/Clients';
-import { Appointments } from './pages/Appointments';
-import { Services } from './pages/Services';
-import { Inventory } from './pages/Inventory';
-import { Notes } from './pages/Notes';
-import { Loyalty } from './pages/Loyalty';
-import { Financial } from './pages/Financial';
-import { Reports } from './pages/Reports';
-import { Settings } from './pages/Settings';
-import { Plans } from './pages/Plans';
-import { Courses } from './pages/Courses';
-import { About } from './pages/About';
-import { Help } from './pages/Help';
-import { NotFound } from './pages/NotFound';
-import { PaymentSuccess } from './pages/PaymentSuccess';
+import Auth from './pages/Auth';
+import Index from './pages/Index';
+import Signup from './pages/Signup';
+import Dashboard from './pages/Dashboard';
+import Clients from './pages/Clients';
+import Appointments from './pages/Appointments';
+import Services from './pages/Services';
+import Inventory from './pages/Inventory';
+import Notes from './pages/Notes';
+import Loyalty from './pages/Loyalty';
+import Financial from './pages/Financial';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import Plans from './pages/Plans';
+import Courses from './pages/Courses';
+import About from './pages/About';
+import Help from './pages/Help';
+import NotFound from './pages/NotFound';
+import PaymentSuccess from './pages/PaymentSuccess';
 import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { QueryClient } from '@tanstack/react-query';
+import ProtectedRoute from './components/ProtectedRoute';
 import FinancialDashboard from './pages/FinancialDashboard';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClient>
+    <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <AuthProvider>
           <BrowserRouter>
@@ -115,7 +118,7 @@ function App() {
           </BrowserRouter>
         </AuthProvider>
       </ThemeProvider>
-    </QueryClient>
+    </QueryClientProvider>
   );
 }
 

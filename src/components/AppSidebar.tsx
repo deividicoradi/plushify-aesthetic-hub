@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -58,7 +59,7 @@ const NavItem = ({ icon: Icon, label, href }: NavItemProps) => {
 };
 
 export const AppSidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <Sidebar>
@@ -212,7 +213,7 @@ export const AppSidebar = () => {
       </SidebarContent>
 
         <SidebarFooter>
-          <Button variant="outline" size="sm" className="w-full" onClick={logout}>
+          <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
             Sair
           </Button>
         </SidebarFooter>
