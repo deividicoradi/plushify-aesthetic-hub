@@ -1,22 +1,60 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, TrendingUp, TrendingDown, BarChart3, ArrowRight } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from 'date-fns';
+import { CalendarIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, subMonths, subYears } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { generateComparativeReport } from '@/utils/exportUtils';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { generateComparativeReport, ExportData } from '@/utils/exportUtils';
+import { ExportButtons } from './ExportButtons';
 
-export const ComparativeReport = () => {
+interface ComparativeData {
+  period: {
+    atual: { from: string; to: string };
+    anterior: { from: string; to: string };
+  };
+  receitas: {
+    atual: number;
+    anterior: number;
+    crescimento: number;
+    diferenca: number;
+  };
+  despesas: {
+    atual: number;
+    anterior: number;
+    crescimento: number;
+    diferenca: number;
+  };
+  saldoLiquido: {
+    atual: number;
+    anterior: number;
+    crescimento: number;
+    diferenca: number;
+  };
+}
+
+interface ExportData {
+  payments: any[];
+  expenses: any[];
+  installments: any[];
+  cashClosures: any[];
+  period: { from: string; to: string };
+}
+
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(value);
+};
+
+const ComparativeReport = () => {
   const { user } = useAuth();
   const [period1, setPeriod1] = useState<{ from: Date; to: Date }>({
     from: startOfMonth(new Date()),
@@ -26,225 +64,158 @@ export const ComparativeReport = () => {
     from: startOfMonth(subMonths(new Date(), 1)),
     to: endOfMonth(subMonths(new Date(), 1))
   });
-  const [comparisonType, setComparisonType] = useState<string>('custom');
+  const [comparisonType, setComparisonType] = useState<string>('month');
 
-  // Buscar dados do primeiro período
+  const fetchPeriodData = async (from: Date, to: Date) => {
+    const fromDate = from.toISOString();
+    const toDate = to.toISOString();
+
+    // Buscar pagamentos
+    const { data: payments } = await supabase
+      .from('payments')
+      .select(`
+        *,
+        payment_methods(name, type),
+        clients(name)
+      `)
+      .eq('user_id', user?.id)
+      .gte('created_at', fromDate)
+      .lte('created_at', toDate);
+
+    // Buscar parcelamentos
+    const { data: installments } = await supabase
+      .from('installments')
+      .select(`
+        *,
+        payments(description, payment_methods(name))
+      `)
+      .eq('user_id', user?.id)
+      .gte('due_date', fromDate)
+      .lte('due_date', toDate);
+
+    // Buscar despesas
+    const { data: expenses } = await supabase
+      .from('expenses')
+      .select(`
+        *,
+        payment_methods(name, type)
+      `)
+      .eq('user_id', user?.id)
+      .gte('expense_date', fromDate)
+      .lte('expense_date', toDate);
+
+    // Buscar fechamentos de caixa
+    const { data: cashClosures } = await supabase
+      .from('cash_closures')
+      .select('*')
+      .eq('user_id', user?.id)
+      .gte('closure_date', fromDate)
+      .lte('closure_date', toDate);
+
+    return {
+      payments: payments || [],
+      installments: installments || [],
+      expenses: expenses || [],
+      cashClosures: cashClosures || [],
+      period: { from: fromDate, to: toDate }
+    };
+  };
+
   const { data: data1, isLoading: loading1 } = useQuery({
-    queryKey: ['comparative-report-1', user?.id, period1.from, period1.to],
-    queryFn: async () => {
-      const fromDate = period1.from.toISOString();
-      const toDate = period1.to.toISOString();
-
-      const [paymentsResult, expensesResult, installmentsResult] = await Promise.all([
-        supabase
-          .from('payments')
-          .select('*')
-          .eq('user_id', user?.id)
-          .gte('created_at', fromDate)
-          .lte('created_at', toDate),
-        supabase
-          .from('expenses')
-          .select('*')
-          .eq('user_id', user?.id)
-          .gte('expense_date', fromDate)
-          .lte('expense_date', toDate),
-        supabase
-          .from('installments')
-          .select('*')
-          .eq('user_id', user?.id)
-          .gte('due_date', fromDate)
-          .lte('due_date', toDate)
-      ]);
-
-      return {
-        payments: paymentsResult.data || [],
-        expenses: expensesResult.data || [],
-        installments: installmentsResult.data || [],
-        period: { from: fromDate, to: toDate }
-      };
-    },
+    queryKey: ['comparative-data-1', user?.id, period1.from, period1.to],
+    queryFn: () => fetchPeriodData(period1.from, period1.to),
     enabled: !!user?.id,
   });
 
-  // Buscar dados do segundo período
   const { data: data2, isLoading: loading2 } = useQuery({
-    queryKey: ['comparative-report-2', user?.id, period2.from, period2.to],
-    queryFn: async () => {
-      const fromDate = period2.from.toISOString();
-      const toDate = period2.to.toISOString();
-
-      const [paymentsResult, expensesResult, installmentsResult] = await Promise.all([
-        supabase
-          .from('payments')
-          .select('*')
-          .eq('user_id', user?.id)
-          .gte('created_at', fromDate)
-          .lte('created_at', toDate),
-        supabase
-          .from('expenses')
-          .select('*')
-          .eq('user_id', user?.id)
-          .gte('expense_date', fromDate)
-          .lte('expense_date', toDate),
-        supabase
-          .from('installments')
-          .select('*')
-          .eq('user_id', user?.id)
-          .gte('due_date', fromDate)
-          .lte('due_date', toDate)
-      ]);
-
-      return {
-        payments: paymentsResult.data || [],
-        expenses: expensesResult.data || [],
-        installments: installmentsResult.data || [],
-        period: { from: fromDate, to: toDate }
-      };
-    },
+    queryKey: ['comparative-data-2', user?.id, period2.from, period2.to],
+    queryFn: () => fetchPeriodData(period2.from, period2.to),
     enabled: !!user?.id,
   });
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
+  const comparison = data1 && data2 ? generateComparativeReport(data1, data2) : null;
 
-  const formatPercentage = (value: number) => {
-    const sign = value >= 0 ? '+' : '';
-    return `${sign}${value.toFixed(1)}%`;
-  };
-
-  const getGrowthColor = (value: number) => {
-    return value >= 0 ? 'text-green-600' : 'text-red-600';
-  };
-
-  const getGrowthIcon = (value: number) => {
-    return value >= 0 ? TrendingUp : TrendingDown;
-  };
-
-  const setQuickComparison = (type: string) => {
-    const today = new Date();
-    setComparisonType(type);
-
-    switch (type) {
-      case 'monthToMonth':
-        setPeriod1({
-          from: startOfMonth(today),
-          to: endOfMonth(today)
-        });
-        setPeriod2({
-          from: startOfMonth(subMonths(today, 1)),
-          to: endOfMonth(subMonths(today, 1))
-        });
-        break;
-      case 'yearToYear':
-        setPeriod1({
-          from: startOfYear(today),
-          to: endOfYear(today)
-        });
-        setPeriod2({
-          from: startOfYear(subYears(today, 1)),
-          to: endOfYear(subYears(today, 1))
-        });
-        break;
-      case 'quarterToQuarter':
-        const currentQuarter = Math.floor(today.getMonth() / 3);
-        const quarterStart = new Date(today.getFullYear(), currentQuarter * 3, 1);
-        const quarterEnd = new Date(today.getFullYear(), (currentQuarter + 1) * 3, 0);
-        
-        const prevQuarterStart = new Date(quarterStart.getFullYear(), quarterStart.getMonth() - 3, 1);
-        const prevQuarterEnd = new Date(prevQuarterStart.getFullYear(), prevQuarterStart.getMonth() + 3, 0);
-        
-        setPeriod1({ from: quarterStart, to: quarterEnd });
-        setPeriod2({ from: prevQuarterStart, to: prevQuarterEnd });
-        break;
+  const handlePeriodChange = (type: string, date: Date, period: number) => {
+    if (type === 'from') {
+      if (period === 1) {
+        setPeriod1({ ...period1, from: date });
+      } else {
+        setPeriod2({ ...period2, from: date });
+      }
+    } else {
+      if (period === 1) {
+        setPeriod1({ ...period1, to: date });
+      } else {
+        setPeriod2({ ...period2, to: date });
+      }
     }
   };
 
-  // Gerar relatório comparativo
-  const comparativeData = data1 && data2 ? generateComparativeReport(data1, data2) : null;
+  const setQuickPeriod = (periodType: string) => {
+    const today = new Date();
+    let newPeriod1 = { from: period1.from, to: period1.to };
+    let newPeriod2 = { from: period2.from, to: period2.to };
 
-  // Dados para o gráfico
-  const chartData = comparativeData ? [
-    {
-      name: 'Receitas',
-      'Período Atual': comparativeData.receitas.atual,
-      'Período Anterior': comparativeData.receitas.anterior,
-    },
-    {
-      name: 'Despesas',
-      'Período Atual': comparativeData.despesas.atual,
-      'Período Anterior': comparativeData.despesas.anterior,
-    },
-    {
-      name: 'Saldo Líquido',
-      'Período Atual': comparativeData.saldoLiquido.atual,
-      'Período Anterior': comparativeData.saldoLiquido.anterior,
-    },
-  ] : [];
+    if (periodType === 'month') {
+      newPeriod1 = { from: startOfMonth(today), to: endOfMonth(today) };
+      newPeriod2 = { from: startOfMonth(subMonths(today, 1)), to: endOfMonth(subMonths(today, 1)) };
+    } else if (periodType === 'year') {
+      newPeriod1 = { from: startOfMonth(today), to: endOfMonth(today) };
+      newPeriod2 = { from: startOfMonth(subYears(today, 1)), to: endOfMonth(subYears(today, 1)) };
+    }
 
-  const isLoading = loading1 || loading2;
+    setPeriod1(newPeriod1);
+    setPeriod2(newPeriod2);
+  };
+
+  const handleExportComparative = () => {
+    if (!data1 || !data2) return;
+
+    const comparativeData: ExportData = {
+      payments: [...data1.payments, ...data2.payments],
+      expenses: [...data1.expenses, ...data2.expenses],
+      installments: [...data1.installments, ...data2.installments],
+      cashClosures: [...(data1.cashClosures || []), ...(data2.cashClosures || [])],
+      period: {
+        from: period2.from.toISOString(),
+        to: period1.to.toISOString()
+      }
+    };
+
+    return comparativeData;
+  };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Relatório Comparativo</h2>
+        <h3 className="text-xl font-semibold">Análise Comparativa</h3>
         <p className="text-muted-foreground">
-          Compare o desempenho financeiro entre diferentes períodos
+          Compare o desempenho financeiro entre dois períodos.
         </p>
       </div>
 
-      {/* Seleção de Períodos */}
+      {/* Filtros de Período */}
       <Card>
         <CardHeader>
-          <CardTitle>Configurar Comparação</CardTitle>
+          <CardTitle>Períodos de Comparação</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Comparações rápidas */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Comparações Rápidas</h3>
-            <div className="flex flex-wrap gap-2">
-              <Button 
-                variant={comparisonType === 'monthToMonth' ? 'default' : 'outline'} 
-                size="sm" 
-                onClick={() => setQuickComparison('monthToMonth')}
-              >
-                Mês vs Mês Anterior
-              </Button>
-              <Button 
-                variant={comparisonType === 'quarterToQuarter' ? 'default' : 'outline'} 
-                size="sm" 
-                onClick={() => setQuickComparison('quarterToQuarter')}
-              >
-                Trimestre vs Trimestre Anterior
-              </Button>
-              <Button 
-                variant={comparisonType === 'yearToYear' ? 'default' : 'outline'} 
-                size="sm" 
-                onClick={() => setQuickComparison('yearToYear')}
-              >
-                Ano vs Ano Anterior
-              </Button>
-              <Button 
-                variant={comparisonType === 'custom' ? 'default' : 'outline'} 
-                size="sm" 
-                onClick={() => setComparisonType('custom')}
-              >
-                Personalizado
-              </Button>
-            </div>
+        <CardContent className="space-y-4">
+          <div className="flex gap-4">
+            <Button variant="outline" size="sm" onClick={() => setQuickPeriod('month')}>
+              Comparar Últimos Meses
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setQuickPeriod('year')}>
+              Comparar Últimos Anos
+            </Button>
           </div>
 
-          {/* Seleção manual de períodos */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             {/* Período 1 */}
-            <div className="space-y-4">
-              <h3 className="font-medium text-blue-600">Período Atual</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Data Inicial</label>
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Período Atual</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-muted-foreground">De</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -255,22 +226,25 @@ export const ComparativeReport = () => {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(period1.from, "dd/MM/yyyy", { locale: ptBR })}
+                        {period1.from ? (
+                          format(period1.from, "dd/MM/yyyy", { locale: ptBR })
+                        ) : (
+                          <span>Selecione</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
                         selected={period1.from}
-                        onSelect={(date) => date && setPeriod1(prev => ({ ...prev, from: date }))}
+                        onSelect={(date) => date && handlePeriodChange('from', date, 1)}
                         initialFocus
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Data Final</label>
+                <div>
+                  <label className="text-xs text-muted-foreground">Até</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -281,14 +255,18 @@ export const ComparativeReport = () => {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(period1.to, "dd/MM/yyyy", { locale: ptBR })}
+                        {period1.to ? (
+                          format(period1.to, "dd/MM/yyyy", { locale: ptBR })
+                        ) : (
+                          <span>Selecione</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
                         selected={period1.to}
-                        onSelect={(date) => date && setPeriod1(prev => ({ ...prev, to: date }))}
+                        onSelect={(date) => date && handlePeriodChange('to', date, 1)}
                         initialFocus
                       />
                     </PopoverContent>
@@ -298,11 +276,11 @@ export const ComparativeReport = () => {
             </div>
 
             {/* Período 2 */}
-            <div className="space-y-4">
-              <h3 className="font-medium text-orange-600">Período de Comparação</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Data Inicial</label>
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Período Anterior</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-muted-foreground">De</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -313,22 +291,25 @@ export const ComparativeReport = () => {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(period2.from, "dd/MM/yyyy", { locale: ptBR })}
+                        {period2.from ? (
+                          format(period2.from, "dd/MM/yyyy", { locale: ptBR })
+                        ) : (
+                          <span>Selecione</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
                         selected={period2.from}
-                        onSelect={(date) => date && setPeriod2(prev => ({ ...prev, from: date }))}
+                        onSelect={(date) => date && handlePeriodChange('from', date, 2)}
                         initialFocus
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Data Final</label>
+                <div>
+                  <label className="text-xs text-muted-foreground">Até</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -339,14 +320,18 @@ export const ComparativeReport = () => {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(period2.to, "dd/MM/yyyy", { locale: ptBR })}
+                        {period2.to ? (
+                          format(period2.to, "dd/MM/yyyy", { locale: ptBR })
+                        ) : (
+                          <span>Selecione</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
                         selected={period2.to}
-                        onSelect={(date) => date && setPeriod2(prev => ({ ...prev, to: date }))}
+                        onSelect={(date) => date && handlePeriodChange('to', date, 2)}
                         initialFocus
                       />
                     </PopoverContent>
@@ -358,167 +343,83 @@ export const ComparativeReport = () => {
         </CardContent>
       </Card>
 
-      {/* Resultados da Comparação */}
-      {isLoading ? (
+      {/* Resumo Comparativo */}
+      {comparison && (
         <Card>
-          <CardContent className="p-6">
-            <div className="text-center">Carregando dados para comparação...</div>
-          </CardContent>
-        </Card>
-      ) : comparativeData ? (
-        <>
-          {/* Cards de Métricas Comparativas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Receitas */}
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-green-700">Receitas</CardTitle>
-                {React.createElement(getGrowthIcon(comparativeData.receitas.crescimento), {
-                  className: `h-4 w-4 ${getGrowthColor(comparativeData.receitas.crescimento)}`
-                })}
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-green-600">Atual:</span>
-                    <span className="text-lg font-bold text-green-900">
-                      {formatCurrency(comparativeData.receitas.atual)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-green-600">Anterior:</span>
-                    <span className="text-sm text-green-700">
-                      {formatCurrency(comparativeData.receitas.anterior)}
-                    </span>
-                  </div>
-                  <div className="pt-2 border-t border-green-200">
-                    <div className="flex items-center justify-between">
-                      <Badge variant={comparativeData.receitas.crescimento >= 0 ? 'default' : 'destructive'}>
-                        {formatPercentage(comparativeData.receitas.crescimento)}
-                      </Badge>
-                      <span className="text-xs text-green-600">
-                        {formatCurrency(comparativeData.receitas.diferenca)}
-                      </span>
-                    </div>
-                  </div>
+          <CardHeader>
+            <CardTitle>Resumo Comparativo</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Comparando {format(new Date(comparison.period.anterior.from), "MMMM yyyy", { locale: ptBR })} e {format(new Date(comparison.period.atual.from), "MMMM yyyy", { locale: ptBR })}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Receitas */}
+              <div className="space-y-2">
+                <div className="text-lg font-semibold">Receitas</div>
+                <div className="flex items-center gap-2">
+                  {comparison.receitas.crescimento >= 0 ? (
+                    <TrendingUp className="text-green-500 w-5 h-5" />
+                  ) : (
+                    <TrendingDown className="text-red-500 w-5 h-5" />
+                  )}
+                  <span>{comparison.receitas.crescimento.toFixed(1)}%</span>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Despesas */}
-            <Card className="bg-gradient-to-br from-red-50 to-pink-100 border-red-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-red-700">Despesas</CardTitle>
-                {React.createElement(getGrowthIcon(-comparativeData.despesas.crescimento), {
-                  className: `h-4 w-4 ${getGrowthColor(-comparativeData.despesas.crescimento)}`
-                })}
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-red-600">Atual:</span>
-                    <span className="text-lg font-bold text-red-900">
-                      {formatCurrency(comparativeData.despesas.atual)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-red-600">Anterior:</span>
-                    <span className="text-sm text-red-700">
-                      {formatCurrency(comparativeData.despesas.anterior)}
-                    </span>
-                  </div>
-                  <div className="pt-2 border-t border-red-200">
-                    <div className="flex items-center justify-between">
-                      <Badge variant={comparativeData.despesas.crescimento <= 0 ? 'default' : 'destructive'}>
-                        {formatPercentage(comparativeData.despesas.crescimento)}
-                      </Badge>
-                      <span className="text-xs text-red-600">
-                        {formatCurrency(comparativeData.despesas.diferenca)}
-                      </span>
-                    </div>
-                  </div>
+                <div className="text-sm text-muted-foreground">
+                  {formatCurrency(comparison.receitas.atual)} ({formatCurrency(comparison.receitas.anterior)} no período anterior)
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Saldo Líquido */}
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-blue-700">Saldo Líquido</CardTitle>
-                {React.createElement(getGrowthIcon(comparativeData.saldoLiquido.crescimento), {
-                  className: `h-4 w-4 ${getGrowthColor(comparativeData.saldoLiquido.crescimento)}`
-                })}
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-blue-600">Atual:</span>
-                    <span className="text-lg font-bold text-blue-900">
-                      {formatCurrency(comparativeData.saldoLiquido.atual)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-blue-600">Anterior:</span>
-                    <span className="text-sm text-blue-700">
-                      {formatCurrency(comparativeData.saldoLiquido.anterior)}
-                    </span>
-                  </div>
-                  <div className="pt-2 border-t border-blue-200">
-                    <div className="flex items-center justify-between">
-                      <Badge variant={comparativeData.saldoLiquido.crescimento >= 0 ? 'default' : 'destructive'}>
-                        {formatPercentage(comparativeData.saldoLiquido.crescimento)}
-                      </Badge>
-                      <span className="text-xs text-blue-600">
-                        {formatCurrency(comparativeData.saldoLiquido.diferenca)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Gráfico Comparativo */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                Comparação Visual
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <XAxis dataKey="name" />
-                    <YAxis tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip 
-                      formatter={(value) => [formatCurrency(Number(value)), '']}
-                      labelStyle={{ color: '#374151' }}
-                      contentStyle={{ 
-                        backgroundColor: '#fff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    <Legend />
-                    <Bar dataKey="Período Atual" fill="#3b82f6" />
-                    <Bar dataKey="Período Anterior" fill="#f59e0b" />
-                  </BarChart>
-                </ResponsiveContainer>
               </div>
-            </CardContent>
-          </Card>
-        </>
-      ) : (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center text-muted-foreground">
-              Configure os períodos acima para visualizar a comparação
+
+              {/* Despesas */}
+              <div className="space-y-2">
+                <div className="text-lg font-semibold">Despesas</div>
+                <div className="flex items-center gap-2">
+                  {comparison.despesas.crescimento >= 0 ? (
+                    <TrendingUp className="text-red-500 w-5 h-5" />
+                  ) : (
+                    <TrendingDown className="text-green-500 w-5 h-5" />
+                  )}
+                  <span>{comparison.despesas.crescimento.toFixed(1)}%</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {formatCurrency(comparison.despesas.atual)} ({formatCurrency(comparison.despesas.anterior)} no período anterior)
+                </div>
+              </div>
+
+              {/* Saldo Líquido */}
+              <div className="space-y-2">
+                <div className="text-lg font-semibold">Saldo Líquido</div>
+                <div className="flex items-center gap-2">
+                  {comparison.saldoLiquido.crescimento >= 0 ? (
+                    <TrendingUp className="text-green-500 w-5 h-5" />
+                  ) : (
+                    <TrendingDown className="text-red-500 w-5 h-5" />
+                  )}
+                  <span>{comparison.saldoLiquido.crescimento.toFixed(1)}%</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {formatCurrency(comparison.saldoLiquido.atual)} ({formatCurrency(comparison.saldoLiquido.anterior)} no período anterior)
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
       )}
+
+      {data1 && data2 && (
+        <ExportButtons
+          reportData={handleExportComparative() || {
+            payments: [],
+            expenses: [],
+            installments: [],
+            cashClosures: [],
+            period: { from: new Date().toISOString(), to: new Date().toISOString() }
+          }}
+          isLoading={loading1 || loading2}
+        />
+      )}
     </div>
   );
 };
+
+export default ComparativeReport;
