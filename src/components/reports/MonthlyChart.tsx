@@ -12,13 +12,13 @@ interface MonthlyChartProps {
 export const MonthlyChart = ({ data, loading = false }: MonthlyChartProps) => {
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Evolução Mensal</CardTitle>
+          <CardTitle className="text-card-foreground">Evolução Mensal</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-80 flex items-center justify-center">
-            <div className="animate-pulse text-gray-500">Carregando dados...</div>
+            <div className="animate-pulse text-muted-foreground">Carregando dados...</div>
           </div>
         </CardContent>
       </Card>
@@ -30,9 +30,9 @@ export const MonthlyChart = ({ data, loading = false }: MonthlyChartProps) => {
   };
 
   return (
-    <Card>
+    <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle>Evolução Mensal</CardTitle>
+        <CardTitle className="text-card-foreground">Evolução Mensal</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-80">
@@ -40,12 +40,12 @@ export const MonthlyChart = ({ data, loading = false }: MonthlyChartProps) => {
             <BarChart data={data}>
               <XAxis 
                 dataKey="month" 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                 axisLine={false}
                 tickLine={false}
               />
@@ -56,11 +56,12 @@ export const MonthlyChart = ({ data, loading = false }: MonthlyChartProps) => {
                   }
                   return [value, name === 'appointments' ? 'Agendamentos' : 'Novos Clientes'];
                 }}
-                labelStyle={{ color: '#374151' }}
+                labelStyle={{ color: 'hsl(var(--foreground))' }}
                 contentStyle={{ 
-                  backgroundColor: '#fff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px'
+                  backgroundColor: 'hsl(var(--background))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
+                  color: 'hsl(var(--foreground))'
                 }}
               />
               <Legend 
@@ -75,19 +76,19 @@ export const MonthlyChart = ({ data, loading = false }: MonthlyChartProps) => {
               />
               <Bar 
                 dataKey="revenue" 
-                fill="#9b87f5" 
+                fill="hsl(var(--primary))" 
                 name="revenue"
                 radius={[4, 4, 0, 0]}
               />
               <Bar 
                 dataKey="appointments" 
-                fill="#33C3F0" 
+                fill="hsl(var(--accent-foreground))" 
                 name="appointments"
                 radius={[4, 4, 0, 0]}
               />
               <Bar 
                 dataKey="newClients" 
-                fill="#D6BCFA" 
+                fill="hsl(var(--muted))" 
                 name="newClients"
                 radius={[4, 4, 0, 0]}
               />

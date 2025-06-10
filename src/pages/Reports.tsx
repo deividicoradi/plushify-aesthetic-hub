@@ -19,8 +19,8 @@ const Reports = () => {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <SidebarInset className="flex-1">
-            <div className="flex flex-col min-h-screen w-full">
-              <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+            <div className="flex flex-col min-h-screen w-full bg-background">
+              <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-3">
                 <SidebarTrigger />
                 <div className="flex-1">
                   <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -29,7 +29,7 @@ const Reports = () => {
                   </h1>
                 </div>
               </header>
-              <main className="flex-1 p-6">
+              <main className="flex-1 p-6 bg-background">
                 <div className="text-center py-8">
                   <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
                   <p className="text-destructive mb-4">Erro ao carregar dados: {error}</p>
@@ -50,9 +50,9 @@ const Reports = () => {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
-          <div className="flex flex-col min-h-screen w-full">
+          <div className="flex flex-col min-h-screen w-full bg-background">
             {/* Header */}
-            <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+            <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-3">
               <SidebarTrigger />
               <div className="flex items-center justify-between flex-1">
                 <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ const Reports = () => {
             </header>
 
             {/* Main content */}
-            <main className="flex-1 p-6 space-y-6">
+            <main className="flex-1 p-6 space-y-6 bg-background">
               {/* Métricas principais */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <MetricCard

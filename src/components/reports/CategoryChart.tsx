@@ -9,18 +9,18 @@ interface CategoryChartProps {
   loading?: boolean;
 }
 
-const COLORS = ['#9b87f5', '#33C3F0', '#D6BCFA', '#7E69AB', '#F97316', '#0EA5E9', '#D946EF'];
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent-foreground))', 'hsl(var(--muted))', 'hsl(var(--secondary))', '#F97316', '#0EA5E9', '#D946EF'];
 
 export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => {
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Receita por Categoria</CardTitle>
+          <CardTitle className="text-card-foreground">Receita por Categoria</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-80 flex items-center justify-center">
-            <div className="animate-pulse text-gray-500">Carregando dados...</div>
+            <div className="animate-pulse text-muted-foreground">Carregando dados...</div>
           </div>
         </CardContent>
       </Card>
@@ -29,13 +29,13 @@ export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => 
 
   if (!data.length) {
     return (
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Receita por Categoria</CardTitle>
+          <CardTitle className="text-card-foreground">Receita por Categoria</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-80 flex items-center justify-center">
-            <div className="text-gray-500 text-center">
+            <div className="text-muted-foreground text-center">
               <p>Nenhuma transação encontrada</p>
               <p className="text-sm mt-2">Adicione transações financeiras para ver os dados</p>
             </div>
@@ -50,9 +50,9 @@ export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => 
   };
 
   return (
-    <Card>
+    <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle>Receita por Categoria</CardTitle>
+        <CardTitle className="text-card-foreground">Receita por Categoria</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-80">
@@ -75,9 +75,10 @@ export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => 
               <Tooltip 
                 formatter={(value) => [formatCurrency(Number(value)), 'Receita']}
                 contentStyle={{ 
-                  backgroundColor: '#fff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px'
+                  backgroundColor: 'hsl(var(--background))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
+                  color: 'hsl(var(--foreground))'
                 }}
               />
               <Legend />
@@ -87,17 +88,17 @@ export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => 
         
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           {data.map((category, index) => (
-            <div key={category.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div key={category.name} className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <div className="flex items-center gap-2">
                 <div 
                   className="w-3 h-3 rounded-full" 
                   style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 />
-                <span className="font-medium">{category.name}</span>
+                <span className="font-medium text-foreground">{category.name}</span>
               </div>
               <div className="text-right">
-                <div className="font-semibold">{formatCurrency(category.value)}</div>
-                <div className="text-sm text-gray-600">{category.percentage.toFixed(1)}%</div>
+                <div className="font-semibold text-foreground">{formatCurrency(category.value)}</div>
+                <div className="text-sm text-muted-foreground">{category.percentage.toFixed(1)}%</div>
               </div>
             </div>
           ))}

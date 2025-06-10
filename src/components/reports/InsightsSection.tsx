@@ -12,16 +12,16 @@ interface InsightsSectionProps {
 export const InsightsSection = ({ metrics, loading = false }: InsightsSectionProps) => {
   if (loading || !metrics) {
     return (
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Insights e Recomendações</CardTitle>
+          <CardTitle className="text-card-foreground">Insights e Recomendações</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="animate-pulse space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="p-4 bg-gray-100 rounded-lg">
-                <div className="w-24 h-4 bg-gray-300 rounded mb-2"></div>
-                <div className="w-full h-3 bg-gray-300 rounded"></div>
+              <div key={i} className="p-4 bg-muted rounded-lg">
+                <div className="w-24 h-4 bg-muted-foreground/20 rounded mb-2"></div>
+                <div className="w-full h-3 bg-muted-foreground/20 rounded"></div>
               </div>
             ))}
           </div>
@@ -90,26 +90,26 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
 
   const getBackgroundColor = (type: string) => {
     switch (type) {
-      case 'success': return 'bg-green-50 border-green-200';
-      case 'warning': return 'bg-yellow-50 border-yellow-200';
-      case 'info': return 'bg-blue-50 border-blue-200';
-      default: return 'bg-purple-50 border-purple-200';
+      case 'success': return 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800';
+      case 'warning': return 'bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-800';
+      case 'info': return 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800';
+      default: return 'bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800';
     }
   };
 
   const getTextColor = (type: string) => {
     switch (type) {
-      case 'success': return 'text-green-800';
-      case 'warning': return 'text-yellow-800';
-      case 'info': return 'text-blue-800';
-      default: return 'text-purple-800';
+      case 'success': return 'text-green-800 dark:text-green-200';
+      case 'warning': return 'text-yellow-800 dark:text-yellow-200';
+      case 'info': return 'text-blue-800 dark:text-blue-200';
+      default: return 'text-purple-800 dark:text-purple-200';
     }
   };
 
   return (
-    <Card>
+    <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle>Insights e Recomendações</CardTitle>
+        <CardTitle className="text-card-foreground">Insights e Recomendações</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

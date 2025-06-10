@@ -43,14 +43,14 @@ const FinancialDashboard = () => {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <SidebarInset className="flex-1">
-            <div className="flex flex-col min-h-screen w-full">
-              <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+            <div className="flex flex-col min-h-screen w-full bg-background">
+              <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-3">
                 <SidebarTrigger />
                 <div className="flex-1">
                   <h1 className="text-2xl font-bold text-foreground">Painel Financeiro</h1>
                 </div>
               </header>
-              <main className="flex-1 p-6">
+              <main className="flex-1 p-6 bg-background">
                 <div className="text-center py-8">
                   <p className="text-destructive mb-4">Erro ao carregar dados: {error}</p>
                   <Button onClick={handleRefresh} variant="outline">
@@ -71,9 +71,9 @@ const FinancialDashboard = () => {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
-          <div className="flex flex-col min-h-screen w-full">
+          <div className="flex flex-col min-h-screen w-full bg-background">
             {/* Header */}
-            <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+            <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-3">
               <SidebarTrigger />
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -97,7 +97,7 @@ const FinancialDashboard = () => {
             </header>
 
             {/* Main content */}
-            <main className="flex-1 p-6 space-y-6">
+            <main className="flex-1 p-6 space-y-6 bg-background">
               {/* Métricas principais */}
               {metrics && (
                 <MetricsCards metrics={metrics} loading={loading} />
