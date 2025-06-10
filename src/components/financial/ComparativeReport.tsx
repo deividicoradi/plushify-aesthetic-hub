@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,14 +38,6 @@ interface ComparativeData {
     crescimento: number;
     diferenca: number;
   };
-}
-
-interface ExportData {
-  payments: any[];
-  expenses: any[];
-  installments: any[];
-  cashClosures: any[];
-  period: { from: string; to: string };
 }
 
 const formatCurrency = (value: number) => {
@@ -349,7 +342,7 @@ const ComparativeReport = () => {
           <CardHeader>
             <CardTitle>Resumo Comparativo</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Comparando {format(new Date(comparison.period.anterior.from), "MMMM yyyy", { locale: ptBR })} e {format(new Date(comparison.period.atual.from), "MMMM yyyy", { locale: ptBR })}
+              Comparando {format(new Date(comparison.periodo.anterior.from), "MMMM yyyy", { locale: ptBR })} e {format(new Date(comparison.periodo.atual.from), "MMMM yyyy", { locale: ptBR })}
             </p>
           </CardHeader>
           <CardContent>
