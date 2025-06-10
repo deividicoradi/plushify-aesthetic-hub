@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Calendar, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { toast } from "@/hooks/use-toast";
 import AppointmentCalendar from '@/components/appointments/AppointmentCalendar';
@@ -85,61 +84,63 @@ const Appointments = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full">
-      <AppSidebar />
-      <SidebarInset className="flex-1">
-        <div className="flex flex-col min-h-screen w-full">
-          {/* Header with sidebar trigger */}
-          <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
-            <SidebarTrigger />
-            <div className="flex items-center justify-between flex-1">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-6 h-6 text-plush-600" />
-                <h1 className="text-2xl font-bold">Agendamentos</h1>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <div className="flex flex-col min-h-screen w-full">
+            {/* Header with sidebar trigger */}
+            <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+              <SidebarTrigger />
+              <div className="flex items-center justify-between flex-1">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-6 h-6 text-plush-600" />
+                  <h1 className="text-2xl font-bold">Agendamentos</h1>
+                </div>
+                <Button 
+                  className="bg-plush-600 hover:bg-plush-700 gap-2"
+                  onClick={handleCreateAppointment}
+                >
+                  <Plus className="h-4 w-4" />
+                  Novo Agendamento
+                </Button>
               </div>
-              <Button 
-                className="bg-plush-600 hover:bg-plush-700 gap-2"
-                onClick={handleCreateAppointment}
-              >
-                <Plus className="h-4 w-4" />
-                Novo Agendamento
-              </Button>
-            </div>
-          </header>
+            </header>
 
-          {/* Main content */}
-          <main className="flex-1 p-6">
-            <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8">
-              <AppointmentCalendar 
-                selectedDate={selectedDate} 
-                onDateChange={setSelectedDate} 
-              />
-              <AppointmentList 
-                date={selectedDate} 
-                appointments={appointments} 
-                onEdit={handleEditAppointment}
-                onDelete={handleDeleteAppointment}
-              />
-            </div>
-          </main>
+            {/* Main content */}
+            <main className="flex-1 p-6">
+              <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8">
+                <AppointmentCalendar 
+                  selectedDate={selectedDate} 
+                  onDateChange={setSelectedDate} 
+                />
+                <AppointmentList 
+                  date={selectedDate} 
+                  appointments={appointments} 
+                  onEdit={handleEditAppointment}
+                  onDelete={handleDeleteAppointment}
+                />
+              </div>
+            </main>
 
-          {/* Dialogs */}
-          <AppointmentDialog 
-            open={showAppointmentDialog}
-            onOpenChange={setShowAppointmentDialog}
-            appointment={currentAppointment}
-            onSave={handleSaveAppointment}
-            selectedDate={selectedDate}
-          />
+            {/* Dialogs */}
+            <AppointmentDialog 
+              open={showAppointmentDialog}
+              onOpenChange={setShowAppointmentDialog}
+              appointment={currentAppointment}
+              onSave={handleSaveAppointment}
+              selectedDate={selectedDate}
+            />
 
-          <DeleteConfirmDialog 
-            open={showDeleteDialog}
-            onOpenChange={setShowDeleteDialog}
-            onConfirm={confirmDeleteAppointment}
-          />
-        </div>
-      </SidebarInset>
-    </div>
+            <DeleteConfirmDialog 
+              open={showDeleteDialog}
+              onOpenChange={setShowDeleteDialog}
+              onConfirm={confirmDeleteAppointment}
+            />
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 
