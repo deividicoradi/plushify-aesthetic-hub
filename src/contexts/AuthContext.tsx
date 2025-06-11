@@ -19,6 +19,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Interval handler used to refresh the token periodically
+  let tokenRefreshInterval: ReturnType<typeof setInterval> | undefined;
+
   // Função para atualizar a sessão
   const refreshSession = async () => {
     try {
@@ -64,16 +67,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      
+
       // Configura um intervalo para renovar o token periodicamente (a cada 55 minutos)
-      const tokenRefreshInterval = setInterval(refreshSession, 55 * 60 * 1000);
-      
-      // Limpa o intervalo quando o componente é desmontado
-      return () => clearInterval(tokenRefreshInterval);
+      tokenRefreshInterval = setInterval(refreshSession, 55 * 60 * 1000);
     });
 
     return () => {
       subscription.unsubscribe();
+      if (tokenRefreshInterval) clearInterval(tokenRefreshInterval);
     };
   }, []);
 
