@@ -24,7 +24,7 @@ import Help from './pages/Help';
 import NotFound from './pages/NotFound';
 import PaymentSuccess from './pages/PaymentSuccess';
 import { AuthProvider } from './contexts/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import FinancialDashboard from './pages/FinancialDashboard';
 
 const queryClient = new QueryClient();
