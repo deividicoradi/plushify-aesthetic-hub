@@ -10,7 +10,8 @@ export const DashboardHeader = () => {
         <LayoutDashboard className="w-6 h-6 text-primary" />
         <h1 className="text-2xl font-bold">Dashboard</h1>
       </div>
-      <div className="hidden lg:block">
+      {/* Mostra notificações em todas as telas, não apenas lg+ */}
+      <div className="flex-shrink-0">
         <NotificationCenter />
       </div>
     </div>

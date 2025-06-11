@@ -17,16 +17,16 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   return (
     <div className="flex flex-col min-h-screen w-full">
-      {/* Header with sidebar trigger */}
-      <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+      {/* Header with sidebar trigger - mais compacto */}
+      <header className="flex items-center gap-4 border-b bg-background px-4 py-2">
         <SidebarTrigger />
         <div className="flex-1">
           <DashboardHeader />
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1 p-6 space-y-6">
+      {/* Main content com espaçamento reduzido */}
+      <main className="flex-1 p-4 space-y-4">
         <PlanInfoBanner currentPlan={currentPlan} isSubscribed={isSubscribed} />
         <DashboardMetrics />
         <DashboardContent />
