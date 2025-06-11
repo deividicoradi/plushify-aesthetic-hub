@@ -37,7 +37,13 @@ const Inventory = () => {
   } = useInventoryDialogs();
   
   const { selectedProduct, handleStockTransaction, handleEditProduct } = useProductActions(refetch);
-  const { selectedProducts, toggleSelect, selectAll, clearSelection } = useProductSelection(products);
+  const {
+    selectedProducts,
+    toggleSelect,
+    selectAll,
+    clearSelection,
+    setSelectedProducts,
+  } = useProductSelection(products);
 
   const handleViewChange = (view: string) => {
     setIsHistoryOpen(view === 'history');
@@ -69,7 +75,7 @@ const Inventory = () => {
                 onShowReports={() => handleViewChange('reports')}
                 onScanBarcode={() => openDialog('barcodeScanner')}
                 selectedProducts={selectedProducts}
-                setSelectedProducts={() => {}}
+                setSelectedProducts={setSelectedProducts}
                 allProducts={products}
                 fetchProducts={refetch}
               />
