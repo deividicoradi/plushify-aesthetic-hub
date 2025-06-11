@@ -25,7 +25,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   // Redirect to dashboard if user tries to access login page while already authenticated
-  if (user && (location.pathname === '/auth' || location.pathname === '/cadastro')) {
+  if (user && (location.pathname === '/auth' || location.pathname === '/signup')) {
     return <Navigate to="/dashboard" replace />;
   }
 
