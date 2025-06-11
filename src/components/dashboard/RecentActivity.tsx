@@ -14,7 +14,7 @@ const activities = [
     time: '5 minutos atrás',
     details: 'Cliente premium, primeira compra agendada.',
     actionText: 'Ver Cliente',
-    action: () => window.location.assign('/clientes')
+    action: () => window.location.assign('/clients')
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ const activities = [
     time: '1 hora atrás',
     details: 'Serviço confirmado para 10:30.',
     actionText: 'Ver Agenda',
-    action: () => window.location.assign('/agendamentos')
+    action: () => window.location.assign('/appointments')
   },
   {
     id: 3,
@@ -36,7 +36,7 @@ const activities = [
     time: '2 horas atrás',
     details: 'Pagamento via cartão. Ref: #1237',
     actionText: 'Ver Financeiro',
-    action: () => window.location.assign('/planos')
+    action: () => window.location.assign('/financial')
   },
 ];
 

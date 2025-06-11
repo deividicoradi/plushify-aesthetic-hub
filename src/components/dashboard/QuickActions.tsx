@@ -26,7 +26,7 @@ export const QuickActions = () => {
       icon: Plus,
       label: 'Novo Agendamento',
       description: 'Agendar serviço',
-      onClick: () => navigate('/agendamentos'),
+      onClick: () => navigate('/appointments'),
       color: 'from-blue-500 to-blue-600',
       textColor: 'text-white'
     },
@@ -34,7 +34,7 @@ export const QuickActions = () => {
       icon: Users,
       label: 'Adicionar Cliente',
       description: 'Cadastrar novo cliente',
-      onClick: () => navigate('/clientes'),
+      onClick: () => navigate('/clients'),
       color: 'from-green-500 to-green-600',
       textColor: 'text-white'
     },
@@ -42,7 +42,7 @@ export const QuickActions = () => {
       icon: Package,
       label: 'Controlar Estoque',
       description: 'Gerenciar produtos',
-      onClick: () => navigate('/estoque'),
+      onClick: () => navigate('/inventory'),
       color: 'from-orange-500 to-orange-600',
       textColor: 'text-white'
     },
@@ -50,7 +50,7 @@ export const QuickActions = () => {
       icon: Calendar,
       label: 'Ver Agenda',
       description: 'Visualizar agendamentos',
-      onClick: () => navigate('/agendamentos'),
+      onClick: () => navigate('/appointments'),
       color: 'from-purple-500 to-purple-600',
       textColor: 'text-white'
     }
@@ -61,7 +61,7 @@ export const QuickActions = () => {
       icon: Brain,
       label: 'IA Personalizada',
       description: 'Análises inteligentes',
-      onClick: () => navigate('/ai-dashboard'),
+      onClick: () => navigate('/reports'),
       color: 'from-gradient-purple to-gradient-pink',
       textColor: 'text-white',
       isPremium: true
@@ -70,7 +70,7 @@ export const QuickActions = () => {
       icon: Target,
       label: 'CRM Avançado',
       description: 'Gestão de vendas',
-      onClick: () => navigate('/crm'),
+      onClick: () => navigate('/clients'),
       color: 'from-gradient-blue to-gradient-cyan',
       textColor: 'text-white',
       isPremium: true
