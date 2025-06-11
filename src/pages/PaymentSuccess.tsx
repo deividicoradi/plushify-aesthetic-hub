@@ -52,8 +52,8 @@ const PaymentSuccess = () => {
   };
   
   return (
-    <div className="min-h-screen pt-20 pb-10 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 mx-4">
+    <div className="min-h-screen bg-background pt-20 pb-10 flex items-center justify-center">
+      <div className="max-w-md w-full bg-white dark:bg-card rounded-xl shadow-lg p-8 mx-4">
         <div className="flex flex-col items-center text-center">
           <div className="w-16 h-16 bg-plush-50 rounded-full flex items-center justify-center mb-6">
             <CheckCircle className="text-plush-600 w-9 h-9" />
@@ -62,22 +62,22 @@ const PaymentSuccess = () => {
           <h1 className="text-2xl font-bold mb-2 font-serif">Pagamento Confirmado!</h1>
           
           {isLoading ? (
-            <p className="text-gray-500 mb-6">Verificando seu pagamento...</p>
+            <p className="text-muted-foreground mb-6">Verificando seu pagamento...</p>
           ) : isSubscribed ? (
             <>
-              <p className="text-gray-500 mb-1">
+              <p className="text-muted-foreground mb-1">
                 Parabéns! Sua assinatura do plano <span className="font-medium text-plush-700">{getPlanName()}</span> foi ativada com sucesso.
               </p>
-              <p className="text-gray-500 mb-6">
+              <p className="text-muted-foreground mb-6">
                 Você já pode começar a aproveitar todos os benefícios do seu novo plano agora mesmo.
               </p>
             </>
           ) : (
             <>
-              <p className="text-gray-500 mb-1">
+              <p className="text-muted-foreground mb-1">
                 Seu pagamento foi recebido, mas pode levar alguns minutos para que sua assinatura seja ativada.
               </p>
-              <p className="text-gray-500 mb-6">
+              <p className="text-muted-foreground mb-6">
                 Caso não seja ativada automaticamente, entre em contato com nosso suporte.
               </p>
             </>

@@ -82,7 +82,7 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm border border-plush-100 p-6 md:p-8">
+      <div className="max-w-md mx-auto bg-white dark:bg-card rounded-xl shadow-sm border border-plush-100 p-6 md:p-8">
         <div className="flex items-center gap-2 mb-6">
           <UserPlus className="w-6 h-6 text-plush-600" />
           <h1 className="text-2xl font-bold">Cadastre-se no Plushify</h1>
