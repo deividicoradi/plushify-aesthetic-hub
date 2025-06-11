@@ -72,7 +72,15 @@ The application expects the following variables at build time:
 - `PRICE_ID_PRO_YEARLY` – Stripe price ID for the yearly Pro plan.
 - `PRICE_ID_PREMIUM_MONTHLY` – Stripe price ID for the monthly Premium plan.
 - `PRICE_ID_PREMIUM_YEARLY` – Stripe price ID for the yearly Premium plan.
-- `APP_URL` – base URL used by Supabase functions when no `origin` header is provided.
+- `APP_URL` – base URL used by Supabase functions when no `Origin` header is provided. This must be defined when running functions without an `Origin` header in the request.
+
+Supabase functions (`supabase/functions/*`) also use the following variables at runtime:
+
+- `STRIPE_SECRET_KEY` – secret key for Stripe used in `create-checkout-session`, `verify-subscription` and `stripe-webhook`.
+- `STRIPE_WEBHOOK_SECRET` – webhook signing secret used by `stripe-webhook`.
+- `SUPABASE_SERVICE_ROLE_KEY` – service role key used by `stripe-webhook` for privileged database access.
+- `SUPABASE_URL` – your Supabase project URL, used by all functions.
+- `SUPABASE_ANON_KEY` – anon key used by functions in `_shared/stripeUtils.ts` to authenticate users.
 
 Create a `.env` file in the project root and define these values when running locally or configure them in the Supabase dashboard for your functions.
 
