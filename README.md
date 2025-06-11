@@ -66,8 +66,15 @@ The application expects the following variables at build time:
 
 - `VITE_SUPABASE_URL` – your Supabase project URL.
 - `VITE_SUPABASE_ANON_KEY` – the public anon key for your project.
+- `PRICE_ID_STARTER_MONTHLY` – Stripe price ID for the monthly Starter plan.
+- `PRICE_ID_STARTER_YEARLY` – Stripe price ID for the yearly Starter plan.
+- `PRICE_ID_PRO_MONTHLY` – Stripe price ID for the monthly Pro plan.
+- `PRICE_ID_PRO_YEARLY` – Stripe price ID for the yearly Pro plan.
+- `PRICE_ID_PREMIUM_MONTHLY` – Stripe price ID for the monthly Premium plan.
+- `PRICE_ID_PREMIUM_YEARLY` – Stripe price ID for the yearly Premium plan.
+- `APP_URL` – base URL used by Supabase functions when no `origin` header is provided.
 
-Create a `.env` file in the project root and define these values when running locally.
+Create a `.env` file in the project root and define these values when running locally or configure them in the Supabase dashboard for your functions.
 
 ## How can I deploy this project?
 

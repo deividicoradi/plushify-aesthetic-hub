@@ -28,22 +28,31 @@ const corsHeaders = {
 
 // Plan configuration with Stripe Price IDs
 const getPlanConfig = (planId: string, isYearly: boolean): PlanConfig => {
-  switch(planId) {
-    case 'starter':
+  switch (planId) {
+    case 'starter': {
+      const monthly = Deno.env.get('PRICE_ID_STARTER_MONTHLY');
+      const yearly = Deno.env.get('PRICE_ID_STARTER_YEARLY');
       return {
-        name: "Plano Starter",
-        priceId: isYearly ? "price_1RNNv2RkF2Xmse9MjGNrg4wk" : "price_1RNNtORkF2Xmse9MudMyCXMt"
+        name: 'Plano Starter',
+        priceId: isYearly ? (yearly ?? '') : (monthly ?? ''),
       };
-    case 'pro':
+    }
+    case 'pro': {
+      const monthly = Deno.env.get('PRICE_ID_PRO_MONTHLY');
+      const yearly = Deno.env.get('PRICE_ID_PRO_YEARLY');
       return {
-        name: "Plano Pro", 
-        priceId: isYearly ? "price_1RNNx3RkF2Xmse9Mz9Hu9f22" : "price_1RNNw9RkF2Xmse9MVAoYhg3u"
+        name: 'Plano Pro',
+        priceId: isYearly ? (yearly ?? '') : (monthly ?? ''),
       };
-    case 'premium':
+    }
+    case 'premium': {
+      const monthly = Deno.env.get('PRICE_ID_PREMIUM_MONTHLY');
+      const yearly = Deno.env.get('PRICE_ID_PREMIUM_YEARLY');
       return {
-        name: "Plano Premium",
-        priceId: isYearly ? "price_1RNNzFRkF2Xmse9Mr6D34kM9" : "price_1RNNxgRkF2Xmse9MGKFxwHZc"
+        name: 'Plano Premium',
+        priceId: isYearly ? (yearly ?? '') : (monthly ?? ''),
       };
+    }
     default:
       throw new Error(`Plano '${planId}' não é válido`);
   }
@@ -196,7 +205,7 @@ serve(async (req) => {
     const planConfig = getPlanConfig(planId, isYearly);
     const customerId = await getOrCreateCustomer(stripe, supabase, user);
     
-    const origin = req.headers.get("origin") || "https://09df458b-dedc-46e2-af46-e15d28209b01.lovableproject.com";
+    const origin = req.headers.get("origin") || Deno.env.get('APP_URL') || "";
     const session = await createCheckoutSession(
       stripe,
       customerId,
