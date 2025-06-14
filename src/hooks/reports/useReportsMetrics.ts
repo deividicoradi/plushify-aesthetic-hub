@@ -30,6 +30,8 @@ export const useReportsMetrics = () => {
       setLoading(true);
       setError(null);
 
+      console.log('🔍 Buscando métricas para usuário:', user.id);
+
       const currentMonth = new Date();
       const lastMonth = new Date();
       lastMonth.setMonth(currentMonth.getMonth() - 1);
@@ -52,13 +54,14 @@ export const useReportsMetrics = () => {
         lastMonthAppointmentsResult
       ] = await Promise.all([
         supabase.from('clients').select('id').eq('user_id', user.id),
+        // Buscar apenas pagamentos com status 'pago' e somar o paid_amount
         supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago'),
         supabase.from('appointments').select('id').eq('user_id', user.id),
         supabase.from('products').select('id, stock, min_stock').eq('user_id', user.id),
         
-        // Métricas do mês atual
-        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('created_at', currentMonthStart.toISOString()),
-        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString()),
+        // Métricas do mês atual - apenas pagamentos realizados
+        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('payment_date', currentMonthStart.toISOString()),
+        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('payment_date', lastMonthStart.toISOString()).lte('payment_date', lastMonthEnd.toISOString()),
         
         supabase.from('clients').select('id').eq('user_id', user.id).gte('created_at', currentMonthStart.toISOString()),
         supabase.from('clients').select('id').eq('user_id', user.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString()),
@@ -67,8 +70,18 @@ export const useReportsMetrics = () => {
         supabase.from('appointments').select('id').eq('user_id', user.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString())
       ]);
 
+      console.log('📊 Dados dos pagamentos recebidos:', paymentsResult.data);
+
       const totalClients = clientsResult.data?.length || 0;
-      const totalRevenue = paymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
+      // Somar paid_amount dos pagamentos com status 'pago'
+      const totalRevenue = paymentsResult.data?.reduce((sum, payment) => {
+        const amount = Number(payment.paid_amount) || 0;
+        console.log('💰 Somando valor pago:', amount);
+        return sum + amount;
+      }, 0) || 0;
+      
+      console.log('💵 Receita total calculada:', totalRevenue);
+      
       const totalAppointments = appointmentsResult.data?.length || 0;
       const totalProducts = productsResult.data?.length || 0;
       const lowStockProducts = productsResult.data?.filter(p => p.stock <= p.min_stock).length || 0;
@@ -86,7 +99,7 @@ export const useReportsMetrics = () => {
       const lastMonthAppointments = lastMonthAppointmentsResult.data?.length || 0;
       const appointmentsGrowth = lastMonthAppointments > 0 ? ((currentMonthAppointments - lastMonthAppointments) / lastMonthAppointments) * 100 : 0;
 
-      setMetrics({
+      const finalMetrics = {
         totalClients,
         totalRevenue,
         totalAppointments,
@@ -95,10 +108,13 @@ export const useReportsMetrics = () => {
         clientsGrowth,
         revenueGrowth,
         appointmentsGrowth
-      });
+      };
+
+      console.log('📈 Métricas finais:', finalMetrics);
+      setMetrics(finalMetrics);
 
     } catch (err: any) {
-      console.error('Erro ao buscar métricas:', err);
+      console.error('❌ Erro ao buscar métricas:', err);
       setError(err.message);
     } finally {
       setLoading(false);

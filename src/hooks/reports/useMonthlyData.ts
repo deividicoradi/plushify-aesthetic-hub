@@ -26,14 +26,18 @@ export const useMonthlyData = () => {
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
+      console.log('📅 Buscando dados mensais dos últimos 6 meses para:', user.id);
+
       // Buscar dados dos últimos 6 meses em paralelo para melhor performance
       const [paymentsResult, clientsResult, appointmentsResult] = await Promise.all([
+        // Buscar apenas pagamentos com status 'pago' e usar payment_date para filtro temporal
         supabase
           .from('payments')
-          .select('paid_amount, payment_date, created_at')
+          .select('paid_amount, payment_date')
           .eq('user_id', user.id)
           .eq('status', 'pago')
-          .gte('created_at', sixMonthsAgo.toISOString()),
+          .gte('payment_date', sixMonthsAgo.toISOString())
+          .not('payment_date', 'is', null), // Garantir que payment_date não seja null
         
         supabase
           .from('clients')
@@ -47,6 +51,8 @@ export const useMonthlyData = () => {
           .eq('user_id', user.id)
           .gte('created_at', sixMonthsAgo.toISOString())
       ]);
+
+      console.log('💳 Pagamentos recebidos para dados mensais:', paymentsResult.data);
 
       const payments = paymentsResult.data || [];
       const clients = clientsResult.data || [];
@@ -70,12 +76,16 @@ export const useMonthlyData = () => {
         });
       }
 
-      // Agregar receitas dos pagamentos
+      // Agregar receitas dos pagamentos usando payment_date
       payments.forEach(payment => {
-        const monthKey = payment.created_at.slice(0, 7);
-        const existing = monthlyDataMap.get(monthKey);
-        if (existing) {
-          existing.revenue += Number(payment.paid_amount);
+        if (payment.payment_date) {
+          const monthKey = payment.payment_date.slice(0, 7);
+          const existing = monthlyDataMap.get(monthKey);
+          if (existing) {
+            const amount = Number(payment.paid_amount) || 0;
+            existing.revenue += amount;
+            console.log(`💰 Adicionando ${amount} ao mês ${monthKey}`);
+          }
         }
       });
 
@@ -97,9 +107,11 @@ export const useMonthlyData = () => {
         }
       });
 
-      setMonthlyData(Array.from(monthlyDataMap.values()));
+      const finalData = Array.from(monthlyDataMap.values());
+      console.log('📊 Dados mensais finais:', finalData);
+      setMonthlyData(finalData);
     } catch (err: any) {
-      console.error('Erro ao buscar dados mensais:', err);
+      console.error('❌ Erro ao buscar dados mensais:', err);
     } finally {
       setLoading(false);
     }
