@@ -24,7 +24,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
   const [formData, setFormData] = useState({
     description: payment?.description || '',
     amount: payment?.amount || '',
-    payment_method: payment?.payment_method || '',
+    payment_method_id: payment?.payment_method_id || '',
     client_id: payment?.client_id || '',
     due_date: payment?.due_date ? payment.due_date.split('T')[0] : '',
     notes: payment?.notes || '',
@@ -62,17 +62,25 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log('Dados sendo enviados:', data);
+      
       if (payment) {
         const { error } = await supabase
           .from('payments')
           .update(data)
           .eq('id', payment.id);
-        if (error) throw error;
+        if (error) {
+          console.error('Erro ao atualizar:', error);
+          throw error;
+        }
       } else {
         const { error } = await supabase
           .from('payments')
           .insert([{ ...data, user_id: user?.id }]);
-        if (error) throw error;
+        if (error) {
+          console.error('Erro ao inserir:', error);
+          throw error;
+        }
       }
     },
     onSuccess: () => {
@@ -82,7 +90,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
       setFormData({
         description: '',
         amount: '',
-        payment_method: '',
+        payment_method_id: '',
         client_id: '',
         due_date: '',
         notes: '',
@@ -90,25 +98,31 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
       });
     },
     onError: (error) => {
+      console.error('Erro completo:', error);
       toast.error('Erro ao salvar pagamento');
-      console.error(error);
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.description || !formData.amount || !formData.payment_method) {
+    if (!formData.description || !formData.amount || !formData.payment_method_id) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
 
-    mutation.mutate({
-      ...formData,
+    const dataToSubmit = {
+      description: formData.description,
       amount: parseFloat(formData.amount),
+      payment_method_id: formData.payment_method_id,
       client_id: formData.client_id || null,
       due_date: formData.due_date || null,
-    });
+      notes: formData.notes || null,
+      status: formData.status
+    };
+
+    console.log('Submetendo dados:', dataToSubmit);
+    mutation.mutate(dataToSubmit);
   };
 
   const handleChange = (field: string, value: string) => {
@@ -167,8 +181,8 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="payment_method">Método de Pagamento *</Label>
-            <Select value={formData.payment_method} onValueChange={(value) => handleChange('payment_method', value)}>
+            <Label htmlFor="payment_method_id">Método de Pagamento *</Label>
+            <Select value={formData.payment_method_id} onValueChange={(value) => handleChange('payment_method_id', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o método" />
               </SelectTrigger>
