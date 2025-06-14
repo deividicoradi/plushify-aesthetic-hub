@@ -115,20 +115,20 @@ const InstallmentCard = ({ installment, paymentData, onEdit, onUpdate }: Install
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
+    <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
+      <CardContent className="p-4 flex flex-col h-full">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                 {installment.installment_number}
               </span>
             </div>
-            <div>
-              <h4 className="font-medium">
+            <div className="min-w-0">
+              <h4 className="font-medium text-sm">
                 Parcela {installment.installment_number}/{installment.total_installments}
               </h4>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground truncate">
                 {paymentData?.description || 'Pagamento'}
               </p>
             </div>
@@ -136,42 +136,44 @@ const InstallmentCard = ({ installment, paymentData, onEdit, onUpdate }: Install
           {getStatusBadge(installment.status, installment.due_date)}
         </div>
 
-        <div className="space-y-2 mb-4">
+        <div className="space-y-2 mb-4 flex-grow">
           <div className="flex items-center gap-2 text-sm">
-            <Calendar className="w-4 h-4 text-muted-foreground" />
-            <span>Vence: {format(new Date(installment.due_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
+            <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <span className="text-xs">Vence: {format(new Date(installment.due_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
           </div>
 
           {installment.payment_date && (
             <div className="flex items-center gap-2 text-sm text-green-600">
-              <CheckCircle className="w-4 h-4" />
-              <span>Pago em: {format(new Date(installment.payment_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
+              <CheckCircle className="w-4 h-4 flex-shrink-0" />
+              <span className="text-xs">Pago em: {format(new Date(installment.payment_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
             </div>
           )}
 
           <div className="flex items-center gap-2 text-sm">
-            <DollarSign className="w-4 h-4 text-muted-foreground" />
-            <span className="font-medium">{formatCurrency(Number(installment.amount))}</span>
-            {Number(installment.paid_amount) > 0 && installment.status !== 'pago' && (
-              <span className="text-green-600">
-                (Pago: {formatCurrency(Number(installment.paid_amount))})
-              </span>
-            )}
+            <DollarSign className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <div className="min-w-0">
+              <span className="font-medium text-sm">{formatCurrency(Number(installment.amount))}</span>
+              {Number(installment.paid_amount) > 0 && installment.status !== 'pago' && (
+                <div className="text-green-600 text-xs">
+                  Pago: {formatCurrency(Number(installment.paid_amount))}
+                </div>
+              )}
+            </div>
           </div>
 
           {installment.notes && (
-            <p className="text-sm text-muted-foreground mt-2">{installment.notes}</p>
+            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{installment.notes}</p>
           )}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 mt-auto">
           {installment.status === 'pendente' ? (
             <Button
               size="sm"
               onClick={handleMarkAsPaid}
-              className="flex-1 bg-green-600 hover:bg-green-700"
+              className="w-full bg-green-600 hover:bg-green-700 text-xs h-8"
             >
-              <CheckCircle className="w-4 h-4 mr-1" />
+              <CheckCircle className="w-3 h-3 mr-1" />
               Marcar como Pago
             </Button>
           ) : (
@@ -179,9 +181,9 @@ const InstallmentCard = ({ installment, paymentData, onEdit, onUpdate }: Install
               size="sm"
               variant="destructive"
               onClick={handleMarkAsNotPaid}
-              className="flex-1"
+              className="w-full text-xs h-8"
             >
-              <XCircle className="w-4 h-4 mr-1" />
+              <XCircle className="w-3 h-3 mr-1" />
               Marcar como Não Pago
             </Button>
           )}
@@ -190,8 +192,9 @@ const InstallmentCard = ({ installment, paymentData, onEdit, onUpdate }: Install
             size="sm"
             variant="outline"
             onClick={() => onEdit(installment)}
+            className="w-full text-xs h-8"
           >
-            <Edit className="w-4 h-4 mr-1" />
+            <Edit className="w-3 h-3 mr-1" />
             Editar
           </Button>
         </div>
