@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +13,12 @@ interface CashOpeningCardProps {
 const CashOpeningCard = ({ opening }: CashOpeningCardProps) => {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      aberto: { label: 'Aberto', variant: 'secondary' as const },
-      fechado: { label: 'Fechado', variant: 'default' as const },
+      aberto: { label: 'Aberto', variant: 'secondary' as const, className: 'bg-green-500 text-white hover:bg-green-600' },
+      fechado: { label: 'Fechado', variant: 'default' as const, className: '' },
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.aberto;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
   };
 
   return (
