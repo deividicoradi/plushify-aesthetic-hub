@@ -53,7 +53,7 @@ interface AppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   appointment?: Appointment;
-  onSave: (appointment: Omit<Appointment, "id"> & { id?: number }) => void;
+  onSave: (appointment: Omit<Appointment, "id"> & { id?: string }) => void;
   selectedDate?: Date;
 }
 

@@ -16,7 +16,7 @@ const Appointments = () => {
   const [showAppointmentDialog, setShowAppointmentDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [currentAppointment, setCurrentAppointment] = useState<Appointment | undefined>(undefined);
-  const [appointmentToDelete, setAppointmentToDelete] = useState<number | null>(null);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
   
   const {
     appointments,
@@ -36,7 +36,7 @@ const Appointments = () => {
     setShowAppointmentDialog(true);
   };
 
-  const handleDeleteAppointment = (id: number) => {
+  const handleDeleteAppointment = (id: string) => {
     setAppointmentToDelete(id);
     setShowDeleteDialog(true);
   };
@@ -49,7 +49,7 @@ const Appointments = () => {
     }
   };
 
-  const handleSaveAppointment = async (appointmentData: Omit<Appointment, "id"> & { id?: number }) => {
+  const handleSaveAppointment = async (appointmentData: Omit<Appointment, "id"> & { id?: string }) => {
     try {
       if (appointmentData.id) {
         await updateAppointment(appointmentData.id, appointmentData);

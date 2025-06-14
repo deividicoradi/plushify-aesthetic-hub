@@ -11,9 +11,18 @@ export const useAppointments = () => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
+      
+      // Verificar se o usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('Usuário não autenticado');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('appointments')
         .select('*')
+        .eq('user_id', user.id)
         .order('start_time', { ascending: true });
 
       if (error) throw error;
@@ -46,6 +55,12 @@ export const useAppointments = () => {
 
   const createAppointment = async (appointmentData: Omit<Appointment, "id">) => {
     try {
+      // Verificar se o usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
       // Combinar data e hora
       const [hours, minutes] = appointmentData.time.split(':');
       const startTime = new Date(appointmentData.date);
@@ -57,6 +72,7 @@ export const useAppointments = () => {
       const { data, error } = await supabase
         .from('appointments')
         .insert({
+          user_id: user.id,
           title: `${appointmentData.service} - ${appointmentData.client}`,
           client_name: appointmentData.client,
           service: appointmentData.service,
@@ -90,8 +106,14 @@ export const useAppointments = () => {
     }
   };
 
-  const updateAppointment = async (id: number, appointmentData: Omit<Appointment, "id">) => {
+  const updateAppointment = async (id: string, appointmentData: Omit<Appointment, "id">) => {
     try {
+      // Verificar se o usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
       // Combinar data e hora
       const [hours, minutes] = appointmentData.time.split(':');
       const startTime = new Date(appointmentData.date);
@@ -112,7 +134,8 @@ export const useAppointments = () => {
           status: appointmentData.status,
           description: `Agendamento de ${appointmentData.service} para ${appointmentData.client}`
         })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -133,12 +156,19 @@ export const useAppointments = () => {
     }
   };
 
-  const deleteAppointment = async (id: number) => {
+  const deleteAppointment = async (id: string) => {
     try {
+      // Verificar se o usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const { error } = await supabase
         .from('appointments')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 

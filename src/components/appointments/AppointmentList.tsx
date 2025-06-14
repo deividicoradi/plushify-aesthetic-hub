@@ -11,7 +11,7 @@ interface AppointmentListProps {
   date: Date | undefined;
   appointments: Appointment[];
   onEdit: (appointment: Appointment) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
   loading?: boolean;
 }
 

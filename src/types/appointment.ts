@@ -1,6 +1,6 @@
 
 export interface Appointment {
-  id: number;
+  id: string; // Mudou de number para string para compatibilizar com UUID do Supabase
   client: string;
   service: string;
   time: string;
