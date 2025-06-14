@@ -28,26 +28,19 @@ export const MetricCard = ({
     return `${sign}${growth.toFixed(1)}%`;
   };
 
-  const getGrowthColor = (growth?: number): string => {
-    if (growth === undefined || growth === null) return 'text-muted-foreground';
-    return growth >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-  };
-
   if (loading) {
     return (
-      <Card className={`bg-gradient-to-br ${colorClass} border-0 hover:scale-105 transition-transform duration-200`}>
+      <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-border/50 shadow-lg hover:shadow-xl transition-all duration-300">
         <CardContent className="p-6">
           <div className="animate-pulse">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-lg bg-white/20">
-                <div className="w-5 h-5 bg-white/40 rounded"></div>
-              </div>
-              <div className="w-12 h-4 bg-white/20 rounded"></div>
+              <div className="w-12 h-12 bg-muted rounded-xl"></div>
+              <div className="w-16 h-6 bg-muted rounded-full"></div>
             </div>
-            <div className="space-y-2">
-              <div className="w-24 h-4 bg-white/20 rounded"></div>
-              <div className="w-16 h-8 bg-white/20 rounded"></div>
-              <div className="w-32 h-3 bg-white/20 rounded"></div>
+            <div className="space-y-3">
+              <div className="w-32 h-5 bg-muted rounded"></div>
+              <div className="w-24 h-8 bg-muted rounded"></div>
+              <div className="w-40 h-4 bg-muted rounded"></div>
             </div>
           </div>
         </CardContent>
@@ -56,28 +49,43 @@ export const MetricCard = ({
   }
 
   return (
-    <Card className={`bg-gradient-to-br ${colorClass} border-0 hover:scale-105 transition-transform duration-200 shadow-lg`}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
-            <Icon className="w-6 h-6 text-white" />
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${colorClass} border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group`}>
+      {/* Subtle pattern overlay */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 30c0-6.627-5.373-12-12-12s-12 5.373-12 12 5.373 12 12 12 12-5.373 12-12m12-12c0-6.627-5.373-12-12-12s-12 5.373-12 12 5.373 12 12 12 12-5.373 12-12"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+      
+      <CardContent className="relative p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="relative">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <Icon className="w-6 h-6 text-white drop-shadow-sm" />
+            </div>
+            {/* Floating indicator */}
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-white/30 rounded-full animate-pulse"></div>
           </div>
+          
           {growth !== undefined && (
-            <span className={`text-sm font-medium text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full`}>
-              {formatGrowth(growth)}
-            </span>
+            <div className="text-right">
+              <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-white/20 backdrop-blur-sm text-white shadow-sm`}>
+                <span className="mr-1">{growth >= 0 ? '↗' : '↙'}</span>
+                {formatGrowth(growth)}
+              </div>
+            </div>
           )}
         </div>
-        <div className="space-y-2">
-          <h3 className="font-semibold text-white/95 text-lg">{title}</h3>
-          <p className="text-3xl font-bold text-white">
+        
+        <div className="space-y-3">
+          <h3 className="font-semibold text-white/95 text-lg tracking-tight">{title}</h3>
+          <div className="text-3xl font-bold text-white drop-shadow-sm">
             {typeof value === 'number' && title.includes('Receita') 
               ? `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
               : value.toLocaleString('pt-BR')
             }
-          </p>
-          <p className="text-sm text-white/80 font-medium">{description}</p>
+          </div>
+          <p className="text-sm text-white/80 font-medium leading-relaxed">{description}</p>
         </div>
+
+        {/* Bottom accent line */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20"></div>
       </CardContent>
     </Card>
   );
