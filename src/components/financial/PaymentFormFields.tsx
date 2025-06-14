@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,7 @@ interface PaymentFormFieldsProps {
     due_date: string;
     notes: string;
     status: string;
+    paid_amount: string;
   };
   onFieldChange: (field: string, value: string) => void;
 }
@@ -33,7 +34,7 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
         .select('id, name')
         .eq('user_id', user?.id)
         .order('name');
-      
+
       if (error) throw error;
       return data;
     },
@@ -55,7 +56,7 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="amount">Valor *</Label>
+          <Label htmlFor="amount">Valor Total *</Label>
           <Input
             id="amount"
             type="number"
@@ -68,52 +69,64 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
-          <Select value={formData.status} onValueChange={(value) => onFieldChange('status', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pendente">Pendente</SelectItem>
-              <SelectItem value="pago">Pago</SelectItem>
-              <SelectItem value="parcial">Parcial</SelectItem>
-              <SelectItem value="cancelado">Cancelado</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label htmlFor="paid_amount">Valor Pago</Label>
+          <Input
+            id="paid_amount"
+            type="number"
+            step="0.01"
+            value={formData.paid_amount}
+            onChange={(e) => onFieldChange('paid_amount', e.target.value)}
+            placeholder="0,00"
+          />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="status">Status</Label>
+        <Select value={formData.status} onValueChange={(value) => onFieldChange('status', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pendente">Pendente</SelectItem>
+            <SelectItem value="pago">Pago</SelectItem>
+            <SelectItem value="parcial">Parcial</SelectItem>
+            <SelectItem value="cancelado">Cancelado</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <PaymentMethodSelect
         value={formData.payment_method_id}
         onValueChange={(value) => onFieldChange('payment_method_id', value)}
+        required
       />
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="client">Cliente</Label>
-          <Select value={formData.client_id} onValueChange={(value) => onFieldChange('client_id', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o cliente" />
-            </SelectTrigger>
-            <SelectContent>
-              {clients?.map((client) => (
-                <SelectItem key={client.id} value={client.id}>
-                  {client.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="client_id">Cliente (opcional)</Label>
+        <Select value={formData.client_id} onValueChange={(value) => onFieldChange('client_id', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione um cliente" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Nenhum cliente</SelectItem>
+            {clients?.map((client) => (
+              <SelectItem key={client.id} value={client.id}>
+                {client.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="due_date">Data de Vencimento</Label>
-          <Input
-            id="due_date"
-            type="date"
-            value={formData.due_date}
-            onChange={(e) => onFieldChange('due_date', e.target.value)}
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="due_date">Data de Vencimento</Label>
+        <Input
+          id="due_date"
+          type="date"
+          value={formData.due_date}
+          onChange={(e) => onFieldChange('due_date', e.target.value)}
+        />
       </div>
 
       <div className="space-y-2">
@@ -122,9 +135,18 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
           id="notes"
           value={formData.notes}
           onChange={(e) => onFieldChange('notes', e.target.value)}
-          placeholder="Observações adicionais"
+          placeholder="Observações adicionais..."
+          rows={3}
         />
       </div>
+
+      {formData.status === 'pago' && (
+        <div className="p-3 bg-green-50 dark:bg-green-800/20 rounded-lg border border-green-200 dark:border-green-800">
+          <p className="text-sm text-green-800 dark:text-green-200">
+            💰 Este pagamento será automaticamente adicionado ao caixa quando salvo.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
