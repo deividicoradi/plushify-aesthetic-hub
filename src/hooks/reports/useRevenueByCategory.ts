@@ -15,9 +15,13 @@ export const useRevenueByCategory = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchRevenueByCategory = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
+      setLoading(true);
       const { data: transactions } = await supabase
         .from('financial_transactions')
         .select('amount, category, type')
@@ -42,16 +46,15 @@ export const useRevenueByCategory = () => {
       }));
 
       setRevenueByCategory(categoryData.sort((a, b) => b.value - a.value));
-
     } catch (err: any) {
       console.error('Erro ao buscar receita por categoria:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) {
-      fetchRevenueByCategory();
-    }
+    fetchRevenueByCategory();
   }, [user]);
 
   return {

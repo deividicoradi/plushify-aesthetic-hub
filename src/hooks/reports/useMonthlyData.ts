@@ -16,9 +16,13 @@ export const useMonthlyData = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchMonthlyData = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
+      setLoading(true);
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -88,16 +92,15 @@ export const useMonthlyData = () => {
       });
 
       setMonthlyData(Array.from(monthlyDataMap.values()));
-
     } catch (err: any) {
       console.error('Erro ao buscar dados mensais:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) {
-      fetchMonthlyData();
-    }
+    fetchMonthlyData();
   }, [user]);
 
   return {
