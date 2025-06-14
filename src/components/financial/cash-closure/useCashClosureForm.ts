@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
+import { useCashMovementData } from '@/hooks/financial/useCashMovementData';
 
 interface CashClosureFormData {
   closure_date: string;
@@ -35,8 +36,14 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
     notes: ''
   });
 
+  // Buscar dados automáticos do movimento quando não estiver editando
+  const { data: movementData, isLoading: loadingMovement } = useCashMovementData(
+    !closure ? formData.closure_date : ''
+  );
+
   useEffect(() => {
     if (closure) {
+      // Editando fechamento existente
       setFormData({
         closure_date: closure.closure_date || new Date().toISOString().split('T')[0],
         opening_balance: closure.opening_balance?.toString() || '',
@@ -49,21 +56,31 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
         other_amount: closure.other_amount?.toString() || '',
         notes: closure.notes || ''
       });
-    } else {
-      setFormData({
-        closure_date: new Date().toISOString().split('T')[0],
-        opening_balance: '',
-        closing_balance: '',
-        total_income: '',
-        total_expenses: '',
-        cash_amount: '',
-        card_amount: '',
-        pix_amount: '',
-        other_amount: '',
-        notes: ''
-      });
+    } else if (movementData && !loadingMovement) {
+      // Novo fechamento com dados automáticos
+      console.log('📊 Preenchendo formulário com dados automáticos:', movementData);
+      setFormData(prev => ({
+        ...prev,
+        opening_balance: movementData.openingBalance.toString(),
+        closing_balance: movementData.closingBalance.toString(),
+        total_income: movementData.totalIncome.toString(),
+        total_expenses: movementData.totalExpenses.toString(),
+        cash_amount: movementData.cashAmount.toString(),
+        card_amount: movementData.cardAmount.toString(),
+        pix_amount: movementData.pixAmount.toString(),
+        other_amount: movementData.otherAmount.toString(),
+        notes: `Fechamento automático - ${movementData.paymentsCount} pagamento(s), ${movementData.expensesCount} despesa(s)`
+      }));
     }
-  }, [closure]);
+  }, [closure, movementData, loadingMovement]);
+
+  // Atualizar dados automáticos quando a data mudar
+  useEffect(() => {
+    if (!closure && formData.closure_date) {
+      // Reset para permitir recálculo automático
+      console.log('📅 Data alterada, dados serão recalculados automaticamente');
+    }
+  }, [formData.closure_date, closure]);
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
@@ -95,9 +112,10 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cash-closures'] });
+      queryClient.invalidateQueries({ queryKey: ['cash-openings'] });
       toast({
         title: "Sucesso!",
-        description: closure ? "Fechamento atualizado!" : "Fechamento de caixa criado com sucesso.",
+        description: closure ? "Fechamento atualizado!" : "Fechamento de caixa criado automaticamente com dados do movimento do dia.",
       });
       onSuccess?.();
     },
@@ -156,6 +174,8 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
     handleChange,
     handleSubmit,
     calculateTotal,
-    isLoading: mutation.isPending,
+    isLoading: mutation.isPending || loadingMovement,
+    movementData,
+    loadingMovement,
   };
 };

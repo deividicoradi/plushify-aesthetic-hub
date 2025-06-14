@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface CashClosurePaymentMethodsProps {
   formData: {
@@ -12,9 +13,15 @@ interface CashClosurePaymentMethodsProps {
   };
   onFieldChange: (field: string, value: string) => void;
   total: number;
+  movementData?: any;
 }
 
-const CashClosurePaymentMethods = ({ formData, onFieldChange, total }: CashClosurePaymentMethodsProps) => {
+const CashClosurePaymentMethods = ({ 
+  formData, 
+  onFieldChange, 
+  total, 
+  movementData 
+}: CashClosurePaymentMethodsProps) => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -24,11 +31,25 @@ const CashClosurePaymentMethods = ({ formData, onFieldChange, total }: CashClosu
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-lg">Detalhamento por Método de Pagamento</h3>
+      <h3 className="font-semibold text-lg">
+        Detalhamento por Método de Pagamento
+        {movementData && (
+          <Badge variant="outline" className="ml-2">
+            Calculado automaticamente
+          </Badge>
+        )}
+      </h3>
       
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="cash_amount">Dinheiro</Label>
+          <Label htmlFor="cash_amount">
+            Dinheiro
+            {movementData && (
+              <Badge variant="secondary" className="ml-2">
+                Auto
+              </Badge>
+            )}
+          </Label>
           <Input
             id="cash_amount"
             type="number"
@@ -40,7 +61,14 @@ const CashClosurePaymentMethods = ({ formData, onFieldChange, total }: CashClosu
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="card_amount">Cartão</Label>
+          <Label htmlFor="card_amount">
+            Cartão
+            {movementData && (
+              <Badge variant="secondary" className="ml-2">
+                Auto
+              </Badge>
+            )}
+          </Label>
           <Input
             id="card_amount"
             type="number"
@@ -52,7 +80,14 @@ const CashClosurePaymentMethods = ({ formData, onFieldChange, total }: CashClosu
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="pix_amount">PIX</Label>
+          <Label htmlFor="pix_amount">
+            PIX
+            {movementData && (
+              <Badge variant="secondary" className="ml-2">
+                Auto
+              </Badge>
+            )}
+          </Label>
           <Input
             id="pix_amount"
             type="number"
@@ -64,7 +99,14 @@ const CashClosurePaymentMethods = ({ formData, onFieldChange, total }: CashClosu
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="other_amount">Outros</Label>
+          <Label htmlFor="other_amount">
+            Outros
+            {movementData && (
+              <Badge variant="secondary" className="ml-2">
+                Auto
+              </Badge>
+            )}
+          </Label>
           <Input
             id="other_amount"
             type="number"
@@ -80,6 +122,11 @@ const CashClosurePaymentMethods = ({ formData, onFieldChange, total }: CashClosu
         <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
           Total calculado: {formatCurrency(total)}
         </p>
+        {movementData && (
+          <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+            Baseado nos pagamentos recebidos durante o dia
+          </p>
+        )}
       </div>
     </div>
   );

@@ -21,6 +21,8 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess, closure }: CashClosu
     handleSubmit,
     calculateTotal,
     isLoading,
+    movementData,
+    loadingMovement,
   } = useCashClosureForm(closure, () => {
     onOpenChange(false);
     onSuccess?.();
@@ -30,7 +32,10 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess, closure }: CashClosu
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{closure ? 'Editar Fechamento de Caixa' : 'Novo Fechamento de Caixa'}</DialogTitle>
+          <DialogTitle>
+            {closure ? 'Editar Fechamento de Caixa' : 'Novo Fechamento de Caixa'}
+            {!closure && ' - Automático'}
+          </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -43,6 +48,8 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess, closure }: CashClosu
               total_expenses: formData.total_expenses,
             }}
             onFieldChange={handleChange}
+            loadingMovement={loadingMovement}
+            movementData={movementData}
           />
 
           <CashClosurePaymentMethods
@@ -54,6 +61,7 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess, closure }: CashClosu
             }}
             onFieldChange={handleChange}
             total={calculateTotal()}
+            movementData={movementData}
           />
 
           <CashClosureNotes
