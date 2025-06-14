@@ -150,6 +150,8 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
   const priorityOrder = { high: 3, medium: 2, low: 1 };
   const sortedInsights = insights.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
 
+  const patternUrl = "data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='0.1'%3E%3Ccircle cx='10' cy='10' r='1'/%3E%3C/g%3E%3C/svg%3E";
+
   return (
     <Card className="bg-gradient-to-br from-card to-card/50 border-border/50 shadow-xl">
       <CardHeader className="pb-4">
@@ -171,7 +173,7 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
         {sortedInsights.map((insight, index) => (
           <div key={index} className={getBackgroundClass(insight.type, insight.priority)}>
             {/* Background pattern */}
-            <div className="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml,%3Csvg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23000" fill-opacity="0.1"%3E%3Ccircle cx="10" cy="10" r="1"/%3E%3C/g%3E%3C/svg%3E')]"></div>
+            <div className="absolute inset-0 opacity-5" style={{ backgroundImage: `url("${patternUrl}")` }}></div>
             
             <div className="relative flex items-start gap-4">
               <div className={`flex-shrink-0 w-10 h-10 bg-gradient-to-r ${getIconColor(insight.type)} rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}>
