@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Calendar, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,21 +50,17 @@ const Appointments = () => {
   };
 
   const handleSaveAppointment = async (appointmentData: Omit<Appointment, "id"> & { id?: string }) => {
-    try {
-      console.log('Salvando agendamento:', appointmentData);
-      
-      if (appointmentData.id) {
-        await updateAppointment(appointmentData.id, appointmentData);
-      } else {
-        await createAppointment(appointmentData);
-      }
-      
-      setShowAppointmentDialog(false);
-      setCurrentAppointment(undefined);
-    } catch (error) {
-      console.error('Erro ao salvar agendamento:', error);
-      // O erro já é tratado no hook useAppointments
+    console.log('Salvando agendamento:', appointmentData);
+    
+    if (appointmentData.id) {
+      await updateAppointment(appointmentData.id, appointmentData);
+    } else {
+      await createAppointment(appointmentData);
     }
+    
+    // O diálogo será fechado automaticamente pelo componente AppointmentDialog
+    // após o salvamento bem-sucedido
+    setCurrentAppointment(undefined);
   };
 
   return (

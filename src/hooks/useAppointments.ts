@@ -12,12 +12,14 @@ export const useAppointments = () => {
     try {
       setLoading(true);
       
-      // Verificar se o usuário está autenticado
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.log('Usuário não autenticado');
+        setAppointments([]);
         return;
       }
+
+      console.log('Buscando agendamentos para o usuário:', user.id);
 
       const { data, error } = await supabase
         .from('appointments')
@@ -25,9 +27,13 @@ export const useAppointments = () => {
         .eq('user_id', user.id)
         .order('start_time', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar agendamentos:', error);
+        throw error;
+      }
 
-      // Converter dados do Supabase para o formato Appointment
+      console.log('Agendamentos recebidos do banco:', data);
+
       const formattedAppointments: Appointment[] = data.map(item => ({
         id: item.id,
         client: item.client_name || 'Cliente não informado',
@@ -37,10 +43,10 @@ export const useAppointments = () => {
           minute: '2-digit' 
         }),
         date: new Date(item.start_time),
-        // Mapear status do banco para o formato da aplicação
         status: mapStatusFromDB(item.status)
       }));
 
+      console.log('Agendamentos formatados:', formattedAppointments);
       setAppointments(formattedAppointments);
     } catch (error) {
       console.error('Erro ao buscar agendamentos:', error);
@@ -54,7 +60,6 @@ export const useAppointments = () => {
     }
   };
 
-  // Função para mapear status da aplicação para o banco
   const mapStatusToDB = (status: "Confirmado" | "Pendente" | "Cancelado"): string => {
     const statusMap = {
       "Confirmado": "Confirmado",
@@ -64,7 +69,6 @@ export const useAppointments = () => {
     return statusMap[status] || "Pendente";
   };
 
-  // Função para mapear status do banco para a aplicação
   const mapStatusFromDB = (status: string): "Confirmado" | "Pendente" | "Cancelado" => {
     const statusMap: { [key: string]: "Confirmado" | "Pendente" | "Cancelado" } = {
       "Confirmado": "Confirmado",
@@ -78,21 +82,18 @@ export const useAppointments = () => {
     try {
       console.log('Criando agendamento com dados:', appointmentData);
       
-      // Verificar se o usuário está autenticado
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Usuário não autenticado');
       }
 
-      // Combinar data e hora
       const [hours, minutes] = appointmentData.time.split(':');
       const startTime = new Date(appointmentData.date);
       startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
       const endTime = new Date(startTime);
-      endTime.setHours(startTime.getHours() + 1); // Duração padrão de 1 hora
+      endTime.setHours(startTime.getHours() + 1);
 
-      // Mapear status para o formato do banco
       const dbStatus = mapStatusToDB(appointmentData.status);
       console.log('Status mapeado para DB:', dbStatus);
 
@@ -122,6 +123,8 @@ export const useAppointments = () => {
       }
 
       console.log('Agendamento criado com sucesso:', data);
+      
+      // Recarregar a lista de agendamentos
       await fetchAppointments();
       
       toast({
@@ -143,13 +146,11 @@ export const useAppointments = () => {
 
   const updateAppointment = async (id: string, appointmentData: Omit<Appointment, "id">) => {
     try {
-      // Verificar se o usuário está autenticado
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Usuário não autenticado');
       }
 
-      // Combinar data e hora
       const [hours, minutes] = appointmentData.time.split(':');
       const startTime = new Date(appointmentData.date);
       startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
@@ -157,7 +158,6 @@ export const useAppointments = () => {
       const endTime = new Date(startTime);
       endTime.setHours(startTime.getHours() + 1);
 
-      // Mapear status para o formato do banco
       const dbStatus = mapStatusToDB(appointmentData.status);
 
       const { error } = await supabase
@@ -196,7 +196,6 @@ export const useAppointments = () => {
 
   const deleteAppointment = async (id: string) => {
     try {
-      // Verificar se o usuário está autenticado
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Usuário não autenticado');

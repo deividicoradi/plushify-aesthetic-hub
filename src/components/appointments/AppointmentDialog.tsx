@@ -53,7 +53,7 @@ interface AppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   appointment?: Appointment;
-  onSave: (appointment: Omit<Appointment, "id"> & { id?: string }) => void;
+  onSave: (appointment: Omit<Appointment, "id"> & { id?: string }) => Promise<void>;
   selectedDate?: Date;
 }
 
@@ -64,6 +64,7 @@ const AppointmentDialog = ({
   onSave,
   selectedDate 
 }: AppointmentDialogProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = !!appointment;
   
   const form = useForm<FormValues>({
@@ -100,10 +101,12 @@ const AppointmentDialog = ({
   }, [appointment, selectedDate, open, form]);
 
   const onSubmit = async (data: FormValues) => {
+    if (isSubmitting) return;
+    
     try {
+      setIsSubmitting(true);
       console.log('Dados do formulário:', data);
       
-      // Garantir que todos os campos obrigatórios estão presentes
       const appointmentData = {
         client: data.client,
         service: data.service,
@@ -115,19 +118,26 @@ const AppointmentDialog = ({
       
       console.log('Dados do agendamento preparados:', appointmentData);
       
+      // Aguardar o salvamento antes de fechar o diálogo
       await onSave(appointmentData);
       
-      toast({
-        title: isEditing ? "Agendamento atualizado" : "Agendamento criado",
-        description: `O agendamento foi ${isEditing ? "atualizado" : "criado"} com sucesso.`,
+      // Só fechar o diálogo se o salvamento foi bem-sucedido
+      onOpenChange(false);
+      
+      // Resetar o formulário para o próximo uso
+      form.reset({
+        client: "",
+        service: "",
+        time: "",
+        status: "Pendente" as const,
+        date: selectedDate || new Date()
       });
+      
     } catch (error) {
       console.error('Erro no onSubmit:', error);
-      toast({
-        title: "Erro",
-        description: `Ocorreu um erro ao ${isEditing ? "atualizar" : "criar"} o agendamento.`,
-        variant: "destructive",
-      });
+      // Em caso de erro, manter o diálogo aberto
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -249,9 +259,16 @@ const AppointmentDialog = ({
             
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="outline">Cancelar</Button>
+                <Button type="button" variant="outline" disabled={isSubmitting}>
+                  Cancelar
+                </Button>
               </DialogClose>
-              <Button type="submit">{isEditing ? "Salvar alterações" : "Criar agendamento"}</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting 
+                  ? (isEditing ? "Salvando..." : "Criando...") 
+                  : (isEditing ? "Salvar alterações" : "Criar agendamento")
+                }
+              </Button>
             </DialogFooter>
           </form>
         </Form>
