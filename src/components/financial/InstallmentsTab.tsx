@@ -29,13 +29,34 @@ const InstallmentsTab = () => {
     enabled: !!user?.id,
   });
 
-  // Buscar dados dos pagamentos
+  // Buscar dados dos pagamentos com informações dos clientes
   const { data: payments } = useQuery({
     queryKey: ['payments-for-installments', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
-        .select('id, description, amount, payment_methods(name)')
+        .select(`
+          id, 
+          description, 
+          amount, 
+          client_id,
+          payment_methods(name)
+        `)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Buscar dados dos clientes
+  const { data: clients } = useQuery({
+    queryKey: ['clients-for-installments', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, email, phone')
         .eq('user_id', user?.id);
 
       if (error) throw error;
@@ -48,12 +69,19 @@ const InstallmentsTab = () => {
     return payments?.find(p => p.id === paymentId);
   };
 
+  const getClientData = (clientId: string | null) => {
+    if (!clientId || !clients) return null;
+    return clients.find(c => c.id === clientId);
+  };
+
   const groupedInstallments = installments?.reduce((acc, installment) => {
     const paymentId = installment.payment_id;
     if (!acc[paymentId]) {
       const paymentData = getPaymentData(paymentId);
+      const clientData = paymentData?.client_id ? getClientData(paymentData.client_id) : null;
       acc[paymentId] = {
         payment: paymentData,
+        client: clientData,
         installments: []
       };
     }
@@ -123,9 +151,20 @@ const InstallmentsTab = () => {
                     <CardTitle className="text-lg">
                       {group.payment?.description || 'Pagamento sem descrição'}
                     </CardTitle>
-                    <div className="text-sm text-muted-foreground mt-1">
+                    <div className="text-sm text-muted-foreground mt-1 space-y-1">
                       <p>Parcelas: {group.installments.length}x</p>
                       <p>Método: {group.payment?.payment_methods?.name || 'N/A'}</p>
+                      {group.client && (
+                        <div className="mt-2 p-2 bg-white/50 dark:bg-black/20 rounded border">
+                          <p className="font-medium text-sm">Cliente: {group.client.name}</p>
+                          {group.client.email && (
+                            <p className="text-xs text-muted-foreground">Email: {group.client.email}</p>
+                          )}
+                          {group.client.phone && (
+                            <p className="text-xs text-muted-foreground">Telefone: {group.client.phone}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -138,6 +177,7 @@ const InstallmentsTab = () => {
                       key={installment.id}
                       installment={installment}
                       paymentData={group.payment}
+                      clientData={group.client}
                       onEdit={handleOpenDialog}
                       onUpdate={refetch}
                     />
