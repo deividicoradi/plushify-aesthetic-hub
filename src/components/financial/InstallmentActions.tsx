@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Check } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
+import { Edit, DollarSign, CheckCircle } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
-import ConfirmationDialog from '@/components/ui/confirmation-dialog';
 
 interface InstallmentActionsProps {
   installment: any;
@@ -15,123 +15,145 @@ interface InstallmentActionsProps {
 
 const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentActionsProps) => {
   const queryClient = useQueryClient();
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const markAsPaidMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('installments')
         .update({
           status: 'pago',
-          paid_amount: Number(installment.amount),
-          payment_date: new Date().toISOString()
+          paid_amount: installment.amount,
+          payment_date: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
-        .eq('id', installment.id);
-      
+        .eq('id', installment.id)
+        .select()
+        .single();
+
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['installments'] });
       toast({
         title: "Sucesso!",
-        description: "Parcela marcada como paga.",
+        description: "Parcela marcada como paga!",
       });
+      queryClient.invalidateQueries({ queryKey: ['installments-by-client'] });
       onUpdate();
     },
     onError: (error) => {
+      console.error('Erro ao marcar parcela como paga:', error);
       toast({
         title: "Erro",
         description: "Erro ao marcar parcela como paga",
         variant: "destructive",
       });
-      console.error(error);
     },
   });
 
-  const deleteInstallmentMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
+  const markAsPartialMutation = useMutation({
+    mutationFn: async (paidAmount: number) => {
+      const { data, error } = await supabase
         .from('installments')
-        .delete()
-        .eq('id', installment.id);
-      
+        .update({
+          status: 'parcial',
+          paid_amount: paidAmount,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', installment.id)
+        .select()
+        .single();
+
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['installments'] });
       toast({
         title: "Sucesso!",
-        description: "Parcela excluída com sucesso.",
+        description: "Pagamento parcial registrado!",
       });
+      queryClient.invalidateQueries({ queryKey: ['installments-by-client'] });
       onUpdate();
     },
     onError: (error) => {
+      console.error('Erro ao registrar pagamento parcial:', error);
       toast({
         title: "Erro",
-        description: "Erro ao excluir parcela",
+        description: "Erro ao registrar pagamento parcial",
         variant: "destructive",
       });
-      console.error(error);
     },
   });
 
-  const handleMarkAsPaid = () => {
-    markAsPaidMutation.mutate();
-  };
-
-  const handleDelete = () => {
-    setDeleteConfirmOpen(true);
-  };
-
-  const confirmDelete = () => {
-    deleteInstallmentMutation.mutate();
+  const handlePartialPayment = () => {
+    const paidAmount = prompt(`Digite o valor pago (máximo R$ ${Number(installment.amount).toFixed(2)}):`);
+    if (paidAmount && !isNaN(Number(paidAmount))) {
+      const amount = Number(paidAmount);
+      if (amount > 0 && amount <= Number(installment.amount)) {
+        markAsPartialMutation.mutate(amount);
+      } else {
+        toast({
+          title: "Valor inválido",
+          description: "O valor deve ser maior que zero e menor ou igual ao valor da parcela",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   return (
-    <>
-      <div className="flex flex-wrap gap-1 mt-auto pt-3">
-        {installment.status === 'pendente' && (
+    <div className="flex flex-col gap-2 mt-auto">
+      {installment.status === 'pendente' && (
+        <>
           <Button
-            variant="outline"
             size="sm"
-            onClick={handleMarkAsPaid}
-            className="text-green-600 hover:text-green-700 flex-1"
+            onClick={() => markAsPaidMutation.mutate()}
+            disabled={markAsPaidMutation.isPending}
+            className="w-full"
           >
-            <Check className="w-3 h-3 mr-1" />
-            Pagar
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Marcar como Pago
           </Button>
-        )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onEdit(installment)}
-          className="flex-1"
-        >
-          <Edit className="w-3 h-3 mr-1" />
-          Editar
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleDelete}
-          className="text-red-600 hover:text-red-700 flex-1"
-        >
-          <Trash2 className="w-3 h-3 mr-1" />
-          Excluir
-        </Button>
-      </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handlePartialPayment}
+            disabled={markAsPartialMutation.isPending}
+            className="w-full"
+          >
+            <DollarSign className="w-3 h-3 mr-1" />
+            Pagamento Parcial
+          </Button>
+        </>
+      )}
+      
+      {installment.status === 'parcial' && (
+        <div className="space-y-2">
+          <Badge variant="outline" className="w-full justify-center bg-orange-50 text-orange-700 border-orange-200">
+            Restante: R$ {(Number(installment.amount) - Number(installment.paid_amount || 0)).toFixed(2)}
+          </Badge>
+          <Button
+            size="sm"
+            onClick={() => markAsPaidMutation.mutate()}
+            disabled={markAsPaidMutation.isPending}
+            className="w-full"
+          >
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Quitar Restante
+          </Button>
+        </div>
+      )}
 
-      <ConfirmationDialog
-        open={deleteConfirmOpen}
-        onOpenChange={setDeleteConfirmOpen}
-        title="Excluir Parcela"
-        description="Tem certeza que deseja excluir esta parcela? Esta ação não pode ser desfeita."
-        confirmText="Excluir"
-        cancelText="Cancelar"
-        onConfirm={confirmDelete}
-        variant="destructive"
-      />
-    </>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => onEdit(installment)}
+        className="w-full"
+      >
+        <Edit className="w-3 h-3 mr-1" />
+        Editar
+      </Button>
+    </div>
   );
 };
 
