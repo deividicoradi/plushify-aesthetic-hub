@@ -1,51 +1,31 @@
 
 import React from 'react';
+import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 
 interface PaymentMethodSelectProps {
   value: string;
   onValueChange: (value: string) => void;
-  enabled?: boolean;
+  disabled?: boolean;
 }
 
-const PaymentMethodSelect = ({ value, onValueChange, enabled = true }: PaymentMethodSelectProps) => {
-  const { data: paymentMethods, error: paymentMethodsError, isLoading } = usePaymentMethods(enabled);
-
-  // Log de erro se houver
-  if (paymentMethodsError) {
-    console.error('Erro na query de métodos de pagamento:', paymentMethodsError);
-  }
-
-  const getPlaceholderText = () => {
-    if (isLoading) return "Carregando...";
-    if (paymentMethodsError) return "Erro ao carregar";
-    if (!paymentMethods || paymentMethods.length === 0) return "Nenhum método disponível";
-    return "Selecione o método";
-  };
+const PaymentMethodSelect = ({ value, onValueChange, disabled = false }: PaymentMethodSelectProps) => {
+  const { data: paymentMethods } = usePaymentMethods();
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="payment_method_id">Método de Pagamento *</Label>
-      <Select value={value} onValueChange={onValueChange} disabled={isLoading || !!paymentMethodsError}>
+      <Label htmlFor="payment_method">Método de Pagamento *</Label>
+      <Select value={value} onValueChange={onValueChange} disabled={disabled}>
         <SelectTrigger>
-          <SelectValue placeholder={getPlaceholderText()} />
+          <SelectValue placeholder="Selecione o método de pagamento" />
         </SelectTrigger>
         <SelectContent>
-          {paymentMethods && paymentMethods.length > 0 ? (
-            paymentMethods.map((method) => (
-              <SelectItem key={method.id} value={method.id}>
-                {method.name}
-              </SelectItem>
-            ))
-          ) : (
-            !isLoading && !paymentMethodsError && (
-              <div className="p-2 text-sm text-gray-500">
-                Nenhum método encontrado
-              </div>
-            )
-          )}
+          {paymentMethods?.map((method) => (
+            <SelectItem key={method.id} value={method.id}>
+              {method.name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>

@@ -23,9 +23,10 @@ interface PaymentFormFieldsProps {
     installments?: string;
   };
   onFieldChange: (field: string, value: string) => void;
+  disabled?: boolean;
 }
 
-const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) => {
+const PaymentFormFields = ({ formData, onFieldChange, disabled = false }: PaymentFormFieldsProps) => {
   const { user } = useAuth();
   const { data: paymentMethods } = usePaymentMethods();
 
@@ -58,6 +59,7 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
           onChange={(e) => onFieldChange('description', e.target.value)}
           placeholder="Descrição do pagamento"
           required
+          disabled={disabled}
         />
       </div>
 
@@ -72,6 +74,7 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
             onChange={(e) => onFieldChange('amount', e.target.value)}
             placeholder="0,00"
             required
+            disabled={disabled}
           />
         </div>
 
@@ -84,13 +87,14 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
             value={formData.paid_amount}
             onChange={(e) => onFieldChange('paid_amount', e.target.value)}
             placeholder="0,00"
+            disabled={disabled}
           />
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="status">Status</Label>
-        <Select value={formData.status} onValueChange={(value) => onFieldChange('status', value)}>
+        <Select value={formData.status} onValueChange={(value) => onFieldChange('status', value)} disabled={disabled}>
           <SelectTrigger>
             <SelectValue placeholder="Selecione o status" />
           </SelectTrigger>
@@ -106,6 +110,7 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
       <PaymentMethodSelect
         value={formData.payment_method_id}
         onValueChange={(value) => onFieldChange('payment_method_id', value)}
+        disabled={disabled}
       />
 
       {isCreditCard && (
@@ -114,6 +119,7 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
           <Select 
             value={formData.installments || '1'} 
             onValueChange={(value) => onFieldChange('installments', value)}
+            disabled={disabled}
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione o número de parcelas" />
@@ -138,7 +144,7 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
 
       <div className="space-y-2">
         <Label htmlFor="client_id">Cliente (opcional)</Label>
-        <Select value={formData.client_id} onValueChange={(value) => onFieldChange('client_id', value)}>
+        <Select value={formData.client_id} onValueChange={(value) => onFieldChange('client_id', value)} disabled={disabled}>
           <SelectTrigger>
             <SelectValue placeholder="Selecione um cliente (opcional)" />
           </SelectTrigger>
@@ -159,6 +165,7 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
           type="date"
           value={formData.due_date}
           onChange={(e) => onFieldChange('due_date', e.target.value)}
+          disabled={disabled}
         />
       </div>
 
@@ -170,6 +177,7 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
           onChange={(e) => onFieldChange('notes', e.target.value)}
           placeholder="Observações adicionais..."
           rows={3}
+          disabled={disabled}
         />
       </div>
 
