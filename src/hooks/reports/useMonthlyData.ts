@@ -29,7 +29,7 @@ export const useMonthlyData = () => {
       console.log('📅 Buscando dados mensais dos últimos 6 meses para:', user.id);
 
       // Buscar dados dos últimos 6 meses em paralelo para melhor performance
-      const [paymentsResult, clientsResult, appointmentsResult] = await Promise.all([
+      const [paymentsResult, cashClosuresResult, clientsResult, appointmentsResult] = await Promise.all([
         // Buscar apenas pagamentos com status 'pago' e usar payment_date para filtro temporal
         supabase
           .from('payments')
@@ -37,7 +37,14 @@ export const useMonthlyData = () => {
           .eq('user_id', user.id)
           .eq('status', 'pago')
           .gte('payment_date', sixMonthsAgo.toISOString())
-          .not('payment_date', 'is', null), // Garantir que payment_date não seja null
+          .not('payment_date', 'is', null),
+        
+        // Buscar fechamentos de caixa
+        supabase
+          .from('cash_closures')
+          .select('total_income, closure_date')
+          .eq('user_id', user.id)
+          .gte('closure_date', sixMonthsAgo.toISOString().split('T')[0]),
         
         supabase
           .from('clients')
@@ -53,8 +60,10 @@ export const useMonthlyData = () => {
       ]);
 
       console.log('💳 Pagamentos recebidos para dados mensais:', paymentsResult.data);
+      console.log('🏦 Fechamentos de caixa para dados mensais:', cashClosuresResult.data);
 
       const payments = paymentsResult.data || [];
+      const cashClosures = cashClosuresResult.data || [];
       const clients = clientsResult.data || [];
       const appointments = appointmentsResult.data || [];
 
@@ -84,7 +93,20 @@ export const useMonthlyData = () => {
           if (existing) {
             const amount = Number(payment.paid_amount) || 0;
             existing.revenue += amount;
-            console.log(`💰 Adicionando ${amount} ao mês ${monthKey}`);
+            console.log(`💰 Adicionando ${amount} ao mês ${monthKey} (pagamento)`);
+          }
+        }
+      });
+
+      // Agregar receitas dos fechamentos de caixa
+      cashClosures.forEach(closure => {
+        if (closure.closure_date) {
+          const monthKey = closure.closure_date.slice(0, 7);
+          const existing = monthlyDataMap.get(monthKey);
+          if (existing) {
+            const amount = Number(closure.total_income) || 0;
+            existing.revenue += amount;
+            console.log(`🏦 Adicionando ${amount} ao mês ${monthKey} (fechamento)`);
           }
         }
       });

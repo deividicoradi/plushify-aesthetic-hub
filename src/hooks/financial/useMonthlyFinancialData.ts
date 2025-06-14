@@ -22,17 +22,32 @@ export const useMonthlyFinancialData = () => {
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('paid_amount, created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', sixMonthsAgo.toISOString());
+      // Buscar dados em paralelo
+      const [paymentsResult, cashClosuresResult, expensesResult] = await Promise.all([
+        supabase
+          .from('payments')
+          .select('paid_amount, payment_date')
+          .eq('user_id', user.id)
+          .eq('status', 'pago')
+          .gte('payment_date', sixMonthsAgo.toISOString())
+          .not('payment_date', 'is', null),
 
-      const { data: expenses } = await supabase
-        .from('expenses')
-        .select('amount, expense_date')
-        .eq('user_id', user.id)
-        .gte('expense_date', sixMonthsAgo.toISOString());
+        supabase
+          .from('cash_closures')
+          .select('total_income, closure_date')
+          .eq('user_id', user.id)
+          .gte('closure_date', sixMonthsAgo.toISOString().split('T')[0]),
+
+        supabase
+          .from('expenses')
+          .select('amount, expense_date')
+          .eq('user_id', user.id)
+          .gte('expense_date', sixMonthsAgo.toISOString())
+      ]);
+
+      const payments = paymentsResult.data || [];
+      const cashClosures = cashClosuresResult.data || [];
+      const expenses = expensesResult.data || [];
 
       const monthlyDataMap = new Map<string, MonthlyFinancialData>();
 
@@ -51,17 +66,28 @@ export const useMonthlyFinancialData = () => {
         });
       }
 
-      // Agregar receitas
-      payments?.forEach(p => {
-        const monthKey = p.created_at.slice(0, 7);
+      // Agregar receitas dos pagamentos
+      payments.forEach(p => {
+        if (p.payment_date) {
+          const monthKey = p.payment_date.slice(0, 7);
+          const existing = monthlyDataMap.get(monthKey);
+          if (existing) {
+            existing.receitas += Number(p.paid_amount || 0);
+          }
+        }
+      });
+
+      // Agregar receitas dos fechamentos de caixa
+      cashClosures.forEach(c => {
+        const monthKey = c.closure_date.slice(0, 7);
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
-          existing.receitas += Number(p.paid_amount || 0);
+          existing.receitas += Number(c.total_income || 0);
         }
       });
 
       // Agregar despesas
-      expenses?.forEach(e => {
+      expenses.forEach(e => {
         const monthKey = e.expense_date.slice(0, 7);
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {

@@ -46,8 +46,11 @@ export const useReportsMetrics = () => {
         paymentsResult,
         appointmentsResult,
         productsResult,
+        cashClosuresResult,
         currentMonthPaymentsResult,
         lastMonthPaymentsResult,
+        currentMonthCashClosuresResult,
+        lastMonthCashClosuresResult,
         currentMonthClientsResult,
         lastMonthClientsResult,
         currentMonthAppointmentsResult,
@@ -59,9 +62,16 @@ export const useReportsMetrics = () => {
         supabase.from('appointments').select('id').eq('user_id', user.id),
         supabase.from('products').select('id, stock, min_stock').eq('user_id', user.id),
         
+        // Buscar fechamentos de caixa
+        supabase.from('cash_closures').select('total_income').eq('user_id', user.id),
+        
         // Métricas do mês atual - apenas pagamentos realizados
         supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('payment_date', currentMonthStart.toISOString()),
         supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('payment_date', lastMonthStart.toISOString()).lte('payment_date', lastMonthEnd.toISOString()),
+        
+        // Fechamentos de caixa do mês atual e anterior
+        supabase.from('cash_closures').select('total_income').eq('user_id', user.id).gte('closure_date', currentMonthStart.toISOString().split('T')[0]),
+        supabase.from('cash_closures').select('total_income').eq('user_id', user.id).gte('closure_date', lastMonthStart.toISOString().split('T')[0]).lte('closure_date', lastMonthEnd.toISOString().split('T')[0]),
         
         supabase.from('clients').select('id').eq('user_id', user.id).gte('created_at', currentMonthStart.toISOString()),
         supabase.from('clients').select('id').eq('user_id', user.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString()),
@@ -71,14 +81,26 @@ export const useReportsMetrics = () => {
       ]);
 
       console.log('📊 Dados dos pagamentos recebidos:', paymentsResult.data);
+      console.log('💰 Dados dos fechamentos de caixa:', cashClosuresResult.data);
 
       const totalClients = clientsResult.data?.length || 0;
+      
       // Somar paid_amount dos pagamentos com status 'pago'
-      const totalRevenue = paymentsResult.data?.reduce((sum, payment) => {
+      const totalRevenueFromPayments = paymentsResult.data?.reduce((sum, payment) => {
         const amount = Number(payment.paid_amount) || 0;
         console.log('💰 Somando valor pago:', amount);
         return sum + amount;
       }, 0) || 0;
+
+      // Somar receitas dos fechamentos de caixa
+      const totalRevenueFromCashClosures = cashClosuresResult.data?.reduce((sum, closure) => {
+        const amount = Number(closure.total_income) || 0;
+        console.log('🏦 Somando receita do fechamento:', amount);
+        return sum + amount;
+      }, 0) || 0;
+
+      // Total de receitas combinando pagamentos e fechamentos
+      const totalRevenue = totalRevenueFromPayments + totalRevenueFromCashClosures;
       
       console.log('💵 Receita total calculada:', totalRevenue);
       
@@ -86,9 +108,16 @@ export const useReportsMetrics = () => {
       const totalProducts = productsResult.data?.length || 0;
       const lowStockProducts = productsResult.data?.filter(p => p.stock <= p.min_stock).length || 0;
 
-      // Calcular crescimento
-      const currentMonthRevenue = currentMonthPaymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
-      const lastMonthRevenue = lastMonthPaymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
+      // Calcular crescimento incluindo fechamentos de caixa
+      const currentMonthRevenueFromPayments = currentMonthPaymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
+      const lastMonthRevenueFromPayments = lastMonthPaymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
+
+      const currentMonthRevenueFromCashClosures = currentMonthCashClosuresResult.data?.reduce((sum, closure) => sum + Number(closure.total_income), 0) || 0;
+      const lastMonthRevenueFromCashClosures = lastMonthCashClosuresResult.data?.reduce((sum, closure) => sum + Number(closure.total_income), 0) || 0;
+
+      const currentMonthRevenue = currentMonthRevenueFromPayments + currentMonthRevenueFromCashClosures;
+      const lastMonthRevenue = lastMonthRevenueFromPayments + lastMonthRevenueFromCashClosures;
+
       const revenueGrowth = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0;
 
       const currentMonthClients = currentMonthClientsResult.data?.length || 0;
