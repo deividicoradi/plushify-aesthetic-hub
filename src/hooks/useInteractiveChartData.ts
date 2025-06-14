@@ -36,8 +36,12 @@ export const useInteractiveChartData = () => {
         const nextDay = new Date(currentDay);
         nextDay.setDate(currentDay.getDate() + 1);
 
-        // Como a tabela appointments foi removida, definir agendamentos como 0
-        const agendamentos = 0;
+        // Buscar agendamentos do dia (agora usando dados reais)
+        const { count: agendamentos } = await supabase
+          .from('appointments')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('appointment_date', currentDay.toISOString().split('T')[0]);
 
         // Buscar faturamento do dia (pagamentos)
         const { data: payments } = await supabase
@@ -60,12 +64,13 @@ export const useInteractiveChartData = () => {
 
         chartData.push({
           day: days[currentDay.getDay()],
-          agendamentos,
+          agendamentos: agendamentos || 0,
           faturamento,
           clientes: clientes || 0
         });
       }
 
+      console.log('Interactive chart data updated:', chartData);
       setData(chartData);
     } catch (error) {
       console.error('Erro ao buscar dados do gráfico:', error);
@@ -76,6 +81,66 @@ export const useInteractiveChartData = () => {
 
   useEffect(() => {
     fetchChartData();
+
+    // Configurar listeners em tempo real para agendamentos
+    const appointmentsChannel = supabase
+      .channel('interactive-chart-appointments')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          console.log('Appointments changed, refreshing interactive chart');
+          fetchChartData();
+        }
+      )
+      .subscribe();
+
+    // Configurar listeners em tempo real para clientes
+    const clientsChannel = supabase
+      .channel('interactive-chart-clients')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'clients',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          console.log('Clients changed, refreshing interactive chart');
+          fetchChartData();
+        }
+      )
+      .subscribe();
+
+    // Configurar listeners em tempo real para pagamentos
+    const paymentsChannel = supabase
+      .channel('interactive-chart-payments')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payments',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          console.log('Payments changed, refreshing interactive chart');
+          fetchChartData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(appointmentsChannel);
+      supabase.removeChannel(clientsChannel);
+      supabase.removeChannel(paymentsChannel);
+    };
   }, [user]);
 
   return {
