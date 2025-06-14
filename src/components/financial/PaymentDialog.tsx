@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -238,7 +237,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
             <Label htmlFor="payment_method_id">Método de Pagamento *</Label>
             <Select value={formData.payment_method_id} onValueChange={(value) => handleChange('payment_method_id', value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o método" />
+                <SelectValue placeholder={paymentMethods && paymentMethods.length > 0 ? "Selecione o método" : "Carregando métodos..."} />
               </SelectTrigger>
               <SelectContent>
                 {paymentMethods && paymentMethods.length > 0 ? (
@@ -247,11 +246,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
                       {method.name}
                     </SelectItem>
                   ))
-                ) : (
-                  <SelectItem value="" disabled>
-                    Carregando métodos de pagamento...
-                  </SelectItem>
-                )}
+                ) : null}
               </SelectContent>
             </Select>
           </div>
