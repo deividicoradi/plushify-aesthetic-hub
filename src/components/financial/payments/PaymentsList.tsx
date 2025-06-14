@@ -22,6 +22,12 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
   const [pendingAction, setPendingAction] = useState<{ type: 'edit' | 'delete'; payment: any } | null>(null);
   const { verifyPassword, isVerifying } = useAuthorizationPassword();
 
+  // Hook para operações seguras - usado para exclusões
+  const { deletePayment, isDeleting } = useSecurePaymentMutation(pendingAction?.payment, () => {
+    setPasswordDialogOpen(false);
+    setPendingAction(null);
+  });
+
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pago: { 
@@ -58,24 +64,26 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
   const handlePasswordConfirm = async (password: string, reason?: string) => {
     if (!pendingAction) return;
 
+    console.log('🔐 Verificando senha para:', pendingAction.type);
+    
     const isValid = await verifyPassword(password);
-    if (!isValid) return;
-
-    if (pendingAction.type === 'edit') {
-      onEdit(pendingAction.payment);
-    } else if (pendingAction.type === 'delete') {
-      // Criar uma instância temporária do hook para exclusão
-      const { deletePayment } = useSecurePaymentMutation(pendingAction.payment, () => {
-        setPasswordDialogOpen(false);
-        setPendingAction(null);
-      });
-      
-      deletePayment({ reason });
+    if (!isValid) {
+      console.log('❌ Senha inválida');
+      return;
     }
 
+    console.log('✅ Senha válida, executando ação:', pendingAction.type);
+
     if (pendingAction.type === 'edit') {
+      // Para edições, apenas chamar o callback de edição e fechar o modal
+      onEdit(pendingAction.payment);
       setPasswordDialogOpen(false);
       setPendingAction(null);
+    } else if (pendingAction.type === 'delete') {
+      // Para exclusões, usar o hook de mutação segura
+      console.log('🗑️ Iniciando exclusão do pagamento:', pendingAction.payment.id);
+      deletePayment({ reason });
+      // O modal será fechado pelo callback de sucesso do hook
     }
   };
 
@@ -177,9 +185,10 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
                   variant="outline"
                   onClick={() => handleSecureAction('delete', payment)}
                   className="text-red-600 hover:text-red-700"
+                  disabled={isDeleting}
                 >
                   <Trash2 className="w-3 h-3 mr-1" />
-                  Excluir
+                  {isDeleting ? 'Excluindo...' : 'Excluir'}
                 </Button>
               </div>
             </CardContent>
@@ -197,7 +206,7 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
             ? 'Digite sua senha para autorizar a edição deste pagamento.'
             : 'Digite sua senha para autorizar a exclusão deste pagamento. Esta ação não pode ser desfeita.'
         }
-        isLoading={isVerifying}
+        isLoading={isVerifying || isDeleting}
         requireReason={true}
       />
     </>
