@@ -11,19 +11,26 @@ interface PaymentMethodSelectProps {
 }
 
 const PaymentMethodSelect = ({ value, onValueChange, enabled = true }: PaymentMethodSelectProps) => {
-  const { data: paymentMethods, error: paymentMethodsError } = usePaymentMethods(enabled);
+  const { data: paymentMethods, error: paymentMethodsError, isLoading } = usePaymentMethods(enabled);
 
   // Log de erro se houver
   if (paymentMethodsError) {
     console.error('Erro na query de métodos de pagamento:', paymentMethodsError);
   }
 
+  const getPlaceholderText = () => {
+    if (isLoading) return "Carregando...";
+    if (paymentMethodsError) return "Erro ao carregar";
+    if (!paymentMethods || paymentMethods.length === 0) return "Nenhum método disponível";
+    return "Selecione o método";
+  };
+
   return (
     <div className="space-y-2">
       <Label htmlFor="payment_method_id">Método de Pagamento *</Label>
-      <Select value={value} onValueChange={onValueChange}>
+      <Select value={value} onValueChange={onValueChange} disabled={isLoading || !!paymentMethodsError}>
         <SelectTrigger>
-          <SelectValue placeholder={paymentMethods && paymentMethods.length > 0 ? "Selecione o método" : "Carregando métodos..."} />
+          <SelectValue placeholder={getPlaceholderText()} />
         </SelectTrigger>
         <SelectContent>
           {paymentMethods && paymentMethods.length > 0 ? (
@@ -32,7 +39,13 @@ const PaymentMethodSelect = ({ value, onValueChange, enabled = true }: PaymentMe
                 {method.name}
               </SelectItem>
             ))
-          ) : null}
+          ) : (
+            !isLoading && !paymentMethodsError && (
+              <div className="p-2 text-sm text-gray-500">
+                Nenhum método encontrado
+              </div>
+            )
+          )}
         </SelectContent>
       </Select>
     </div>

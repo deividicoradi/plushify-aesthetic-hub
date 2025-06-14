@@ -48,7 +48,8 @@ export const usePaymentMethods = (enabled: boolean = true) => {
             defaultMethods.map(method => ({
               user_id: user?.id,
               name: method.name,
-              type: method.type
+              type: method.type,
+              active: true
             }))
           )
           .select();
@@ -59,11 +60,13 @@ export const usePaymentMethods = (enabled: boolean = true) => {
         }
 
         console.log('Métodos padrão criados:', insertedData);
-        return insertedData;
+        return insertedData || [];
       }
       
-      return data;
+      return data || [];
     },
     enabled: !!user?.id && enabled,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutos
   });
 };
