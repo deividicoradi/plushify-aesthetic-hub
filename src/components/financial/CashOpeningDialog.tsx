@@ -1,11 +1,11 @@
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
@@ -14,172 +14,238 @@ interface CashOpeningDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  opening?: any;
 }
 
-interface CashOpeningFormData {
-  opening_date: string;
-  opening_balance: number;
-  cash_amount: number;
-  card_amount: number;
-  pix_amount: number;
-  other_amount: number;
-  notes?: string;
-}
-
-const CashOpeningDialog = ({ open, onOpenChange, onSuccess }: CashOpeningDialogProps) => {
+const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeningDialogProps) => {
   const { user } = useAuth();
-  const { register, handleSubmit, reset, watch, formState: { isSubmitting } } = useForm<CashOpeningFormData>({
-    defaultValues: {
-      opening_date: new Date().toISOString().split('T')[0],
-      opening_balance: 0,
-      cash_amount: 0,
-      card_amount: 0,
-      pix_amount: 0,
-      other_amount: 0,
-      notes: ''
-    }
+  const queryClient = useQueryClient();
+  
+  const [formData, setFormData] = useState({
+    opening_date: new Date().toISOString().split('T')[0],
+    opening_balance: '',
+    cash_amount: '',
+    card_amount: '',
+    pix_amount: '',
+    other_amount: '',
+    notes: ''
   });
 
-  const watchedValues = watch();
-  const calculatedBalance = Number(watchedValues.cash_amount || 0) + 
-                           Number(watchedValues.card_amount || 0) + 
-                           Number(watchedValues.pix_amount || 0) + 
-                           Number(watchedValues.other_amount || 0);
-
-  const onSubmit = async (data: CashOpeningFormData) => {
-    try {
-      const { error } = await supabase
-        .from('cash_openings')
-        .insert({
-          user_id: user?.id,
-          opening_date: data.opening_date,
-          opening_balance: calculatedBalance,
-          cash_amount: Number(data.cash_amount),
-          card_amount: Number(data.card_amount),
-          pix_amount: Number(data.pix_amount),
-          other_amount: Number(data.other_amount),
-          notes: data.notes,
-          status: 'aberto'
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso!",
-        description: "Caixa aberto com sucesso.",
+  useEffect(() => {
+    if (opening) {
+      setFormData({
+        opening_date: opening.opening_date || new Date().toISOString().split('T')[0],
+        opening_balance: opening.opening_balance?.toString() || '',
+        cash_amount: opening.cash_amount?.toString() || '',
+        card_amount: opening.card_amount?.toString() || '',
+        pix_amount: opening.pix_amount?.toString() || '',
+        other_amount: opening.other_amount?.toString() || '',
+        notes: opening.notes || ''
       });
-
-      reset();
-      onOpenChange(false);
-      onSuccess?.();
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: error.message || "Erro ao abrir caixa",
-        variant: "destructive",
+    } else {
+      setFormData({
+        opening_date: new Date().toISOString().split('T')[0],
+        opening_balance: '',
+        cash_amount: '',
+        card_amount: '',
+        pix_amount: '',
+        other_amount: '',
+        notes: ''
       });
     }
+  }, [opening, open]);
+
+  const mutation = useMutation({
+    mutationFn: async (data: any) => {
+      if (opening) {
+        const { error } = await supabase
+          .from('cash_openings')
+          .update(data)
+          .eq('id', opening.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('cash_openings')
+          .insert([{ 
+            ...data, 
+            user_id: user?.id,
+            status: 'aberto',
+            opened_at: new Date().toISOString()
+          }]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cash-openings'] });
+      toast({
+        title: "Sucesso!",
+        description: opening ? "Abertura atualizada!" : "Abertura de caixa criada com sucesso.",
+      });
+      onOpenChange(false);
+      onSuccess?.();
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar abertura de caixa",
+        variant: "destructive",
+      });
+      console.error(error);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.opening_date) {
+      toast({
+        title: "Erro",
+        description: "Preencha a data de abertura",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const processedData = {
+      opening_date: formData.opening_date,
+      opening_balance: parseFloat(formData.opening_balance) || 0,
+      cash_amount: parseFloat(formData.cash_amount) || 0,
+      card_amount: parseFloat(formData.card_amount) || 0,
+      pix_amount: parseFloat(formData.pix_amount) || 0,
+      other_amount: parseFloat(formData.other_amount) || 0,
+      notes: formData.notes || null,
+    };
+
+    mutation.mutate(processedData);
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const calculateTotal = () => {
+    const balance = parseFloat(formData.opening_balance) || 0;
+    const cash = parseFloat(formData.cash_amount) || 0;
+    const card = parseFloat(formData.card_amount) || 0;
+    const pix = parseFloat(formData.pix_amount) || 0;
+    const other = parseFloat(formData.other_amount) || 0;
+    return balance + cash + card + pix + other;
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Abertura de Caixa</DialogTitle>
+          <DialogTitle>{opening ? 'Editar Abertura de Caixa' : 'Nova Abertura de Caixa'}</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="opening_date">Data de Abertura</Label>
-              <Input
-                id="opening_date"
-                type="date"
-                {...register('opening_date', { required: true })}
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="opening_date">Data de Abertura *</Label>
+            <Input
+              id="opening_date"
+              type="date"
+              value={formData.opening_date}
+              onChange={(e) => handleChange('opening_date', e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="opening_balance">Saldo Inicial</Label>
+            <Input
+              id="opening_balance"
+              type="number"
+              step="0.01"
+              value={formData.opening_balance}
+              onChange={(e) => handleChange('opening_balance', e.target.value)}
+              placeholder="0,00"
+            />
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Valores Iniciais</h3>
+            <h3 className="font-semibold">Valores por Método de Pagamento</h3>
             
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="cash_amount">Dinheiro</Label>
                 <Input
                   id="cash_amount"
                   type="number"
                   step="0.01"
+                  value={formData.cash_amount}
+                  onChange={(e) => handleChange('cash_amount', e.target.value)}
                   placeholder="0,00"
-                  {...register('cash_amount', { valueAsNumber: true })}
                 />
               </div>
-              
-              <div>
+
+              <div className="space-y-2">
                 <Label htmlFor="card_amount">Cartão</Label>
                 <Input
                   id="card_amount"
                   type="number"
                   step="0.01"
+                  value={formData.card_amount}
+                  onChange={(e) => handleChange('card_amount', e.target.value)}
                   placeholder="0,00"
-                  {...register('card_amount', { valueAsNumber: true })}
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="pix_amount">PIX</Label>
                 <Input
                   id="pix_amount"
                   type="number"
                   step="0.01"
+                  value={formData.pix_amount}
+                  onChange={(e) => handleChange('pix_amount', e.target.value)}
                   placeholder="0,00"
-                  {...register('pix_amount', { valueAsNumber: true })}
                 />
               </div>
-              
-              <div>
+
+              <div className="space-y-2">
                 <Label htmlFor="other_amount">Outros</Label>
                 <Input
                   id="other_amount"
                   type="number"
                   step="0.01"
+                  value={formData.other_amount}
+                  onChange={(e) => handleChange('other_amount', e.target.value)}
                   placeholder="0,00"
-                  {...register('other_amount', { valueAsNumber: true })}
                 />
               </div>
             </div>
 
-            <div className="p-3 bg-blue-50 dark:bg-blue-800/20 rounded-lg">
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                Saldo Inicial Total: {new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL'
-                }).format(calculatedBalance)}
+            <div className="p-3 bg-green-50 dark:bg-green-800/20 rounded-lg">
+              <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                Total em caixa: {formatCurrency(calculateTotal())}
               </p>
             </div>
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="notes">Observações</Label>
             <Textarea
               id="notes"
-              placeholder="Observações sobre a abertura do caixa..."
-              {...register('notes')}
+              value={formData.notes}
+              onChange={(e) => handleChange('notes', e.target.value)}
+              placeholder="Observações sobre a abertura"
             />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Abrindo...' : 'Abrir Caixa'}
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? 'Salvando...' : opening ? 'Atualizar' : 'Criar Abertura'}
             </Button>
           </div>
         </form>

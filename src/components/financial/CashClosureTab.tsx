@@ -1,21 +1,24 @@
-
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Calculator, TrendingUp, TrendingDown, DoorOpen } from 'lucide-react';
+import { Plus, Calculator, TrendingUp, TrendingDown, DoorOpen, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import CashClosureDialog from './CashClosureDialog';
 import CashOpeningDialog from './CashOpeningDialog';
+import { toast } from "@/hooks/use-toast";
 
 const CashClosureTab = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [isClosureDialogOpen, setIsClosureDialogOpen] = useState(false);
   const [isOpeningDialogOpen, setIsOpeningDialogOpen] = useState(false);
+  const [editingClosure, setEditingClosure] = useState<any>(null);
+  const [editingOpening, setEditingOpening] = useState<any>(null);
 
   const { data: cashClosures, isLoading: loadingClosures, refetch: refetchClosures } = useQuery({
     queryKey: ['cash-closures', user?.id],
@@ -45,6 +48,58 @@ const CashClosureTab = () => {
       return data;
     },
     enabled: !!user?.id,
+  });
+
+  const deleteClosureMutation = useMutation({
+    mutationFn: async (closureId: string) => {
+      const { error } = await supabase
+        .from('cash_closures')
+        .delete()
+        .eq('id', closureId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cash-closures'] });
+      toast({
+        title: "Sucesso!",
+        description: "Fechamento excluído com sucesso.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir fechamento",
+        variant: "destructive",
+      });
+      console.error(error);
+    },
+  });
+
+  const deleteOpeningMutation = useMutation({
+    mutationFn: async (openingId: string) => {
+      const { error } = await supabase
+        .from('cash_openings')
+        .delete()
+        .eq('id', openingId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cash-openings'] });
+      toast({
+        title: "Sucesso!",
+        description: "Abertura excluída com sucesso.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir abertura",
+        variant: "destructive",
+      });
+      console.error(error);
+    },
   });
 
   const formatCurrency = (value: number) => {
@@ -87,6 +142,38 @@ const CashClosureTab = () => {
   const handleRefetch = () => {
     refetchClosures();
     refetchOpenings();
+  };
+
+  const handleEditClosure = (closure: any) => {
+    setEditingClosure(closure);
+    setIsClosureDialogOpen(true);
+  };
+
+  const handleEditOpening = (opening: any) => {
+    setEditingOpening(opening);
+    setIsOpeningDialogOpen(true);
+  };
+
+  const handleDeleteClosure = (closureId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este fechamento?')) {
+      deleteClosureMutation.mutate(closureId);
+    }
+  };
+
+  const handleDeleteOpening = (openingId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir esta abertura?')) {
+      deleteOpeningMutation.mutate(openingId);
+    }
+  };
+
+  const handleCloseClosureDialog = () => {
+    setIsClosureDialogOpen(false);
+    setEditingClosure(null);
+  };
+
+  const handleCloseOpeningDialog = () => {
+    setIsOpeningDialogOpen(false);
+    setEditingOpening(null);
   };
 
   return (
@@ -136,10 +223,27 @@ const CashClosureTab = () => {
                             {getStatusBadge(opening.status)}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Aberto em: {format(new Date(opening.opened_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                          </p>
+                        <div className="flex items-center gap-2">
+                          <div className="text-right mr-4">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              Aberto em: {format(new Date(opening.opened_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditOpening(opening)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteOpening(opening.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
                     </CardHeader>
@@ -207,12 +311,29 @@ const CashClosureTab = () => {
                             {getStatusBadge(closure.status)}
                           </div>
                         </div>
-                        <div className="text-right">
-                          {closure.closed_at && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              Fechado em: {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                            </p>
-                          )}
+                        <div className="flex items-center gap-2">
+                          <div className="text-right mr-4">
+                            {closure.closed_at && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Fechado em: {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditClosure(closure)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteClosure(closure.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
                     </CardHeader>
@@ -304,14 +425,16 @@ const CashClosureTab = () => {
 
       <CashClosureDialog 
         open={isClosureDialogOpen} 
-        onOpenChange={setIsClosureDialogOpen}
+        onOpenChange={handleCloseClosureDialog}
         onSuccess={handleRefetch}
+        closure={editingClosure}
       />
 
       <CashOpeningDialog 
         open={isOpeningDialogOpen} 
-        onOpenChange={setIsOpeningDialogOpen}
+        onOpenChange={handleCloseOpeningDialog}
         onSuccess={handleRefetch}
+        opening={editingOpening}
       />
     </div>
   );

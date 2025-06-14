@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Edit, CheckCircle, XCircle } from 'lucide-react';
+import { Edit, Trash2, Check } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 
@@ -12,95 +13,106 @@ interface InstallmentActionsProps {
 }
 
 const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentActionsProps) => {
-  const handleMarkAsPaid = async () => {
-    try {
+  const queryClient = useQueryClient();
+
+  const markAsPaidMutation = useMutation({
+    mutationFn: async () => {
       const { error } = await supabase
         .from('installments')
         .update({
           status: 'pago',
-          payment_date: new Date().toISOString(),
-          paid_amount: installment.amount,
-          updated_at: new Date().toISOString()
+          paid_amount: Number(installment.amount),
+          payment_date: new Date().toISOString()
         })
         .eq('id', installment.id);
-
+      
       if (error) throw error;
-
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['installments'] });
       toast({
         title: "Sucesso!",
         description: "Parcela marcada como paga.",
       });
-
       onUpdate();
-    } catch (error: any) {
+    },
+    onError: (error) => {
       toast({
         title: "Erro",
-        description: error.message || "Erro ao atualizar parcela",
+        description: "Erro ao marcar parcela como paga",
         variant: "destructive",
       });
-    }
-  };
+      console.error(error);
+    },
+  });
 
-  const handleMarkAsNotPaid = async () => {
-    try {
+  const deleteInstallmentMutation = useMutation({
+    mutationFn: async () => {
       const { error } = await supabase
         .from('installments')
-        .update({
-          status: 'pendente',
-          payment_date: null,
-          paid_amount: 0,
-          updated_at: new Date().toISOString()
-        })
+        .delete()
         .eq('id', installment.id);
-
+      
       if (error) throw error;
-
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['installments'] });
       toast({
         title: "Sucesso!",
-        description: "Parcela marcada como não paga.",
+        description: "Parcela excluída com sucesso.",
       });
-
       onUpdate();
-    } catch (error: any) {
+    },
+    onError: (error) => {
       toast({
         title: "Erro",
-        description: error.message || "Erro ao atualizar parcela",
+        description: "Erro ao excluir parcela",
         variant: "destructive",
       });
+      console.error(error);
+    },
+  });
+
+  const handleMarkAsPaid = () => {
+    markAsPaidMutation.mutate();
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Tem certeza que deseja excluir esta parcela?')) {
+      deleteInstallmentMutation.mutate();
     }
   };
 
   return (
-    <div className="flex flex-col gap-2 mt-auto">
-      {installment.status === 'pendente' ? (
+    <div className="flex flex-wrap gap-1 mt-auto pt-3">
+      {installment.status === 'pendente' && (
         <Button
+          variant="outline"
           size="sm"
           onClick={handleMarkAsPaid}
-          className="w-full bg-green-600 hover:bg-green-700 text-xs h-8"
+          className="text-green-600 hover:text-green-700 flex-1"
         >
-          <CheckCircle className="w-3 h-3 mr-1" />
-          Marcar como Pago
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={handleMarkAsNotPaid}
-          className="w-full text-xs h-8"
-        >
-          <XCircle className="w-3 h-3 mr-1" />
-          Marcar como Não Pago
+          <Check className="w-3 h-3 mr-1" />
+          Pagar
         </Button>
       )}
-      
       <Button
-        size="sm"
         variant="outline"
+        size="sm"
         onClick={() => onEdit(installment)}
-        className="w-full text-xs h-8"
+        className="flex-1"
       >
         <Edit className="w-3 h-3 mr-1" />
         Editar
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleDelete}
+        className="text-red-600 hover:text-red-700 flex-1"
+      >
+        <Trash2 className="w-3 h-3 mr-1" />
+        Excluir
       </Button>
     </div>
   );

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,14 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/hooks/use-toast";
 
 interface ExpenseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  expense?: any;
 }
 
-const ExpenseDialog = ({ open, onOpenChange }: ExpenseDialogProps) => {
+const ExpenseDialog = ({ open, onOpenChange, expense }: ExpenseDialogProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
@@ -28,6 +29,28 @@ const ExpenseDialog = ({ open, onOpenChange }: ExpenseDialogProps) => {
     expense_date: new Date().toISOString().split('T')[0],
     notes: ''
   });
+
+  useEffect(() => {
+    if (expense) {
+      setFormData({
+        description: expense.description || '',
+        amount: expense.amount?.toString() || '',
+        category: expense.category || '',
+        payment_method_id: expense.payment_method_id || '',
+        expense_date: expense.expense_date ? expense.expense_date.split('T')[0] : new Date().toISOString().split('T')[0],
+        notes: expense.notes || ''
+      });
+    } else {
+      setFormData({
+        description: '',
+        amount: '',
+        category: '',
+        payment_method_id: '',
+        expense_date: new Date().toISOString().split('T')[0],
+        notes: ''
+      });
+    }
+  }, [expense, open]);
 
   const { data: paymentMethods } = useQuery({
     queryKey: ['payment-methods', user?.id],
@@ -47,27 +70,33 @@ const ExpenseDialog = ({ open, onOpenChange }: ExpenseDialogProps) => {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase
-        .from('expenses')
-        .insert([{ ...data, user_id: user?.id }]);
-      
-      if (error) throw error;
+      if (expense) {
+        const { error } = await supabase
+          .from('expenses')
+          .update(data)
+          .eq('id', expense.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('expenses')
+          .insert([{ ...data, user_id: user?.id }]);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      toast.success('Despesa criada!');
-      onOpenChange(false);
-      setFormData({
-        description: '',
-        amount: '',
-        category: '',
-        payment_method_id: '',
-        expense_date: new Date().toISOString().split('T')[0],
-        notes: ''
+      toast({
+        title: "Sucesso!",
+        description: expense ? "Despesa atualizada!" : "Despesa criada!",
       });
+      onOpenChange(false);
     },
     onError: (error) => {
-      toast.error('Erro ao criar despesa');
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar despesa",
+        variant: "destructive",
+      });
       console.error(error);
     },
   });
@@ -76,14 +105,21 @@ const ExpenseDialog = ({ open, onOpenChange }: ExpenseDialogProps) => {
     e.preventDefault();
     
     if (!formData.description || !formData.amount || !formData.category) {
-      toast.error('Preencha todos os campos obrigatórios');
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive",
+      });
       return;
     }
 
     mutation.mutate({
-      ...formData,
+      description: formData.description,
       amount: parseFloat(formData.amount),
+      category: formData.category,
       payment_method_id: formData.payment_method_id || null,
+      expense_date: formData.expense_date,
+      notes: formData.notes || null,
     });
   };
 
@@ -106,7 +142,7 @@ const ExpenseDialog = ({ open, onOpenChange }: ExpenseDialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Nova Despesa</DialogTitle>
+          <DialogTitle>{expense ? 'Editar Despesa' : 'Nova Despesa'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -195,7 +231,7 @@ const ExpenseDialog = ({ open, onOpenChange }: ExpenseDialogProps) => {
               Cancelar
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Salvando...' : 'Criar'}
+              {mutation.isPending ? 'Salvando...' : expense ? 'Atualizar' : 'Criar'}
             </Button>
           </div>
         </form>

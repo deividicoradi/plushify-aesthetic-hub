@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +13,10 @@ interface CashClosureDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  closure?: any;
 }
 
-const CashClosureDialog = ({ open, onOpenChange, onSuccess }: CashClosureDialogProps) => {
+const CashClosureDialog = ({ open, onOpenChange, onSuccess, closure }: CashClosureDialogProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
@@ -33,30 +33,21 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess }: CashClosureDialogP
     notes: ''
   });
 
-  const mutation = useMutation({
-    mutationFn: async (data: any) => {
-      const calculatedDifference = Number(data.closing_balance) - Number(data.opening_balance);
-      
-      const { error } = await supabase
-        .from('cash_closures')
-        .insert([{ 
-          ...data, 
-          user_id: user?.id,
-          difference: calculatedDifference,
-          status: 'fechado',
-          closed_at: new Date().toISOString()
-        }]);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cash-closures'] });
-      toast({
-        title: "Sucesso!",
-        description: "Fechamento de caixa criado com sucesso.",
+  useEffect(() => {
+    if (closure) {
+      setFormData({
+        closure_date: closure.closure_date || new Date().toISOString().split('T')[0],
+        opening_balance: closure.opening_balance?.toString() || '',
+        closing_balance: closure.closing_balance?.toString() || '',
+        total_income: closure.total_income?.toString() || '',
+        total_expenses: closure.total_expenses?.toString() || '',
+        cash_amount: closure.cash_amount?.toString() || '',
+        card_amount: closure.card_amount?.toString() || '',
+        pix_amount: closure.pix_amount?.toString() || '',
+        other_amount: closure.other_amount?.toString() || '',
+        notes: closure.notes || ''
       });
-      onOpenChange(false);
-      onSuccess?.();
+    } else {
       setFormData({
         closure_date: new Date().toISOString().split('T')[0],
         opening_balance: '',
@@ -69,11 +60,50 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess }: CashClosureDialogP
         other_amount: '',
         notes: ''
       });
+    }
+  }, [closure, open]);
+
+  const mutation = useMutation({
+    mutationFn: async (data: any) => {
+      const calculatedDifference = Number(data.closing_balance) - Number(data.opening_balance);
+      
+      if (closure) {
+        const { error } = await supabase
+          .from('cash_closures')
+          .update({ 
+            ...data, 
+            difference: calculatedDifference,
+            status: 'fechado',
+            closed_at: new Date().toISOString()
+          })
+          .eq('id', closure.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('cash_closures')
+          .insert([{ 
+            ...data, 
+            user_id: user?.id,
+            difference: calculatedDifference,
+            status: 'fechado',
+            closed_at: new Date().toISOString()
+          }]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cash-closures'] });
+      toast({
+        title: "Sucesso!",
+        description: closure ? "Fechamento atualizado!" : "Fechamento de caixa criado com sucesso.",
+      });
+      onOpenChange(false);
+      onSuccess?.();
     },
     onError: (error) => {
       toast({
         title: "Erro",
-        description: "Erro ao criar fechamento de caixa",
+        description: "Erro ao salvar fechamento de caixa",
         variant: "destructive",
       });
       console.error(error);
@@ -93,7 +123,7 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess }: CashClosureDialogP
     }
 
     const processedData = {
-      ...formData,
+      closure_date: formData.closure_date,
       opening_balance: parseFloat(formData.opening_balance) || 0,
       closing_balance: parseFloat(formData.closing_balance),
       total_income: parseFloat(formData.total_income) || 0,
@@ -102,6 +132,7 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess }: CashClosureDialogP
       card_amount: parseFloat(formData.card_amount) || 0,
       pix_amount: parseFloat(formData.pix_amount) || 0,
       other_amount: parseFloat(formData.other_amount) || 0,
+      notes: formData.notes || null,
     };
 
     mutation.mutate(processedData);
@@ -130,7 +161,7 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess }: CashClosureDialogP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo Fechamento de Caixa</DialogTitle>
+          <DialogTitle>{closure ? 'Editar Fechamento de Caixa' : 'Novo Fechamento de Caixa'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -273,7 +304,7 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess }: CashClosureDialogP
               Cancelar
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Salvando...' : 'Criar Fechamento'}
+              {mutation.isPending ? 'Salvando...' : closure ? 'Atualizar' : 'Criar Fechamento'}
             </Button>
           </div>
         </form>
