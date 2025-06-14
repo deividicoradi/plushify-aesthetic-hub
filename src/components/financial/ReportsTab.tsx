@@ -36,8 +36,7 @@ const ReportsTab = () => {
         .from('payments')
         .select(`
           *,
-          payment_methods(name, type),
-          clients(name)
+          payment_methods(name, type)
         `)
         .eq('user_id', user?.id)
         .eq('status', 'pago')
@@ -66,12 +65,16 @@ const ReportsTab = () => {
       }
 
       // Processar pagamentos excluídos para incluir no relatório
-      const processedDeletedPayments = deletedPayments?.map(log => ({
-        ...log.old_data,
-        _deleted: true,
-        _deleted_at: log.created_at,
-        _deleted_reason: log.reason
-      })) || [];
+      const processedDeletedPayments = deletedPayments?.map(log => {
+        // Garantir que old_data é um objeto válido
+        const oldData = log.old_data && typeof log.old_data === 'object' ? log.old_data : {};
+        return {
+          ...oldData,
+          _deleted: true,
+          _deleted_at: log.created_at,
+          _deleted_reason: log.reason
+        };
+      }) || [];
 
       // Buscar parcelamentos do período
       const { data: installments } = await supabase
