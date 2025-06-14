@@ -21,16 +21,32 @@ export const GenerateReportButton = ({
   const [isGenerating, setIsGenerating] = React.useState(false);
 
   const handleGenerateReport = async () => {
-    if (!reportData) return;
+    console.log('🔄 Iniciando geração de relatório PDF...');
+    console.log('📊 Dados do relatório:', reportData);
+    console.log('📄 Tipo de relatório:', reportType);
+    
+    if (!reportData) {
+      console.error('❌ Nenhum dado de relatório disponível');
+      toast({
+        title: "Erro",
+        description: "Nenhum dado disponível para gerar o relatório",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsGenerating(true);
     try {
+      console.log('📝 Chamando função generateFinancialReport...');
       await generateFinancialReport(reportData, reportType);
+      console.log('✅ PDF gerado com sucesso!');
       toast({
         title: "Sucesso!",
         description: "Relatório PDF gerado com sucesso.",
       });
     } catch (error: any) {
+      console.error('❌ Erro ao gerar relatório PDF:', error);
+      console.error('❌ Stack trace:', error.stack);
       toast({
         title: "Erro",
         description: error.message || "Erro ao gerar relatório",
