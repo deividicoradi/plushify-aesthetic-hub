@@ -15,19 +15,18 @@ export const useCashOpeningValidation = () => {
     // Usar a data atual se não for fornecida
     const targetDate = recordDate ? recordDate.split('T')[0] : new Date().toISOString().split('T')[0];
     
-    console.log('🔍 Verificando se caixa está aberto para a data:', targetDate);
+    console.log('🔍 Verificando status do caixa para a data:', targetDate);
 
-    // Verificar se existe um caixa aberto para esta data
-    const { data: openCash, error } = await supabase
-      .from('cash_openings')
-      .select('id, opening_date, status')
+    // PRIMEIRO: Verificar se existe um caixa fechado para esta data
+    const { data: closedCash, error: closureError } = await supabase
+      .from('cash_closures')
+      .select('id, closure_date, status')
       .eq('user_id', user.id)
-      .eq('opening_date', targetDate)
-      .eq('status', 'aberto')
-      .maybeSingle();
+      .eq('closure_date', targetDate)
+      .eq('status', 'fechado');
 
-    if (error) {
-      console.error('❌ Erro ao verificar abertura do caixa:', error);
+    if (closureError) {
+      console.error('❌ Erro ao verificar fechamento do caixa:', closureError);
       toast({
         title: "Erro",
         description: "Erro ao verificar status do caixa",
@@ -36,8 +35,41 @@ export const useCashOpeningValidation = () => {
       return { shouldProceed: false };
     }
 
-    // Se não há caixa aberto para esta data, mostrar mensagem
-    if (!openCash) {
+    // Se encontrou qualquer caixa fechado para esta data, bloquear operação
+    if (closedCash && closedCash.length > 0) {
+      console.log('❌ Caixa está fechado para a data:', targetDate, closedCash);
+      const dateFormatted = new Date(targetDate + 'T00:00:00').toLocaleDateString('pt-BR');
+      
+      toast({
+        title: "Caixa fechado",
+        description: `O caixa do dia ${dateFormatted} está fechado. Não é possível criar novos registros para esta data.`,
+        variant: "destructive",
+      });
+      
+      return { shouldProceed: false };
+    }
+
+    // SEGUNDO: Se não há caixa fechado, verificar se existe um caixa aberto
+    const { data: openCash, error: openingError } = await supabase
+      .from('cash_openings')
+      .select('id, opening_date, status')
+      .eq('user_id', user.id)
+      .eq('opening_date', targetDate)
+      .eq('status', 'aberto');
+
+    if (openingError) {
+      console.error('❌ Erro ao verificar abertura do caixa:', openingError);
+      toast({
+        title: "Erro",
+        description: "Erro ao verificar status do caixa",
+        variant: "destructive",
+      });
+      return { shouldProceed: false };
+    }
+
+    // Se não há caixa aberto, também bloquear
+    if (!openCash || openCash.length === 0) {
+      console.log('❌ Não há caixa aberto para a data:', targetDate);
       const dateFormatted = new Date(targetDate + 'T00:00:00').toLocaleDateString('pt-BR');
       
       toast({
@@ -46,7 +78,6 @@ export const useCashOpeningValidation = () => {
         variant: "destructive",
       });
       
-      console.log('❌ Caixa não está aberto para a data:', targetDate);
       return { shouldProceed: false };
     }
 
