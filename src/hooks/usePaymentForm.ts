@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { usePaymentValidation } from './financial/usePaymentValidation';
 import { useSecurePaymentMutation } from './financial/useSecurePaymentMutation';
 import { usePaymentMutation } from './financial/usePaymentMutation';
+import { useCashOpeningValidation } from './financial/useCashOpeningValidation';
 
 interface PaymentFormData {
   description: string;
@@ -31,6 +32,7 @@ const initialFormData: PaymentFormData = {
 export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
   const [formData, setFormData] = useState<PaymentFormData>(initialFormData);
   const { validatePaymentForm, preparePaymentData } = usePaymentValidation();
+  const { checkAndPromptCashOpening } = useCashOpeningValidation();
   
   // Para edições, usar a mutação segura
   const { updatePayment, isUpdating } = useSecurePaymentMutation(payment, onSuccess);
@@ -78,11 +80,19 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validatePaymentForm(formData)) {
       return;
+    }
+
+    // Para novos pagamentos, verificar se o caixa está aberto
+    if (!payment) {
+      const validation = await checkAndPromptCashOpening(formData.due_date);
+      if (!validation.shouldProceed) {
+        return;
+      }
     }
 
     // Para pagamentos parciais, validar se tem valor pago e se é menor que o total

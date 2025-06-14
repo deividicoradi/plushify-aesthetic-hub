@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
+import { useCashOpeningValidation } from '@/hooks/financial/useCashOpeningValidation';
 
 interface InstallmentFormData {
   payment_id: string;
@@ -14,6 +15,7 @@ interface InstallmentFormData {
 
 export const useInstallmentForm = (installment: any, onSuccess: () => void) => {
   const { user } = useAuth();
+  const { checkAndPromptCashOpening } = useCashOpeningValidation();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<InstallmentFormData>({
     payment_id: '',
@@ -56,6 +58,14 @@ export const useInstallmentForm = (installment: any, onSuccess: () => void) => {
         variant: "destructive",
       });
       return;
+    }
+
+    // Para novos parcelamentos, verificar se o caixa está aberto
+    if (!installment) {
+      const validation = await checkAndPromptCashOpening(formData.due_date.toISOString());
+      if (!validation.shouldProceed) {
+        return;
+      }
     }
 
     setLoading(true);
