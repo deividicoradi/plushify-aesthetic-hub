@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +50,29 @@ const ReportsTab = () => {
         console.error('❌ Erro ao buscar pagamentos:', paymentsError);
       }
 
+      // Buscar pagamentos excluídos através dos logs de auditoria
+      const { data: deletedPayments, error: deletedError } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('table_name', 'payments')
+        .eq('action', 'DELETE')
+        .gte('created_at', fromDate)
+        .lte('created_at', toDate);
+
+      console.log('🗑️ Pagamentos excluídos encontrados:', deletedPayments);
+      if (deletedError) {
+        console.error('❌ Erro ao buscar pagamentos excluídos:', deletedError);
+      }
+
+      // Processar pagamentos excluídos para incluir no relatório
+      const processedDeletedPayments = deletedPayments?.map(log => ({
+        ...log.old_data,
+        _deleted: true,
+        _deleted_at: log.created_at,
+        _deleted_reason: log.reason
+      })) || [];
+
       // Buscar parcelamentos do período
       const { data: installments } = await supabase
         .from('installments')
@@ -87,7 +109,7 @@ const ReportsTab = () => {
       }
 
       return {
-        payments: payments || [],
+        payments: [...(payments || []), ...processedDeletedPayments],
         installments: installments || [],
         expenses: expenses || [],
         cashClosures: cashClosures || [],
@@ -149,8 +171,10 @@ const ReportsTab = () => {
     }
   };
 
-  // Calcular totais usando paid_amount dos pagamentos realizados + fechamentos de caixa
+  // Calcular totais incluindo pagamentos excluídos
   const totalReceitasFromPayments = reportData?.payments.reduce((sum, p) => {
+    // Não contar pagamentos excluídos no total de receitas
+    if (p._deleted) return sum;
     const amount = Number(p.paid_amount) || 0;
     console.log('💵 Adicionando ao total de receitas (pagamento):', amount);
     return sum + amount;
@@ -170,7 +194,10 @@ const ReportsTab = () => {
     new Date(i.due_date) < new Date() && i.status === 'pendente'
   ).length || 0;
 
-  console.log('📊 Totais calculados:', { totalReceitas, totalDespesas, parcelasVencidas });
+  // Contar pagamentos excluídos
+  const pagamentosExcluidos = reportData?.payments.filter(p => p._deleted).length || 0;
+
+  console.log('📊 Totais calculados:', { totalReceitas, totalDespesas, parcelasVencidas, pagamentosExcluidos });
 
   return (
     <div className="space-y-6">
@@ -313,7 +340,7 @@ const ReportsTab = () => {
             <CardTitle>Resumo do Período</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {formatCurrency(totalReceitas)}
@@ -340,6 +367,13 @@ const ReportsTab = () => {
                   {parcelasVencidas}
                 </div>
                 <div className="text-sm text-muted-foreground">Parcelas Vencidas</div>
+              </div>
+
+              <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+                <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+                  {pagamentosExcluidos}
+                </div>
+                <div className="text-sm text-muted-foreground">Pagamentos Excluídos</div>
               </div>
             </div>
           </CardContent>
@@ -385,13 +419,25 @@ const ReportsTab = () => {
                   {reportData.payments.slice(0, 5).map((payment: any) => (
                     <div key={payment.id} className="flex justify-between items-center p-2 border rounded">
                       <div>
-                        <div className="font-medium">{payment.description}</div>
+                        <div className="font-medium flex items-center gap-2">
+                          {payment.description}
+                          {payment._deleted && (
+                            <Badge variant="destructive" className="text-xs">
+                              Excluído
+                            </Badge>
+                          )}
+                        </div>
                         <div className="text-sm text-muted-foreground">
                           {payment.clients?.name || 'Cliente não informado'}
+                          {payment._deleted && payment._deleted_reason && (
+                            <span className="block text-red-500">
+                              Motivo: {payment._deleted_reason}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <Badge variant="default">
-                        {formatCurrency(Number(payment.paid_amount))}
+                      <Badge variant={payment._deleted ? "destructive" : "default"}>
+                        {formatCurrency(Number(payment.paid_amount || payment.amount))}
                       </Badge>
                     </div>
                   ))}
