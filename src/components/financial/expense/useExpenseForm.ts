@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
+import { useCashOpeningValidation } from '@/hooks/financial/useCashOpeningValidation';
 
 interface ExpenseFormData {
   description: string;
@@ -17,6 +18,7 @@ interface ExpenseFormData {
 export const useExpenseForm = (expense: any, onSuccess: () => void) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { checkAndPromptCashOpening } = useCashOpeningValidation();
   
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
@@ -51,6 +53,17 @@ export const useExpenseForm = (expense: any, onSuccess: () => void) => {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
+      // ✅ VALIDAÇÃO OBRIGATÓRIA DO CAIXA ANTES DE QUALQUER OPERAÇÃO
+      console.log('🔒 [VALIDAÇÃO OBRIGATÓRIA] Verificando status do caixa para despesa...');
+      const targetDate = expense ? 
+        (expense.expense_date ? expense.expense_date.split('T')[0] : data.expense_date) : 
+        data.expense_date;
+      
+      const validation = await checkAndPromptCashOpening(targetDate);
+      if (!validation.shouldProceed) {
+        throw new Error('Operação bloqueada: caixa não está aberto para esta data');
+      }
+
       if (expense) {
         const { error } = await supabase
           .from('expenses')
@@ -75,7 +88,7 @@ export const useExpenseForm = (expense: any, onSuccess: () => void) => {
     onError: (error) => {
       toast({
         title: "Erro",
-        description: "Erro ao salvar despesa",
+        description: error.message || "Erro ao salvar despesa",
         variant: "destructive",
       });
       console.error(error);

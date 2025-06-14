@@ -3,12 +3,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 import { useAuditLog } from '@/hooks/useAuditLog';
-import { useCashStatusValidation } from './useCashStatusValidation';
+import { useCashOpeningValidation } from './useCashOpeningValidation';
 
 export const useSecureInstallmentMutation = (onSuccess?: () => void) => {
   const queryClient = useQueryClient();
   const { createAuditLog } = useAuditLog();
-  const { validateCashIsOpen } = useCashStatusValidation();
+  const { checkAndPromptCashOpening } = useCashOpeningValidation();
 
   const updateMutation = useMutation({
     mutationFn: async ({ installmentId, data, reason }: { installmentId: string; data: any; reason?: string }) => {
@@ -23,10 +23,11 @@ export const useSecureInstallmentMutation = (onSuccess?: () => void) => {
         throw new Error('Parcelamento não encontrado');
       }
 
-      // Validar se o caixa está aberto para a data de criação do parcelamento
-      const validation = await validateCashIsOpen(originalData.created_at);
-      if (!validation.isValid) {
-        throw new Error(validation.message);
+      // ✅ VALIDAÇÃO OBRIGATÓRIA DO CAIXA ANTES DE QUALQUER OPERAÇÃO
+      console.log('🔒 [VALIDAÇÃO OBRIGATÓRIA] Verificando status do caixa para edição...');
+      const validation = await checkAndPromptCashOpening(originalData.created_at);
+      if (!validation.shouldProceed) {
+        throw new Error('Operação bloqueada: caixa não está aberto para esta data');
       }
 
       const { data: updateResult, error } = await supabase
@@ -82,10 +83,11 @@ export const useSecureInstallmentMutation = (onSuccess?: () => void) => {
         throw new Error('Parcelamento não encontrado');
       }
 
-      // Validar se o caixa está aberto para a data de criação do parcelamento
-      const validation = await validateCashIsOpen(originalData.created_at);
-      if (!validation.isValid) {
-        throw new Error(validation.message);
+      // ✅ VALIDAÇÃO OBRIGATÓRIA DO CAIXA ANTES DE QUALQUER OPERAÇÃO
+      console.log('🔒 [VALIDAÇÃO OBRIGATÓRIA] Verificando status do caixa para exclusão...');
+      const validation = await checkAndPromptCashOpening(originalData.created_at);
+      if (!validation.shouldProceed) {
+        throw new Error('Operação bloqueada: caixa não está aberto para esta data');
       }
 
       const { error } = await supabase

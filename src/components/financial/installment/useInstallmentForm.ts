@@ -60,16 +60,18 @@ export const useInstallmentForm = (installment: any, onSuccess: () => void) => {
       return;
     }
 
-    // Para novos parcelamentos, verificar se o caixa está aberto ANTES de qualquer processamento
-    if (!installment) {
-      console.log('🔍 Verificando status do caixa antes de criar novo parcelamento...');
-      const validation = await checkAndPromptCashOpening(formData.due_date.toISOString());
-      if (!validation.shouldProceed) {
-        console.log('❌ Criação de parcelamento bloqueada - caixa não está aberto');
-        return;
-      }
-      console.log('✅ Caixa validado - prosseguindo com criação do parcelamento');
+    // ✅ VALIDAÇÃO OBRIGATÓRIA DO CAIXA - SEMPRE VERIFICAR ANTES DE QUALQUER OPERAÇÃO
+    console.log('🔒 [VALIDAÇÃO OBRIGATÓRIA] Verificando status do caixa...');
+    const targetDate = installment ? 
+      (installment.created_at ? installment.created_at.split('T')[0] : formData.due_date.toISOString()) : 
+      formData.due_date.toISOString();
+    
+    const validation = await checkAndPromptCashOpening(targetDate);
+    if (!validation.shouldProceed) {
+      console.log('🚫 [OPERAÇÃO BLOQUEADA] Caixa não está aberto - operação cancelada');
+      return;
     }
+    console.log('✅ [LIBERADO] Caixa validado - prosseguindo com operação');
 
     setLoading(true);
     try {

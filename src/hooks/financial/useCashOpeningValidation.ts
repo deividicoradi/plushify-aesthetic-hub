@@ -15,7 +15,7 @@ export const useCashOpeningValidation = () => {
     // Usar a data atual se não for fornecida
     const targetDate = recordDate ? recordDate.split('T')[0] : new Date().toISOString().split('T')[0];
     
-    console.log('🔍 Verificando status do caixa para a data:', targetDate);
+    console.log('🔍 [VALIDAÇÃO CRÍTICA] Verificando status do caixa para a data:', targetDate);
 
     // PRIMEIRO: Verificar se existe um caixa fechado para esta data
     const { data: closedCash, error: closureError } = await supabase
@@ -26,23 +26,23 @@ export const useCashOpeningValidation = () => {
       .eq('status', 'fechado');
 
     if (closureError) {
-      console.error('❌ Erro ao verificar fechamento do caixa:', closureError);
+      console.error('❌ [ERRO CRÍTICO] Erro ao verificar fechamento do caixa:', closureError);
       toast({
-        title: "Erro",
-        description: "Erro ao verificar status do caixa",
+        title: "Erro crítico",
+        description: "Erro ao verificar status do caixa. Operação bloqueada por segurança.",
         variant: "destructive",
       });
       return { shouldProceed: false };
     }
 
-    // Se encontrou qualquer caixa fechado para esta data, bloquear operação
+    // Se encontrou qualquer caixa fechado para esta data, BLOQUEAR COMPLETAMENTE
     if (closedCash && closedCash.length > 0) {
-      console.log('❌ Caixa está fechado para a data:', targetDate, closedCash);
+      console.log('🚫 [BLOQUEIO TOTAL] Caixa está fechado para a data:', targetDate);
       const dateFormatted = new Date(targetDate + 'T00:00:00').toLocaleDateString('pt-BR');
       
       toast({
-        title: "Caixa fechado",
-        description: `O caixa do dia ${dateFormatted} está fechado. Não é possível criar novos registros para esta data.`,
+        title: "🚫 OPERAÇÃO BLOQUEADA",
+        description: `O caixa do dia ${dateFormatted} está FECHADO. NENHUMA operação financeira é permitida para esta data. Abra o caixa primeiro!`,
         variant: "destructive",
       });
       
@@ -58,32 +58,38 @@ export const useCashOpeningValidation = () => {
       .eq('status', 'aberto');
 
     if (openingError) {
-      console.error('❌ Erro ao verificar abertura do caixa:', openingError);
+      console.error('❌ [ERRO CRÍTICO] Erro ao verificar abertura do caixa:', openingError);
       toast({
-        title: "Erro",
-        description: "Erro ao verificar status do caixa",
+        title: "Erro crítico",
+        description: "Erro ao verificar status do caixa. Operação bloqueada por segurança.",
         variant: "destructive",
       });
       return { shouldProceed: false };
     }
 
-    // Se não há caixa aberto, também bloquear
+    // Se não há caixa aberto, BLOQUEAR COMPLETAMENTE
     if (!openCash || openCash.length === 0) {
-      console.log('❌ Não há caixa aberto para a data:', targetDate);
+      console.log('🚫 [BLOQUEIO TOTAL] Não há caixa aberto para a data:', targetDate);
       const dateFormatted = new Date(targetDate + 'T00:00:00').toLocaleDateString('pt-BR');
       
       toast({
-        title: "Caixa não está aberto",
-        description: `O caixa do dia ${dateFormatted} não está aberto. Abra o caixa antes de registrar pagamentos ou parcelamentos.`,
+        title: "🚫 CAIXA FECHADO",
+        description: `O caixa do dia ${dateFormatted} NÃO ESTÁ ABERTO. É obrigatório abrir o caixa antes de qualquer operação financeira!`,
         variant: "destructive",
       });
       
       return { shouldProceed: false };
     }
 
-    console.log('✅ Caixa está aberto para a data:', targetDate);
+    console.log('✅ [LIBERADO] Caixa está aberto para a data:', targetDate);
     return { shouldProceed: true };
   };
 
-  return { checkAndPromptCashOpening };
+  // Nova função para validar operações de hoje
+  const validateTodayCashStatus = async (): Promise<{ shouldProceed: boolean }> => {
+    const today = new Date().toISOString().split('T')[0];
+    return await checkAndPromptCashOpening(today);
+  };
+
+  return { checkAndPromptCashOpening, validateTodayCashStatus };
 };
