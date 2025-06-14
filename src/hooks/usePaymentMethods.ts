@@ -30,16 +30,16 @@ export const usePaymentMethods = (enabled: boolean = true) => {
         console.log('Nenhum método encontrado, criando métodos padrão...');
         
         const defaultMethods = [
-          { name: 'PIX', type: 'digital' },
-          { name: 'Dinheiro', type: 'cash' },
-          { name: 'Cartão de Débito', type: 'card' },
-          { name: 'Cartão de Crédito', type: 'card' },
-          { name: 'Transferência Bancária', type: 'transfer' },
-          { name: 'Boleto', type: 'slip' },
-          { name: 'Cheque', type: 'check' },
-          { name: 'Vale Alimentação', type: 'voucher' },
-          { name: 'Vale Refeição', type: 'voucher' },
-          { name: 'Outros', type: 'other' }
+          { name: 'PIX', type: 'pix' },
+          { name: 'Dinheiro', type: 'dinheiro' },
+          { name: 'Cartão de Débito', type: 'cartao_debito' },
+          { name: 'Cartão de Crédito', type: 'cartao_credito' },
+          { name: 'Transferência Bancária', type: 'transferencia' },
+          { name: 'Boleto', type: 'boleto' },
+          { name: 'Cheque', type: 'cheque' },
+          { name: 'Vale Alimentação', type: 'vale_alimentacao' },
+          { name: 'Vale Refeição', type: 'vale_refeicao' },
+          { name: 'Outros', type: 'outros' }
         ];
 
         const { data: insertedData, error: insertError } = await supabase
