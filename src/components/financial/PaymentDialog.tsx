@@ -28,21 +28,41 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
   // Verificar status do caixa quando o diálogo abrir
   useEffect(() => {
     if (open && !payment) { // Apenas para novos pagamentos
+      let isCancelled = false;
+      
       const checkCashStatus = async () => {
+        if (isCancelled) return;
+        
         setValidatingCash(true);
-        const status = await validateTodayCashStatus();
-        setCashStatus(status);
-        setValidatingCash(false);
+        try {
+          const status = await validateTodayCashStatus();
+          if (!isCancelled) {
+            setCashStatus(status);
+          }
+        } catch (error) {
+          console.error('Erro ao validar caixa:', error);
+          if (!isCancelled) {
+            setCashStatus({ shouldProceed: false });
+          }
+        } finally {
+          if (!isCancelled) {
+            setValidatingCash(false);
+          }
+        }
       };
       
       checkCashStatus();
+      
+      return () => {
+        isCancelled = true;
+      };
     } else if (open && payment) {
       // Para edições, sempre permitir (a validação será feita no submit)
       setCashStatus({ shouldProceed: true });
     } else {
       setCashStatus(null);
     }
-  }, [open, payment, validateTodayCashStatus]);
+  }, [open, payment]); // Removido validateTodayCashStatus das dependências
 
   // Se está validando ou o caixa está fechado para novos pagamentos
   const isFormBlocked = validatingCash || (cashStatus && !cashStatus.shouldProceed && !payment);
@@ -76,6 +96,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
               <PaymentFormFields
                 formData={formData}
                 onFieldChange={handleChange}
+                disabled={isFormBlocked}
               />
             </div>
           </ScrollArea>

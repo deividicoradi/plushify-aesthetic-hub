@@ -40,21 +40,41 @@ const InstallmentDialog = ({ open, onOpenChange, onSuccess, installment }: Insta
   // Verificar status do caixa quando o diálogo abrir
   useEffect(() => {
     if (open && !installment) { // Apenas para novos parcelamentos
+      let isCancelled = false;
+      
       const checkCashStatus = async () => {
+        if (isCancelled) return;
+        
         setValidatingCash(true);
-        const status = await validateTodayCashStatus();
-        setCashStatus(status);
-        setValidatingCash(false);
+        try {
+          const status = await validateTodayCashStatus();
+          if (!isCancelled) {
+            setCashStatus(status);
+          }
+        } catch (error) {
+          console.error('Erro ao validar caixa:', error);
+          if (!isCancelled) {
+            setCashStatus({ shouldProceed: false });
+          }
+        } finally {
+          if (!isCancelled) {
+            setValidatingCash(false);
+          }
+        }
       };
       
       checkCashStatus();
+      
+      return () => {
+        isCancelled = true;
+      };
     } else if (open && installment) {
       // Para edições, sempre permitir (a validação será feita no submit)
       setCashStatus({ shouldProceed: true });
     } else {
       setCashStatus(null);
     }
-  }, [open, installment, validateTodayCashStatus]);
+  }, [open, installment]); // Removido validateTodayCashStatus das dependências
 
   // Buscar pagamentos que podem ser parcelados
   const { data: payments } = useQuery({
