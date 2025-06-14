@@ -4,42 +4,49 @@ import { Users, CalendarDays, Receipt, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useClientStats } from '@/hooks/useClientStats';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 
 export const DashboardMetrics = () => {
   const navigate = useNavigate();
   const { hasFeature } = useSubscription();
-  const { totalClients, activeClients, newThisMonth, loading } = useClientStats();
+  const { 
+    totalClients, 
+    activeClients, 
+    newThisMonth, 
+    weeklyAppointments,
+    monthlyRevenue,
+    loading 
+  } = useDashboardStats();
 
   const metricItems = [
     {
       title: "Total de Clientes",
       value: loading ? "..." : totalClients.toLocaleString(),
-      trend: "+12.3%",
+      trend: newThisMonth > 0 && totalClients > 0 ? `+${((newThisMonth / totalClients) * 100).toFixed(1)}%` : "+0%",
       icon: Users,
       description: "Últimos 30 dias",
       to: "/clients",
-      color: "from-[#9b87f5] to-[#7E69AB]",
+      color: "from-pink-500 via-rose-500 to-red-500",
       clickable: true,
     },
     {
       title: "Agendamentos",
-      value: "156",
-      trend: "+8.2%",
+      value: loading ? "..." : weeklyAppointments.toLocaleString(),
+      trend: weeklyAppointments > 10 ? "+Alta" : weeklyAppointments > 0 ? "+Baixa" : "Nenhum",
       icon: CalendarDays,
       description: "Esta semana",
       to: "/appointments",
-      color: "from-[#6E59A5] to-[#9b87f5]",
+      color: "from-cyan-500 via-blue-500 to-indigo-600",
       clickable: true,
     },
     {
       title: "Receita",
-      value: "R$ 15.290",
-      trend: "+23.1%",
+      value: loading ? "..." : `R$ ${monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      trend: monthlyRevenue > 1000 ? "+23.1%" : monthlyRevenue > 0 ? "+5.0%" : "+0%",
       icon: Receipt,
       description: "Este mês",
       to: hasFeature('pro') ? "/financial" : "/planos",
-      color: "from-[#8B5CF6] to-[#D6BCFA]",
+      color: "from-emerald-500 via-green-500 to-teal-600",
       clickable: true,
     },
     {
@@ -49,7 +56,7 @@ export const DashboardMetrics = () => {
       icon: TrendingUp,
       description: hasFeature('pro') ? "Análises avançadas" : "Upgrade para Pro",
       to: hasFeature('pro') ? "/reports" : "/planos",
-      color: "from-[#33C3F0] to-[#9b87f5]",
+      color: "from-violet-500 via-purple-500 to-indigo-600",
       clickable: true,
     },
   ];
