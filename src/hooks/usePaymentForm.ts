@@ -35,7 +35,7 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      console.log('Dados sendo enviados:', data);
+      console.log('Dados sendo enviados para pagamento:', data);
       
       let result;
       if (payment) {
@@ -47,7 +47,7 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
           .single();
         
         if (error) {
-          console.error('Erro ao atualizar:', error);
+          console.error('Erro ao atualizar pagamento:', error);
           throw error;
         }
         result = updateResult;
@@ -59,7 +59,7 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
           .single();
         
         if (error) {
-          console.error('Erro ao inserir:', error);
+          console.error('Erro ao inserir pagamento:', error);
           throw error;
         }
         result = insertResult;
@@ -68,11 +68,11 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       return result;
     },
     onSuccess: async (result) => {
-      console.log('💰 Pagamento salvo:', result);
+      console.log('💰 Pagamento salvo com sucesso:', result);
 
       // Se o pagamento foi marcado como pago e tem valor pago, atualizar o caixa
       if (result.status === 'pago' && Number(result.paid_amount) > 0) {
-        console.log('🔄 Atualizando caixa com pagamento recebido...');
+        console.log('🔄 Iniciando atualização do caixa...');
         
         try {
           await updateCashFromPayment.mutateAsync({
@@ -80,10 +80,18 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
             paymentMethodId: result.payment_method_id,
             description: result.description || 'Pagamento recebido'
           });
+          console.log('✅ Caixa atualizado com sucesso!');
         } catch (error) {
-          console.error('Erro ao atualizar caixa:', error);
+          console.error('❌ Erro ao atualizar caixa:', error);
           // Não falhar a operação principal se houver erro no caixa
+          toast({
+            title: "Atenção",
+            description: "Pagamento salvo, mas houve erro ao atualizar o caixa. Verifique manualmente.",
+            variant: "destructive",
+          });
         }
+      } else {
+        console.log('ℹ️ Pagamento não está marcado como pago ou não tem valor pago - caixa não será atualizado');
       }
 
       queryClient.invalidateQueries({ queryKey: ['payments'] });
@@ -108,7 +116,7 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       console.error('Erro completo:', error);
       toast({
         title: "Erro",
-        description: 'Erro ao salvar pagamento',
+        description: 'Erro ao salvar pagamento: ' + (error.message || 'Erro desconhecido'),
         variant: "destructive",
       });
     },
@@ -161,7 +169,7 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       payment_date: formData.status === 'pago' ? new Date().toISOString() : null
     };
 
-    console.log('Submetendo dados:', dataToSubmit);
+    console.log('Submetendo dados do pagamento:', dataToSubmit);
     mutation.mutate(dataToSubmit);
   };
 
