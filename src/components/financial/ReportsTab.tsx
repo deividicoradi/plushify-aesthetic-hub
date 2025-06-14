@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
 import { generateFinancialReport } from '@/utils/pdfReports';
+import { Payment, Installment } from '@/utils/reports/types';
 
 const ReportsTab = () => {
   const { user } = useAuth();
@@ -31,18 +32,18 @@ const ReportsTab = () => {
 
       console.log('🔍 Buscando dados do relatório para o período:', { fromDate, toDate });
 
-      // Buscar pagamentos realizados (status = 'pago') usando payment_date para filtro temporal
+      // Buscar todos os pagamentos (incluindo pagos) para o período
       const { data: payments, error: paymentsError } = await supabase
         .from('payments')
         .select(`
           *,
-          payment_methods(name, type)
+          payment_methods(name, type),
+          clients(name)
         `)
         .eq('user_id', user?.id)
-        .eq('status', 'pago')
-        .gte('payment_date', fromDate)
-        .lte('payment_date', toDate)
-        .not('payment_date', 'is', null);
+        .or('status.eq.pago,status.eq.parcial')
+        .or(`payment_date.gte.${fromDate},created_at.gte.${fromDate}`)
+        .or(`payment_date.lte.${toDate},created_at.lte.${toDate}`);
 
       console.log('💰 Pagamentos encontrados:', payments);
       if (paymentsError) {
@@ -65,27 +66,33 @@ const ReportsTab = () => {
       }
 
       // Processar pagamentos excluídos para incluir no relatório
-      const processedDeletedPayments = deletedPayments?.map(log => {
-        // Garantir que old_data é um objeto válido
-        const oldData = log.old_data && typeof log.old_data === 'object' ? log.old_data : {};
+      const processedDeletedPayments: Payment[] = deletedPayments?.map(log => {
+        const oldData = log.old_data && typeof log.old_data === 'object' && log.old_data !== null ? log.old_data as any : {};
         return {
-          ...oldData,
+          id: oldData.id || log.record_id,
+          description: oldData.description || 'Pagamento excluído',
+          amount: Number(oldData.amount || 0),
+          paid_amount: Number(oldData.paid_amount || 0),
+          status: 'excluido',
+          created_at: log.created_at,
           _deleted: true,
           _deleted_at: log.created_at,
-          _deleted_reason: log.reason
+          _deleted_reason: log.reason || 'Sem motivo informado'
         };
       }) || [];
 
-      // Buscar parcelamentos do período
+      // Buscar parcelamentos do período (pagos e pendentes)
       const { data: installments } = await supabase
         .from('installments')
         .select(`
           *,
-          payments(description, payment_methods(name))
+          payments(description, payment_methods(name), clients(name))
         `)
         .eq('user_id', user?.id)
-        .gte('due_date', fromDate)
-        .lte('due_date', toDate);
+        .or(`payment_date.gte.${fromDate},due_date.gte.${fromDate}`)
+        .or(`payment_date.lte.${toDate},due_date.lte.${toDate}`);
+
+      console.log('📊 Parcelamentos encontrados:', installments?.length || 0);
 
       // Buscar despesas
       const { data: expenses } = await supabase
@@ -111,8 +118,13 @@ const ReportsTab = () => {
         console.error('❌ Erro ao buscar fechamentos:', cashClosuresError);
       }
 
+      const allPayments: Payment[] = [
+        ...(payments || []).map(p => ({ ...p, clients: p.clients })),
+        ...processedDeletedPayments
+      ];
+
       return {
-        payments: [...(payments || []), ...processedDeletedPayments],
+        payments: allPayments,
         installments: installments || [],
         expenses: expenses || [],
         cashClosures: cashClosures || [],
@@ -178,7 +190,7 @@ const ReportsTab = () => {
   const totalReceitasFromPayments = reportData?.payments.reduce((sum, p) => {
     // Não contar pagamentos excluídos no total de receitas
     if (p._deleted) return sum;
-    const amount = Number(p.paid_amount) || 0;
+    const amount = Number(p.paid_amount || p.amount) || 0;
     console.log('💵 Adicionando ao total de receitas (pagamento):', amount);
     return sum + amount;
   }, 0) || 0;
@@ -419,7 +431,7 @@ const ReportsTab = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {reportData.payments.slice(0, 5).map((payment: any) => (
+                  {reportData.payments.slice(0, 5).map((payment: Payment) => (
                     <div key={payment.id} className="flex justify-between items-center p-2 border rounded">
                       <div>
                         <div className="font-medium flex items-center gap-2">
@@ -447,6 +459,44 @@ const ReportsTab = () => {
                   {reportData.payments.length > 5 && (
                     <div className="text-sm text-muted-foreground text-center">
                       +{reportData.payments.length - 5} mais...
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {reportType === 'consolidado' || reportType === 'parcelamentos' ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Parcelamentos ({reportData.installments.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {reportData.installments.slice(0, 5).map((installment: Installment) => (
+                    <div key={installment.id} className="flex justify-between items-center p-2 border rounded">
+                      <div>
+                        <div className="font-medium">
+                          {installment.payments?.description || 'Parcelamento'} - 
+                          Parcela {installment.installment_number}/{installment.total_installments}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Status: {installment.status === 'pago' ? 'Pago' : 'Pendente'}
+                          {installment.payment_date && (
+                            <span className="block">
+                              Pago em: {format(new Date(installment.payment_date), 'dd/MM/yyyy', { locale: ptBR })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <Badge variant={installment.status === 'pago' ? "default" : "secondary"}>
+                        {formatCurrency(Number(installment.amount))}
+                      </Badge>
+                    </div>
+                  ))}
+                  {reportData.installments.length > 5 && (
+                    <div className="text-sm text-muted-foreground text-center">
+                      +{reportData.installments.length - 5} mais...
                     </div>
                   )}
                 </div>

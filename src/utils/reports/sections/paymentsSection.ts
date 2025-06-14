@@ -21,12 +21,18 @@ export const addPaymentsSection = (doc: jsPDF, data: ReportData, yPosition: numb
 
   if (data.payments.length > 0) {
     const paymentsData = data.payments.map(payment => [
-      payment._deleted ? 'EXCLUÍDO' : formatDate(payment.created_at),
+      payment._deleted ? 'EXCLUÍDO' : 
+      payment.payment_date ? formatDate(payment.payment_date) : 
+      formatDate(payment.created_at),
       payment.description || 'N/A',
       payment.clients?.name || 'N/A',
       payment.payment_methods?.name || 'N/A',
       formatCurrency(Number(payment.paid_amount || payment.amount)),
-      payment._deleted ? 'Excluído' : payment.status,
+      payment._deleted ? 'Excluído' : 
+      payment.status === 'pago' ? 'Pago' :
+      payment.status === 'parcial' ? 'Parcial' :
+      payment.status === 'pendente' ? 'Pendente' : 
+      payment.status,
       payment._deleted && payment._deleted_reason ? payment._deleted_reason : ''
     ]);
 
@@ -42,11 +48,23 @@ export const addPaymentsSection = (doc: jsPDF, data: ReportData, yPosition: numb
         6: { cellWidth: 30 } // Observações column
       },
       didParseCell: function(data) {
-        // Destacar linhas de pagamentos excluídos
         const rowData = paymentsData[data.row.index];
-        if (rowData && rowData[0] === 'EXCLUÍDO') {
-          data.cell.styles.fillColor = [255, 235, 235]; // Light red background
-          data.cell.styles.textColor = [150, 50, 50]; // Dark red text
+        if (rowData) {
+          // Destacar linhas de pagamentos excluídos
+          if (rowData[0] === 'EXCLUÍDO') {
+            data.cell.styles.fillColor = [255, 235, 235]; // Light red background
+            data.cell.styles.textColor = [150, 50, 50]; // Dark red text
+          }
+          // Destacar pagamentos pagos
+          else if (rowData[5] === 'Pago') {
+            data.cell.styles.fillColor = [230, 255, 230]; // Light green background
+            data.cell.styles.textColor = [50, 150, 50]; // Dark green text
+          }
+          // Destacar pagamentos parciais
+          else if (rowData[5] === 'Parcial') {
+            data.cell.styles.fillColor = [255, 248, 220]; // Light orange background
+            data.cell.styles.textColor = [150, 100, 50]; // Dark orange text
+          }
         }
       }
     });
