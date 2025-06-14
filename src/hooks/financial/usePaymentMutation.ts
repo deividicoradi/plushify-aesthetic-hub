@@ -75,12 +75,12 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
         console.log('📝 Criando parcelamento automático para pagamento parcial...');
         
         try {
-          await createInstallmentsForPartialPayment(result);
-          console.log('✅ Parcelamento automático criado com sucesso!');
+          const newInstallment = await createInstallmentsForPartialPayment(result);
+          console.log('✅ Parcelamento automático criado com sucesso:', newInstallment);
           
           toast({
             title: "Parcelamento criado!",
-            description: "O valor restante foi automaticamente registrado em Parcelamentos.",
+            description: `O valor restante de R$ ${(Number(result.amount) - Number(result.paid_amount)).toFixed(2)} foi registrado em Parcelamentos.`,
           });
         } catch (error) {
           console.error('❌ Erro ao criar parcelamento automático:', error);
@@ -94,15 +94,21 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
 
       // Invalidar todas as queries relacionadas para atualizar as telas
       console.log('🔄 Invalidando queries...');
+      
+      // Aguardar um pouco para garantir que o banco de dados foi atualizado
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['payments'] }),
         queryClient.invalidateQueries({ queryKey: ['payment-methods'] }),
         queryClient.invalidateQueries({ queryKey: ['installments'] }),
         queryClient.invalidateQueries({ queryKey: ['payments-for-installments'] }),
-        queryClient.invalidateQueries({ queryKey: ['clients-for-installments'] })
+        queryClient.invalidateQueries({ queryKey: ['clients-for-installments'] }),
+        queryClient.refetchQueries({ queryKey: ['installments'] }),
+        queryClient.refetchQueries({ queryKey: ['payments-for-installments'] })
       ]);
       
-      console.log('✅ Todas as queries foram invalidadas');
+      console.log('✅ Todas as queries foram invalidadas e refetchadas');
       
       toast({
         title: "Sucesso!",

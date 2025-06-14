@@ -18,7 +18,7 @@ export const usePaymentInstallments = () => {
     
     if (remainingAmount <= 0) {
       console.log('⚠️ Valor restante é zero ou negativo, não criando parcelamento');
-      return;
+      return null;
     }
 
     // Criar uma parcela para o valor restante
@@ -33,7 +33,7 @@ export const usePaymentInstallments = () => {
       amount: remainingAmount,
       due_date: dueDate.toISOString(),
       status: 'pendente',
-      notes: `Valor restante do pagamento: ${paymentData.description}`
+      notes: `Valor restante do pagamento: ${paymentData.description || 'Pagamento parcial'}`
     };
 
     console.log('💾 Inserindo parcelamento:', installment);

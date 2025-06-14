@@ -21,14 +21,16 @@ export const useInstallmentsData = () => {
         throw error;
       }
       
-      console.log('📋 Parcelamentos encontrados:', data?.length || 0);
-      return data;
+      console.log('📋 Parcelamentos encontrados:', data?.length || 0, data);
+      return data || [];
     },
     enabled: !!user?.id,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   // Buscar dados dos pagamentos com informações dos clientes
-  const { data: payments } = useQuery({
+  const { data: payments, refetch: refetchPayments } = useQuery({
     queryKey: ['payments-for-installments', user?.id],
     queryFn: async () => {
       console.log('🔍 Buscando pagamentos para parcelamentos');
@@ -50,13 +52,13 @@ export const useInstallmentsData = () => {
       }
       
       console.log('💰 Pagamentos encontrados:', data?.length || 0);
-      return data;
+      return data || [];
     },
     enabled: !!user?.id,
   });
 
   // Buscar dados dos clientes
-  const { data: clients } = useQuery({
+  const { data: clients, refetch: refetchClients } = useQuery({
     queryKey: ['clients-for-installments', user?.id],
     queryFn: async () => {
       console.log('🔍 Buscando clientes para parcelamentos');
@@ -71,7 +73,7 @@ export const useInstallmentsData = () => {
       }
       
       console.log('👥 Clientes encontrados:', data?.length || 0);
-      return data;
+      return data || [];
     },
     enabled: !!user?.id,
   });
@@ -109,10 +111,17 @@ export const useInstallmentsData = () => {
 
   console.log('📊 Parcelamentos agrupados:', Object.keys(groupedInstallments || {}).length, 'grupos');
 
+  const refetchAll = () => {
+    console.log('🔄 Refazendo busca de todos os dados de parcelamentos...');
+    refetch();
+    refetchPayments();
+    refetchClients();
+  };
+
   return {
     installments,
     groupedInstallments,
     isLoading,
-    refetch
+    refetch: refetchAll
   };
 };
