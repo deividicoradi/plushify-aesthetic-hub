@@ -15,9 +15,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const currentPlan = getCurrentPlanInfo();
 
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
       {/* Header with sidebar trigger - mais compacto */}
-      <header className="flex items-center gap-4 border-b bg-background px-4 py-2">
+      <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-2">
         <SidebarTrigger />
         <div className="flex-1">
           <DashboardHeader />
@@ -25,7 +25,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       </header>
 
       {/* Main content com espaçamento reduzido */}
-      <main className="flex-1 p-4 space-y-4">
+      <main className="flex-1 p-4 space-y-4 bg-background">
         <PlanInfoBanner currentPlan={currentPlan} isSubscribed={isSubscribed} />
         <DashboardContent />
         {children}

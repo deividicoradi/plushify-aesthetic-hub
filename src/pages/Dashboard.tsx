@@ -7,9 +7,9 @@ import { DashboardContent } from '@/components/dashboard/DashboardContent';
 const Dashboard = () => {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full bg-background text-foreground">
         <AppSidebar />
-        <SidebarInset className="flex-1">
+        <SidebarInset className="flex-1 bg-background">
           <div className="p-6">
             <DashboardContent />
           </div>
