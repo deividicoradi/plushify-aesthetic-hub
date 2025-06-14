@@ -32,9 +32,11 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
   });
 
   // Buscar métodos de pagamento do banco de dados
-  const { data: paymentMethods } = useQuery({
+  const { data: paymentMethods, error: paymentMethodsError } = useQuery({
     queryKey: ['payment-methods', user?.id],
     queryFn: async () => {
+      console.log('Buscando métodos de pagamento para usuário:', user?.id);
+      
       const { data, error } = await supabase
         .from('payment_methods')
         .select('*')
@@ -42,11 +44,59 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
         .eq('active', true)
         .order('name');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar métodos de pagamento:', error);
+        throw error;
+      }
+      
+      console.log('Métodos de pagamento encontrados:', data);
+      
+      // Se não há métodos, criar os padrão
+      if (!data || data.length === 0) {
+        console.log('Nenhum método encontrado, criando métodos padrão...');
+        
+        const defaultMethods = [
+          { name: 'PIX', type: 'digital' },
+          { name: 'Dinheiro', type: 'cash' },
+          { name: 'Cartão de Débito', type: 'card' },
+          { name: 'Cartão de Crédito', type: 'card' },
+          { name: 'Transferência Bancária', type: 'transfer' },
+          { name: 'Boleto', type: 'slip' },
+          { name: 'Cheque', type: 'check' },
+          { name: 'Vale Alimentação', type: 'voucher' },
+          { name: 'Vale Refeição', type: 'voucher' },
+          { name: 'Outros', type: 'other' }
+        ];
+
+        const { data: insertedData, error: insertError } = await supabase
+          .from('payment_methods')
+          .insert(
+            defaultMethods.map(method => ({
+              user_id: user?.id,
+              name: method.name,
+              type: method.type
+            }))
+          )
+          .select();
+
+        if (insertError) {
+          console.error('Erro ao criar métodos padrão:', insertError);
+          throw insertError;
+        }
+
+        console.log('Métodos padrão criados:', insertedData);
+        return insertedData;
+      }
+      
       return data;
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && open,
   });
+
+  // Log de erro se houver
+  if (paymentMethodsError) {
+    console.error('Erro na query de métodos de pagamento:', paymentMethodsError);
+  }
 
   const { data: clients } = useQuery({
     queryKey: ['clients', user?.id],
@@ -88,6 +138,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
+      queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
       toast.success(payment ? 'Pagamento atualizado!' : 'Pagamento criado!');
       onOpenChange(false);
       setFormData({
@@ -190,11 +241,17 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
                 <SelectValue placeholder="Selecione o método" />
               </SelectTrigger>
               <SelectContent>
-                {paymentMethods?.map((method) => (
-                  <SelectItem key={method.id} value={method.id}>
-                    {method.name}
+                {paymentMethods && paymentMethods.length > 0 ? (
+                  paymentMethods.map((method) => (
+                    <SelectItem key={method.id} value={method.id}>
+                      {method.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="" disabled>
+                    Carregando métodos de pagamento...
                   </SelectItem>
-                ))}
+                )}
               </SelectContent>
             </Select>
           </div>
