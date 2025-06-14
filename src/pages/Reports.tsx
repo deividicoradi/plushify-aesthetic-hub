@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Users, CalendarDays, Receipt, Package, AlertTriangle, BarChart3, PieChart, Activity } from 'lucide-react';
 import { MetricCard } from '@/components/reports/MetricCard';
 import { MonthlyChart } from '@/components/reports/MonthlyChart';
@@ -13,7 +14,12 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/s
 import { AppSidebar } from '@/components/AppSidebar';
 
 const Reports = () => {
+  const navigate = useNavigate();
   const { metrics, monthlyData, revenueByCategory, loading, error, refetch } = useReportsData();
+
+  const handleCardClick = (route: string) => {
+    navigate(route);
+  };
 
   if (error) {
     return (
@@ -97,6 +103,7 @@ const Reports = () => {
                   description="Clientes cadastrados"
                   colorClass="bg-emerald-600"
                   loading={loading}
+                  onClick={() => handleCardClick('/clients')}
                 />
 
                 <MetricCard
@@ -107,6 +114,7 @@ const Reports = () => {
                   description="Receita acumulada"
                   colorClass="bg-blue-600"
                   loading={loading}
+                  onClick={() => handleCardClick('/financial')}
                 />
 
                 <MetricCard
@@ -117,6 +125,7 @@ const Reports = () => {
                   description="Total de agendamentos"
                   colorClass="bg-purple-600"
                   loading={loading}
+                  onClick={() => handleCardClick('/appointments')}
                 />
 
                 <MetricCard
@@ -126,6 +135,7 @@ const Reports = () => {
                   description={`${metrics?.lowStockProducts || 0} com estoque baixo`}
                   colorClass="bg-orange-600"
                   loading={loading}
+                  onClick={() => handleCardClick('/inventory')}
                 />
               </div>
 
