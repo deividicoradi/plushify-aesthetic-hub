@@ -31,8 +31,10 @@ const ClientList: React.FC<{
   filters: {
     status: string;
     lastVisit: string;
-  }
-}> = ({ filters }) => {
+  };
+  searchTerm: string;
+  onClientUpdate: () => void;
+}> = ({ filters, searchTerm, onClientUpdate }) => {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -47,6 +49,7 @@ const ClientList: React.FC<{
       let query = supabase
         .from('clients')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       // Apply status filter
@@ -58,16 +61,26 @@ const ClientList: React.FC<{
 
       if (error) throw error;
 
+      // Apply search filter
+      let filteredData = data || [];
+      if (searchTerm.trim()) {
+        filteredData = filteredData.filter(client => 
+          client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (client.phone && client.phone.includes(searchTerm))
+        );
+      }
+
       // Explicitly cast the data to match our Client type
-      setClients(data?.map(client => ({
+      setClients(filteredData.map(client => ({
         id: client.id,
         name: client.name,
         email: client.email,
         phone: client.phone,
-        status: client.status || 'Ativo', // Ensure status is not null
+        status: client.status || 'Ativo',
         created_at: client.created_at,
         last_visit: client.last_visit
-      })) || []);
+      })));
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -81,7 +94,7 @@ const ClientList: React.FC<{
 
   useEffect(() => {
     fetchClients();
-  }, [user, filters]);
+  }, [user, filters, searchTerm]);
 
   const handleEditClient = (client: Client) => {
     setSelectedClient(client);
@@ -105,6 +118,7 @@ const ClientList: React.FC<{
       });
       
       fetchClients();
+      onClientUpdate(); // Update stats
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -112,6 +126,11 @@ const ClientList: React.FC<{
         variant: "destructive"
       });
     }
+  };
+
+  const handleClientUpdated = () => {
+    fetchClients();
+    onClientUpdate(); // Update stats
   };
 
   const getInitials = (name: string) => {
@@ -146,7 +165,7 @@ const ClientList: React.FC<{
             {clients.length === 0 && (
               <TableRow className="border-b border-border">
                 <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  Nenhum cliente encontrado com os filtros selecionados.
+                  {searchTerm.trim() ? `Nenhum cliente encontrado para "${searchTerm}"` : 'Nenhum cliente encontrado com os filtros selecionados.'}
                 </TableCell>
               </TableRow>
             )}
@@ -212,7 +231,7 @@ const ClientList: React.FC<{
         client={selectedClient}
         open={isEditDrawerOpen}
         onOpenChange={setIsEditDrawerOpen}
-        onSuccess={fetchClients}
+        onSuccess={handleClientUpdated}
       />
     </>
   );
