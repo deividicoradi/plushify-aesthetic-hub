@@ -37,7 +37,7 @@
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 100%;
+    --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 10% 3.9%;
     --sidebar-primary: 346 77% 49.8%;
     --sidebar-primary-foreground: 355.7 100% 97.3%;
@@ -76,11 +76,11 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 346 77% 49.8%;
 
-    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-background: 222.2 84% 3.9%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 346 77% 49.8%;
     --sidebar-primary-foreground: 355.7 100% 97.3%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent: 217.2 32.6% 15.5%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 346 77% 49.8%;
@@ -125,6 +125,20 @@
   
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Modern sidebar styles */
+  [data-sidebar="sidebar"] {
+    @apply bg-sidebar-background text-sidebar-foreground;
+  }
+
+  [data-sidebar="menu-button"][data-active="true"] {
+    @apply bg-sidebar-accent/80 text-sidebar-accent-foreground font-medium;
+    @apply border-l-2 border-primary ml-0 pl-3;
+  }
+
+  [data-sidebar="menu-button"]:hover:not([data-active="true"]) {
+    @apply bg-sidebar-accent/50 text-sidebar-accent-foreground;
   }
 
   /* Background gradients that adapt to theme */
@@ -177,4 +191,9 @@
 
 .animate-glow {
   animation: glow 2s ease-in-out infinite;
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
