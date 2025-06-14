@@ -14,7 +14,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDes
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Archive } from "lucide-react";
+import { Package, Barcode, Tag, Archive } from "lucide-react";
 
 type ProductFormData = {
   name: string;
@@ -26,6 +26,7 @@ type ProductFormData = {
 export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const { user } = useAuth();
   const [categories, setCategories] = useState<string[]>([]);
+  const [customCategory, setCustomCategory] = useState("");
   
   const form = useForm<ProductFormData>({
     defaultValues: {
@@ -71,11 +72,18 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
+      const finalCategory = customCategory || data.category;
+      
+      if (!finalCategory) {
+        toast.error("Por favor, selecione ou digite uma categoria");
+        return;
+      }
+
       const { error } = await supabase
         .from('products')
         .insert({
           name: data.name,
-          category: data.category,
+          category: finalCategory,
           min_stock: data.minStock,
           barcode: data.barcode || null,
           user_id: user?.id
@@ -85,6 +93,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
       toast.success("Produto adicionado com sucesso!");
       form.reset();
+      setCustomCategory("");
       onSuccess();
     } catch (error: any) {
       toast.error("Erro ao adicionar produto: " + error.message);
@@ -92,102 +101,152 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do Produto</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ex: Esmalte Rosa" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 pb-4 border-b">
+        <div className="p-2 bg-primary/10 rounded-lg">
+          <Package className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h3 className="font-semibold text-lg">Novo Produto</h3>
+          <p className="text-sm text-muted-foreground">Adicione um novo produto ao seu estoque</p>
+        </div>
+      </div>
 
-        <FormField
-          control={form.control}
-          name="barcode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Código de Barras</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ex: 7891234567890" />
-              </FormControl>
-              <FormDescription>
-                Opcional. Pode ser escaneado utilizando a câmera do dispositivo.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <FormField
+            control={form.control}
+            name="name"
+            rules={{ required: "Nome do produto é obrigatório" }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  Nome do Produto
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    placeholder="Ex: Esmalte Rosa"
+                    className="h-11"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoria</FormLabel>
-              <div className="flex gap-2">
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione uma categoria" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
-                  placeholder="Ou digite uma nova"
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      field.onChange(e.target.value);
-                    }
-                  }}
-                  className="w-1/2"
-                />
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="barcode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Barcode className="w-4 h-4" />
+                  Código de Barras
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    placeholder="Ex: 7891234567890"
+                    className="h-11"
+                  />
+                </FormControl>
+                <FormDescription>
+                  Opcional. Pode ser escaneado utilizando a câmera do dispositivo.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="minStock"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                <div className="flex items-center gap-1">
-                  <Archive className="h-4 w-4 text-muted-foreground" />
-                  <span>Estoque Mínimo</span>
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  Categoria
+                </FormLabel>
+                <div className="space-y-3">
+                  <Select
+                    value={customCategory ? "" : field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setCustomCategory("");
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <div className="relative">
+                    <Input
+                      placeholder="Ou digite uma nova categoria"
+                      value={customCategory}
+                      onChange={(e) => {
+                        setCustomCategory(e.target.value);
+                        if (e.target.value) {
+                          field.onChange("");
+                        }
+                      }}
+                      className="h-11"
+                    />
+                  </div>
                 </div>
-              </FormLabel>
-              <FormControl>
-                <Input {...field} type="number" min="0" />
-              </FormControl>
-              <FormDescription>
-                Você será alertado quando o estoque estiver abaixo deste valor
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button type="submit" className="w-full">Adicionar Produto</Button>
-      </form>
-    </Form>
+          <FormField
+            control={form.control}
+            name="minStock"
+            rules={{ 
+              required: "Estoque mínimo é obrigatório",
+              min: { value: 0, message: "Valor deve ser maior ou igual a 0" }
+            }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Archive className="w-4 h-4" />
+                  Estoque Mínimo
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    type="number" 
+                    min="0"
+                    className="h-11"
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Você será alertado quando o estoque estiver abaixo deste valor
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="pt-4">
+            <Button type="submit" className="w-full h-11 font-medium">
+              Adicionar Produto
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 };
