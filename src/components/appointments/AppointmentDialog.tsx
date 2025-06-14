@@ -101,6 +101,8 @@ const AppointmentDialog = ({
 
   const onSubmit = (data: FormValues) => {
     try {
+      console.log('Dados do formulário:', data);
+      
       // Garantir que todos os campos obrigatórios estão presentes
       const appointmentData = {
         client: data.client,
@@ -111,6 +113,8 @@ const AppointmentDialog = ({
         ...(isEditing && { id: appointment.id })
       };
       
+      console.log('Dados do agendamento preparados:', appointmentData);
+      
       onSave(appointmentData);
       onOpenChange(false);
       toast({
@@ -118,6 +122,7 @@ const AppointmentDialog = ({
         description: `O agendamento foi ${isEditing ? "atualizado" : "criado"} com sucesso.`,
       });
     } catch (error) {
+      console.error('Erro no onSubmit:', error);
       toast({
         title: "Erro",
         description: `Ocorreu um erro ao ${isEditing ? "atualizar" : "criar"} o agendamento.`,
