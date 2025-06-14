@@ -30,7 +30,7 @@ export const useReportsMetrics = () => {
       setLoading(true);
       setError(null);
 
-      console.log('🔍 Buscando métricas para usuário:', user.id);
+      console.log('🔍 Buscando métricas para relatórios - usuário:', user.id);
 
       const currentMonth = new Date();
       const lastMonth = new Date();
@@ -57,17 +57,17 @@ export const useReportsMetrics = () => {
         lastMonthAppointmentsResult
       ] = await Promise.all([
         supabase.from('clients').select('id').eq('user_id', user.id),
-        // Buscar apenas pagamentos com status 'pago' e somar o paid_amount
-        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago'),
+        // Buscar todos os pagamentos primeiro, filtraremos por status depois
+        supabase.from('payments').select('paid_amount, status').eq('user_id', user.id),
         supabase.from('appointments').select('id').eq('user_id', user.id),
         supabase.from('products').select('id, stock, min_stock').eq('user_id', user.id),
         
         // Buscar fechamentos de caixa
         supabase.from('cash_closures').select('total_income').eq('user_id', user.id),
         
-        // Métricas do mês atual - apenas pagamentos realizados
-        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('payment_date', currentMonthStart.toISOString()),
-        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('payment_date', lastMonthStart.toISOString()).lte('payment_date', lastMonthEnd.toISOString()),
+        // Métricas do mês atual - buscar todos e filtrar depois
+        supabase.from('payments').select('paid_amount, status, payment_date').eq('user_id', user.id).gte('payment_date', currentMonthStart.toISOString()),
+        supabase.from('payments').select('paid_amount, status, payment_date').eq('user_id', user.id).gte('payment_date', lastMonthStart.toISOString()).lte('payment_date', lastMonthEnd.toISOString()),
         
         // Fechamentos de caixa do mês atual e anterior
         supabase.from('cash_closures').select('total_income').eq('user_id', user.id).gte('closure_date', currentMonthStart.toISOString().split('T')[0]),
@@ -80,13 +80,20 @@ export const useReportsMetrics = () => {
         supabase.from('appointments').select('id').eq('user_id', user.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString())
       ]);
 
-      console.log('📊 Dados dos pagamentos recebidos:', paymentsResult.data);
-      console.log('💰 Dados dos fechamentos de caixa:', cashClosuresResult.data);
+      console.log('📊 Dados dos pagamentos para relatórios:', paymentsResult.data);
+      console.log('💰 Dados dos fechamentos de caixa para relatórios:', cashClosuresResult.data);
+
+      if (paymentsResult.error) {
+        console.error('❌ Erro ao buscar pagamentos:', paymentsResult.error);
+      }
+      if (cashClosuresResult.error) {
+        console.error('❌ Erro ao buscar fechamentos:', cashClosuresResult.error);
+      }
 
       const totalClients = clientsResult.data?.length || 0;
       
       // Somar paid_amount dos pagamentos com status 'pago'
-      const totalRevenueFromPayments = paymentsResult.data?.reduce((sum, payment) => {
+      const totalRevenueFromPayments = paymentsResult.data?.filter(p => p.status === 'pago').reduce((sum, payment) => {
         const amount = Number(payment.paid_amount) || 0;
         console.log('💰 Somando valor pago:', amount);
         return sum + amount;
@@ -102,15 +109,15 @@ export const useReportsMetrics = () => {
       // Total de receitas combinando pagamentos e fechamentos
       const totalRevenue = totalRevenueFromPayments + totalRevenueFromCashClosures;
       
-      console.log('💵 Receita total calculada:', totalRevenue);
+      console.log('💵 Receita total calculada para relatórios:', totalRevenue);
       
       const totalAppointments = appointmentsResult.data?.length || 0;
       const totalProducts = productsResult.data?.length || 0;
       const lowStockProducts = productsResult.data?.filter(p => p.stock <= p.min_stock).length || 0;
 
       // Calcular crescimento incluindo fechamentos de caixa
-      const currentMonthRevenueFromPayments = currentMonthPaymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
-      const lastMonthRevenueFromPayments = lastMonthPaymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
+      const currentMonthRevenueFromPayments = currentMonthPaymentsResult.data?.filter(p => p.status === 'pago').reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
+      const lastMonthRevenueFromPayments = lastMonthPaymentsResult.data?.filter(p => p.status === 'pago').reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
 
       const currentMonthRevenueFromCashClosures = currentMonthCashClosuresResult.data?.reduce((sum, closure) => sum + Number(closure.total_income), 0) || 0;
       const lastMonthRevenueFromCashClosures = lastMonthCashClosuresResult.data?.reduce((sum, closure) => sum + Number(closure.total_income), 0) || 0;
@@ -139,11 +146,11 @@ export const useReportsMetrics = () => {
         appointmentsGrowth
       };
 
-      console.log('📈 Métricas finais:', finalMetrics);
+      console.log('📈 Métricas finais para relatórios:', finalMetrics);
       setMetrics(finalMetrics);
 
     } catch (err: any) {
-      console.error('❌ Erro ao buscar métricas:', err);
+      console.error('❌ Erro ao buscar métricas para relatórios:', err);
       setError(err.message);
     } finally {
       setLoading(false);

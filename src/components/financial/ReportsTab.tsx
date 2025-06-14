@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +33,7 @@ const ReportsTab = () => {
       console.log('🔍 Buscando dados do relatório para o período:', { fromDate, toDate });
 
       // Buscar pagamentos realizados (status = 'pago') usando payment_date para filtro temporal
-      const { data: payments } = await supabase
+      const { data: payments, error: paymentsError } = await supabase
         .from('payments')
         .select(`
           *,
@@ -46,6 +47,9 @@ const ReportsTab = () => {
         .not('payment_date', 'is', null);
 
       console.log('💰 Pagamentos encontrados:', payments);
+      if (paymentsError) {
+        console.error('❌ Erro ao buscar pagamentos:', paymentsError);
+      }
 
       // Buscar parcelamentos do período
       const { data: installments } = await supabase
@@ -70,12 +74,17 @@ const ReportsTab = () => {
         .lte('expense_date', toDate);
 
       // Buscar fechamentos de caixa
-      const { data: cashClosures } = await supabase
+      const { data: cashClosures, error: cashClosuresError } = await supabase
         .from('cash_closures')
         .select('*')
         .eq('user_id', user?.id)
         .gte('closure_date', fromDate)
         .lte('closure_date', toDate);
+
+      console.log('🏦 Fechamentos de caixa encontrados:', cashClosures);
+      if (cashClosuresError) {
+        console.error('❌ Erro ao buscar fechamentos:', cashClosuresError);
+      }
 
       return {
         payments: payments || [],
@@ -116,8 +125,6 @@ const ReportsTab = () => {
     }
   };
 
-  // ... keep existing code (setQuickPeriod function)
-
   const setQuickPeriod = (period: string) => {
     const today = new Date();
     switch (period) {
@@ -142,13 +149,21 @@ const ReportsTab = () => {
     }
   };
 
-  // Calcular totais usando paid_amount dos pagamentos realizados
-  const totalReceitas = reportData?.payments.reduce((sum, p) => {
+  // Calcular totais usando paid_amount dos pagamentos realizados + fechamentos de caixa
+  const totalReceitasFromPayments = reportData?.payments.reduce((sum, p) => {
     const amount = Number(p.paid_amount) || 0;
-    console.log('💵 Adicionando ao total de receitas:', amount);
+    console.log('💵 Adicionando ao total de receitas (pagamento):', amount);
     return sum + amount;
   }, 0) || 0;
 
+  const totalReceitasFromCashClosures = reportData?.cashClosures.reduce((sum, c) => {
+    const amount = Number(c.total_income) || 0;
+    console.log('🏦 Adicionando ao total de receitas (fechamento):', amount);
+    return sum + amount;
+  }, 0) || 0;
+
+  const totalReceitas = totalReceitasFromPayments + totalReceitasFromCashClosures;
+  
   const totalDespesas = reportData?.expenses.reduce((sum, e) => sum + Number(e.amount), 0) || 0;
   
   const parcelasVencidas = reportData?.installments.filter(i => 
@@ -383,6 +398,36 @@ const ReportsTab = () => {
                   {reportData.payments.length > 5 && (
                     <div className="text-sm text-muted-foreground text-center">
                       +{reportData.payments.length - 5} mais...
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {reportType === 'consolidado' || reportType === 'fechamentos' ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Fechamentos de Caixa ({reportData.cashClosures.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {reportData.cashClosures.slice(0, 5).map((closure: any) => (
+                    <div key={closure.id} className="flex justify-between items-center p-2 border rounded">
+                      <div>
+                        <div className="font-medium">Fechamento de Caixa</div>
+                        <div className="text-sm text-muted-foreground">
+                          {format(new Date(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
+                        </div>
+                      </div>
+                      <Badge variant="default">
+                        {formatCurrency(Number(closure.total_income))}
+                      </Badge>
+                    </div>
+                  ))}
+                  {reportData.cashClosures.length > 5 && (
+                    <div className="text-sm text-muted-foreground text-center">
+                      +{reportData.cashClosures.length - 5} mais...
                     </div>
                   )}
                 </div>
