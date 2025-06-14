@@ -107,6 +107,12 @@ export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) 
 
   const deleteMutation = useMutation({
     mutationFn: async ({ reason }: { reason?: string }) => {
+      if (!payment?.id) {
+        throw new Error('ID do pagamento não encontrado');
+      }
+
+      console.log('🗑️ Excluindo pagamento:', payment.id);
+
       // Buscar dados originais para auditoria
       const { data: originalData } = await supabase
         .from('payments')
@@ -119,7 +125,10 @@ export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) 
         .delete()
         .eq('id', payment.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao excluir pagamento:', error);
+        throw error;
+      }
 
       // Criar log de auditoria
       await createAuditLog({
@@ -133,6 +142,7 @@ export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) 
       return originalData;
     },
     onSuccess: () => {
+      console.log('✅ Pagamento excluído com sucesso');
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       toast({
         title: "Sucesso!",
@@ -141,12 +151,12 @@ export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) 
       onSuccess?.();
     },
     onError: (error) => {
+      console.error('❌ Erro ao excluir pagamento:', error);
       toast({
         title: "Erro",
-        description: "Erro ao excluir pagamento",
+        description: "Erro ao excluir pagamento: " + (error.message || 'Erro desconhecido'),
         variant: "destructive",
       });
-      console.error(error);
     },
   });
 

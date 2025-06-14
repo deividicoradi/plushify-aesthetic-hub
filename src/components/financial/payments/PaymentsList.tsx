@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,6 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{ type: 'edit' | 'delete'; payment: any } | null>(null);
   const { verifyPassword, isVerifying } = useAuthorizationPassword();
-  const { deletePayment, isDeleting } = useSecurePaymentMutation();
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -66,11 +64,19 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
     if (pendingAction.type === 'edit') {
       onEdit(pendingAction.payment);
     } else if (pendingAction.type === 'delete') {
+      // Criar uma instância temporária do hook para exclusão
+      const { deletePayment } = useSecurePaymentMutation(pendingAction.payment, () => {
+        setPasswordDialogOpen(false);
+        setPendingAction(null);
+      });
+      
       deletePayment({ reason });
     }
 
-    setPasswordDialogOpen(false);
-    setPendingAction(null);
+    if (pendingAction.type === 'edit') {
+      setPasswordDialogOpen(false);
+      setPendingAction(null);
+    }
   };
 
   if (isLoading) {
@@ -171,10 +177,9 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
                   variant="outline"
                   onClick={() => handleSecureAction('delete', payment)}
                   className="text-red-600 hover:text-red-700"
-                  disabled={isDeleting}
                 >
                   <Trash2 className="w-3 h-3 mr-1" />
-                  {isDeleting ? 'Excluindo...' : 'Excluir'}
+                  Excluir
                 </Button>
               </div>
             </CardContent>
