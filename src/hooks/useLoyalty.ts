@@ -48,7 +48,7 @@ export const useLoyalty = () => {
     try {
       setLoading(true);
 
-      // Buscar todos os clientes com seus agendamentos
+      // Buscar todos os clientes
       const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
         .select(`
@@ -62,27 +62,26 @@ export const useLoyalty = () => {
 
       if (clientsError) throw clientsError;
 
-      // Buscar agendamentos concluídos com preços
-      const { data: appointmentsData, error: appointmentsError } = await supabase
-        .from('appointments')
+      // Buscar pagamentos pagos para calcular gastos dos clientes
+      const { data: paymentsData, error: paymentsError } = await supabase
+        .from('payments')
         .select(`
           id,
           client_id,
-          price,
-          start_time,
+          amount,
           status
         `)
         .eq('user_id', user.id)
-        .eq('status', 'concluido');
+        .eq('status', 'pago');
 
-      if (appointmentsError) throw appointmentsError;
+      if (paymentsError) throw paymentsError;
 
-      // Processar dados de fidelidade
+      // Processar dados de fidelidade baseado em pagamentos
       const loyaltyClients: LoyaltyClient[] = clientsData?.map(client => {
-        const clientAppointments = appointmentsData?.filter(apt => apt.client_id === client.id) || [];
-        const totalSpent = clientAppointments.reduce((sum, apt) => sum + (apt.price || 0), 0);
+        const clientPayments = paymentsData?.filter(payment => payment.client_id === client.id) || [];
+        const totalSpent = clientPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
         const totalPoints = Math.floor(totalSpent); // 1 ponto por real gasto
-        const appointmentsCount = clientAppointments.length;
+        const appointmentsCount = clientPayments.length; // Usando pagamentos como proxy para agendamentos
         const tier = calculateTier(totalSpent);
 
         return {
@@ -102,8 +101,8 @@ export const useLoyalty = () => {
       loyaltyClients.sort((a, b) => b.totalPoints - a.totalPoints);
 
       // Calcular estatísticas
-      const totalRevenue = appointmentsData?.reduce((sum, apt) => sum + (apt.price || 0), 0) || 0;
-      const totalAppointments = appointmentsData?.length || 0;
+      const totalRevenue = paymentsData?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+      const totalAppointments = paymentsData?.length || 0;
       const pointsDistributed = loyaltyClients.reduce((sum, client) => sum + client.totalPoints, 0);
 
       const statsData: LoyaltyStats = {

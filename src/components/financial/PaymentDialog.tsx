@@ -26,7 +26,6 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
     amount: payment?.amount || '',
     payment_method_id: payment?.payment_method_id || '',
     client_id: payment?.client_id || '',
-    appointment_id: payment?.appointment_id || '',
     due_date: payment?.due_date ? payment.due_date.split('T')[0] : '',
     notes: payment?.notes || '',
     status: payment?.status || 'pendente'
@@ -63,21 +62,6 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
     enabled: !!user?.id,
   });
 
-  const { data: appointments } = useQuery({
-    queryKey: ['appointments', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('id, title')
-        .eq('user_id', user?.id)
-        .order('start_time', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-
   const mutation = useMutation({
     mutationFn: async (data: any) => {
       if (payment) {
@@ -102,7 +86,6 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
         amount: '',
         payment_method_id: '',
         client_id: '',
-        appointment_id: '',
         due_date: '',
         notes: '',
         status: 'pendente'
@@ -126,7 +109,6 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
       ...formData,
       amount: parseFloat(formData.amount),
       client_id: formData.client_id || null,
-      appointment_id: formData.appointment_id || null,
       due_date: formData.due_date || null,
     });
   };
@@ -220,30 +202,14 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="appointment">Agendamento</Label>
-              <Select value={formData.appointment_id} onValueChange={(value) => handleChange('appointment_id', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o agendamento" />
-                </SelectTrigger>
-                <SelectContent>
-                  {appointments?.map((appointment) => (
-                    <SelectItem key={appointment.id} value={appointment.id}>
-                      {appointment.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="due_date">Data de Vencimento</Label>
+              <Input
+                id="due_date"
+                type="date"
+                value={formData.due_date}
+                onChange={(e) => handleChange('due_date', e.target.value)}
+              />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="due_date">Data de Vencimento</Label>
-            <Input
-              id="due_date"
-              type="date"
-              value={formData.due_date}
-              onChange={(e) => handleChange('due_date', e.target.value)}
-            />
           </div>
 
           <div className="space-y-2">

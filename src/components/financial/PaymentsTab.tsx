@@ -50,21 +50,6 @@ const PaymentsTab = () => {
     enabled: !!user?.id,
   });
 
-  // Buscar agendamentos separadamente se appointment_id estiver presente
-  const { data: appointments } = useQuery({
-    queryKey: ['appointments', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('id, title')
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pendente: { label: 'Pendente', variant: 'secondary' as const },
@@ -88,12 +73,6 @@ const PaymentsTab = () => {
     if (!clientId || !clients) return null;
     const client = clients.find(c => c.id === clientId);
     return client?.name;
-  };
-
-  const getAppointmentTitle = (appointmentId: string | null) => {
-    if (!appointmentId || !appointments) return null;
-    const appointment = appointments.find(a => a.id === appointmentId);
-    return appointment?.title;
   };
 
   const filteredPayments = payments?.filter(payment =>
@@ -136,7 +115,6 @@ const PaymentsTab = () => {
         ) : (
           filteredPayments?.map((payment) => {
             const clientName = getClientName(payment.client_id);
-            const appointmentTitle = getAppointmentTitle(payment.appointment_id);
             
             return (
               <Card key={payment.id} className="hover:shadow-md transition-shadow">
@@ -152,9 +130,6 @@ const PaymentsTab = () => {
                       <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                         {clientName && (
                           <p>Cliente: {clientName}</p>
-                        )}
-                        {appointmentTitle && (
-                          <p>Serviço: {appointmentTitle}</p>
                         )}
                         <p>Método: {payment.payment_methods?.name}</p>
                         <p>Criado em: {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>

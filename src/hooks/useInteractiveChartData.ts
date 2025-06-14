@@ -36,13 +36,8 @@ export const useInteractiveChartData = () => {
         const nextDay = new Date(currentDay);
         nextDay.setDate(currentDay.getDate() + 1);
 
-        // Buscar agendamentos do dia
-        const { count: agendamentos } = await supabase
-          .from('appointments')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .gte('start_time', currentDay.toISOString())
-          .lt('start_time', nextDay.toISOString());
+        // Como a tabela appointments foi removida, definir agendamentos como 0
+        const agendamentos = 0;
 
         // Buscar faturamento do dia (pagamentos)
         const { data: payments } = await supabase
@@ -65,7 +60,7 @@ export const useInteractiveChartData = () => {
 
         chartData.push({
           day: days[currentDay.getDay()],
-          agendamentos: agendamentos || 0,
+          agendamentos,
           faturamento,
           clientes: clientes || 0
         });

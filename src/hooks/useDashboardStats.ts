@@ -54,24 +54,9 @@ export const useDashboardStats = () => {
         .eq('user_id', user.id)
         .gte('created_at', startOfMonth.toISOString());
 
-      // Buscar agendamentos desta semana
-      const startOfWeek = new Date();
-      const day = startOfWeek.getDay();
-      const diff = startOfWeek.getDate() - day;
-      startOfWeek.setDate(diff);
-      startOfWeek.setHours(0, 0, 0, 0);
-
-      const { count: weeklyAppointments } = await supabase
-        .from('appointments')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('start_time', startOfWeek.toISOString());
-
-      // Buscar total de agendamentos
-      const { count: totalAppointments } = await supabase
-        .from('appointments')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+      // Como a tabela appointments foi removida, definir valores padrão
+      const weeklyAppointments = 0;
+      const totalAppointments = 0;
 
       // Buscar receita mensal (pagamentos deste mês)
       const { data: monthlyPayments } = await supabase
@@ -87,8 +72,8 @@ export const useDashboardStats = () => {
         totalClients: totalClients || 0,
         activeClients: activeClients || 0,
         newThisMonth: newThisMonth || 0,
-        totalAppointments: totalAppointments || 0,
-        weeklyAppointments: weeklyAppointments || 0,
+        totalAppointments,
+        weeklyAppointments,
         monthlyRevenue,
         loading: false
       });
