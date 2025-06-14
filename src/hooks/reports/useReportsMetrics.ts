@@ -5,13 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export interface ReportsMetrics {
   totalClients: number;
-  clientsGrowth: number;
   totalRevenue: number;
-  revenueGrowth: number;
   totalAppointments: number;
-  appointmentsGrowth: number;
   totalProducts: number;
   lowStockProducts: number;
+  clientsGrowth?: number;
+  revenueGrowth?: number;
+  appointmentsGrowth?: number;
 }
 
 export const useReportsMetrics = () => {
@@ -19,11 +19,6 @@ export const useReportsMetrics = () => {
   const [metrics, setMetrics] = useState<ReportsMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const calculateGrowthRate = (current: number, previous: number): number => {
-    if (previous === 0) return current > 0 ? 100 : 0;
-    return ((current - previous) / previous) * 100;
-  };
 
   const fetchMetrics = async () => {
     if (!user) {
@@ -35,87 +30,76 @@ export const useReportsMetrics = () => {
       setLoading(true);
       setError(null);
 
-      const now = new Date();
-      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+      const currentMonth = new Date();
+      const lastMonth = new Date();
+      lastMonth.setMonth(currentMonth.getMonth() - 1);
 
-      // Buscar clientes
-      const { data: clients } = await supabase
-        .from('clients')
-        .select('created_at')
-        .eq('user_id', user.id);
+      const currentMonthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+      const lastMonthStart = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1);
+      const lastMonthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0);
 
-      const currentMonthClients = clients?.filter(
-        client => new Date(client.created_at) >= currentMonthStart
-      ).length || 0;
+      // Buscar métricas em paralelo
+      const [
+        clientsResult,
+        paymentsResult,
+        appointmentsResult,
+        productsResult,
+        currentMonthPaymentsResult,
+        lastMonthPaymentsResult,
+        currentMonthClientsResult,
+        lastMonthClientsResult,
+        currentMonthAppointmentsResult,
+        lastMonthAppointmentsResult
+      ] = await Promise.all([
+        supabase.from('clients').select('id').eq('user_id', user.id),
+        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago'),
+        supabase.from('appointments').select('id').eq('user_id', user.id),
+        supabase.from('products').select('id, stock, min_stock').eq('user_id', user.id),
+        
+        // Métricas do mês atual
+        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('created_at', currentMonthStart.toISOString()),
+        supabase.from('payments').select('paid_amount').eq('user_id', user.id).eq('status', 'pago').gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString()),
+        
+        supabase.from('clients').select('id').eq('user_id', user.id).gte('created_at', currentMonthStart.toISOString()),
+        supabase.from('clients').select('id').eq('user_id', user.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString()),
+        
+        supabase.from('appointments').select('id').eq('user_id', user.id).gte('created_at', currentMonthStart.toISOString()),
+        supabase.from('appointments').select('id').eq('user_id', user.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString())
+      ]);
 
-      const lastMonthClients = clients?.filter(
-        client => new Date(client.created_at) >= lastMonthStart && 
-                  new Date(client.created_at) <= lastMonthEnd
-      ).length || 0;
+      const totalClients = clientsResult.data?.length || 0;
+      const totalRevenue = paymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
+      const totalAppointments = appointmentsResult.data?.length || 0;
+      const totalProducts = productsResult.data?.length || 0;
+      const lowStockProducts = productsResult.data?.filter(p => p.stock <= p.min_stock).length || 0;
 
-      // Buscar agendamentos
-      const { data: appointments } = await supabase
-        .from('appointments')
-        .select('created_at')
-        .eq('user_id', user.id);
+      // Calcular crescimento
+      const currentMonthRevenue = currentMonthPaymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
+      const lastMonthRevenue = lastMonthPaymentsResult.data?.reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
+      const revenueGrowth = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0;
 
-      const currentMonthAppointments = appointments?.filter(
-        appointment => new Date(appointment.created_at) >= currentMonthStart
-      ).length || 0;
+      const currentMonthClients = currentMonthClientsResult.data?.length || 0;
+      const lastMonthClients = lastMonthClientsResult.data?.length || 0;
+      const clientsGrowth = lastMonthClients > 0 ? ((currentMonthClients - lastMonthClients) / lastMonthClients) * 100 : 0;
 
-      const lastMonthAppointments = appointments?.filter(
-        appointment => new Date(appointment.created_at) >= lastMonthStart && 
-                      new Date(appointment.created_at) <= lastMonthEnd
-      ).length || 0;
-
-      // Buscar transações financeiras
-      const { data: transactions } = await supabase
-        .from('financial_transactions')
-        .select('amount, type, transaction_date')
-        .eq('user_id', user.id)
-        .eq('type', 'receita');
-
-      const currentMonthRevenue = transactions?.filter(
-        t => new Date(t.transaction_date) >= currentMonthStart
-      ).reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-      const lastMonthRevenue = transactions?.filter(
-        t => new Date(t.transaction_date) >= lastMonthStart && 
-            new Date(t.transaction_date) <= lastMonthEnd
-      ).reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-      // Buscar produtos
-      const { data: products } = await supabase
-        .from('products')
-        .select('stock, min_stock')
-        .eq('user_id', user.id);
-
-      const totalProducts = products?.length || 0;
-      const lowStockProducts = products?.filter(
-        p => p.stock <= p.min_stock
-      ).length || 0;
-
-      console.log('Reports metrics updated:', {
-        totalAppointments: appointments?.length || 0,
-        appointmentsGrowth: calculateGrowthRate(currentMonthAppointments, lastMonthAppointments)
-      });
+      const currentMonthAppointments = currentMonthAppointmentsResult.data?.length || 0;
+      const lastMonthAppointments = lastMonthAppointmentsResult.data?.length || 0;
+      const appointmentsGrowth = lastMonthAppointments > 0 ? ((currentMonthAppointments - lastMonthAppointments) / lastMonthAppointments) * 100 : 0;
 
       setMetrics({
-        totalClients: clients?.length || 0,
-        clientsGrowth: calculateGrowthRate(currentMonthClients, lastMonthClients),
-        totalRevenue: transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0,
-        revenueGrowth: calculateGrowthRate(currentMonthRevenue, lastMonthRevenue),
-        totalAppointments: appointments?.length || 0,
-        appointmentsGrowth: calculateGrowthRate(currentMonthAppointments, lastMonthAppointments),
+        totalClients,
+        totalRevenue,
+        totalAppointments,
         totalProducts,
-        lowStockProducts
+        lowStockProducts,
+        clientsGrowth,
+        revenueGrowth,
+        appointmentsGrowth
       });
 
     } catch (err: any) {
-      setError(err.message);
       console.error('Erro ao buscar métricas:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }

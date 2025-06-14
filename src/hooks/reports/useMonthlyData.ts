@@ -27,13 +27,13 @@ export const useMonthlyData = () => {
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
       // Buscar dados dos últimos 6 meses em paralelo para melhor performance
-      const [transactionsResult, clientsResult, appointmentsResult] = await Promise.all([
+      const [paymentsResult, clientsResult, appointmentsResult] = await Promise.all([
         supabase
-          .from('financial_transactions')
-          .select('amount, type, transaction_date')
+          .from('payments')
+          .select('paid_amount, payment_date, created_at')
           .eq('user_id', user.id)
-          .eq('type', 'receita')
-          .gte('transaction_date', sixMonthsAgo.toISOString()),
+          .eq('status', 'pago')
+          .gte('created_at', sixMonthsAgo.toISOString()),
         
         supabase
           .from('clients')
@@ -48,7 +48,7 @@ export const useMonthlyData = () => {
           .gte('created_at', sixMonthsAgo.toISOString())
       ]);
 
-      const transactions = transactionsResult.data || [];
+      const payments = paymentsResult.data || [];
       const clients = clientsResult.data || [];
       const appointments = appointmentsResult.data || [];
 
@@ -70,12 +70,12 @@ export const useMonthlyData = () => {
         });
       }
 
-      // Agregar receitas
-      transactions.forEach(t => {
-        const monthKey = t.transaction_date.slice(0, 7);
+      // Agregar receitas dos pagamentos
+      payments.forEach(payment => {
+        const monthKey = payment.created_at.slice(0, 7);
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
-          existing.revenue += Number(t.amount);
+          existing.revenue += Number(payment.paid_amount);
         }
       });
 

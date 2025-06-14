@@ -22,30 +22,44 @@ export const useRevenueByCategory = () => {
 
     try {
       setLoading(true);
-      const { data: transactions } = await supabase
-        .from('financial_transactions')
-        .select('amount, category, type')
+      
+      // Buscar pagamentos com métodos de pagamento
+      const { data: payments, error } = await supabase
+        .from('payments')
+        .select(`
+          paid_amount,
+          payment_methods (
+            name,
+            type
+          )
+        `)
         .eq('user_id', user.id)
-        .eq('type', 'receita');
+        .eq('status', 'pago');
 
+      if (error) throw error;
+
+      // Agrupar por método de pagamento
       const categoryMap = new Map<string, number>();
       let totalRevenue = 0;
 
-      transactions?.forEach(t => {
-        const amount = Number(t.amount);
-        totalRevenue += amount;
+      payments?.forEach(payment => {
+        const amount = Number(payment.paid_amount);
+        const categoryName = payment.payment_methods?.name || 'Outros';
         
-        const current = categoryMap.get(t.category) || 0;
-        categoryMap.set(t.category, current + amount);
+        totalRevenue += amount;
+        categoryMap.set(categoryName, (categoryMap.get(categoryName) || 0) + amount);
       });
 
-      const categoryData: CategoryData[] = Array.from(categoryMap.entries()).map(([name, value]) => ({
-        name,
-        value,
-        percentage: totalRevenue > 0 ? (value / totalRevenue) * 100 : 0
-      }));
+      // Converter para array com percentuais
+      const categoriesData: CategoryData[] = Array.from(categoryMap.entries())
+        .map(([name, value]) => ({
+          name,
+          value,
+          percentage: totalRevenue > 0 ? (value / totalRevenue) * 100 : 0
+        }))
+        .sort((a, b) => b.value - a.value);
 
-      setRevenueByCategory(categoryData.sort((a, b) => b.value - a.value));
+      setRevenueByCategory(categoriesData);
     } catch (err: any) {
       console.error('Erro ao buscar receita por categoria:', err);
     } finally {
