@@ -93,6 +93,8 @@ export const useWeeklyOverviewData = () => {
   useEffect(() => {
     fetchWeeklyData();
 
+    if (!user) return;
+
     // Configurar listener em tempo real para agendamentos
     const appointmentsChannel = supabase
       .channel('weekly-overview-appointments')
@@ -102,10 +104,10 @@ export const useWeeklyOverviewData = () => {
           event: '*',
           schema: 'public',
           table: 'appointments',
-          filter: `user_id=eq.${user?.id}`
+          filter: `user_id=eq.${user.id}`
         },
-        () => {
-          console.log('Appointments changed, refreshing weekly overview');
+        (payload) => {
+          console.log('Appointments changed, refreshing weekly overview:', payload);
           fetchWeeklyData();
         }
       )
@@ -120,10 +122,10 @@ export const useWeeklyOverviewData = () => {
           event: '*',
           schema: 'public',
           table: 'payments',
-          filter: `user_id=eq.${user?.id}`
+          filter: `user_id=eq.${user.id}`
         },
-        () => {
-          console.log('Payments changed, refreshing weekly overview');
+        (payload) => {
+          console.log('Payments changed, refreshing weekly overview:', payload);
           fetchWeeklyData();
         }
       )
