@@ -99,7 +99,7 @@ const AppointmentDialog = ({
     }
   }, [appointment, selectedDate, open, form]);
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
     try {
       console.log('Dados do formulário:', data);
       
@@ -115,8 +115,8 @@ const AppointmentDialog = ({
       
       console.log('Dados do agendamento preparados:', appointmentData);
       
-      onSave(appointmentData);
-      onOpenChange(false);
+      await onSave(appointmentData);
+      
       toast({
         title: isEditing ? "Agendamento atualizado" : "Agendamento criado",
         description: `O agendamento foi ${isEditing ? "atualizado" : "criado"} com sucesso.`,

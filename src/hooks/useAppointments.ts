@@ -37,7 +37,8 @@ export const useAppointments = () => {
           minute: '2-digit' 
         }),
         date: new Date(item.start_time),
-        status: item.status as "Confirmado" | "Pendente" | "Cancelado"
+        // Mapear status do banco para o formato da aplicação
+        status: mapStatusFromDB(item.status)
       }));
 
       setAppointments(formattedAppointments);
@@ -53,8 +54,30 @@ export const useAppointments = () => {
     }
   };
 
+  // Função para mapear status da aplicação para o banco
+  const mapStatusToDB = (status: "Confirmado" | "Pendente" | "Cancelado"): string => {
+    const statusMap = {
+      "Confirmado": "Confirmado",
+      "Pendente": "Pendente", 
+      "Cancelado": "Cancelado"
+    };
+    return statusMap[status] || "Pendente";
+  };
+
+  // Função para mapear status do banco para a aplicação
+  const mapStatusFromDB = (status: string): "Confirmado" | "Pendente" | "Cancelado" => {
+    const statusMap: { [key: string]: "Confirmado" | "Pendente" | "Cancelado" } = {
+      "Confirmado": "Confirmado",
+      "Pendente": "Pendente",
+      "Cancelado": "Cancelado"
+    };
+    return statusMap[status] || "Pendente";
+  };
+
   const createAppointment = async (appointmentData: Omit<Appointment, "id">) => {
     try {
+      console.log('Criando agendamento com dados:', appointmentData);
+      
       // Verificar se o usuário está autenticado
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -69,24 +92,36 @@ export const useAppointments = () => {
       const endTime = new Date(startTime);
       endTime.setHours(startTime.getHours() + 1); // Duração padrão de 1 hora
 
+      // Mapear status para o formato do banco
+      const dbStatus = mapStatusToDB(appointmentData.status);
+      console.log('Status mapeado para DB:', dbStatus);
+
+      const insertData = {
+        user_id: user.id,
+        title: `${appointmentData.service} - ${appointmentData.client}`,
+        client_name: appointmentData.client,
+        service: appointmentData.service,
+        time: appointmentData.time,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        status: dbStatus,
+        description: `Agendamento de ${appointmentData.service} para ${appointmentData.client}`
+      };
+
+      console.log('Dados para inserção no Supabase:', insertData);
+
       const { data, error } = await supabase
         .from('appointments')
-        .insert({
-          user_id: user.id,
-          title: `${appointmentData.service} - ${appointmentData.client}`,
-          client_name: appointmentData.client,
-          service: appointmentData.service,
-          time: appointmentData.time,
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          status: appointmentData.status,
-          description: `Agendamento de ${appointmentData.service} para ${appointmentData.client}`
-        })
+        .insert(insertData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro do Supabase:', error);
+        throw error;
+      }
 
+      console.log('Agendamento criado com sucesso:', data);
       await fetchAppointments();
       
       toast({
@@ -122,6 +157,9 @@ export const useAppointments = () => {
       const endTime = new Date(startTime);
       endTime.setHours(startTime.getHours() + 1);
 
+      // Mapear status para o formato do banco
+      const dbStatus = mapStatusToDB(appointmentData.status);
+
       const { error } = await supabase
         .from('appointments')
         .update({
@@ -131,7 +169,7 @@ export const useAppointments = () => {
           time: appointmentData.time,
           start_time: startTime.toISOString(),
           end_time: endTime.toISOString(),
-          status: appointmentData.status,
+          status: dbStatus,
           description: `Agendamento de ${appointmentData.service} para ${appointmentData.client}`
         })
         .eq('id', id)
