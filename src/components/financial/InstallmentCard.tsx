@@ -9,7 +9,8 @@ import {
   Edit, 
   CheckCircle, 
   Clock,
-  AlertTriangle 
+  AlertTriangle,
+  XCircle 
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -84,6 +85,35 @@ const InstallmentCard = ({ installment, paymentData, onEdit, onUpdate }: Install
     }
   };
 
+  const handleMarkAsNotPaid = async () => {
+    try {
+      const { error } = await supabase
+        .from('installments')
+        .update({
+          status: 'pendente',
+          payment_date: null,
+          paid_amount: 0,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', installment.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso!",
+        description: "Parcela marcada como não paga.",
+      });
+
+      onUpdate();
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao atualizar parcela",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
@@ -135,14 +165,24 @@ const InstallmentCard = ({ installment, paymentData, onEdit, onUpdate }: Install
         </div>
 
         <div className="flex gap-2">
-          {installment.status === 'pendente' && (
+          {installment.status === 'pendente' ? (
             <Button
               size="sm"
               onClick={handleMarkAsPaid}
-              className="flex-1"
+              className="flex-1 bg-green-600 hover:bg-green-700"
             >
               <CheckCircle className="w-4 h-4 mr-1" />
               Marcar como Pago
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleMarkAsNotPaid}
+              className="flex-1"
+            >
+              <XCircle className="w-4 h-4 mr-1" />
+              Marcar como Não Pago
             </Button>
           )}
           
