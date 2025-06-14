@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +62,9 @@ const ComparativeReport = () => {
     const fromDate = from.toISOString();
     const toDate = to.toISOString();
 
-    // Buscar pagamentos
+    console.log('🔍 Buscando dados comparativos para o período:', { fromDate, toDate });
+
+    // Buscar pagamentos realizados (status = 'pago') usando payment_date
     const { data: payments } = await supabase
       .from('payments')
       .select(`
@@ -72,8 +73,10 @@ const ComparativeReport = () => {
         clients(name)
       `)
       .eq('user_id', user?.id)
-      .gte('created_at', fromDate)
-      .lte('created_at', toDate);
+      .eq('status', 'pago')
+      .gte('payment_date', fromDate)
+      .lte('payment_date', toDate)
+      .not('payment_date', 'is', null);
 
     // Buscar parcelamentos
     const { data: installments } = await supabase

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +29,9 @@ const ReportsTab = () => {
       const fromDate = dateFrom.toISOString();
       const toDate = dateTo.toISOString();
 
-      // Buscar pagamentos
+      console.log('🔍 Buscando dados do relatório para o período:', { fromDate, toDate });
+
+      // Buscar pagamentos realizados (status = 'pago') usando payment_date para filtro temporal
       const { data: payments } = await supabase
         .from('payments')
         .select(`
@@ -39,10 +40,14 @@ const ReportsTab = () => {
           clients(name)
         `)
         .eq('user_id', user?.id)
-        .gte('created_at', fromDate)
-        .lte('created_at', toDate);
+        .eq('status', 'pago')
+        .gte('payment_date', fromDate)
+        .lte('payment_date', toDate)
+        .not('payment_date', 'is', null);
 
-      // Buscar parcelamentos
+      console.log('💰 Pagamentos encontrados:', payments);
+
+      // Buscar parcelamentos do período
       const { data: installments } = await supabase
         .from('installments')
         .select(`
@@ -111,6 +116,8 @@ const ReportsTab = () => {
     }
   };
 
+  // ... keep existing code (setQuickPeriod function)
+
   const setQuickPeriod = (period: string) => {
     const today = new Date();
     switch (period) {
@@ -135,11 +142,20 @@ const ReportsTab = () => {
     }
   };
 
-  const totalReceitas = reportData?.payments.reduce((sum, p) => sum + Number(p.paid_amount), 0) || 0;
+  // Calcular totais usando paid_amount dos pagamentos realizados
+  const totalReceitas = reportData?.payments.reduce((sum, p) => {
+    const amount = Number(p.paid_amount) || 0;
+    console.log('💵 Adicionando ao total de receitas:', amount);
+    return sum + amount;
+  }, 0) || 0;
+
   const totalDespesas = reportData?.expenses.reduce((sum, e) => sum + Number(e.amount), 0) || 0;
+  
   const parcelasVencidas = reportData?.installments.filter(i => 
     new Date(i.due_date) < new Date() && i.status === 'pendente'
   ).length || 0;
+
+  console.log('📊 Totais calculados:', { totalReceitas, totalDespesas, parcelasVencidas });
 
   return (
     <div className="space-y-6">
@@ -359,8 +375,8 @@ const ReportsTab = () => {
                           {payment.clients?.name || 'Cliente não informado'}
                         </div>
                       </div>
-                      <Badge variant={payment.status === 'pago' ? 'default' : 'secondary'}>
-                        {formatCurrency(Number(payment.amount))}
+                      <Badge variant="default">
+                        {formatCurrency(Number(payment.paid_amount))}
                       </Badge>
                     </div>
                   ))}
