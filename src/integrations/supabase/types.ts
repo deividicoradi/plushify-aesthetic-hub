@@ -505,6 +505,7 @@ export type Database = {
           discount: number | null
           due_date: string | null
           id: string
+          installments: number
           notes: string | null
           paid_amount: number
           payment_date: string | null
@@ -522,6 +523,7 @@ export type Database = {
           discount?: number | null
           due_date?: string | null
           id?: string
+          installments?: number
           notes?: string | null
           paid_amount?: number
           payment_date?: string | null
@@ -539,6 +541,7 @@ export type Database = {
           discount?: number | null
           due_date?: string | null
           id?: string
+          installments?: number
           notes?: string | null
           paid_amount?: number
           payment_date?: string | null
