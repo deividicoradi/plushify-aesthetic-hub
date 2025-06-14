@@ -15,6 +15,7 @@ interface PaymentFormData {
   notes: string;
   status: string;
   paid_amount: string;
+  installments: string;
 }
 
 export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
@@ -30,7 +31,8 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
     due_date: payment?.due_date ? payment.due_date.split('T')[0] : '',
     notes: payment?.notes || '',
     status: payment?.status || 'pendente',
-    paid_amount: payment?.paid_amount || ''
+    paid_amount: payment?.paid_amount || '',
+    installments: payment?.installments || '1'
   });
 
   const mutation = useMutation({
@@ -109,7 +111,8 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
         due_date: '',
         notes: '',
         status: 'pendente',
-        paid_amount: ''
+        paid_amount: '',
+        installments: '1'
       });
     },
     onError: (error) => {
@@ -129,6 +132,12 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       // Se marcar como pago e não tem paid_amount, usar o amount total
       if (field === 'status' && value === 'pago' && !newData.paid_amount) {
         newData.paid_amount = newData.amount;
+      }
+      
+      // Se mudar o método de pagamento e não for cartão de crédito, resetar parcelas para 1
+      if (field === 'payment_method_id') {
+        // Reset installments when payment method changes
+        newData.installments = '1';
       }
       
       return newData;
@@ -166,7 +175,8 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       notes: formData.notes || null,
       status: formData.status,
       paid_amount: parseFloat(formData.paid_amount) || 0,
-      payment_date: formData.status === 'pago' ? new Date().toISOString() : null
+      payment_date: formData.status === 'pago' ? new Date().toISOString() : null,
+      installments: parseInt(formData.installments) || 1
     };
 
     console.log('Submetendo dados do pagamento:', dataToSubmit);
