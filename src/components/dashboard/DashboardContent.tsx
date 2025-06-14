@@ -1,11 +1,6 @@
 
 import React from 'react';
-import { InteractiveChart } from '@/components/dashboard/InteractiveChart';
-import { ModernActivityFeed } from '@/components/dashboard/ModernActivityFeed';
-import { FloatingActionButtons } from '@/components/dashboard/FloatingActionButtons';
-import { WeeklyOverview } from '@/components/dashboard/WeeklyOverview';
-import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
-import { QuickHelp } from '@/components/dashboard/QuickHelp';
+import { ModernDashboard } from '@/components/dashboard/ModernDashboard';
 import { TeamManagement } from '@/components/premium/TeamManagement';
 import { useSubscription } from '@/hooks/useSubscription';
 
@@ -13,29 +8,11 @@ export const DashboardContent = () => {
   const { hasFeature } = useSubscription();
 
   return (
-    <div className="space-y-8 p-1 relative">
-      {/* Interactive Analytics Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2">
-          <InteractiveChart />
-        </div>
-        <div className="space-y-6">
-          <WeeklyOverview />
-        </div>
-      </div>
+    <div className="space-y-8 relative">
+      {/* Dashboard Principal Moderno */}
+      <ModernDashboard />
 
-      {/* Alerts and Help Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <AlertsPanel />
-        <QuickHelp />
-      </div>
-
-      {/* Activity Section */}
-      <div className="grid grid-cols-1">
-        <ModernActivityFeed />
-      </div>
-
-      {/* Premium Features Section */}
+      {/* Seção Premium - Team Management */}
       {hasFeature('premium') && (
         <div className="relative overflow-hidden rounded-3xl p-8 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-800/30">
           {/* Background pattern */}
@@ -59,9 +36,6 @@ export const DashboardContent = () => {
           </div>
         </div>
       )}
-
-      {/* Floating Action Buttons */}
-      <FloatingActionButtons />
     </div>
   );
 };
