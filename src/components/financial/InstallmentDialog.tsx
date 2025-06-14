@@ -31,15 +31,20 @@ const InstallmentDialog = ({ open, onOpenChange, onSuccess, installment }: Insta
     onOpenChange(false);
   });
 
-  // Buscar pagamentos disponíveis
+  // Buscar todos os pagamentos disponíveis (removendo o filtro de status)
   const { data: payments } = useQuery({
     queryKey: ['payments-for-installments', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
-        .select('id, description, amount')
+        .select(`
+          id, 
+          description, 
+          amount,
+          clients(name)
+        `)
         .eq('user_id', user?.id)
-        .eq('status', 'pago');
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data;

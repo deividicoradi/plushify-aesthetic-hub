@@ -20,7 +20,13 @@ const InstallmentPaymentSelect = ({ value, onValueChange, payments }: Installmen
         <SelectContent>
           {payments?.map((payment) => (
             <SelectItem key={payment.id} value={payment.id}>
-              {payment.description} - R$ {Number(payment.amount).toFixed(2)}
+              <div className="flex flex-col">
+                <span className="font-medium">{payment.description}</span>
+                <div className="text-sm text-muted-foreground">
+                  R$ {Number(payment.amount).toFixed(2)}
+                  {payment.clients && ` - ${payment.clients.name}`}
+                </div>
+              </div>
             </SelectItem>
           ))}
         </SelectContent>
