@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,16 +23,47 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
   const { updateCashFromPayment } = useCashIntegration();
   
   const [formData, setFormData] = useState<PaymentFormData>({
-    description: payment?.description || '',
-    amount: payment?.amount || '',
-    payment_method_id: payment?.payment_method_id || '',
-    client_id: payment?.client_id || '',
-    due_date: payment?.due_date ? payment.due_date.split('T')[0] : '',
-    notes: payment?.notes || '',
-    status: payment?.status || 'pendente',
-    paid_amount: payment?.paid_amount || '',
-    installments: payment?.installments || '1'
+    description: '',
+    amount: '',
+    payment_method_id: '',
+    client_id: '',
+    due_date: '',
+    notes: '',
+    status: 'pendente',
+    paid_amount: '',
+    installments: '1'
   });
+
+  // Atualizar formData quando payment mudar
+  useEffect(() => {
+    if (payment) {
+      console.log('📝 Carregando dados do pagamento para edição:', payment);
+      setFormData({
+        description: payment.description || '',
+        amount: payment.amount?.toString() || '',
+        payment_method_id: payment.payment_method_id || '',
+        client_id: payment.client_id || '',
+        due_date: payment.due_date ? payment.due_date.split('T')[0] : '',
+        notes: payment.notes || '',
+        status: payment.status || 'pendente',
+        paid_amount: payment.paid_amount?.toString() || '',
+        installments: payment.installments?.toString() || '1'
+      });
+    } else {
+      // Reset para novo pagamento
+      setFormData({
+        description: '',
+        amount: '',
+        payment_method_id: '',
+        client_id: '',
+        due_date: '',
+        notes: '',
+        status: 'pendente',
+        paid_amount: '',
+        installments: '1'
+      });
+    }
+  }, [payment]);
 
   // Função para criar parcelamentos automáticos para pagamentos parciais
   const createInstallmentsForPartialPayment = async (paymentData: any) => {
