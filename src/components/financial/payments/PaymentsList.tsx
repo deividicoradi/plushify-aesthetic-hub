@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,15 +24,32 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
   const { verifyPassword, isVerifying } = useAuthorizationPassword();
   const { deletePayment, isDeleting } = useSecurePaymentMutation();
 
-  const getStatusBadge = (status: string): "default" | "destructive" | "secondary" | "outline" => {
-    const variants = {
-      pago: 'default' as const,
-      pendente: 'secondary' as const, 
-      parcial: 'outline' as const,
-      cancelado: 'destructive' as const
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      pago: { 
+        label: 'Pago', 
+        variant: 'default' as const,
+        className: 'bg-green-500 text-white hover:bg-green-600'
+      },
+      pendente: { 
+        label: 'Pendente', 
+        variant: 'secondary' as const,
+        className: 'bg-yellow-500 text-white hover:bg-yellow-600'
+      },
+      parcial: { 
+        label: 'Parcial', 
+        variant: 'outline' as const,
+        className: 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500'
+      },
+      cancelado: { 
+        label: 'Cancelado', 
+        variant: 'destructive' as const,
+        className: ''
+      },
     };
     
-    return variants[status as keyof typeof variants] || variants.pendente;
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendente;
+    return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
   };
 
   const handleSecureAction = (type: 'edit' | 'delete', payment: any) => {
@@ -94,26 +112,24 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
             <CardContent className="p-4">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
                     {payment.description || 'Pagamento sem descrição'}
                   </h3>
-                  <Badge variant={getStatusBadge(payment.status)}>
-                    {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                  </Badge>
+                  {getStatusBadge(payment.status)}
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-green-600">
                     {formatCurrency(Number(payment.amount))}
                   </p>
                   {payment.status === 'parcial' && (
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Pago: {formatCurrency(Number(payment.paid_amount || 0))}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-2 text-sm text-gray-600 mb-4">
+              <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
                 {getClientName(payment.client_id) && (
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4" />
@@ -134,7 +150,7 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
                 )}
 
                 {payment.notes && (
-                  <p className="text-xs bg-gray-50 p-2 rounded mt-2 line-clamp-2">
+                  <p className="text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded mt-2 line-clamp-2">
                     {payment.notes}
                   </p>
                 )}
