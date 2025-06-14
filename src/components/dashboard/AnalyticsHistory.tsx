@@ -11,11 +11,11 @@ import { ptBR } from 'date-fns/locale';
 
 export const AnalyticsHistory = () => {
   const { analytics, loading, saving } = useDashboardAnalytics();
-  const [selectedAnalysis, setSelectedAnalysis] = useState(null);
+  const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null);
 
   if (loading) {
     return (
-      <Card>
+      <Card className="h-fit">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="w-5 h-5" />
@@ -49,32 +49,35 @@ export const AnalyticsHistory = () => {
     }
   };
 
+  const toggleAnalysis = (analysisId: string) => {
+    setSelectedAnalysis(selectedAnalysis === analysisId ? null : analysisId);
+  };
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="w-5 h-5" />
-              Análises Automáticas
-              {saving && <Clock className="w-4 h-4 text-blue-500 animate-spin" />}
-            </CardTitle>
-            <Badge variant="outline">
-              {analytics.length} análises salvas
-            </Badge>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Suas análises são salvas automaticamente baseadas nos dados do dashboard
-          </p>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-96">
-            <div className="space-y-3">
-              {analytics.map((analysis) => (
+    <Card className="h-fit">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="w-5 h-5" />
+            Análises Automáticas
+            {saving && <Clock className="w-4 h-4 text-blue-500 animate-spin" />}
+          </CardTitle>
+          <Badge variant="outline">
+            {analytics.length} análises salvas
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Suas análises são salvas automaticamente baseadas nos dados do dashboard
+        </p>
+      </CardHeader>
+      <CardContent className="p-0">
+        <ScrollArea className="h-96 px-6 pb-6">
+          <div className="space-y-3">
+            {analytics.map((analysis) => (
+              <div key={analysis.id} className="space-y-0">
                 <Card 
-                  key={analysis.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => setSelectedAnalysis(selectedAnalysis?.id === analysis.id ? null : analysis)}
+                  className="cursor-pointer hover:shadow-md transition-all duration-200 border border-gray-200"
+                  onClick={() => toggleAnalysis(analysis.id)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -109,64 +112,66 @@ export const AnalyticsHistory = () => {
                         <p className="font-medium">{analysis.metrics?.new_clients || 0}</p>
                       </div>
                     </div>
-
-                    {selectedAnalysis?.id === analysis.id && (
-                      <div className="mt-4 pt-4 border-t space-y-4">
-                        {/* Insights */}
-                        <div>
-                          <h4 className="font-medium mb-2">Insights Gerados:</h4>
-                          <div className="space-y-2">
-                            {analysis.insights?.map((insight, index) => (
-                              <div key={index} className={`p-3 rounded-lg border ${getInsightColor(insight.severity)}`}>
-                                <div className="flex items-start gap-2">
-                                  {getInsightIcon(insight.severity)}
-                                  <div>
-                                    <h5 className="font-medium">{insight.title}</h5>
-                                    <p className="text-sm">{insight.message}</p>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Recomendações */}
-                        <div>
-                          <h4 className="font-medium mb-2">Recomendações:</h4>
-                          <div className="space-y-2">
-                            {analysis.recommendations?.map((rec, index) => (
-                              <div key={index} className="p-3 rounded-lg bg-gray-50 border">
-                                <div className="flex items-start gap-2">
-                                  <TrendingUp className="w-4 h-4 text-purple-500 mt-0.5" />
-                                  <div>
-                                    <h5 className="font-medium">{rec.title}</h5>
-                                    <p className="text-sm text-gray-600">{rec.action}</p>
-                                    <Badge variant="outline" className="mt-1">
-                                      Prioridade: {rec.priority}
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
-              ))}
-              
-              {analytics.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <Brain className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>Nenhuma análise salva ainda.</p>
-                  <p className="text-sm">As análises serão geradas automaticamente baseadas nos seus dados.</p>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </CardContent>
-      </Card>
-    </div>
+
+                {selectedAnalysis === analysis.id && (
+                  <Card className="mt-2 border-l-4 border-l-blue-500 bg-blue-50/30">
+                    <CardContent className="p-4 space-y-4">
+                      {/* Insights */}
+                      <div>
+                        <h4 className="font-medium mb-2">Insights Gerados:</h4>
+                        <div className="space-y-2">
+                          {analysis.insights?.map((insight: any, index: number) => (
+                            <div key={index} className={`p-3 rounded-lg border ${getInsightColor(insight.severity)}`}>
+                              <div className="flex items-start gap-2">
+                                {getInsightIcon(insight.severity)}
+                                <div>
+                                  <h5 className="font-medium">{insight.title}</h5>
+                                  <p className="text-sm">{insight.message}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Recomendações */}
+                      <div>
+                        <h4 className="font-medium mb-2">Recomendações:</h4>
+                        <div className="space-y-2">
+                          {analysis.recommendations?.map((rec: any, index: number) => (
+                            <div key={index} className="p-3 rounded-lg bg-gray-50 border">
+                              <div className="flex items-start gap-2">
+                                <TrendingUp className="w-4 h-4 text-purple-500 mt-0.5" />
+                                <div>
+                                  <h5 className="font-medium">{rec.title}</h5>
+                                  <p className="text-sm text-gray-600">{rec.action}</p>
+                                  <Badge variant="outline" className="mt-1">
+                                    Prioridade: {rec.priority}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ))}
+            
+            {analytics.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Brain className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p>Nenhuma análise salva ainda.</p>
+                <p className="text-sm">As análises serão geradas automaticamente baseadas nos seus dados.</p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   );
 };
