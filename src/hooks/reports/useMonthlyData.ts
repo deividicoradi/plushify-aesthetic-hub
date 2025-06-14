@@ -26,25 +26,31 @@ export const useMonthlyData = () => {
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-      // Buscar dados dos últimos 6 meses
-      const { data: transactions } = await supabase
-        .from('financial_transactions')
-        .select('amount, type, transaction_date')
-        .eq('user_id', user.id)
-        .eq('type', 'receita')
-        .gte('transaction_date', sixMonthsAgo.toISOString());
+      // Buscar dados dos últimos 6 meses em paralelo para melhor performance
+      const [transactionsResult, clientsResult, appointmentsResult] = await Promise.all([
+        supabase
+          .from('financial_transactions')
+          .select('amount, type, transaction_date')
+          .eq('user_id', user.id)
+          .eq('type', 'receita')
+          .gte('transaction_date', sixMonthsAgo.toISOString()),
+        
+        supabase
+          .from('clients')
+          .select('created_at')
+          .eq('user_id', user.id)
+          .gte('created_at', sixMonthsAgo.toISOString()),
+        
+        supabase
+          .from('appointments')
+          .select('created_at')
+          .eq('user_id', user.id)
+          .gte('created_at', sixMonthsAgo.toISOString())
+      ]);
 
-      const { data: clients } = await supabase
-        .from('clients')
-        .select('created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', sixMonthsAgo.toISOString());
-
-      const { data: appointments } = await supabase
-        .from('appointments')
-        .select('created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', sixMonthsAgo.toISOString());
+      const transactions = transactionsResult.data || [];
+      const clients = clientsResult.data || [];
+      const appointments = appointmentsResult.data || [];
 
       // Agrupar por mês
       const monthlyDataMap = new Map<string, MonthlyData>();
@@ -65,7 +71,7 @@ export const useMonthlyData = () => {
       }
 
       // Agregar receitas
-      transactions?.forEach(t => {
+      transactions.forEach(t => {
         const monthKey = t.transaction_date.slice(0, 7);
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
@@ -74,7 +80,7 @@ export const useMonthlyData = () => {
       });
 
       // Agregar agendamentos
-      appointments?.forEach(appointment => {
+      appointments.forEach(appointment => {
         const monthKey = appointment.created_at.slice(0, 7);
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
@@ -83,7 +89,7 @@ export const useMonthlyData = () => {
       });
 
       // Agregar novos clientes
-      clients?.forEach(client => {
+      clients.forEach(client => {
         const monthKey = client.created_at.slice(0, 7);
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {

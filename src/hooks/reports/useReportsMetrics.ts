@@ -26,9 +26,15 @@ export const useReportsMetrics = () => {
   };
 
   const fetchMetrics = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
+      setLoading(true);
+      setError(null);
+
       const now = new Date();
       const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -110,13 +116,13 @@ export const useReportsMetrics = () => {
     } catch (err: any) {
       setError(err.message);
       console.error('Erro ao buscar métricas:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) {
-      fetchMetrics();
-    }
+    fetchMetrics();
   }, [user]);
 
   return {
