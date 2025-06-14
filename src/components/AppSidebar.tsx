@@ -14,7 +14,8 @@ import {
   Book,
   HelpCircle,
   LucideIcon,
-  LogOut
+  LogOut,
+  Crown
 } from 'lucide-react';
 import {
   Sidebar,
@@ -83,6 +84,7 @@ export const AppSidebar = () => {
 
   const otherItems = [
     { icon: Book, label: 'Anotações', href: '/notes' },
+    { icon: Crown, label: 'Planos', href: '/planos' },
     { icon: Settings, label: 'Configurações', href: '/settings' },
     { icon: HelpCircle, label: 'Ajuda', href: '/help' },
   ];
