@@ -45,23 +45,35 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
   };
 
   const handleStatusChange = async (newStatus: Appointment['status']) => {
+    console.log('Changing status to:', newStatus);
     await updateAppointment(appointment.id, { status: newStatus });
   };
 
   const handleDeleteClick = () => {
+    console.log('Delete button clicked for appointment:', appointment.id);
     setShowDeleteDialog(true);
   };
 
   const handleDeleteConfirm = async () => {
+    console.log('Delete confirmed for appointment:', appointment.id);
     setIsDeleting(true);
+    
     try {
-      await deleteAppointment(appointment.id);
-      setShowDeleteDialog(false);
+      const success = await deleteAppointment(appointment.id);
+      if (success) {
+        console.log('Appointment deleted successfully, closing dialog');
+        setShowDeleteDialog(false);
+      }
     } catch (error) {
       console.error('Erro ao excluir agendamento:', error);
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    console.log('Delete cancelled');
+    setShowDeleteDialog(false);
   };
 
   return (
@@ -155,7 +167,9 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleDeleteCancel} disabled={isDeleting}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteConfirm}
               disabled={isDeleting}

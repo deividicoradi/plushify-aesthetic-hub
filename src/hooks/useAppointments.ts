@@ -113,6 +113,8 @@ export const useAppointments = () => {
     if (!user) return null;
 
     try {
+      console.log('Updating appointment:', id, updates);
+      
       const { data, error } = await supabase
         .from('appointments')
         .update(updates)
@@ -123,11 +125,14 @@ export const useAppointments = () => {
 
       if (error) throw error;
 
+      console.log('Updated appointment:', data);
+
       const formattedData = {
         ...data,
         status: data.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
       };
 
+      // Atualizar a lista local imediatamente
       setAppointments(prev => 
         prev.map(appointment => 
           appointment.id === id ? formattedData : appointment
@@ -155,6 +160,8 @@ export const useAppointments = () => {
     if (!user) return false;
 
     try {
+      console.log('Deleting appointment:', id);
+      
       const { error } = await supabase
         .from('appointments')
         .delete()
@@ -163,8 +170,14 @@ export const useAppointments = () => {
 
       if (error) throw error;
 
-      // Atualizar a lista local removendo o item
-      setAppointments(prev => prev.filter(appointment => appointment.id !== id));
+      console.log('Appointment deleted successfully');
+
+      // Atualizar a lista local removendo o item IMEDIATAMENTE
+      setAppointments(prev => {
+        const newAppointments = prev.filter(appointment => appointment.id !== id);
+        console.log('Updated appointments after deletion:', newAppointments);
+        return newAppointments;
+      });
       
       toast({
         title: "Sucesso",
@@ -190,6 +203,7 @@ export const useAppointments = () => {
   return {
     appointments,
     isLoading,
+    isCreating,
     createAppointment,
     updateAppointment,
     deleteAppointment,
