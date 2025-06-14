@@ -64,6 +64,21 @@ export const useReportsData = () => {
                   new Date(client.created_at) <= lastMonthEnd
       ).length || 0;
 
+      // Buscar agendamentos
+      const { data: appointments } = await supabase
+        .from('appointments')
+        .select('created_at')
+        .eq('user_id', user.id);
+
+      const currentMonthAppointments = appointments?.filter(
+        appointment => new Date(appointment.created_at) >= currentMonthStart
+      ).length || 0;
+
+      const lastMonthAppointments = appointments?.filter(
+        appointment => new Date(appointment.created_at) >= lastMonthStart && 
+                      new Date(appointment.created_at) <= lastMonthEnd
+      ).length || 0;
+
       // Buscar transações financeiras
       const { data: transactions } = await supabase
         .from('financial_transactions')
@@ -80,10 +95,6 @@ export const useReportsData = () => {
             new Date(t.transaction_date) <= lastMonthEnd
       ).reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
-      // Como não temos mais agendamentos, definir valores como 0
-      const currentMonthAppointments = 0;
-      const lastMonthAppointments = 0;
-
       // Buscar produtos
       const { data: products } = await supabase
         .from('products')
@@ -95,12 +106,17 @@ export const useReportsData = () => {
         p => p.stock <= p.min_stock
       ).length || 0;
 
+      console.log('Reports metrics updated:', {
+        totalAppointments: appointments?.length || 0,
+        appointmentsGrowth: calculateGrowthRate(currentMonthAppointments, lastMonthAppointments)
+      });
+
       setMetrics({
         totalClients: clients?.length || 0,
         clientsGrowth: calculateGrowthRate(currentMonthClients, lastMonthClients),
         totalRevenue: transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0,
         revenueGrowth: calculateGrowthRate(currentMonthRevenue, lastMonthRevenue),
-        totalAppointments: 0, // Sistema de agendamentos será recriado
+        totalAppointments: appointments?.length || 0,
         appointmentsGrowth: calculateGrowthRate(currentMonthAppointments, lastMonthAppointments),
         totalProducts,
         lowStockProducts
@@ -133,6 +149,12 @@ export const useReportsData = () => {
         .eq('user_id', user.id)
         .gte('created_at', sixMonthsAgo.toISOString());
 
+      const { data: appointments } = await supabase
+        .from('appointments')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .gte('created_at', sixMonthsAgo.toISOString());
+
       // Agrupar por mês
       const monthlyDataMap = new Map<string, MonthlyData>();
 
@@ -146,7 +168,7 @@ export const useReportsData = () => {
         monthlyDataMap.set(monthKey, {
           month: monthName,
           revenue: 0,
-          appointments: 0, // Sistema de agendamentos será recriado
+          appointments: 0,
           newClients: 0
         });
       }
@@ -157,6 +179,15 @@ export const useReportsData = () => {
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
           existing.revenue += Number(t.amount);
+        }
+      });
+
+      // Agregar agendamentos
+      appointments?.forEach(appointment => {
+        const monthKey = appointment.created_at.slice(0, 7);
+        const existing = monthlyDataMap.get(monthKey);
+        if (existing) {
+          existing.appointments += 1;
         }
       });
 
@@ -210,19 +241,98 @@ export const useReportsData = () => {
     }
   };
 
+  const fetchAllData = async () => {
+    setLoading(true);
+    await Promise.all([
+      fetchMetrics(),
+      fetchMonthlyData(),
+      fetchRevenueByCategory()
+    ]);
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (user) {
-      const fetchAllData = async () => {
-        setLoading(true);
-        await Promise.all([
-          fetchMetrics(),
-          fetchMonthlyData(),
-          fetchRevenueByCategory()
-        ]);
-        setLoading(false);
-      };
-
       fetchAllData();
+
+      // Configurar listeners em tempo real para agendamentos
+      const appointmentsChannel = supabase
+        .channel('reports-appointments')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'appointments',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Appointments changed, refreshing reports data:', payload);
+            fetchAllData();
+          }
+        )
+        .subscribe();
+
+      // Configurar listeners em tempo real para clientes
+      const clientsChannel = supabase
+        .channel('reports-clients')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'clients',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Clients changed, refreshing reports data:', payload);
+            fetchAllData();
+          }
+        )
+        .subscribe();
+
+      // Configurar listeners em tempo real para transações financeiras
+      const transactionsChannel = supabase
+        .channel('reports-transactions')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'financial_transactions',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Financial transactions changed, refreshing reports data:', payload);
+            fetchAllData();
+          }
+        )
+        .subscribe();
+
+      // Configurar listeners em tempo real para produtos
+      const productsChannel = supabase
+        .channel('reports-products')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'products',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Products changed, refreshing reports data:', payload);
+            fetchAllData();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(appointmentsChannel);
+        supabase.removeChannel(clientsChannel);
+        supabase.removeChannel(transactionsChannel);
+        supabase.removeChannel(productsChannel);
+      };
     }
   }, [user]);
 
@@ -232,12 +342,6 @@ export const useReportsData = () => {
     revenueByCategory,
     loading,
     error,
-    refetch: () => {
-      if (user) {
-        fetchMetrics();
-        fetchMonthlyData();
-        fetchRevenueByCategory();
-      }
-    }
+    refetch: fetchAllData
   };
 };
