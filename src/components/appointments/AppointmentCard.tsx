@@ -1,0 +1,129 @@
+
+import React from 'react';
+import { Clock, User, Package, MoreVertical, Phone, MessageCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
+interface AppointmentCardProps {
+  appointment: {
+    id: string;
+    clientName: string;
+    serviceName: string;
+    date: string;
+    time: string;
+    duration: number;
+    status: 'agendado' | 'confirmado' | 'concluido' | 'cancelado';
+    price: number;
+    notes?: string;
+  };
+}
+
+const statusColors = {
+  agendado: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+  confirmado: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  concluido: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  cancelado: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+};
+
+const statusLabels = {
+  agendado: 'Agendado',
+  confirmado: 'Confirmado',
+  concluido: 'Concluído',
+  cancelado: 'Cancelado'
+};
+
+export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const formatPrice = (price: number) => {
+    return price.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  };
+
+  return (
+    <Card className="hover:shadow-md transition-shadow duration-200">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-3">
+            {/* Header with client and status */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-plush-100 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-plush-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                    {appointment.clientName}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {formatDate(appointment.date)}
+                  </p>
+                </div>
+              </div>
+              <Badge className={statusColors[appointment.status]}>
+                {statusLabels[appointment.status]}
+              </Badge>
+            </div>
+
+            {/* Service and time info */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-gray-400" />
+                <span className="text-sm font-medium">{appointment.serviceName}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span className="text-sm">{appointment.time} ({appointment.duration}min)</span>
+              </div>
+              <div className="font-semibold text-plush-600">
+                {formatPrice(appointment.price)}
+              </div>
+            </div>
+
+            {/* Notes */}
+            {appointment.notes && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <strong>Observações:</strong> {appointment.notes}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 ml-4">
+            <Button variant="ghost" size="sm">
+              <Phone className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm">
+              <MessageCircle className="w-4 h-4" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Editar</DropdownMenuItem>
+                <DropdownMenuItem>Confirmar</DropdownMenuItem>
+                <DropdownMenuItem>Concluir</DropdownMenuItem>
+                <DropdownMenuItem className="text-red-600">Cancelar</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
