@@ -22,17 +22,16 @@ export const useCashStatusValidation = () => {
       .select('id, closure_date, status')
       .eq('user_id', user.id)
       .eq('closure_date', recordDateOnly)
-      .eq('status', 'fechado')
-      .maybeSingle();
+      .eq('status', 'fechado');
 
     if (closureError) {
       console.error('❌ Erro ao verificar fechamento do caixa:', closureError);
       return { isValid: false, message: 'Erro ao verificar status do caixa' };
     }
 
-    // Se encontrou um caixa fechado, bloquear operação
-    if (closedCash) {
-      console.log('❌ Caixa está fechado para a data:', recordDateOnly);
+    // Se encontrou qualquer caixa fechado para esta data, bloquear operação
+    if (closedCash && closedCash.length > 0) {
+      console.log('❌ Caixa está fechado para a data:', recordDateOnly, closedCash);
       return { 
         isValid: false, 
         message: `O caixa do dia ${new Date(recordDateOnly + 'T00:00:00').toLocaleDateString('pt-BR')} está fechado. Não é possível editar ou excluir registros desta data.` 
@@ -45,8 +44,7 @@ export const useCashStatusValidation = () => {
       .select('id, opening_date, status')
       .eq('user_id', user.id)
       .eq('opening_date', recordDateOnly)
-      .eq('status', 'aberto')
-      .maybeSingle();
+      .eq('status', 'aberto');
 
     if (openingError) {
       console.error('❌ Erro ao verificar abertura do caixa:', openingError);
@@ -54,7 +52,7 @@ export const useCashStatusValidation = () => {
     }
 
     // Se não há caixa aberto, também bloquear
-    if (!openCash) {
+    if (!openCash || openCash.length === 0) {
       console.log('❌ Não há caixa aberto para a data:', recordDateOnly);
       return { 
         isValid: false, 
