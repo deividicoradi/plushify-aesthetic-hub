@@ -1,6 +1,4 @@
 
-import { useMemo } from 'react';
-
 export interface InsightData {
   type: string;
   title: string;

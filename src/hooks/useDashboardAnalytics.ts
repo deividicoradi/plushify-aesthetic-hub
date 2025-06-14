@@ -4,8 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardStats } from './useDashboardStats';
 import { useReportsData } from './useReportsData';
 import { useAnalyticsData } from './useAnalyticsData';
-import { generateInsights } from '@/utils/analyticsInsights';
-import { generateRecommendations } from '@/utils/analyticsRecommendations';
+import { generateInsights } from '@/utils/dashboardInsights';
+import { generateRecommendations } from '@/utils/dashboardRecommendations';
 
 export const useDashboardAnalytics = () => {
   const { user } = useAuth();
