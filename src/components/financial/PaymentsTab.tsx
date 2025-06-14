@@ -86,8 +86,10 @@ const PaymentsTab = () => {
     return client?.name;
   };
 
-  const getPaymentMethodName = (method: string) => {
-    return paymentMethodsMap[method as keyof typeof paymentMethodsMap] || method;
+  const getPaymentMethodName = (methodId: string) => {
+    // For now, we'll try to map the method_id to our predefined methods
+    // In the future, we might need to update the database to store the method type directly
+    return paymentMethodsMap[methodId as keyof typeof paymentMethodsMap] || methodId;
   };
 
   const filteredPayments = payments?.filter(payment =>
@@ -146,7 +148,7 @@ const PaymentsTab = () => {
                         {clientName && (
                           <p>Cliente: {clientName}</p>
                         )}
-                        <p>Método: {getPaymentMethodName(payment.payment_method)}</p>
+                        <p>Método: {getPaymentMethodName(payment.payment_method_id)}</p>
                         <p>Criado em: {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
                       </div>
                     </div>
