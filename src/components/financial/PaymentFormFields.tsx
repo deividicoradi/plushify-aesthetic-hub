@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Label } from "@/components/ui/label";
@@ -182,6 +181,14 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
         </div>
       )}
 
+      {formData.status === 'parcial' && formData.amount && formData.paid_amount && (
+        <div className="p-3 bg-yellow-50 dark:bg-yellow-800/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            📝 Valor restante: R$ {(Number(formData.amount) - Number(formData.paid_amount)).toFixed(2)} será automaticamente registrado em Parcelamentos.
+          </p>
+        </div>
+      )}
+
       {isCreditCard && formData.installments && Number(formData.installments) > 1 && formData.amount && (
         <div className="p-3 bg-blue-50 dark:bg-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <p className="text-sm text-blue-800 dark:text-blue-200">
@@ -194,4 +201,3 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
 };
 
 export default PaymentFormFields;
-

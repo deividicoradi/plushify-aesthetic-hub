@@ -35,6 +35,39 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
     installments: payment?.installments || '1'
   });
 
+  // Função para criar parcelamentos automáticos para pagamentos parciais
+  const createInstallmentsForPartialPayment = async (paymentData: any) => {
+    const remainingAmount = Number(paymentData.amount) - Number(paymentData.paid_amount);
+    
+    if (remainingAmount <= 0) return;
+
+    // Criar uma parcela para o valor restante
+    const dueDate = new Date();
+    dueDate.setMonth(dueDate.getMonth() + 1); // Vencimento em 30 dias
+
+    const installment = {
+      user_id: user?.id,
+      payment_id: paymentData.id,
+      installment_number: 1,
+      total_installments: 1,
+      amount: remainingAmount,
+      due_date: dueDate.toISOString(),
+      status: 'pendente',
+      notes: `Valor restante do pagamento: ${paymentData.description}`
+    };
+
+    const { error } = await supabase
+      .from('installments')
+      .insert([installment]);
+
+    if (error) {
+      console.error('Erro ao criar parcelamento automático:', error);
+      throw error;
+    }
+
+    console.log('✅ Parcelamento automático criado para pagamento parcial');
+  };
+
   const mutation = useMutation({
     mutationFn: async (data: any) => {
       console.log('Dados sendo enviados para pagamento:', data);
@@ -92,12 +125,31 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
             variant: "destructive",
           });
         }
-      } else {
-        console.log('ℹ️ Pagamento não está marcado como pago ou não tem valor pago - caixa não será atualizado');
+      }
+
+      // Se o pagamento foi marcado como parcial, criar parcelamento automático
+      if (result.status === 'parcial' && Number(result.paid_amount) > 0) {
+        console.log('📝 Criando parcelamento automático para pagamento parcial...');
+        
+        try {
+          await createInstallmentsForPartialPayment(result);
+          toast({
+            title: "Parcelamento criado!",
+            description: "O valor restante foi automaticamente registrado em Parcelamentos.",
+          });
+        } catch (error) {
+          console.error('❌ Erro ao criar parcelamento automático:', error);
+          toast({
+            title: "Atenção",
+            description: "Pagamento salvo, mas houve erro ao criar o parcelamento automático.",
+            variant: "destructive",
+          });
+        }
       }
 
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+      queryClient.invalidateQueries({ queryKey: ['installments'] });
       toast({
         title: "Sucesso!",
         description: payment ? 'Pagamento atualizado!' : 'Pagamento criado!',
@@ -166,6 +218,27 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       return;
     }
 
+    // Se status é parcial, deve ter paid_amount menor que amount
+    if (formData.status === 'parcial') {
+      if (!formData.paid_amount || Number(formData.paid_amount) <= 0) {
+        toast({
+          title: "Erro",
+          description: 'Para pagamentos parciais, informe o valor pago',
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (Number(formData.paid_amount) >= Number(formData.amount)) {
+        toast({
+          title: "Erro",
+          description: 'Para pagamentos parciais, o valor pago deve ser menor que o valor total',
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     const dataToSubmit = {
       description: formData.description,
       amount: parseFloat(formData.amount),
@@ -175,7 +248,7 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       notes: formData.notes || null,
       status: formData.status,
       paid_amount: parseFloat(formData.paid_amount) || 0,
-      payment_date: formData.status === 'pago' ? new Date().toISOString() : null,
+      payment_date: ['pago', 'parcial'].includes(formData.status) ? new Date().toISOString() : null,
       installments: parseInt(formData.installments) || 1
     };
 
