@@ -11,9 +11,10 @@ import { toast } from "@/components/ui/sonner";
 type NewClientDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 };
 
-const NewClientDrawer: React.FC<NewClientDrawerProps> = ({ open, onOpenChange }) => {
+const NewClientDrawer: React.FC<NewClientDrawerProps> = ({ open, onOpenChange, onSuccess }) => {
   const { user } = useAuth();
   const [form, setForm] = useState({
     name: "",
@@ -72,6 +73,11 @@ const NewClientDrawer: React.FC<NewClientDrawerProps> = ({ open, onOpenChange })
         status: "Ativo"
       });
       onOpenChange(false);
+      
+      // Notify parent component about the success
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: any) {
       toast.error("Erro ao adicionar cliente: " + error.message);
     } finally {

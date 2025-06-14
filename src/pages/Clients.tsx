@@ -8,6 +8,8 @@ import { AppSidebar } from '@/components/AppSidebar';
 import ClientList from '@/components/clients/ClientList';
 import NewClientDrawer from "@/components/clients/NewClientDrawer";
 import ClientFiltersPopover from "@/components/clients/ClientFiltersPopover";
+import { useClientStats } from '@/hooks/useClientStats';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Clients = () => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
@@ -16,6 +18,11 @@ const Clients = () => {
     lastVisit: 'Todos'
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const { totalClients, activeClients, newThisMonth, loading, refetch } = useClientStats();
+
+  const handleClientAdded = () => {
+    refetch(); // Atualiza as estatísticas quando um novo cliente é adicionado
+  };
 
   return (
     <SidebarProvider>
@@ -86,7 +93,11 @@ const Clients = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Total de Clientes</p>
-                      <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">1,234</p>
+                      {loading ? (
+                        <Skeleton className="h-8 w-16 mt-1" />
+                      ) : (
+                        <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{totalClients.toLocaleString()}</p>
+                      )}
                     </div>
                     <div className="p-3 bg-blue-500/10 rounded-lg">
                       <Users className="w-6 h-6 text-blue-600" />
@@ -98,7 +109,11 @@ const Clients = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-green-600 dark:text-green-400">Clientes Ativos</p>
-                      <p className="text-2xl font-bold text-green-900 dark:text-green-100">1,156</p>
+                      {loading ? (
+                        <Skeleton className="h-8 w-16 mt-1" />
+                      ) : (
+                        <p className="text-2xl font-bold text-green-900 dark:text-green-100">{activeClients.toLocaleString()}</p>
+                      )}
                     </div>
                     <div className="p-3 bg-green-500/10 rounded-lg">
                       <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -112,7 +127,11 @@ const Clients = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Novos Este Mês</p>
-                      <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">+47</p>
+                      {loading ? (
+                        <Skeleton className="h-8 w-16 mt-1" />
+                      ) : (
+                        <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">+{newThisMonth}</p>
+                      )}
                     </div>
                     <div className="p-3 bg-purple-500/10 rounded-lg">
                       <Plus className="w-6 h-6 text-purple-600" />
@@ -130,13 +149,14 @@ const Clients = () => {
                   </p>
                 </div>
                 <div className="p-6">
-                  <ClientList filters={filters} />
+                  <ClientList filters={filters} searchTerm={searchTerm} onClientUpdate={refetch} />
                 </div>
               </div>
 
               <NewClientDrawer
                 open={isDrawerOpen}
                 onOpenChange={setDrawerOpen}
+                onSuccess={handleClientAdded}
               />
             </main>
           </div>
