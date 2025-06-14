@@ -4,19 +4,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
-
-const weeklyData = [
-  { day: 'Seg', agendamentos: 12, faturamento: 850, clientes: 8 },
-  { day: 'Ter', agendamentos: 15, faturamento: 1200, clientes: 12 },
-  { day: 'Qua', agendamentos: 8, faturamento: 650, clientes: 6 },
-  { day: 'Qui', agendamentos: 18, faturamento: 1450, clientes: 15 },
-  { day: 'Sex', agendamentos: 22, faturamento: 1800, clientes: 18 },
-  { day: 'Sáb', agendamentos: 25, faturamento: 2100, clientes: 20 },
-  { day: 'Dom', agendamentos: 10, faturamento: 750, clientes: 8 },
-];
+import { useInteractiveChartData } from '@/hooks/useInteractiveChartData';
 
 export const InteractiveChart = () => {
   const [activeMetric, setActiveMetric] = useState<'agendamentos' | 'faturamento' | 'clientes'>('agendamentos');
+  const { data, loading } = useInteractiveChartData();
 
   const metrics = {
     agendamentos: {
@@ -40,6 +32,22 @@ export const InteractiveChart = () => {
   };
 
   const currentMetric = metrics[activeMetric];
+
+  if (loading) {
+    return (
+      <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white via-white to-gray-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800/30">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-border/50">
+          <CardTitle className="text-xl font-semibold">Analytics Interativo</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">Visão geral semanal</p>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="animate-pulse text-muted-foreground">Carregando dados...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white via-white to-gray-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800/30">
@@ -80,7 +88,7 @@ export const InteractiveChart = () => {
         </div>
 
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={weeklyData}>
+          <AreaChart data={data}>
             <defs>
               <linearGradient id={`gradient-${activeMetric}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={currentMetric.color} stopOpacity={0.3}/>
@@ -105,6 +113,12 @@ export const InteractiveChart = () => {
                 border: 'none',
                 borderRadius: '12px',
                 boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+              }}
+              formatter={(value, name) => {
+                if (name === 'faturamento') {
+                  return [`R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Faturamento'];
+                }
+                return [value, name === 'agendamentos' ? 'Agendamentos' : 'Novos Clientes'];
               }}
             />
             <Area
