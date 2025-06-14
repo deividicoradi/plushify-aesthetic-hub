@@ -1,33 +1,46 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { Edit, Trash2, Calendar, User, CreditCard } from 'lucide-react';
+import { formatCurrency, formatDate } from '@/utils/reports/formatters';
+import { useCashStatusValidation } from '@/hooks/financial/useCashStatusValidation';
 
 interface PaymentCardProps {
   payment: any;
-  clientName?: string | null;
+  clientName: string | null;
   onEdit: (payment: any) => void;
-  onDelete: (paymentId: string) => void;
+  onDelete: (payment: any) => void;
+  isDeleting: boolean;
 }
 
-const PaymentCard = ({ payment, clientName, onEdit, onDelete }: PaymentCardProps) => {
-  const getStatusBadge = (status: string, dueDate?: string) => {
-    const isOverdue = dueDate && new Date(dueDate) < new Date() && status === 'pendente';
-    
+const PaymentCard = ({ payment, clientName, onEdit, onDelete, isDeleting }: PaymentCardProps) => {
+  const [isCashClosed, setIsCashClosed] = useState(false);
+  const { validateCashIsOpen } = useCashStatusValidation();
+
+  useEffect(() => {
+    const checkCashStatus = async () => {
+      if (payment?.created_at) {
+        const validation = await validateCashIsOpen(payment.created_at);
+        setIsCashClosed(!validation.isValid);
+      }
+    };
+
+    checkCashStatus();
+  }, [payment?.created_at, validateCashIsOpen]);
+
+  const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pendente: { 
-        label: isOverdue ? 'Atrasado' : 'Pendente', 
-        variant: 'secondary' as const,
-        className: isOverdue ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-red-500 text-white hover:bg-red-600'
-      },
       pago: { 
         label: 'Pago', 
         variant: 'default' as const,
         className: 'bg-green-500 text-white hover:bg-green-600'
+      },
+      pendente: { 
+        label: 'Pendente', 
+        variant: 'secondary' as const,
+        className: 'bg-yellow-500 text-white hover:bg-yellow-600'
       },
       parcial: { 
         label: 'Parcial', 
@@ -37,7 +50,7 @@ const PaymentCard = ({ payment, clientName, onEdit, onDelete }: PaymentCardProps
       cancelado: { 
         label: 'Cancelado', 
         variant: 'destructive' as const,
-        className: 'bg-gray-500 text-white hover:bg-gray-600'
+        className: ''
       },
     };
     
@@ -45,68 +58,76 @@ const PaymentCard = ({ payment, clientName, onEdit, onDelete }: PaymentCardProps
     return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
-
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2 flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold">
-                {payment.description || 'Pagamento sem descrição'}
-              </h3>
-              {getStatusBadge(payment.status, payment.due_date)}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-              {clientName && (
-                <p>Cliente: {clientName}</p>
-              )}
-              {payment.payment_methods && (
-                <p>Método: {payment.payment_methods.name}</p>
-              )}
-              <p>Criado em: {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
-            </div>
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
+              {payment.description || 'Pagamento sem descrição'}
+            </h3>
+            {getStatusBadge(payment.status)}
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right space-y-1">
-              <p className="text-lg font-bold">
-                {formatCurrency(Number(payment.amount))}
+          <div className="text-right">
+            <p className="text-lg font-bold text-green-600">
+              {formatCurrency(Number(payment.amount))}
+            </p>
+            {payment.status === 'parcial' && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Pago: {formatCurrency(Number(payment.paid_amount || 0))}
               </p>
-              {Number(payment.paid_amount) > 0 && (
-                <p className="text-sm text-green-600">
-                  Pago: {formatCurrency(Number(payment.paid_amount))}
-                </p>
-              )}
-              {Number(payment.discount) > 0 && (
-                <p className="text-sm text-orange-600">
-                  Desconto: {formatCurrency(Number(payment.discount))}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEdit(payment)}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDelete(payment.id)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
+            )}
           </div>
+        </div>
+
+        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {clientName && (
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              <span>{clientName}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            <span>{payment.payment_methods?.name || 'Método não informado'}</span>
+          </div>
+
+          {payment.due_date && (
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              <span>Venc: {formatDate(payment.due_date)}</span>
+            </div>
+          )}
+
+          {payment.notes && (
+            <p className="text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded mt-2 line-clamp-2">
+              {payment.notes}
+            </p>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onEdit(payment)}
+            disabled={isCashClosed}
+            className="flex-1"
+          >
+            <Edit className="w-3 h-3 mr-1" />
+            Editar
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onDelete(payment)}
+            className="text-red-600 hover:text-red-700"
+            disabled={isDeleting || isCashClosed}
+          >
+            <Trash2 className="w-3 h-3 mr-1" />
+            {isDeleting ? 'Excluindo...' : 'Excluir'}
+          </Button>
         </div>
       </CardContent>
     </Card>
