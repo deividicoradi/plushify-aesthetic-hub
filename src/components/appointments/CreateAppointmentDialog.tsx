@@ -29,20 +29,29 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submitted with data:', formData);
+    
     if (!formData.client_name || !formData.service_name || !formData.appointment_date || !formData.appointment_time) {
+      console.log('Missing required fields');
       return;
     }
 
-    const result = await createAppointment({
+    const appointmentPayload = {
       client_name: formData.client_name,
       service_name: formData.service_name,
       appointment_date: formData.appointment_date,
       appointment_time: formData.appointment_time,
       duration: formData.duration,
-      status: 'agendado',
+      status: 'agendado' as const,
       price: formData.price,
       notes: formData.notes || undefined
-    });
+    };
+
+    console.log('Creating appointment with payload:', appointmentPayload);
+
+    const result = await createAppointment(appointmentPayload);
+
+    console.log('Create appointment result:', result);
 
     if (result) {
       setFormData({

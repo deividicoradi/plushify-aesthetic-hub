@@ -40,6 +40,8 @@ export const useAppointments = () => {
 
       if (error) throw error;
       
+      console.log('Fetched appointments:', data);
+      
       // Garantir que o status está correto
       const formattedData = (data || []).map(appointment => ({
         ...appointment,
@@ -63,6 +65,8 @@ export const useAppointments = () => {
     if (!user) return null;
 
     try {
+      console.log('Creating appointment with data:', appointmentData);
+      
       const { data, error } = await supabase
         .from('appointments')
         .insert({
@@ -74,12 +78,19 @@ export const useAppointments = () => {
 
       if (error) throw error;
 
+      console.log('Created appointment:', data);
+
       const formattedData = {
         ...data,
         status: data.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
       };
 
+      // Atualizar a lista local e fazer refetch para garantir sincronização
       setAppointments(prev => [...prev, formattedData]);
+      
+      // Fazer refetch para garantir que temos os dados mais atualizados
+      await fetchAppointments();
+
       toast({
         title: "Sucesso",
         description: "Agendamento criado com sucesso!"
