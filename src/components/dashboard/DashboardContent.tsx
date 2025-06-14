@@ -9,44 +9,52 @@ import { WeeklyOverview } from '@/components/dashboard/WeeklyOverview';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { QuickHelp } from '@/components/dashboard/QuickHelp';
 import { TeamManagement } from '@/components/premium/TeamManagement';
-import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { Users, CalendarDays, Receipt, TrendingUp } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 
 export const DashboardContent = () => {
   const navigate = useNavigate();
   const { hasFeature } = useSubscription();
+  const { 
+    totalClients, 
+    activeClients, 
+    newThisMonth, 
+    weeklyAppointments,
+    monthlyRevenue,
+    loading 
+  } = useDashboardStats();
 
   const metricItems = [
     {
       title: "Total de Clientes",
-      value: "1,234",
-      trend: "+12.3%",
+      value: loading ? "..." : totalClients.toLocaleString(),
+      trend: newThisMonth > 0 && totalClients > 0 ? `+${((newThisMonth / totalClients) * 100).toFixed(1)}%` : "+0%",
       icon: Users,
       description: "Últimos 30 dias",
       to: "/clients",
       gradientClass: "from-purple-500 via-purple-600 to-indigo-600",
-      trendUp: true,
+      trendUp: newThisMonth > 0,
     },
     {
       title: "Agendamentos",
-      value: "156",
-      trend: "+8.2%",
+      value: loading ? "..." : weeklyAppointments.toLocaleString(),
+      trend: weeklyAppointments > 10 ? "+Alta" : weeklyAppointments > 0 ? "+Baixa" : "Nenhum",
       icon: CalendarDays,
       description: "Esta semana",
       to: "/appointments",
       gradientClass: "from-blue-500 via-blue-600 to-cyan-600",
-      trendUp: true,
+      trendUp: weeklyAppointments > 0,
     },
     {
       title: "Receita",
-      value: "R$ 15.290",
-      trend: "+23.1%",
+      value: loading ? "..." : `R$ ${monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      trend: monthlyRevenue > 1000 ? "+23.1%" : monthlyRevenue > 0 ? "+5.0%" : "+0%",
       icon: Receipt,
       description: "Este mês",
       to: hasFeature('pro') ? "/financial" : "/planos",
       gradientClass: "from-green-500 via-green-600 to-emerald-600",
-      trendUp: true,
+      trendUp: monthlyRevenue > 0,
     },
     {
       title: "Crescimento",

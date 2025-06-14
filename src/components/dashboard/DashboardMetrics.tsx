@@ -4,15 +4,17 @@ import { Users, CalendarDays, Receipt, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useClientStats } from '@/hooks/useClientStats';
 
 export const DashboardMetrics = () => {
   const navigate = useNavigate();
   const { hasFeature } = useSubscription();
+  const { totalClients, activeClients, newThisMonth, loading } = useClientStats();
 
   const metricItems = [
     {
       title: "Total de Clientes",
-      value: "1,234",
+      value: loading ? "..." : totalClients.toLocaleString(),
       trend: "+12.3%",
       icon: Users,
       description: "Últimos 30 dias",
