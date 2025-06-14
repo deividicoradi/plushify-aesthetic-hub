@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -26,7 +27,7 @@ export const useAppointments = () => {
   const [isCreating, setIsCreating] = useState(false);
   const { user } = useAuth();
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -59,7 +60,7 @@ export const useAppointments = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   const createAppointment = async (appointmentData: Omit<Appointment, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     if (!user || isCreating) return null;
@@ -162,7 +163,9 @@ export const useAppointments = () => {
 
       if (error) throw error;
 
+      // Atualizar a lista local removendo o item
       setAppointments(prev => prev.filter(appointment => appointment.id !== id));
+      
       toast({
         title: "Sucesso",
         description: "Agendamento excluído com sucesso!"
@@ -182,7 +185,7 @@ export const useAppointments = () => {
 
   useEffect(() => {
     fetchAppointments();
-  }, [user]);
+  }, [fetchAppointments]);
 
   return {
     appointments,
