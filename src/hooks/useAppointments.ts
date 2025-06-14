@@ -1,0 +1,174 @@
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { Appointment } from '@/types/appointment';
+
+export const useAppointments = () => {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*')
+        .order('start_time', { ascending: true });
+
+      if (error) throw error;
+
+      // Converter dados do Supabase para o formato Appointment
+      const formattedAppointments: Appointment[] = data.map(item => ({
+        id: item.id,
+        client: item.client_name || 'Cliente não informado',
+        service: item.service || 'Serviço não informado',
+        time: item.time || new Date(item.start_time).toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        date: new Date(item.start_time),
+        status: item.status as "Confirmado" | "Pendente" | "Cancelado"
+      }));
+
+      setAppointments(formattedAppointments);
+    } catch (error) {
+      console.error('Erro ao buscar agendamentos:', error);
+      toast({
+        title: "Erro ao carregar agendamentos",
+        description: "Não foi possível carregar os agendamentos.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createAppointment = async (appointmentData: Omit<Appointment, "id">) => {
+    try {
+      // Combinar data e hora
+      const [hours, minutes] = appointmentData.time.split(':');
+      const startTime = new Date(appointmentData.date);
+      startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      const endTime = new Date(startTime);
+      endTime.setHours(startTime.getHours() + 1); // Duração padrão de 1 hora
+
+      const { data, error } = await supabase
+        .from('appointments')
+        .insert({
+          title: `${appointmentData.service} - ${appointmentData.client}`,
+          client_name: appointmentData.client,
+          service: appointmentData.service,
+          time: appointmentData.time,
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          status: appointmentData.status,
+          description: `Agendamento de ${appointmentData.service} para ${appointmentData.client}`
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await fetchAppointments();
+      
+      toast({
+        title: "Agendamento criado",
+        description: "O agendamento foi criado com sucesso."
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao criar agendamento:', error);
+      toast({
+        title: "Erro ao criar agendamento",
+        description: "Não foi possível criar o agendamento.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const updateAppointment = async (id: number, appointmentData: Omit<Appointment, "id">) => {
+    try {
+      // Combinar data e hora
+      const [hours, minutes] = appointmentData.time.split(':');
+      const startTime = new Date(appointmentData.date);
+      startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      const endTime = new Date(startTime);
+      endTime.setHours(startTime.getHours() + 1);
+
+      const { error } = await supabase
+        .from('appointments')
+        .update({
+          title: `${appointmentData.service} - ${appointmentData.client}`,
+          client_name: appointmentData.client,
+          service: appointmentData.service,
+          time: appointmentData.time,
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          status: appointmentData.status,
+          description: `Agendamento de ${appointmentData.service} para ${appointmentData.client}`
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await fetchAppointments();
+      
+      toast({
+        title: "Agendamento atualizado",
+        description: "O agendamento foi atualizado com sucesso."
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar agendamento:', error);
+      toast({
+        title: "Erro ao atualizar agendamento",
+        description: "Não foi possível atualizar o agendamento.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const deleteAppointment = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await fetchAppointments();
+      
+      toast({
+        title: "Agendamento excluído",
+        description: "O agendamento foi excluído com sucesso."
+      });
+    } catch (error) {
+      console.error('Erro ao excluir agendamento:', error);
+      toast({
+        title: "Erro ao excluir agendamento",
+        description: "Não foi possível excluir o agendamento.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  return {
+    appointments,
+    loading,
+    fetchAppointments,
+    createAppointment,
+    updateAppointment,
+    deleteAppointment
+  };
+};

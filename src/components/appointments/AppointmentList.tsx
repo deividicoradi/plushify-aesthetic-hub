@@ -1,8 +1,7 @@
 
-import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Appointment } from "@/types/appointment";
 import { format } from "date-fns";
@@ -13,13 +12,27 @@ interface AppointmentListProps {
   appointments: Appointment[];
   onEdit: (appointment: Appointment) => void;
   onDelete: (id: number) => void;
+  loading?: boolean;
 }
 
-const AppointmentList = ({ date, appointments, onEdit, onDelete }: AppointmentListProps) => {
+const AppointmentList = ({ date, appointments, onEdit, onDelete, loading = false }: AppointmentListProps) => {
   const filteredAppointments = date 
     ? appointments.filter(appointment => 
         appointment.date.toDateString() === date.toDateString())
     : appointments;
+
+  if (loading) {
+    return (
+      <div className="rounded-md border">
+        <div className="p-4 border-b">
+          <h3 className="font-medium">Carregando agendamentos...</h3>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-md border">

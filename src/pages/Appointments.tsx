@@ -1,14 +1,15 @@
+
 import React, { useState } from 'react';
 import { Calendar, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { toast } from "@/hooks/use-toast";
 import AppointmentCalendar from '@/components/appointments/AppointmentCalendar';
 import AppointmentList from '@/components/appointments/AppointmentList';
 import AppointmentDialog from '@/components/appointments/AppointmentDialog';
 import DeleteConfirmDialog from '@/components/appointments/DeleteConfirmDialog';
 import { Appointment } from '@/types/appointment';
+import { useAppointments } from '@/hooks/useAppointments';
 
 const Appointments = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -17,33 +18,13 @@ const Appointments = () => {
   const [currentAppointment, setCurrentAppointment] = useState<Appointment | undefined>(undefined);
   const [appointmentToDelete, setAppointmentToDelete] = useState<number | null>(null);
   
-  // Dados de exemplo para demonstração
-  const [appointments, setAppointments] = useState<Appointment[]>([
-    {
-      id: 1,
-      client: "Maria Silva",
-      service: "Corte de Cabelo",
-      time: "09:00",
-      date: new Date(),
-      status: "Confirmado",
-    },
-    {
-      id: 2,
-      client: "João Santos",
-      service: "Manicure",
-      time: "10:30",
-      date: new Date(),
-      status: "Pendente",
-    },
-    {
-      id: 3,
-      client: "Ana Oliveira",
-      service: "Maquiagem",
-      time: "14:00",
-      date: new Date(new Date().setDate(new Date().getDate() + 1)),
-      status: "Confirmado",
-    },
-  ]);
+  const {
+    appointments,
+    loading,
+    createAppointment,
+    updateAppointment,
+    deleteAppointment
+  } = useAppointments();
 
   const handleCreateAppointment = () => {
     setCurrentAppointment(undefined);
@@ -60,26 +41,24 @@ const Appointments = () => {
     setShowDeleteDialog(true);
   };
 
-  const confirmDeleteAppointment = () => {
+  const confirmDeleteAppointment = async () => {
     if (appointmentToDelete !== null) {
-      setAppointments(appointments.filter(a => a.id !== appointmentToDelete));
+      await deleteAppointment(appointmentToDelete);
       setShowDeleteDialog(false);
       setAppointmentToDelete(null);
-      toast({
-        title: "Agendamento excluído",
-        description: "O agendamento foi excluído com sucesso."
-      });
     }
   };
 
-  const handleSaveAppointment = (appointmentData: Omit<Appointment, "id"> & { id?: number }) => {
-    if (appointmentData.id) {
-      setAppointments(appointments.map(a => 
-        a.id === appointmentData.id ? { ...appointmentData, id: a.id } as Appointment : a
-      ));
-    } else {
-      const newId = Math.max(0, ...appointments.map(a => a.id)) + 1;
-      setAppointments([...appointments, { ...appointmentData, id: newId } as Appointment]);
+  const handleSaveAppointment = async (appointmentData: Omit<Appointment, "id"> & { id?: number }) => {
+    try {
+      if (appointmentData.id) {
+        await updateAppointment(appointmentData.id, appointmentData);
+      } else {
+        await createAppointment(appointmentData);
+      }
+      setShowAppointmentDialog(false);
+    } catch (error) {
+      console.error('Erro ao salvar agendamento:', error);
     }
   };
 
@@ -119,6 +98,7 @@ const Appointments = () => {
                   appointments={appointments} 
                   onEdit={handleEditAppointment}
                   onDelete={handleDeleteAppointment}
+                  loading={loading}
                 />
               </div>
             </main>

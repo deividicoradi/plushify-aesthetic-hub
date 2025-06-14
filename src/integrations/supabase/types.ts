@@ -12,39 +12,48 @@ export type Database = {
       appointments: {
         Row: {
           client_id: string | null
+          client_name: string | null
           created_at: string
           description: string | null
           end_time: string
           id: string
           price: number | null
+          service: string | null
           start_time: string
           status: string
+          time: string | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
           client_id?: string | null
+          client_name?: string | null
           created_at?: string
           description?: string | null
           end_time: string
           id?: string
           price?: number | null
+          service?: string | null
           start_time: string
           status?: string
+          time?: string | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
           client_id?: string | null
+          client_name?: string | null
           created_at?: string
           description?: string | null
           end_time?: string
           id?: string
           price?: number | null
+          service?: string | null
           start_time?: string
           status?: string
+          time?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -629,7 +638,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      format_appointment_time: {
+        Args: { start_time: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
