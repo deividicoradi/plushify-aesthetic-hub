@@ -11,7 +11,7 @@ import ExpensesTab from '@/components/financial/ExpensesTab';
 import ReportsTab from '@/components/financial/ReportsTab';
 
 const Financial = () => {
-  const [activeTab, setActiveTab] = useState('payments');
+  const [activeTab, setActiveTab] = useState('cash-closure');
 
   return (
     <SidebarProvider>
@@ -34,6 +34,10 @@ const Financial = () => {
             <main className="flex-1 p-6 space-y-6">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                 <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
+                  <TabsTrigger value="cash-closure" className="flex items-center gap-2">
+                    <Receipt className="w-4 h-4" />
+                    <span className="hidden sm:inline">Caixa</span>
+                  </TabsTrigger>
                   <TabsTrigger value="payments" className="flex items-center gap-2">
                     <CreditCard className="w-4 h-4" />
                     <span className="hidden sm:inline">Pagamentos</span>
@@ -41,10 +45,6 @@ const Financial = () => {
                   <TabsTrigger value="installments" className="flex items-center gap-2">
                     <Calculator className="w-4 h-4" />
                     <span className="hidden sm:inline">Parcelamentos</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="cash-closure" className="flex items-center gap-2">
-                    <Receipt className="w-4 h-4" />
-                    <span className="hidden sm:inline">Fechamento</span>
                   </TabsTrigger>
                   <TabsTrigger value="expenses" className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4" />
@@ -56,16 +56,16 @@ const Financial = () => {
                   </TabsTrigger>
                 </TabsList>
 
+                <TabsContent value="cash-closure" className="space-y-6">
+                  <CashClosureTab />
+                </TabsContent>
+
                 <TabsContent value="payments" className="space-y-6">
                   <PaymentsTab />
                 </TabsContent>
 
                 <TabsContent value="installments" className="space-y-6">
                   <InstallmentsTab />
-                </TabsContent>
-
-                <TabsContent value="cash-closure" className="space-y-6">
-                  <CashClosureTab />
                 </TabsContent>
 
                 <TabsContent value="expenses" className="space-y-6">
