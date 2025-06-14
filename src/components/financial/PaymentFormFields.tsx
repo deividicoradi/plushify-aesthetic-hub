@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Label } from "@/components/ui/label";
@@ -104,10 +105,9 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
         <Label htmlFor="client_id">Cliente (opcional)</Label>
         <Select value={formData.client_id} onValueChange={(value) => onFieldChange('client_id', value)}>
           <SelectTrigger>
-            <SelectValue placeholder="Selecione um cliente" />
+            <SelectValue placeholder="Selecione um cliente (opcional)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Nenhum cliente</SelectItem>
             {clients?.map((client) => (
               <SelectItem key={client.id} value={client.id}>
                 {client.name}
