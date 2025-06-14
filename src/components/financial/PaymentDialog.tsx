@@ -24,28 +24,26 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
   const [formData, setFormData] = useState({
     description: payment?.description || '',
     amount: payment?.amount || '',
-    payment_method_id: payment?.payment_method_id || '',
+    payment_method: payment?.payment_method || '',
     client_id: payment?.client_id || '',
     due_date: payment?.due_date ? payment.due_date.split('T')[0] : '',
     notes: payment?.notes || '',
     status: payment?.status || 'pendente'
   });
 
-  const { data: paymentMethods } = useQuery({
-    queryKey: ['payment-methods', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('payment_methods')
-        .select('*')
-        .eq('user_id', user?.id)
-        .eq('active', true)
-        .order('name');
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  // Métodos de pagamento mais usados atualmente
+  const paymentMethods = [
+    { id: 'pix', name: 'PIX' },
+    { id: 'dinheiro', name: 'Dinheiro' },
+    { id: 'cartao_debito', name: 'Cartão de Débito' },
+    { id: 'cartao_credito', name: 'Cartão de Crédito' },
+    { id: 'transferencia', name: 'Transferência Bancária' },
+    { id: 'boleto', name: 'Boleto' },
+    { id: 'cheque', name: 'Cheque' },
+    { id: 'vale_alimentacao', name: 'Vale Alimentação' },
+    { id: 'vale_refeicao', name: 'Vale Refeição' },
+    { id: 'outros', name: 'Outros' }
+  ];
 
   const { data: clients } = useQuery({
     queryKey: ['clients', user?.id],
@@ -84,7 +82,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
       setFormData({
         description: '',
         amount: '',
-        payment_method_id: '',
+        payment_method: '',
         client_id: '',
         due_date: '',
         notes: '',
@@ -100,7 +98,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.description || !formData.amount || !formData.payment_method_id) {
+    if (!formData.description || !formData.amount || !formData.payment_method) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
@@ -170,12 +168,12 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="payment_method">Método de Pagamento *</Label>
-            <Select value={formData.payment_method_id} onValueChange={(value) => handleChange('payment_method_id', value)}>
+            <Select value={formData.payment_method} onValueChange={(value) => handleChange('payment_method', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o método" />
               </SelectTrigger>
               <SelectContent>
-                {paymentMethods?.map((method) => (
+                {paymentMethods.map((method) => (
                   <SelectItem key={method.id} value={method.id}>
                     {method.name}
                   </SelectItem>

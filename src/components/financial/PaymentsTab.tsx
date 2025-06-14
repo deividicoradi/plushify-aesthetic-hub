@@ -22,10 +22,7 @@ const PaymentsTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
-        .select(`
-          *,
-          payment_methods (name, type)
-        `)
+        .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
@@ -50,6 +47,20 @@ const PaymentsTab = () => {
     enabled: !!user?.id,
   });
 
+  // Mapear métodos de pagamento
+  const paymentMethodsMap = {
+    'pix': 'PIX',
+    'dinheiro': 'Dinheiro',
+    'cartao_debito': 'Cartão de Débito',
+    'cartao_credito': 'Cartão de Crédito',
+    'transferencia': 'Transferência Bancária',
+    'boleto': 'Boleto',
+    'cheque': 'Cheque',
+    'vale_alimentacao': 'Vale Alimentação',
+    'vale_refeicao': 'Vale Refeição',
+    'outros': 'Outros'
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pendente: { label: 'Pendente', variant: 'secondary' as const },
@@ -73,6 +84,10 @@ const PaymentsTab = () => {
     if (!clientId || !clients) return null;
     const client = clients.find(c => c.id === clientId);
     return client?.name;
+  };
+
+  const getPaymentMethodName = (method: string) => {
+    return paymentMethodsMap[method as keyof typeof paymentMethodsMap] || method;
   };
 
   const filteredPayments = payments?.filter(payment =>
@@ -131,7 +146,7 @@ const PaymentsTab = () => {
                         {clientName && (
                           <p>Cliente: {clientName}</p>
                         )}
-                        <p>Método: {payment.payment_methods?.name}</p>
+                        <p>Método: {getPaymentMethodName(payment.payment_method)}</p>
                         <p>Criado em: {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
                       </div>
                     </div>
