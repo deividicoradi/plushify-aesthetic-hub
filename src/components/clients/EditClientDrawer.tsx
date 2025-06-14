@@ -3,10 +3,13 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { User, Mail, Phone, UserCheck, X, Save } from "lucide-react";
 
 type Client = {
   id: string;
@@ -54,8 +57,8 @@ const EditClientDrawer: React.FC<EditClientDrawerProps> = ({ client, open, onOpe
     // Validate required fields
     if (!form.name.trim()) {
       toast({
-        title: "Erro",
-        description: "Nome é obrigatório",
+        title: "Campo obrigatório",
+        description: "O nome do cliente é obrigatório",
         variant: "destructive",
       });
       return;
@@ -64,7 +67,7 @@ const EditClientDrawer: React.FC<EditClientDrawerProps> = ({ client, open, onOpe
     // Check if user is logged in
     if (!user || !client) {
       toast({
-        title: "Erro",
+        title: "Erro de autenticação",
         description: "Você precisa estar logado para editar um cliente",
         variant: "destructive",
       });
@@ -89,16 +92,16 @@ const EditClientDrawer: React.FC<EditClientDrawerProps> = ({ client, open, onOpe
       }
 
       toast({
-        title: "Sucesso",
-        description: "Cliente atualizado com sucesso!",
+        title: "Cliente atualizado!",
+        description: "As informações do cliente foram atualizadas com sucesso.",
       });
       
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Erro",
-        description: "Erro ao atualizar cliente: " + error.message,
+        title: "Erro ao atualizar",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -108,70 +111,151 @@ const EditClientDrawer: React.FC<EditClientDrawerProps> = ({ client, open, onOpe
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-w-md ml-auto w-full animate-slide-in-right">
-        <DrawerHeader>
-          <DrawerTitle>Editar Cliente</DrawerTitle>
-          <DrawerDescription>Atualize os dados do cliente.</DrawerDescription>
-        </DrawerHeader>
-        <form className="space-y-5 px-6 pb-6" onSubmit={handleSubmit} autoComplete="off">
-          <div>
-            <Label htmlFor="name">Nome</Label>
-            <Input 
-              id="name" 
-              name="name" 
-              required 
-              value={form.name} 
-              onChange={handleInput}
-            />
+      <DrawerContent className="max-w-lg mx-auto w-full max-h-[90vh] overflow-hidden">
+        {/* Modern Header with gradient */}
+        <DrawerHeader className="relative bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-b border-border/50 pb-6">
+          <div className="absolute top-4 right-4">
+            <DrawerClose asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8 rounded-full hover:bg-background/50"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DrawerClose>
           </div>
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input 
-              id="email" 
-              name="email" 
-              type="email" 
-              value={form.email} 
-              onChange={handleInput}
-            />
+          
+          <div className="flex items-center gap-3 pr-12">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 ring-1 ring-primary/10">
+              <User className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <DrawerTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                Editar Cliente
+              </DrawerTitle>
+              <DrawerDescription className="text-muted-foreground mt-1">
+                Atualize as informações do cliente
+              </DrawerDescription>
+            </div>
           </div>
-          <div>
-            <Label htmlFor="phone">Telefone</Label>
-            <Input 
-              id="phone" 
-              name="phone" 
-              value={form.phone} 
-              onChange={handleInput} 
-              placeholder="(99) 99999-9999"
-            />
-          </div>
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <select
-              id="status"
-              name="status"
-              className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background focus:outline-none"
-              value={form.status}
-              onChange={e => setForm({ ...form, status: e.target.value })}
+
+          {/* Status Badge */}
+          <div className="mt-4">
+            <Badge 
+              variant={form.status === "Ativo" ? "default" : "secondary"}
+              className="text-xs px-3 py-1"
             >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
-            </select>
+              {form.status}
+            </Badge>
           </div>
-          <DrawerFooter>
+        </DrawerHeader>
+
+        {/* Form Content */}
+        <div className="flex-1 overflow-y-auto">
+          <form className="space-y-6 p-6" onSubmit={handleSubmit} autoComplete="off">
+            {/* Name Field */}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-sm font-medium flex items-center gap-2">
+                <User className="w-4 h-4 text-muted-foreground" />
+                Nome *
+              </Label>
+              <Input 
+                id="name" 
+                name="name" 
+                required 
+                value={form.name} 
+                onChange={handleInput}
+                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/50"
+                placeholder="Digite o nome completo"
+              />
+            </div>
+
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
+                <Mail className="w-4 h-4 text-muted-foreground" />
+                Email
+              </Label>
+              <Input 
+                id="email" 
+                name="email" 
+                type="email" 
+                value={form.email} 
+                onChange={handleInput}
+                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/50"
+                placeholder="cliente@exemplo.com"
+              />
+            </div>
+
+            {/* Phone Field */}
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-sm font-medium flex items-center gap-2">
+                <Phone className="w-4 h-4 text-muted-foreground" />
+                Telefone
+              </Label>
+              <Input 
+                id="phone" 
+                name="phone" 
+                value={form.phone} 
+                onChange={handleInput} 
+                placeholder="(11) 99999-9999"
+                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/50"
+              />
+            </div>
+
+            {/* Status Field */}
+            <div className="space-y-2">
+              <Label htmlFor="status" className="text-sm font-medium flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-muted-foreground" />
+                Status
+              </Label>
+              <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value })}>
+                <SelectTrigger className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/50">
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ativo">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      Ativo
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Inativo">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      Inativo
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </form>
+        </div>
+
+        {/* Modern Footer */}
+        <DrawerFooter className="border-t border-border/50 bg-muted/20 p-6">
+          <div className="flex gap-3">
             <Button 
-              className="w-full bg-pink-500 hover:bg-pink-600" 
+              className="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 gap-2" 
               type="submit" 
               disabled={submitting}
+              onClick={handleSubmit}
             >
+              <Save className="w-4 h-4" />
               {submitting ? "Salvando..." : "Salvar Alterações"}
             </Button>
             <DrawerClose asChild>
-              <Button variant="outline" className="w-full" type="button">
+              <Button 
+                variant="outline" 
+                className="flex-1 hover:bg-accent/50 transition-all duration-200" 
+                type="button"
+              >
                 Cancelar
               </Button>
             </DrawerClose>
-          </DrawerFooter>
-        </form>
+          </div>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );
