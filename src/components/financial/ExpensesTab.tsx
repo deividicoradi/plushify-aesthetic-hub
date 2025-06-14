@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +11,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ExpenseDialog from './ExpenseDialog';
 import { toast } from "@/hooks/use-toast";
+import ConfirmationDialog from '@/components/ui/confirmation-dialog';
 
 const ExpensesTab = () => {
   const { user } = useAuth();
@@ -19,6 +19,8 @@ const ExpensesTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
 
   const { data: expenses, isLoading } = useQuery({
     queryKey: ['expenses', user?.id],
@@ -90,8 +92,14 @@ const ExpensesTab = () => {
   };
 
   const handleDelete = (expenseId: string) => {
-    if (window.confirm('Tem certeza que deseja excluir esta despesa?')) {
-      deleteExpenseMutation.mutate(expenseId);
+    setExpenseToDelete(expenseId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (expenseToDelete) {
+      deleteExpenseMutation.mutate(expenseToDelete);
+      setExpenseToDelete(null);
     }
   };
 
@@ -217,6 +225,17 @@ const ExpensesTab = () => {
         open={isDialogOpen} 
         onOpenChange={handleCloseDialog}
         expense={editingExpense}
+      />
+
+      <ConfirmationDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Excluir Despesa"
+        description="Tem certeza que deseja excluir esta despesa? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        onConfirm={confirmDelete}
+        variant="destructive"
       />
     </div>
   );

@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Check } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
+import ConfirmationDialog from '@/components/ui/confirmation-dialog';
 
 interface InstallmentActionsProps {
   installment: any;
@@ -14,6 +15,7 @@ interface InstallmentActionsProps {
 
 const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentActionsProps) => {
   const queryClient = useQueryClient();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const markAsPaidMutation = useMutation({
     mutationFn: async () => {
@@ -78,43 +80,58 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
   };
 
   const handleDelete = () => {
-    if (window.confirm('Tem certeza que deseja excluir esta parcela?')) {
-      deleteInstallmentMutation.mutate();
-    }
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    deleteInstallmentMutation.mutate();
   };
 
   return (
-    <div className="flex flex-wrap gap-1 mt-auto pt-3">
-      {installment.status === 'pendente' && (
+    <>
+      <div className="flex flex-wrap gap-1 mt-auto pt-3">
+        {installment.status === 'pendente' && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleMarkAsPaid}
+            className="text-green-600 hover:text-green-700 flex-1"
+          >
+            <Check className="w-3 h-3 mr-1" />
+            Pagar
+          </Button>
+        )}
         <Button
           variant="outline"
           size="sm"
-          onClick={handleMarkAsPaid}
-          className="text-green-600 hover:text-green-700 flex-1"
+          onClick={() => onEdit(installment)}
+          className="flex-1"
         >
-          <Check className="w-3 h-3 mr-1" />
-          Pagar
+          <Edit className="w-3 h-3 mr-1" />
+          Editar
         </Button>
-      )}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => onEdit(installment)}
-        className="flex-1"
-      >
-        <Edit className="w-3 h-3 mr-1" />
-        Editar
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleDelete}
-        className="text-red-600 hover:text-red-700 flex-1"
-      >
-        <Trash2 className="w-3 h-3 mr-1" />
-        Excluir
-      </Button>
-    </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleDelete}
+          className="text-red-600 hover:text-red-700 flex-1"
+        >
+          <Trash2 className="w-3 h-3 mr-1" />
+          Excluir
+        </Button>
+      </div>
+
+      <ConfirmationDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Excluir Parcela"
+        description="Tem certeza que deseja excluir esta parcela? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        onConfirm={confirmDelete}
+        variant="destructive"
+      />
+    </>
   );
 };
 

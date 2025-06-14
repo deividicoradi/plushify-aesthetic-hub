@@ -11,6 +11,7 @@ import PaymentDialog from './PaymentDialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from "@/hooks/use-toast";
+import ConfirmationDialog from '@/components/ui/confirmation-dialog';
 
 const PaymentsTab = () => {
   const { user } = useAuth();
@@ -18,6 +19,8 @@ const PaymentsTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
 
   const { data: payments, isLoading } = useQuery({
     queryKey: ['payments', user?.id],
@@ -127,8 +130,14 @@ const PaymentsTab = () => {
   };
 
   const handleDelete = (paymentId: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este pagamento?')) {
-      deletePaymentMutation.mutate(paymentId);
+    setPaymentToDelete(paymentId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (paymentToDelete) {
+      deletePaymentMutation.mutate(paymentToDelete);
+      setPaymentToDelete(null);
     }
   };
 
@@ -245,6 +254,17 @@ const PaymentsTab = () => {
         open={isDialogOpen} 
         onOpenChange={handleCloseDialog}
         payment={editingPayment}
+      />
+
+      <ConfirmationDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Excluir Pagamento"
+        description="Tem certeza que deseja excluir este pagamento? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        onConfirm={confirmDelete}
+        variant="destructive"
       />
     </div>
   );
