@@ -3,43 +3,41 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export interface Service {
+export interface Client {
   id: string;
   name: string;
-  price: number;
-  duration: number;
-  description?: string;
-  category?: string;
+  email?: string;
+  phone?: string;
+  status?: string;
 }
 
-export const useServices = () => {
-  const [services, setServices] = useState<Service[]>([]);
+export const useClients = () => {
+  const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
-  const fetchServices = async () => {
+  const fetchClients = async () => {
     if (!user) return;
 
     try {
       const { data, error } = await supabase
-        .from('services')
-        .select('id, name, price, duration, description, category')
+        .from('clients')
+        .select('id, name, email, phone, status')
         .eq('user_id', user.id)
-        .eq('active', true)
         .order('name');
 
       if (error) throw error;
-      setServices(data || []);
+      setClients(data || []);
     } catch (error) {
-      console.error('Erro ao buscar serviços:', error);
+      console.error('Erro ao buscar clientes:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchServices();
+    fetchClients();
   }, [user]);
 
-  return { services, isLoading, refetch: fetchServices };
+  return { clients, isLoading, refetch: fetchClients };
 };

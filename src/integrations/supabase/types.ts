@@ -9,6 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string
+          client_id: string | null
+          client_name: string
+          created_at: string
+          duration: number
+          id: string
+          notes: string | null
+          price: number
+          service_id: string | null
+          service_name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time: string
+          client_id?: string | null
+          client_name: string
+          created_at?: string
+          duration?: number
+          id?: string
+          notes?: string | null
+          price?: number
+          service_id?: string | null
+          service_name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string
+          client_id?: string | null
+          client_name?: string
+          created_at?: string
+          duration?: number
+          id?: string
+          notes?: string | null
+          price?: number
+          service_id?: string | null
+          service_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cash_closures: {
         Row: {
           card_amount: number

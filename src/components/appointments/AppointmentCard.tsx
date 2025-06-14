@@ -5,19 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useAppointments, type Appointment } from '@/hooks/useAppointments';
 
 interface AppointmentCardProps {
-  appointment: {
-    id: string;
-    clientName: string;
-    serviceName: string;
-    date: string;
-    time: string;
-    duration: number;
-    status: 'agendado' | 'confirmado' | 'concluido' | 'cancelado';
-    price: number;
-    notes?: string;
-  };
+  appointment: Appointment;
 }
 
 const statusColors = {
@@ -35,12 +28,10 @@ const statusLabels = {
 };
 
 export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
+  const { updateAppointment, deleteAppointment } = useAppointments();
+
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    return format(new Date(date), "dd/MM/yyyy", { locale: ptBR });
   };
 
   const formatPrice = (price: number) => {
@@ -48,6 +39,16 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
       style: 'currency',
       currency: 'BRL'
     });
+  };
+
+  const handleStatusChange = async (newStatus: Appointment['status']) => {
+    await updateAppointment(appointment.id, { status: newStatus });
+  };
+
+  const handleDelete = async () => {
+    if (confirm('Tem certeza que deseja excluir este agendamento?')) {
+      await deleteAppointment(appointment.id);
+    }
   };
 
   return (
@@ -63,10 +64,10 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                    {appointment.clientName}
+                    {appointment.client_name}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    {formatDate(appointment.date)}
+                    {formatDate(appointment.appointment_date)}
                   </p>
                 </div>
               </div>
@@ -79,11 +80,11 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center gap-2">
                 <Package className="w-4 h-4 text-gray-400" />
-                <span className="text-sm font-medium">{appointment.serviceName}</span>
+                <span className="text-sm font-medium">{appointment.service_name}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-gray-400" />
-                <span className="text-sm">{appointment.time} ({appointment.duration}min)</span>
+                <span className="text-sm">{appointment.appointment_time} ({appointment.duration}min)</span>
               </div>
               <div className="font-semibold text-plush-600">
                 {formatPrice(appointment.price)}
@@ -115,10 +116,21 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>Editar</DropdownMenuItem>
-                <DropdownMenuItem>Confirmar</DropdownMenuItem>
-                <DropdownMenuItem>Concluir</DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600">Cancelar</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleStatusChange('confirmado')}>
+                  Confirmar
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleStatusChange('concluido')}>
+                  Concluir
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleStatusChange('cancelado')}>
+                  Cancelar
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="text-red-600"
+                  onClick={handleDelete}
+                >
+                  Excluir
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/components/ui/use-toast';
+import { useAppointments } from '@/hooks/useAppointments';
+import { useClients } from '@/hooks/useClients';
+import { useServices } from '@/hooks/useServices';
 
 interface CreateAppointmentDialogProps {
   open: boolean;
@@ -15,51 +17,79 @@ interface CreateAppointmentDialogProps {
 }
 
 export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmentDialogProps) => {
+  const { createAppointment } = useAppointments();
+  const { clients } = useClients();
+  const { services } = useServices();
+  
   const [formData, setFormData] = useState({
-    clientName: '',
-    serviceName: '',
-    date: '',
-    time: '',
-    duration: '',
-    price: '',
+    client_id: '',
+    client_name: '',
+    service_id: '',
+    service_name: '',
+    appointment_date: '',
+    appointment_time: '',
+    duration: 60,
+    price: 0,
     notes: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.clientName || !formData.serviceName || !formData.date || !formData.time) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive"
-      });
+    if (!formData.client_name || !formData.service_name || !formData.appointment_date || !formData.appointment_time) {
       return;
     }
 
-    // Here you would typically save to the backend
-    console.log('Creating appointment:', formData);
-    
-    toast({
-      title: "Sucesso",
-      description: "Agendamento criado com sucesso!"
+    const result = await createAppointment({
+      client_id: formData.client_id || undefined,
+      service_id: formData.service_id || undefined,
+      client_name: formData.client_name,
+      service_name: formData.service_name,
+      appointment_date: formData.appointment_date,
+      appointment_time: formData.appointment_time,
+      duration: formData.duration,
+      status: 'agendado',
+      price: formData.price,
+      notes: formData.notes || undefined
     });
-    
-    // Reset form and close dialog
-    setFormData({
-      clientName: '',
-      serviceName: '',
-      date: '',
-      time: '',
-      duration: '',
-      price: '',
-      notes: ''
-    });
-    onOpenChange(false);
+
+    if (result) {
+      setFormData({
+        client_id: '',
+        client_name: '',
+        service_id: '',
+        service_name: '',
+        appointment_date: '',
+        appointment_time: '',
+        duration: 60,
+        price: 0,
+        notes: ''
+      });
+      onOpenChange(false);
+    }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleClientChange = (clientId: string) => {
+    const selectedClient = clients.find(c => c.id === clientId);
+    setFormData(prev => ({
+      ...prev,
+      client_id: clientId,
+      client_name: selectedClient?.name || ''
+    }));
+  };
+
+  const handleServiceChange = (serviceId: string) => {
+    const selectedService = services.find(s => s.id === serviceId);
+    setFormData(prev => ({
+      ...prev,
+      service_id: serviceId,
+      service_name: selectedService?.name || '',
+      duration: selectedService?.duration || 60,
+      price: selectedService?.price || 0
+    }));
+  };
+
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -81,16 +111,26 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
                 <User className="w-4 h-4" />
                 Cliente *
               </Label>
-              <Select value={formData.clientName} onValueChange={(value) => handleInputChange('clientName', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um cliente" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Maria Silva">Maria Silva</SelectItem>
-                  <SelectItem value="Ana Costa">Ana Costa</SelectItem>
-                  <SelectItem value="Julia Santos">Julia Santos</SelectItem>
-                </SelectContent>
-              </Select>
+              {clients.length > 0 ? (
+                <Select value={formData.client_id} onValueChange={handleClientChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  placeholder="Nome do cliente"
+                  value={formData.client_name}
+                  onChange={(e) => handleInputChange('client_name', e.target.value)}
+                />
+              )}
             </div>
 
             {/* Service */}
@@ -99,16 +139,26 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
                 <Package className="w-4 h-4" />
                 Serviço *
               </Label>
-              <Select value={formData.serviceName} onValueChange={(value) => handleInputChange('serviceName', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um serviço" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Corte e Escova">Corte e Escova</SelectItem>
-                  <SelectItem value="Manicure">Manicure</SelectItem>
-                  <SelectItem value="Massagem Relaxante">Massagem Relaxante</SelectItem>
-                </SelectContent>
-              </Select>
+              {services.length > 0 ? (
+                <Select value={formData.service_id} onValueChange={handleServiceChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um serviço" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {services.map((service) => (
+                      <SelectItem key={service.id} value={service.id}>
+                        {service.name} - {service.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  placeholder="Nome do serviço"
+                  value={formData.service_name}
+                  onChange={(e) => handleInputChange('service_name', e.target.value)}
+                />
+              )}
             </div>
 
             {/* Date */}
@@ -120,8 +170,8 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
               <Input
                 id="date"
                 type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
+                value={formData.appointment_date}
+                onChange={(e) => handleInputChange('appointment_date', e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
               />
             </div>
@@ -135,8 +185,8 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
               <Input
                 id="time"
                 type="time"
-                value={formData.time}
-                onChange={(e) => handleInputChange('time', e.target.value)}
+                value={formData.appointment_time}
+                onChange={(e) => handleInputChange('appointment_time', e.target.value)}
               />
             </div>
 
@@ -148,7 +198,7 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
                 type="number"
                 placeholder="60"
                 value={formData.duration}
-                onChange={(e) => handleInputChange('duration', e.target.value)}
+                onChange={(e) => handleInputChange('duration', parseInt(e.target.value) || 60)}
               />
             </div>
 
@@ -161,7 +211,7 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
                 step="0.01"
                 placeholder="0,00"
                 value={formData.price}
-                onChange={(e) => handleInputChange('price', e.target.value)}
+                onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
               />
             </div>
           </div>
