@@ -4,13 +4,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardStats } from './useDashboardStats';
 import { useReportsData } from './useReportsData';
 import { useAnalyticsData } from './useAnalyticsData';
-import { generateInsights } from '@/utils/dashboardInsights';
-import { generateRecommendations } from '@/utils/dashboardRecommendations';
 
 export const useDashboardAnalytics = () => {
   const { user } = useAuth();
   
-  // Obter dados para análise
+  // Obter dados básicos
   const dashboardStats = useDashboardStats();
   const reportsData = useReportsData();
   
@@ -23,20 +21,12 @@ export const useDashboardAnalytics = () => {
     fetchAnalytics
   } = useAnalyticsData();
 
-  // Criar e salvar análise automática
+  // Criar análise apenas quando solicitado
   const createAndSaveAnalysis = useCallback(async () => {
     if (!user || dashboardStats.loading || reportsData.loading) return;
 
     try {
-      const insights = generateInsights(dashboardStats, reportsData);
-      const recommendations = generateRecommendations(insights);
-      
-      const trends = {
-        revenue_trend: reportsData.metrics?.revenueGrowth || 0,
-        client_trend: dashboardStats.newThisMonth || 0,
-        appointment_trend: dashboardStats.weeklyAppointments || 0
-      };
-
+      // Analytics simplificado apenas com métricas básicas
       const analysisData = {
         metrics: {
           total_clients: dashboardStats.totalClients,
@@ -44,27 +34,20 @@ export const useDashboardAnalytics = () => {
           weekly_appointments: dashboardStats.weeklyAppointments,
           new_clients: dashboardStats.newThisMonth
         },
-        insights,
-        trends,
-        recommendations
+        insights: [],
+        trends: {
+          revenue_trend: reportsData.metrics?.revenueGrowth || 0,
+          client_trend: dashboardStats.newThisMonth || 0,
+          appointment_trend: dashboardStats.weeklyAppointments || 0
+        },
+        recommendations: []
       };
 
       await saveAnalysis(analysisData);
     } catch (error) {
-      console.error('Erro ao criar e salvar análise:', error);
+      console.error('Erro ao criar análise:', error);
     }
   }, [user, dashboardStats, reportsData, saveAnalysis]);
-
-  // Salvar análise automaticamente quando os dados mudarem
-  useEffect(() => {
-    if (!dashboardStats.loading && !reportsData.loading && user) {
-      const timer = setTimeout(() => {
-        createAndSaveAnalysis();
-      }, 2000); // Aguarda 2 segundos após os dados carregarem
-
-      return () => clearTimeout(timer);
-    }
-  }, [dashboardStats.loading, reportsData.loading, user, createAndSaveAnalysis]);
 
   // Buscar análises ao montar o componente
   useEffect(() => {

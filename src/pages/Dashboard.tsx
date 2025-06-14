@@ -2,7 +2,7 @@
 import React from 'react';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { DashboardContent } from '@/components/dashboard/DashboardContent';
 
 const Dashboard = () => {
   return (
@@ -10,11 +10,9 @@ const Dashboard = () => {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
-          <DashboardLayout>
-            <div className="space-y-4">
-              {/* Dashboard content is handled by DashboardLayout components */}
-            </div>
-          </DashboardLayout>
+          <div className="p-6">
+            <DashboardContent />
+          </div>
         </SidebarInset>
       </div>
     </SidebarProvider>
