@@ -60,12 +60,15 @@ export const useInstallmentForm = (installment: any, onSuccess: () => void) => {
       return;
     }
 
-    // Para novos parcelamentos, verificar se o caixa está aberto
+    // Para novos parcelamentos, verificar se o caixa está aberto ANTES de qualquer processamento
     if (!installment) {
+      console.log('🔍 Verificando status do caixa antes de criar novo parcelamento...');
       const validation = await checkAndPromptCashOpening(formData.due_date.toISOString());
       if (!validation.shouldProceed) {
+        console.log('❌ Criação de parcelamento bloqueada - caixa não está aberto');
         return;
       }
+      console.log('✅ Caixa validado - prosseguindo com criação do parcelamento');
     }
 
     setLoading(true);

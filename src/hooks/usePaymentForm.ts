@@ -87,12 +87,15 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       return;
     }
 
-    // Para novos pagamentos, verificar se o caixa está aberto
+    // Para novos pagamentos, verificar se o caixa está aberto ANTES de qualquer processamento
     if (!payment) {
+      console.log('🔍 Verificando status do caixa antes de criar novo pagamento...');
       const validation = await checkAndPromptCashOpening(formData.due_date);
       if (!validation.shouldProceed) {
+        console.log('❌ Criação de pagamento bloqueada - caixa não está aberto');
         return;
       }
+      console.log('✅ Caixa validado - prosseguindo com criação do pagamento');
     }
 
     // Para pagamentos parciais, validar se tem valor pago e se é menor que o total
