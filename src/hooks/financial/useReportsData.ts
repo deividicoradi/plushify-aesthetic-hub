@@ -19,9 +19,21 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
       const { data: payments, error: paymentsError } = await supabase
         .from('payments')
         .select(`
-          *,
-          payment_methods(name, type),
-          clients(name)
+          id,
+          description,
+          amount,
+          paid_amount,
+          status,
+          created_at,
+          payment_date,
+          user_id,
+          appointment_id,
+          client_id,
+          payment_method_id,
+          discount,
+          due_date,
+          installments,
+          notes
         `)
         .eq('user_id', user?.id)
         .or('status.eq.pago,status.eq.parcial')
@@ -32,6 +44,20 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
       if (paymentsError) {
         console.error('❌ Erro ao buscar pagamentos:', paymentsError);
       }
+
+      // Buscar informações dos clientes separadamente
+      const clientIds = payments?.map(p => p.client_id).filter(Boolean) || [];
+      const { data: clients } = clientIds.length > 0 ? await supabase
+        .from('clients')
+        .select('id, name')
+        .in('id', clientIds) : { data: [] };
+
+      // Buscar informações dos métodos de pagamento separadamente
+      const paymentMethodIds = payments?.map(p => p.payment_method_id).filter(Boolean) || [];
+      const { data: paymentMethods } = paymentMethodIds.length > 0 ? await supabase
+        .from('payment_methods')
+        .select('id, name, type')
+        .in('id', paymentMethodIds) : { data: [] };
 
       // Buscar pagamentos excluídos através dos logs de auditoria
       const { data: deletedPayments, error: deletedError } = await supabase
@@ -68,8 +94,15 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
       const { data: installments } = await supabase
         .from('installments')
         .select(`
-          *,
-          payments(description, payment_methods(name), clients(name))
+          id,
+          installment_number,
+          total_installments,
+          amount,
+          paid_amount,
+          due_date,
+          payment_date,
+          status,
+          payment_id
         `)
         .eq('user_id', user?.id)
         .or(`payment_date.gte.${fromDate},due_date.gte.${fromDate}`)
@@ -102,20 +135,37 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
       }
 
       // Fix TypeScript error by properly typing the payments
-      const validPayments: Payment[] = (payments || []).map(p => ({
-        id: p.id,
-        description: p.description,
-        amount: p.amount,
-        paid_amount: p.paid_amount,
-        status: p.status,
-        created_at: p.created_at,
-        payment_date: p.payment_date,
-        clients: p.clients ? { name: p.clients.name } : undefined,
-        payment_methods: p.payment_methods ? { 
-          name: p.payment_methods.name, 
-          type: p.payment_methods.type 
-        } : undefined
-      }));
+      const validPayments: Payment[] = (payments || []).map(p => {
+        const client = clients?.find(c => c.id === p.client_id);
+        const paymentMethod = paymentMethods?.find(pm => pm.id === p.payment_method_id);
+        
+        return {
+          id: p.id,
+          description: p.description,
+          amount: p.amount,
+          paid_amount: p.paid_amount,
+          status: p.status,
+          created_at: p.created_at,
+          payment_date: p.payment_date,
+          clients: client ? { name: client.name } : undefined,
+          payment_methods: paymentMethod ? { 
+            name: paymentMethod.name, 
+            type: paymentMethod.type 
+          } : undefined
+        };
+      });
+
+      // Process installments with payment information
+      const processedInstallments = (installments || []).map(installment => {
+        const relatedPayment = validPayments.find(p => p.id === installment.payment_id);
+        return {
+          ...installment,
+          payments: relatedPayment ? {
+            description: relatedPayment.description,
+            payment_methods: relatedPayment.payment_methods
+          } : undefined
+        };
+      });
 
       const allPayments: Payment[] = [
         ...validPayments,
@@ -124,7 +174,7 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
 
       return {
         payments: allPayments,
-        installments: installments || [],
+        installments: processedInstallments,
         expenses: expenses || [],
         cashClosures: cashClosures || [],
         period: { from: fromDate, to: toDate }
