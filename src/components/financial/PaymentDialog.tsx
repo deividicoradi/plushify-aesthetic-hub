@@ -20,16 +20,16 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0">
+        <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>
             {payment ? 'Editar Pagamento' : 'Novo Pagamento'}
           </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <ScrollArea className="flex-1 pr-4">
-            <div className="space-y-4">
+          <ScrollArea className="max-h-[60vh] px-6">
+            <div className="space-y-4 pb-4">
               <PaymentFormFields
                 formData={formData}
                 onFieldChange={handleChange}
@@ -37,7 +37,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
             </div>
           </ScrollArea>
 
-          <div className="flex justify-end gap-2 pt-4 mt-4 border-t">
+          <div className="flex justify-end gap-2 p-6 pt-4 border-t bg-background">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
