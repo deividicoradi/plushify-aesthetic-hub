@@ -18,9 +18,9 @@ export const useWeeklyOverviewData = () => {
     appointmentsCompleted: 0,
     appointmentsTotal: 0,
     revenueActual: 0,
-    revenueGoal: 10000, // Meta fixa, pode ser configurável no futuro
+    revenueGoal: 5000,
     averageServiceTime: 0,
-    clientSatisfaction: 94, // Valor fixo por enquanto, pode ser implementado sistema de avaliação
+    clientSatisfaction: 95,
     loading: true
   });
   const { user } = useAuth();
@@ -31,50 +31,95 @@ export const useWeeklyOverviewData = () => {
     try {
       setData(prev => ({ ...prev, loading: true }));
 
-      // Calcular início e fim da semana
-      const now = new Date();
-      const startOfWeek = new Date(now);
-      const day = startOfWeek.getDay();
-      const diff = startOfWeek.getDate() - day;
+      // Calcular início da semana
+      const startOfWeek = new Date();
+      const dayOfWeek = startOfWeek.getDay();
+      const diff = startOfWeek.getDate() - dayOfWeek;
       startOfWeek.setDate(diff);
       startOfWeek.setHours(0, 0, 0, 0);
 
       const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 7);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
 
-      // Como não temos mais agendamentos, definir valores como 0
-      const appointmentsTotal = 0;
-      const appointmentsCompleted = 0;
-      const averageServiceTime = 0;
+      // Buscar agendamentos da semana
+      const { data: weeklyAppointments } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('appointment_date', startOfWeek.toISOString().split('T')[0])
+        .lte('appointment_date', endOfWeek.toISOString().split('T')[0]);
 
-      // Buscar receita da semana (pagamentos)
-      const { data: payments } = await supabase
+      const appointmentsTotal = weeklyAppointments?.length || 0;
+      const appointmentsCompleted = weeklyAppointments?.filter(apt => apt.status === 'concluido').length || 0;
+
+      // Calcular receita da semana
+      const { data: weeklyPayments } = await supabase
         .from('payments')
         .select('amount')
         .eq('user_id', user.id)
         .eq('status', 'pago')
         .gte('payment_date', startOfWeek.toISOString())
-        .lt('payment_date', endOfWeek.toISOString());
+        .lte('payment_date', endOfWeek.toISOString());
 
-      const revenueActual = payments?.reduce((sum, payment) => sum + Number(payment.amount), 0) || 0;
+      const revenueActual = weeklyPayments?.reduce((sum, payment) => sum + Number(payment.amount), 0) || 0;
+
+      // Calcular tempo médio dos serviços
+      const totalDuration = weeklyAppointments?.reduce((sum, apt) => sum + apt.duration, 0) || 0;
+      const averageServiceTime = appointmentsTotal > 0 ? Math.round(totalDuration / appointmentsTotal) : 0;
 
       setData({
         appointmentsCompleted,
         appointmentsTotal,
         revenueActual,
-        revenueGoal: 10000,
+        revenueGoal: 5000,
         averageServiceTime,
-        clientSatisfaction: 94,
+        clientSatisfaction: 95,
         loading: false
       });
     } catch (error) {
-      console.error('Erro ao buscar dados da semana:', error);
+      console.error('Erro ao buscar dados semanais:', error);
       setData(prev => ({ ...prev, loading: false }));
     }
   };
 
   useEffect(() => {
     fetchWeeklyData();
+
+    // Configurar listener em tempo real
+    const channel = supabase
+      .channel('weekly-overview-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          console.log('Appointments changed, refreshing weekly overview');
+          fetchWeeklyData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payments',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          console.log('Payments changed, refreshing weekly overview');
+          fetchWeeklyData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   return {

@@ -54,9 +54,24 @@ export const useDashboardStats = () => {
         .eq('user_id', user.id)
         .gte('created_at', startOfMonth.toISOString());
 
-      // Como a tabela appointments foi removida, definir valores padrão
-      const weeklyAppointments = 0;
-      const totalAppointments = 0;
+      // Buscar agendamentos totais
+      const { count: totalAppointments } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Buscar agendamentos desta semana
+      const startOfWeek = new Date();
+      const dayOfWeek = startOfWeek.getDay();
+      const diff = startOfWeek.getDate() - dayOfWeek;
+      startOfWeek.setDate(diff);
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const { count: weeklyAppointments } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('appointment_date', startOfWeek.toISOString().split('T')[0]);
 
       // Buscar receita mensal (pagamentos deste mês)
       const { data: monthlyPayments } = await supabase
@@ -72,8 +87,8 @@ export const useDashboardStats = () => {
         totalClients: totalClients || 0,
         activeClients: activeClients || 0,
         newThisMonth: newThisMonth || 0,
-        totalAppointments,
-        weeklyAppointments,
+        totalAppointments: totalAppointments || 0,
+        weeklyAppointments: weeklyAppointments || 0,
         monthlyRevenue,
         loading: false
       });
@@ -85,6 +100,66 @@ export const useDashboardStats = () => {
 
   useEffect(() => {
     fetchDashboardStats();
+
+    // Configurar listener em tempo real para agendamentos
+    const appointmentsChannel = supabase
+      .channel('appointments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          console.log('Appointments changed, refreshing dashboard stats');
+          fetchDashboardStats();
+        }
+      )
+      .subscribe();
+
+    // Configurar listener em tempo real para clientes
+    const clientsChannel = supabase
+      .channel('clients-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'clients',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          console.log('Clients changed, refreshing dashboard stats');
+          fetchDashboardStats();
+        }
+      )
+      .subscribe();
+
+    // Configurar listener em tempo real para pagamentos
+    const paymentsChannel = supabase
+      .channel('payments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payments',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          console.log('Payments changed, refreshing dashboard stats');
+          fetchDashboardStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(appointmentsChannel);
+      supabase.removeChannel(clientsChannel);
+      supabase.removeChannel(paymentsChannel);
+    };
   }, [user]);
 
   return {

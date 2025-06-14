@@ -13,6 +13,7 @@ export const DashboardMetrics = () => {
     totalClients, 
     activeClients, 
     newThisMonth, 
+    totalAppointments,
     weeklyAppointments,
     monthlyRevenue,
     loading 
@@ -32,7 +33,7 @@ export const DashboardMetrics = () => {
     {
       title: "Agendamentos",
       value: loading ? "..." : weeklyAppointments.toLocaleString(),
-      trend: weeklyAppointments > 10 ? "+Alta" : weeklyAppointments > 0 ? "+Baixa" : "Nenhum",
+      trend: totalAppointments > 0 ? `${totalAppointments} total` : "Nenhum",
       icon: CalendarDays,
       description: "Esta semana",
       to: "/appointments",
