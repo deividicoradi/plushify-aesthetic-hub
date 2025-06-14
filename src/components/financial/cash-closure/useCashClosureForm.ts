@@ -11,7 +11,6 @@ interface CashClosureFormData {
   opening_balance: string;
   closing_balance: string;
   total_income: string;
-  total_expenses: string;
   cash_amount: string;
   card_amount: string;
   pix_amount: string;
@@ -28,7 +27,6 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
     opening_balance: '',
     closing_balance: '',
     total_income: '',
-    total_expenses: '',
     cash_amount: '',
     card_amount: '',
     pix_amount: '',
@@ -49,7 +47,6 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
         opening_balance: closure.opening_balance?.toString() || '',
         closing_balance: closure.closing_balance?.toString() || '',
         total_income: closure.total_income?.toString() || '',
-        total_expenses: closure.total_expenses?.toString() || '',
         cash_amount: closure.cash_amount?.toString() || '',
         card_amount: closure.card_amount?.toString() || '',
         pix_amount: closure.pix_amount?.toString() || '',
@@ -67,28 +64,25 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
         card_amount: movementData.cardAmount.toString(),
         pix_amount: movementData.pixAmount.toString(),
         other_amount: movementData.otherAmount.toString(),
-        // Despesas e saldo final ficam vazios para preenchimento manual
-        total_expenses: '',
-        closing_balance: '',
-        notes: `Fechamento automático - ${movementData.paymentsCount} pagamento(s) recebido(s). Insira as despesas manualmente.`
+        closing_balance: (movementData.openingBalance + movementData.totalIncome).toString(),
+        notes: `Fechamento automático - ${movementData.paymentsCount} pagamento(s) recebido(s).`
       }));
     }
   }, [closure, movementData, loadingMovement]);
 
-  // Recalcular saldo final quando receitas ou despesas mudarem
+  // Recalcular saldo final quando receitas mudarem
   useEffect(() => {
-    if (!closure && formData.total_income && formData.total_expenses) {
+    if (!closure && formData.total_income && formData.opening_balance) {
       const income = parseFloat(formData.total_income) || 0;
-      const expenses = parseFloat(formData.total_expenses) || 0;
       const opening = parseFloat(formData.opening_balance) || 0;
-      const calculatedClosing = opening + income - expenses;
+      const calculatedClosing = opening + income;
       
       setFormData(prev => ({
         ...prev,
         closing_balance: calculatedClosing.toString()
       }));
     }
-  }, [formData.total_income, formData.total_expenses, formData.opening_balance, closure]);
+  }, [formData.total_income, formData.opening_balance, closure]);
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
@@ -113,7 +107,8 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
             user_id: user?.id,
             difference: calculatedDifference,
             status: 'fechado',
-            closed_at: new Date().toISOString()
+            closed_at: new Date().toISOString(),
+            total_expenses: 0 // Sempre 0 porque não calculamos despesas aqui
           }]);
         if (error) throw error;
       }
@@ -123,7 +118,7 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
       queryClient.invalidateQueries({ queryKey: ['cash-openings'] });
       toast({
         title: "Sucesso!",
-        description: closure ? "Fechamento atualizado!" : "Fechamento de caixa criado com receitas automáticas. Despesas inseridas manualmente.",
+        description: closure ? "Fechamento atualizado!" : "Fechamento de caixa criado com receitas automáticas.",
       });
       onSuccess?.();
     },
@@ -166,7 +161,6 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
       opening_balance: parseFloat(formData.opening_balance) || 0,
       closing_balance: parseFloat(formData.closing_balance),
       total_income: parseFloat(formData.total_income) || 0,
-      total_expenses: parseFloat(formData.total_expenses) || 0,
       cash_amount: parseFloat(formData.cash_amount) || 0,
       card_amount: parseFloat(formData.card_amount) || 0,
       pix_amount: parseFloat(formData.pix_amount) || 0,

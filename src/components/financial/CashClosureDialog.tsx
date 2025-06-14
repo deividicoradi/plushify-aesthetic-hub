@@ -45,7 +45,6 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess, closure }: CashClosu
               opening_balance: formData.opening_balance,
               closing_balance: formData.closing_balance,
               total_income: formData.total_income,
-              total_expenses: formData.total_expenses,
             }}
             onFieldChange={handleChange}
             loadingMovement={loadingMovement}

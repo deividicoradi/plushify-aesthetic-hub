@@ -10,7 +10,6 @@ interface CashClosureBasicFieldsProps {
     opening_balance: string;
     closing_balance: string;
     total_income: string;
-    total_expenses: string;
   };
   onFieldChange: (field: string, value: string) => void;
   loadingMovement?: boolean;
@@ -51,9 +50,6 @@ const CashClosureBasicFields = ({
             <span>Receitas: {formatCurrency(movementData.totalIncome)}</span>
             <span>Pagamentos: {movementData.paymentsCount}</span>
           </div>
-          <p className="text-xs text-green-600 dark:text-green-300 mt-1">
-            💡 Insira as despesas manualmente para calcular o saldo final
-          </p>
         </div>
       )}
       
@@ -103,26 +99,6 @@ const CashClosureBasicFields = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="total_expenses">
-            Total de Despesas
-            <Badge variant="outline" className="ml-2">
-              Manual
-            </Badge>
-          </Label>
-          <Input
-            id="total_expenses"
-            type="number"
-            step="0.01"
-            value={formData.total_expenses}
-            onChange={(e) => onFieldChange('total_expenses', e.target.value)}
-            placeholder="0,00"
-          />
-          <p className="text-xs text-gray-500">
-            Insira o total de despesas registradas no sistema
-          </p>
-        </div>
-
-        <div className="space-y-2 col-span-2">
           <Label htmlFor="closing_balance">
             Saldo Final
             <Badge variant="outline" className="ml-2">
@@ -139,7 +115,7 @@ const CashClosureBasicFields = ({
             required
           />
           <p className="text-xs text-gray-500">
-            Saldo Inicial + Receitas - Despesas
+            Saldo Inicial + Receitas
           </p>
         </div>
       </div>

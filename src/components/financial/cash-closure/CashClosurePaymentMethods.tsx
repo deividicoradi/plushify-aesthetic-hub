@@ -132,7 +132,7 @@ const CashClosurePaymentMethods = ({
         </p>
         {movementData && (
           <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-            Valores baseados apenas nos pagamentos recebidos durante o dia
+            Valores baseados nos pagamentos recebidos durante o dia
           </p>
         )}
       </div>
