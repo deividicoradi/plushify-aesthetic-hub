@@ -1,13 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Edit, DollarSign, CheckCircle, Trash2 } from 'lucide-react';
-import PasswordDialog from '@/components/ui/password-dialog';
 import { useAuthorizationPassword } from '@/hooks/useAuthorizationPassword';
 import { useSecureInstallmentMutation } from '@/hooks/financial/useSecureInstallmentMutation';
 import { useCashStatusValidation } from '@/hooks/financial/useCashStatusValidation';
-import { toast } from "@/hooks/use-toast";
+import InstallmentPasswordDialog from './installments/InstallmentPasswordDialog';
+import InstallmentActionButtons from './installments/InstallmentActionButtons';
+import InstallmentPartialPayment from './installments/InstallmentPartialPayment';
 
 interface InstallmentActionsProps {
   installment: any;
@@ -22,6 +20,7 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
     data?: any 
   } | null>(null);
   const [isCashClosed, setIsCashClosed] = useState(false);
+  
   const { verifyPassword, isVerifying } = useAuthorizationPassword();
   const { updateInstallment, deleteInstallment, isUpdating, isDeleting } = useSecureInstallmentMutation(onUpdate);
   const { validateCashIsOpen } = useCashStatusValidation();
@@ -43,30 +42,11 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
     setPasswordDialogOpen(true);
   };
 
-  const handlePartialPayment = () => {
-    if (isCashClosed) {
-      toast({
-        title: "Caixa fechado",
-        description: "Não é possível realizar pagamentos com o caixa fechado",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const paidAmount = prompt(`Digite o valor pago (máximo R$ ${Number(installment.amount).toFixed(2)}):`);
-    if (paidAmount && !isNaN(Number(paidAmount))) {
-      const amount = Number(paidAmount);
-      if (amount > 0 && amount <= Number(installment.amount)) {
-        handleSecureAction('markPartial', { paidAmount: amount });
-      } else {
-        toast({
-          title: "Valor inválido",
-          description: "O valor deve ser maior que zero e menor ou igual ao valor da parcela",
-          variant: "destructive",
-        });
-      }
-    }
-  };
+  const partialPaymentHandler = InstallmentPartialPayment({
+    installment,
+    isCashClosed,
+    onSecureAction: handleSecureAction
+  });
 
   const handlePasswordConfirm = async (password: string, reason?: string) => {
     if (!pendingAction) return;
@@ -116,101 +96,23 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
     setPendingAction(null);
   };
 
-  const getDialogTitle = () => {
-    switch (pendingAction?.type) {
-      case 'edit': return 'Confirmar Edição';
-      case 'delete': return 'Confirmar Exclusão';
-      case 'markPaid': return 'Confirmar Pagamento';
-      case 'markPartial': return 'Confirmar Pagamento Parcial';
-      default: return 'Confirmar Ação';
-    }
-  };
-
-  const getDialogDescription = () => {
-    switch (pendingAction?.type) {
-      case 'edit': return 'Digite sua senha para autorizar a edição desta parcela.';
-      case 'delete': return 'Digite sua senha para autorizar a exclusão desta parcela. Esta ação não pode ser desfeita.';
-      case 'markPaid': return 'Digite sua senha para autorizar a marcação desta parcela como paga.';
-      case 'markPartial': return 'Digite sua senha para autorizar o registro do pagamento parcial.';
-      default: return 'Digite sua senha para autorizar esta ação.';
-    }
-  };
-
   return (
     <>
-      <div className="flex flex-col gap-2 mt-auto">
-        {installment.status === 'pendente' && (
-          <>
-            <Button
-              size="sm"
-              onClick={() => handleSecureAction('markPaid')}
-              disabled={isUpdating || isCashClosed}
-              className="w-full"
-            >
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Marcar como Pago
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handlePartialPayment}
-              disabled={isUpdating || isCashClosed}
-              className="w-full"
-            >
-              <DollarSign className="w-3 h-3 mr-1" />
-              Pagamento Parcial
-            </Button>
-          </>
-        )}
-        
-        {installment.status === 'parcial' && (
-          <div className="space-y-2">
-            <Badge variant="outline" className="w-full justify-center bg-orange-50 text-orange-700 border-orange-200">
-              Restante: R$ {(Number(installment.amount) - Number(installment.paid_amount || 0)).toFixed(2)}
-            </Badge>
-            <Button
-              size="sm"
-              onClick={() => handleSecureAction('markPaid')}
-              disabled={isUpdating || isCashClosed}
-              className="w-full"
-            >
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Quitar Restante
-            </Button>
-          </div>
-        )}
+      <InstallmentActionButtons
+        installment={installment}
+        isCashClosed={isCashClosed}
+        isUpdating={isUpdating}
+        isDeleting={isDeleting}
+        onSecureAction={handleSecureAction}
+        onPartialPayment={partialPaymentHandler.handlePartialPayment}
+      />
 
-        <div className="flex gap-1">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => handleSecureAction('edit')}
-            disabled={isCashClosed}
-            className="flex-1"
-          >
-            <Edit className="w-3 h-3 mr-1" />
-            Editar
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => handleSecureAction('delete')}
-            className="text-red-600 hover:text-red-700"
-            disabled={isDeleting || isCashClosed}
-          >
-            <Trash2 className="w-3 h-3" />
-          </Button>
-        </div>
-      </div>
-
-      <PasswordDialog
+      <InstallmentPasswordDialog
         open={passwordDialogOpen}
         onOpenChange={setPasswordDialogOpen}
         onConfirm={handlePasswordConfirm}
-        title={getDialogTitle()}
-        description={getDialogDescription()}
-        isLoading={isVerifying}
-        requireReason={true}
+        pendingAction={pendingAction}
+        isVerifying={isVerifying}
       />
     </>
   );
