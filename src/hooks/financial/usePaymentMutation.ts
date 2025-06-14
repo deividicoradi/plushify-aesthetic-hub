@@ -49,9 +49,13 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
     onSuccess: async (result) => {
       console.log('💰 Pagamento salvo com sucesso:', result);
 
-      // Se o pagamento foi marcado como pago e tem valor pago, atualizar o caixa
-      if (result.status === 'pago' && Number(result.paid_amount) > 0) {
-        console.log('🔄 Iniciando atualização do caixa...');
+      // Se o pagamento foi marcado como pago OU parcial e tem valor pago, atualizar o caixa
+      if ((result.status === 'pago' || result.status === 'parcial') && Number(result.paid_amount) > 0) {
+        console.log('🔄 Iniciando atualização do caixa...', {
+          status: result.status,
+          paidAmount: result.paid_amount,
+          paymentMethodId: result.payment_method_id
+        });
         
         try {
           await updateCashFromPayment.mutateAsync({
@@ -70,7 +74,7 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
         }
       }
 
-      // Se o pagamento foi marcado como parcial, criar parcelamento automático
+      // Se o pagamento foi marcado como parcial, criar parcelamento automático para o valor restante
       if (result.status === 'parcial' && Number(result.paid_amount) > 0) {
         console.log('📝 Criando parcelamento automático para pagamento parcial...');
         
@@ -104,6 +108,8 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
         queryClient.invalidateQueries({ queryKey: ['installments'] }),
         queryClient.invalidateQueries({ queryKey: ['payments-for-installments'] }),
         queryClient.invalidateQueries({ queryKey: ['clients-for-installments'] }),
+        queryClient.invalidateQueries({ queryKey: ['cash-openings'] }),
+        queryClient.invalidateQueries({ queryKey: ['cash-closures'] }),
         queryClient.refetchQueries({ queryKey: ['installments'] }),
         queryClient.refetchQueries({ queryKey: ['payments-for-installments'] })
       ]);
