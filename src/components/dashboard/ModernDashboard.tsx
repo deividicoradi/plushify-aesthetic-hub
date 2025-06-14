@@ -9,7 +9,6 @@ import {
   Package, 
   Plus,
   ArrowRight,
-  Clock,
   DollarSign,
   Activity
 } from 'lucide-react';
@@ -66,7 +65,7 @@ export const ModernDashboard = () => {
       value: loading ? '...' : totalClients.toString(),
       subtitle: `+${newThisMonth} este mês`,
       icon: Users,
-      color: 'text-blue-600 bg-blue-100',
+      color: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30',
       trend: newThisMonth > 0 ? 'up' : 'stable'
     },
     {
@@ -74,7 +73,7 @@ export const ModernDashboard = () => {
       value: loading ? '...' : weeklyAppointments.toString(),
       subtitle: 'Esta semana',
       icon: Calendar,
-      color: 'text-green-600 bg-green-100',
+      color: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30',
       trend: weeklyAppointments > 5 ? 'up' : 'stable'
     },
     {
@@ -82,7 +81,7 @@ export const ModernDashboard = () => {
       value: loading ? '...' : `R$ ${monthlyRevenue.toLocaleString('pt-BR')}`,
       subtitle: 'Este mês',
       icon: DollarSign,
-      color: 'text-purple-600 bg-purple-100',
+      color: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30',
       trend: monthlyRevenue > 1000 ? 'up' : 'stable'
     },
     {
@@ -90,13 +89,13 @@ export const ModernDashboard = () => {
       value: 'Ativo',
       subtitle: 'Sistema funcionando',
       icon: Activity,
-      color: 'text-emerald-600 bg-emerald-100',
+      color: 'text-emerald-600 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/30',
       trend: 'up'
     }
   ];
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
@@ -119,7 +118,7 @@ export const ModernDashboard = () => {
       {/* Métricas Principais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {metrics.map((metric, index) => (
-          <Card key={index} className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card key={index} className="relative overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
@@ -149,10 +148,10 @@ export const ModernDashboard = () => {
       </div>
 
       {/* Ações Rápidas */}
-      <Card className="shadow-lg">
+      <Card className="shadow-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-primary" />
+            <ArrowRight className="w-5 h-5 text-primary" />
             Ações Rápidas
           </CardTitle>
         </CardHeader>
@@ -162,7 +161,7 @@ export const ModernDashboard = () => {
               <div
                 key={index}
                 onClick={action.onClick}
-                className="relative group p-4 rounded-lg border-2 border-dashed border-gray-200 hover:border-primary/50 cursor-pointer transition-all duration-200 hover:shadow-md"
+                className="relative group p-4 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-primary/50 cursor-pointer transition-all duration-200 hover:shadow-md"
               >
                 {action.premium && (
                   <div className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">
@@ -185,93 +184,6 @@ export const ModernDashboard = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Visão Geral de Funcionalidades */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>Funcionalidades Disponíveis</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex items-center gap-3">
-                <Users className="w-5 h-5 text-blue-600" />
-                <span className="font-medium">Gestão de Clientes</span>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/clients')}
-              >
-                Acessar
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-green-600" />
-                <span className="font-medium">Agendamentos</span>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/appointments')}
-              >
-                Acessar
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex items-center gap-3">
-                <Package className="w-5 h-5 text-purple-600" />
-                <span className="font-medium">Controle de Estoque</span>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/inventory')}
-              >
-                Acessar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>Recursos Premium</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
-              <div className="flex items-center gap-3">
-                <TrendingUp className="w-5 h-5 text-purple-600" />
-                <span className="font-medium">Relatórios Avançados</span>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => hasFeature('pro') ? navigate('/reports') : navigate('/planos')}
-              >
-                {hasFeature('pro') ? 'Acessar' : 'Upgrade'}
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-              <div className="flex items-center gap-3">
-                <DollarSign className="w-5 h-5 text-blue-600" />
-                <span className="font-medium">Gestão Financeira</span>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => hasFeature('pro') ? navigate('/financial') : navigate('/planos')}
-              >
-                {hasFeature('pro') ? 'Acessar' : 'Upgrade'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
