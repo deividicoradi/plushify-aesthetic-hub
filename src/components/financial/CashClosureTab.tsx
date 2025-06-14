@@ -24,8 +24,8 @@ const CashClosureTab = () => {
     loadingClosures,
     loadingOpenings,
     handleRefetch,
-    deleteClosure,
-    deleteOpening,
+    handleDeleteClosure,
+    handleDeleteOpening,
   } = useCashClosureData();
 
   const handleEditClosure = (closure: any) => {
@@ -38,13 +38,13 @@ const CashClosureTab = () => {
     setIsOpeningDialogOpen(true);
   };
 
-  const handleDeleteClosure = (closureId: string) => {
+  const handleDeleteClosureClick = (closureId: string) => {
     setItemToDelete(closureId);
     setDeleteType('closure');
     setDeleteConfirmOpen(true);
   };
 
-  const handleDeleteOpening = (openingId: string) => {
+  const handleDeleteOpeningClick = (openingId: string) => {
     setItemToDelete(openingId);
     setDeleteType('opening');
     setDeleteConfirmOpen(true);
@@ -53,9 +53,9 @@ const CashClosureTab = () => {
   const confirmDelete = () => {
     if (itemToDelete) {
       if (deleteType === 'closure') {
-        deleteClosure(itemToDelete);
+        handleDeleteClosure(itemToDelete);
       } else {
-        deleteOpening(itemToDelete);
+        handleDeleteOpening(itemToDelete);
       }
       setItemToDelete(null);
     }
@@ -92,7 +92,7 @@ const CashClosureTab = () => {
                     key={opening.id}
                     opening={opening}
                     onEdit={handleEditOpening}
-                    onDelete={handleDeleteOpening}
+                    onDelete={handleDeleteOpeningClick}
                   />
                 ))}
               </div>
@@ -107,7 +107,7 @@ const CashClosureTab = () => {
                     key={closure.id}
                     closure={closure}
                     onEdit={handleEditClosure}
-                    onDelete={handleDeleteClosure}
+                    onDelete={handleDeleteClosureClick}
                   />
                 ))}
               </div>
