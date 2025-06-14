@@ -15,11 +15,15 @@ export const AppointmentsList = ({ searchQuery }: AppointmentsListProps) => {
   const [activeTab, setActiveTab] = useState('hoje');
   const { appointments, isLoading } = useAppointments();
 
+  console.log('AppointmentsList render - Total appointments:', appointments.length);
+
   const filteredAppointments = useMemo(() => {
-    return appointments.filter(appointment =>
+    const filtered = appointments.filter(appointment =>
       appointment.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       appointment.service_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    console.log('Filtered appointments:', filtered.length);
+    return filtered;
   }, [appointments, searchQuery]);
 
   const todayAppointments = useMemo(() => {
@@ -78,7 +82,10 @@ export const AppointmentsList = ({ searchQuery }: AppointmentsListProps) => {
           ) : (
             <div className="grid gap-4">
               {todayAppointments.map((appointment) => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
+                <AppointmentCard 
+                  key={`today-${appointment.id}`} 
+                  appointment={appointment} 
+                />
               ))}
             </div>
           )}
@@ -92,7 +99,10 @@ export const AppointmentsList = ({ searchQuery }: AppointmentsListProps) => {
           ) : (
             <div className="grid gap-4">
               {tomorrowAppointments.map((appointment) => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
+                <AppointmentCard 
+                  key={`tomorrow-${appointment.id}`} 
+                  appointment={appointment} 
+                />
               ))}
             </div>
           )}
@@ -101,7 +111,10 @@ export const AppointmentsList = ({ searchQuery }: AppointmentsListProps) => {
         <TabsContent value="todos" className="space-y-4 mt-6">
           <div className="grid gap-4">
             {filteredAppointments.map((appointment) => (
-              <AppointmentCard key={appointment.id} appointment={appointment} />
+              <AppointmentCard 
+                key={`all-${appointment.id}`} 
+                appointment={appointment} 
+              />
             ))}
           </div>
         </TabsContent>

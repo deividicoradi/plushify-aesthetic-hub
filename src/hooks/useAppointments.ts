@@ -43,7 +43,6 @@ export const useAppointments = () => {
       
       console.log('Fetched appointments:', data);
       
-      // Garantir que o status está correto
       const formattedData = (data || []).map(appointment => ({
         ...appointment,
         status: appointment.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
@@ -87,7 +86,6 @@ export const useAppointments = () => {
         status: data.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
       };
 
-      // Atualizar a lista local imediatamente
       setAppointments(prev => [...prev, formattedData]);
 
       toast({
@@ -132,7 +130,6 @@ export const useAppointments = () => {
         status: data.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
       };
 
-      // Atualizar a lista local imediatamente
       setAppointments(prev => 
         prev.map(appointment => 
           appointment.id === id ? formattedData : appointment
@@ -159,9 +156,9 @@ export const useAppointments = () => {
   const deleteAppointment = async (id: string) => {
     if (!user) return false;
 
+    console.log('Starting deletion process for appointment:', id);
+
     try {
-      console.log('Deleting appointment:', id);
-      
       const { error } = await supabase
         .from('appointments')
         .delete()
@@ -170,13 +167,14 @@ export const useAppointments = () => {
 
       if (error) throw error;
 
-      console.log('Appointment deleted successfully');
+      console.log('Successfully deleted appointment from database:', id);
 
-      // Atualizar a lista local removendo o item IMEDIATAMENTE
-      setAppointments(prev => {
-        const newAppointments = prev.filter(appointment => appointment.id !== id);
-        console.log('Updated appointments after deletion:', newAppointments);
-        return newAppointments;
+      // Forçar atualização imediata do estado
+      setAppointments(prevAppointments => {
+        const filteredAppointments = prevAppointments.filter(appointment => appointment.id !== id);
+        console.log('Updated local state - removed appointment:', id);
+        console.log('Remaining appointments:', filteredAppointments.length);
+        return filteredAppointments;
       });
       
       toast({
