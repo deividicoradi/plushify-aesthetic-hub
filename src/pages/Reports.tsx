@@ -20,7 +20,7 @@ const Reports = () => {
           <AppSidebar />
           <SidebarInset className="flex-1">
             <div className="flex flex-col min-h-screen w-full bg-background">
-              <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-3">
+              <header className="flex items-center gap-4 border-b border-border bg-card px-4 py-3">
                 <SidebarTrigger />
                 <div className="flex-1">
                   <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -52,7 +52,7 @@ const Reports = () => {
         <SidebarInset className="flex-1">
           <div className="flex flex-col min-h-screen w-full bg-background">
             {/* Header */}
-            <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-3">
+            <header className="flex items-center gap-4 border-b border-border bg-card px-4 py-3">
               <SidebarTrigger />
               <div className="flex items-center justify-between flex-1">
                 <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ const Reports = () => {
                   growth={metrics?.clientsGrowth}
                   icon={Users}
                   description="Clientes cadastrados"
-                  colorClass="from-green-50 to-emerald-50 border-green-200 dark:from-green-950/20 dark:to-emerald-950/20 dark:border-green-800"
+                  colorClass="from-green-500/20 to-emerald-500/20 border-green-500/30 dark:from-green-500/10 dark:to-emerald-500/10 dark:border-green-500/20"
                   loading={loading}
                 />
 
@@ -85,7 +85,7 @@ const Reports = () => {
                   growth={metrics?.revenueGrowth}
                   icon={Receipt}
                   description="Receita acumulada"
-                  colorClass="from-blue-50 to-cyan-50 border-blue-200 dark:from-blue-950/20 dark:to-cyan-950/20 dark:border-blue-800"
+                  colorClass="from-blue-500/20 to-cyan-500/20 border-blue-500/30 dark:from-blue-500/10 dark:to-cyan-500/10 dark:border-blue-500/20"
                   loading={loading}
                 />
 
@@ -95,7 +95,7 @@ const Reports = () => {
                   growth={metrics?.appointmentsGrowth}
                   icon={CalendarDays}
                   description="Total de agendamentos"
-                  colorClass="from-purple-50 to-pink-50 border-purple-200 dark:from-purple-950/20 dark:to-pink-950/20 dark:border-purple-800"
+                  colorClass="from-purple-500/20 to-pink-500/20 border-purple-500/30 dark:from-purple-500/10 dark:to-pink-500/10 dark:border-purple-500/20"
                   loading={loading}
                 />
 
@@ -104,7 +104,7 @@ const Reports = () => {
                   value={metrics?.totalProducts || 0}
                   icon={Package}
                   description={`${metrics?.lowStockProducts || 0} com estoque baixo`}
-                  colorClass="from-orange-50 to-yellow-50 border-orange-200 dark:from-orange-950/20 dark:to-yellow-950/20 dark:border-orange-800"
+                  colorClass="from-orange-500/20 to-yellow-500/20 border-orange-500/30 dark:from-orange-500/10 dark:to-yellow-500/10 dark:border-orange-500/20"
                   loading={loading}
                 />
               </div>
