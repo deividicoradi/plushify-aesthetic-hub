@@ -23,12 +23,12 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
   const { verifyPassword, isVerifying } = useAuthorizationPassword();
   const { deletePayment, isDeleting } = useSecurePaymentMutation();
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string): "default" | "destructive" | "secondary" | "outline" => {
     const variants = {
-      pago: 'default',
-      pendente: 'secondary', 
-      parcial: 'outline',
-      cancelado: 'destructive'
+      pago: 'default' as const,
+      pendente: 'secondary' as const, 
+      parcial: 'outline' as const,
+      cancelado: 'destructive' as const
     };
     
     return variants[status as keyof typeof variants] || variants.pendente;
