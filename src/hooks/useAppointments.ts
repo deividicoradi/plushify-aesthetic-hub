@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,6 +23,7 @@ export interface Appointment {
 export const useAppointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
   const { user } = useAuth();
 
   const fetchAppointments = async () => {
@@ -62,9 +62,10 @@ export const useAppointments = () => {
   };
 
   const createAppointment = async (appointmentData: Omit<Appointment, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-    if (!user) return null;
+    if (!user || isCreating) return null;
 
     try {
+      setIsCreating(true);
       console.log('Creating appointment with data:', appointmentData);
       
       const { data, error } = await supabase
@@ -85,8 +86,8 @@ export const useAppointments = () => {
         status: data.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
       };
 
-      // Fazer refetch para garantir que temos os dados mais atualizados
-      await fetchAppointments();
+      // Atualizar a lista local imediatamente
+      setAppointments(prev => [...prev, formattedData]);
 
       toast({
         title: "Sucesso",
@@ -102,6 +103,8 @@ export const useAppointments = () => {
         variant: "destructive"
       });
       return null;
+    } finally {
+      setIsCreating(false);
     }
   };
 

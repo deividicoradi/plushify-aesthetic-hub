@@ -15,6 +15,7 @@ interface CreateAppointmentDialogProps {
 
 export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmentDialogProps) => {
   const { createAppointment } = useAppointments();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     client_name: '',
@@ -29,6 +30,8 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (isSubmitting) return;
+    
     console.log('Form submitted with data:', formData);
     
     if (!formData.client_name || !formData.service_name || !formData.appointment_date || !formData.appointment_time) {
@@ -36,34 +39,40 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
       return;
     }
 
-    const appointmentPayload = {
-      client_name: formData.client_name,
-      service_name: formData.service_name,
-      appointment_date: formData.appointment_date,
-      appointment_time: formData.appointment_time,
-      duration: formData.duration,
-      status: 'agendado' as const,
-      price: formData.price,
-      notes: formData.notes || undefined
-    };
+    setIsSubmitting(true);
 
-    console.log('Creating appointment with payload:', appointmentPayload);
+    try {
+      const appointmentPayload = {
+        client_name: formData.client_name,
+        service_name: formData.service_name,
+        appointment_date: formData.appointment_date,
+        appointment_time: formData.appointment_time,
+        duration: formData.duration,
+        status: 'agendado' as const,
+        price: formData.price,
+        notes: formData.notes || undefined
+      };
 
-    const result = await createAppointment(appointmentPayload);
+      console.log('Creating appointment with payload:', appointmentPayload);
 
-    console.log('Create appointment result:', result);
+      const result = await createAppointment(appointmentPayload);
 
-    if (result) {
-      setFormData({
-        client_name: '',
-        service_name: '',
-        appointment_date: '',
-        appointment_time: '',
-        duration: 60,
-        price: 0,
-        notes: ''
-      });
-      onOpenChange(false);
+      console.log('Create appointment result:', result);
+
+      if (result) {
+        setFormData({
+          client_name: '',
+          service_name: '',
+          appointment_date: '',
+          appointment_time: '',
+          duration: 60,
+          price: 0,
+          notes: ''
+        });
+        onOpenChange(false);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -189,8 +198,12 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-plush-600 hover:bg-plush-700">
-              Criar Agendamento
+            <Button 
+              type="submit" 
+              className="bg-plush-600 hover:bg-plush-700"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Criando...' : 'Criar Agendamento'}
             </Button>
           </div>
         </form>
