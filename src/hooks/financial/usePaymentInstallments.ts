@@ -9,7 +9,17 @@ export const usePaymentInstallments = () => {
   const createInstallmentsForPartialPayment = async (paymentData: any) => {
     const remainingAmount = Number(paymentData.amount) - Number(paymentData.paid_amount);
     
-    if (remainingAmount <= 0) return;
+    console.log('📝 Criando parcelamento automático:', {
+      totalAmount: paymentData.amount,
+      paidAmount: paymentData.paid_amount,
+      remainingAmount,
+      paymentId: paymentData.id
+    });
+    
+    if (remainingAmount <= 0) {
+      console.log('⚠️ Valor restante é zero ou negativo, não criando parcelamento');
+      return;
+    }
 
     // Criar uma parcela para o valor restante
     const dueDate = new Date();
@@ -26,16 +36,21 @@ export const usePaymentInstallments = () => {
       notes: `Valor restante do pagamento: ${paymentData.description}`
     };
 
-    const { error } = await supabase
+    console.log('💾 Inserindo parcelamento:', installment);
+
+    const { data, error } = await supabase
       .from('installments')
-      .insert([installment]);
+      .insert([installment])
+      .select('*')
+      .single();
 
     if (error) {
-      console.error('Erro ao criar parcelamento automático:', error);
+      console.error('❌ Erro ao criar parcelamento automático:', error);
       throw error;
     }
 
-    console.log('✅ Parcelamento automático criado para pagamento parcial');
+    console.log('✅ Parcelamento automático criado com sucesso:', data);
+    return data;
   };
 
   return {

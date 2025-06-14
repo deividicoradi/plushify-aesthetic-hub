@@ -9,13 +9,19 @@ export const useInstallmentsData = () => {
   const { data: installments, isLoading, refetch } = useQuery({
     queryKey: ['installments', user?.id],
     queryFn: async () => {
+      console.log('🔍 Buscando parcelamentos para usuário:', user?.id);
       const { data, error } = await supabase
         .from('installments')
         .select('*')
         .eq('user_id', user?.id)
         .order('due_date', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao buscar parcelamentos:', error);
+        throw error;
+      }
+      
+      console.log('📋 Parcelamentos encontrados:', data?.length || 0);
       return data;
     },
     enabled: !!user?.id,
@@ -25,6 +31,7 @@ export const useInstallmentsData = () => {
   const { data: payments } = useQuery({
     queryKey: ['payments-for-installments', user?.id],
     queryFn: async () => {
+      console.log('🔍 Buscando pagamentos para parcelamentos');
       const { data, error } = await supabase
         .from('payments')
         .select(`
@@ -32,11 +39,17 @@ export const useInstallmentsData = () => {
           description, 
           amount, 
           client_id,
+          status,
           payment_methods(name)
         `)
         .eq('user_id', user?.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao buscar pagamentos:', error);
+        throw error;
+      }
+      
+      console.log('💰 Pagamentos encontrados:', data?.length || 0);
       return data;
     },
     enabled: !!user?.id,
@@ -46,12 +59,18 @@ export const useInstallmentsData = () => {
   const { data: clients } = useQuery({
     queryKey: ['clients-for-installments', user?.id],
     queryFn: async () => {
+      console.log('🔍 Buscando clientes para parcelamentos');
       const { data, error } = await supabase
         .from('clients')
         .select('id, name, email, phone')
         .eq('user_id', user?.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao buscar clientes:', error);
+        throw error;
+      }
+      
+      console.log('👥 Clientes encontrados:', data?.length || 0);
       return data;
     },
     enabled: !!user?.id,
@@ -71,6 +90,13 @@ export const useInstallmentsData = () => {
     if (!acc[paymentId]) {
       const paymentData = getPaymentData(paymentId);
       const clientData = paymentData?.client_id ? getClientData(paymentData.client_id) : null;
+      
+      console.log(`🔗 Agrupando parcelamento para pagamento ${paymentId}:`, {
+        payment: paymentData?.description,
+        client: clientData?.name,
+        installmentCount: 1
+      });
+      
       acc[paymentId] = {
         payment: paymentData,
         client: clientData,
@@ -80,6 +106,8 @@ export const useInstallmentsData = () => {
     acc[paymentId].installments.push(installment);
     return acc;
   }, {} as any);
+
+  console.log('📊 Parcelamentos agrupados:', Object.keys(groupedInstallments || {}).length, 'grupos');
 
   return {
     installments,

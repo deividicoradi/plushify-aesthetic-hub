@@ -14,7 +14,7 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      console.log('Dados sendo enviados para pagamento:', data);
+      console.log('💾 Dados sendo enviados para pagamento:', data);
       
       let result;
       if (payment) {
@@ -26,7 +26,7 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
           .single();
         
         if (error) {
-          console.error('Erro ao atualizar pagamento:', error);
+          console.error('❌ Erro ao atualizar pagamento:', error);
           throw error;
         }
         result = updateResult;
@@ -38,7 +38,7 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
           .single();
         
         if (error) {
-          console.error('Erro ao inserir pagamento:', error);
+          console.error('❌ Erro ao inserir pagamento:', error);
           throw error;
         }
         result = insertResult;
@@ -62,7 +62,6 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
           console.log('✅ Caixa atualizado com sucesso!');
         } catch (error) {
           console.error('❌ Erro ao atualizar caixa:', error);
-          // Não falhar a operação principal se houver erro no caixa
           toast({
             title: "Atenção",
             description: "Pagamento salvo, mas houve erro ao atualizar o caixa. Verifique manualmente.",
@@ -77,6 +76,8 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
         
         try {
           await createInstallmentsForPartialPayment(result);
+          console.log('✅ Parcelamento automático criado com sucesso!');
+          
           toast({
             title: "Parcelamento criado!",
             description: "O valor restante foi automaticamente registrado em Parcelamentos.",
@@ -91,9 +92,18 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
         }
       }
 
-      queryClient.invalidateQueries({ queryKey: ['payments'] });
-      queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
-      queryClient.invalidateQueries({ queryKey: ['installments'] });
+      // Invalidar todas as queries relacionadas para atualizar as telas
+      console.log('🔄 Invalidando queries...');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['payments'] }),
+        queryClient.invalidateQueries({ queryKey: ['payment-methods'] }),
+        queryClient.invalidateQueries({ queryKey: ['installments'] }),
+        queryClient.invalidateQueries({ queryKey: ['payments-for-installments'] }),
+        queryClient.invalidateQueries({ queryKey: ['clients-for-installments'] })
+      ]);
+      
+      console.log('✅ Todas as queries foram invalidadas');
+      
       toast({
         title: "Sucesso!",
         description: payment ? 'Pagamento atualizado!' : 'Pagamento criado!',
@@ -101,7 +111,7 @@ export const usePaymentMutation = (payment?: any, onSuccess?: () => void) => {
       onSuccess?.();
     },
     onError: (error) => {
-      console.error('Erro completo:', error);
+      console.error('❌ Erro completo:', error);
       toast({
         title: "Erro",
         description: 'Erro ao salvar pagamento: ' + (error.message || 'Erro desconhecido'),
