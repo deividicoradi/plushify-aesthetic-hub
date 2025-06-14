@@ -9,65 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      appointments: {
-        Row: {
-          client_id: string | null
-          client_name: string | null
-          created_at: string
-          description: string | null
-          end_time: string
-          id: string
-          price: number | null
-          service: string | null
-          start_time: string
-          status: string
-          time: string | null
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          client_id?: string | null
-          client_name?: string | null
-          created_at?: string
-          description?: string | null
-          end_time: string
-          id?: string
-          price?: number | null
-          service?: string | null
-          start_time: string
-          status?: string
-          time?: string | null
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          client_id?: string | null
-          client_name?: string | null
-          created_at?: string
-          description?: string | null
-          end_time?: string
-          id?: string
-          price?: number | null
-          service?: string | null
-          start_time?: string
-          status?: string
-          time?: string | null
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "appointments_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       cash_closures: {
         Row: {
           card_amount: number
@@ -251,15 +192,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "financial_transactions_appointment_id_fkey"
-            columns: ["appointment_id"]
-            isOneToOne: false
-            referencedRelation: "appointments"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       installments: {
         Row: {
@@ -638,10 +571,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      format_appointment_time: {
-        Args: { start_time: string }
-        Returns: string
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
