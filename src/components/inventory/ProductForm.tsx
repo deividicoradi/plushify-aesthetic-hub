@@ -14,13 +14,12 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDes
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Package, Barcode, Tag, Archive } from "lucide-react";
+import { Package, Tag, Archive } from "lucide-react";
 
 type ProductFormData = {
   name: string;
   category: string;
   minStock: number;
-  barcode: string;
 };
 
 export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
@@ -32,19 +31,9 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
     defaultValues: {
       name: "",
       category: "",
-      minStock: 5,
-      barcode: ""
+      minStock: 5
     }
   });
-
-  // Check for pending barcode from scanner
-  useEffect(() => {
-    const pendingBarcode = sessionStorage.getItem('pendingBarcode');
-    if (pendingBarcode) {
-      form.setValue('barcode', pendingBarcode);
-      sessionStorage.removeItem('pendingBarcode');
-    }
-  }, [form]);
 
   // Fetch all existing categories
   useEffect(() => {
@@ -85,7 +74,6 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
           name: data.name,
           category: finalCategory,
           min_stock: data.minStock,
-          barcode: data.barcode || null,
           user_id: user?.id
         });
 
@@ -131,30 +119,6 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
                     className="h-11"
                   />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="barcode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  <Barcode className="w-4 h-4" />
-                  Código de Barras
-                </FormLabel>
-                <FormControl>
-                  <Input 
-                    {...field} 
-                    placeholder="Ex: 7891234567890"
-                    className="h-11"
-                  />
-                </FormControl>
-                <FormDescription>
-                  Opcional. Pode ser escaneado utilizando a câmera do dispositivo.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
