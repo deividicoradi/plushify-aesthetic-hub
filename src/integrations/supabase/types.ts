@@ -171,6 +171,42 @@ export type Database = {
         }
         Relationships: []
       }
+      dashboard_analytics: {
+        Row: {
+          analysis_date: string
+          created_at: string
+          id: string
+          insights: Json
+          metrics: Json
+          recommendations: Json
+          trends: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis_date?: string
+          created_at?: string
+          id?: string
+          insights: Json
+          metrics: Json
+          recommendations: Json
+          trends: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis_date?: string
+          created_at?: string
+          id?: string
+          insights?: Json
+          metrics?: Json
+          recommendations?: Json
+          trends?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number

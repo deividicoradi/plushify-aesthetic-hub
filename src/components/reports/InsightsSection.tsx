@@ -2,7 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReportsMetrics } from '@/hooks/useReportsData';
-import { TrendingUp, AlertTriangle, Target, Lightbulb, Zap, Award, Brain } from 'lucide-react';
+import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
+import { TrendingUp, AlertTriangle, Target, Lightbulb, Zap, Award, Brain, Save } from 'lucide-react';
 
 interface InsightsSectionProps {
   metrics: ReportsMetrics | null;
@@ -10,6 +11,9 @@ interface InsightsSectionProps {
 }
 
 export const InsightsSection = ({ metrics, loading = false }: InsightsSectionProps) => {
+  const { analytics, saving } = useDashboardAnalytics();
+  const latestAnalysis = analytics[0]; // Análise mais recente
+
   if (loading || !metrics) {
     return (
       <Card className="bg-card border-border shadow-sm">
@@ -36,11 +40,14 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
     );
   }
 
-  const insights = [];
+  // Usar insights salvos se disponíveis, senão gerar insights em tempo real
+  const savedInsights = latestAnalysis?.insights || [];
+  
+  const realTimeInsights = [];
 
   // Insight sobre crescimento de receita
   if (metrics.revenueGrowth > 0) {
-    insights.push({
+    realTimeInsights.push({
       icon: TrendingUp,
       title: '🚀 Crescimento Acelerado',
       message: `Excelente! Sua receita cresceu ${metrics.revenueGrowth.toFixed(1)}% este mês. Continue investindo em marketing digital e programas de fidelização para manter essa trajetória.`,
@@ -48,7 +55,7 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
       priority: 'high'
     });
   } else if (metrics.revenueGrowth < -10) {
-    insights.push({
+    realTimeInsights.push({
       icon: AlertTriangle,
       title: '⚠️ Atenção Necessária',
       message: `Detectamos uma queda de ${Math.abs(metrics.revenueGrowth).toFixed(1)}% na receita. Recomendamos analisar a satisfação dos clientes e revisar estratégias de vendas.`,
@@ -59,7 +66,7 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
 
   // Insight sobre estoque baixo
   if (metrics.lowStockProducts > 0) {
-    insights.push({
+    realTimeInsights.push({
       icon: AlertTriangle,
       title: '📦 Gestão de Estoque',
       message: `${metrics.lowStockProducts} produto(s) com estoque baixo. Configure alertas automáticos para evitar rupturas e otimizar suas vendas.`,
@@ -70,7 +77,7 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
 
   // Insight sobre crescimento de clientes
   if (metrics.clientsGrowth > 15) {
-    insights.push({
+    realTimeInsights.push({
       icon: Award,
       title: '🎯 Captação Excepcional',
       message: `Parabéns! Você captou ${metrics.clientsGrowth.toFixed(1)}% mais clientes este mês. Considere implementar um programa de indicação para potencializar ainda mais esse crescimento.`,
@@ -81,7 +88,7 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
 
   // Insight sobre agendamentos
   if (metrics.appointmentsGrowth > 20) {
-    insights.push({
+    realTimeInsights.push({
       icon: Zap,
       title: '💡 Oportunidade de Expansão',
       message: `Com ${metrics.appointmentsGrowth.toFixed(1)}% mais agendamentos, você pode considerar expandir horários de funcionamento ou contratar mais profissionais para atender a demanda crescente.`,
@@ -90,9 +97,12 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
     });
   }
 
+  // Combinar insights salvos e em tempo real
+  const allInsights = [...savedInsights, ...realTimeInsights];
+
   // Insight sobre meta de receita
   const projectedRevenue = metrics.totalRevenue * (1 + Math.max(metrics.revenueGrowth, 0) / 100);
-  insights.push({
+  allInsights.push({
     icon: Target,
     title: '🎯 Projeção Estratégica',
     message: `Baseado no crescimento atual, você pode alcançar R$ ${projectedRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} no próximo mês. Mantenha o foco nas estratégias que estão funcionando.`,
@@ -101,7 +111,7 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
   });
 
   // Insight motivacional
-  insights.push({
+  allInsights.push({
     icon: Lightbulb,
     title: '✨ Dica do Expert',
     message: 'Analise seus horários de pico e otimize a agenda para maximizar a receita. Clientes satisfeitos recomendam 3x mais que a média do mercado.',
@@ -148,7 +158,11 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
 
   // Sort by priority
   const priorityOrder = { high: 3, medium: 2, low: 1 };
-  const sortedInsights = insights.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
+  const sortedInsights = allInsights
+    .filter((insight, index, self) => 
+      index === self.findIndex(i => i.title === insight.title) // Remove duplicatas
+    )
+    .sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
 
   return (
     <Card className="bg-card border-border shadow-sm">
@@ -158,8 +172,13 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
             <Brain className="w-4 h-4 text-primary-foreground" />
           </div>
           <div className="flex-1">
-            <CardTitle className="text-xl">Insights Inteligentes</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">Análises automáticas baseadas nos seus dados</p>
+            <CardTitle className="text-xl flex items-center gap-2">
+              Insights Inteligentes
+              {saving && <Save className="w-4 h-4 text-blue-500 animate-pulse" />}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Análises automáticas baseadas nos seus dados {latestAnalysis && '(salvas automaticamente)'}
+            </p>
           </div>
         </div>
       </CardHeader>

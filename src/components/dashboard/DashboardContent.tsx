@@ -6,6 +6,7 @@ import { FloatingActionButtons } from '@/components/dashboard/FloatingActionButt
 import { WeeklyOverview } from '@/components/dashboard/WeeklyOverview';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { QuickHelp } from '@/components/dashboard/QuickHelp';
+import { AnalyticsHistory } from '@/components/dashboard/AnalyticsHistory';
 import { TeamManagement } from '@/components/premium/TeamManagement';
 import { useSubscription } from '@/hooks/useSubscription';
 
@@ -24,13 +25,18 @@ export const DashboardContent = () => {
         </div>
       </div>
 
-      {/* Activity and Alerts Section */}
+      {/* Analytics History Section */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <ModernActivityFeed />
+        <AnalyticsHistory />
         <div className="space-y-6">
           <AlertsPanel />
           <QuickHelp />
         </div>
+      </div>
+
+      {/* Activity Section */}
+      <div className="grid grid-cols-1">
+        <ModernActivityFeed />
       </div>
 
       {/* Premium Features Section */}
