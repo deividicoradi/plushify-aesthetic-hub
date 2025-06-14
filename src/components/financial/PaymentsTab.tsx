@@ -22,7 +22,10 @@ const PaymentsTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
-        .select('*')
+        .select(`
+          *,
+          payment_methods (name, type)
+        `)
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
@@ -47,20 +50,6 @@ const PaymentsTab = () => {
     enabled: !!user?.id,
   });
 
-  // Mapear métodos de pagamento
-  const paymentMethodsMap = {
-    'pix': 'PIX',
-    'dinheiro': 'Dinheiro',
-    'cartao_debito': 'Cartão de Débito',
-    'cartao_credito': 'Cartão de Crédito',
-    'transferencia': 'Transferência Bancária',
-    'boleto': 'Boleto',
-    'cheque': 'Cheque',
-    'vale_alimentacao': 'Vale Alimentação',
-    'vale_refeicao': 'Vale Refeição',
-    'outros': 'Outros'
-  };
-
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pendente: { label: 'Pendente', variant: 'secondary' as const },
@@ -84,12 +73,6 @@ const PaymentsTab = () => {
     if (!clientId || !clients) return null;
     const client = clients.find(c => c.id === clientId);
     return client?.name;
-  };
-
-  const getPaymentMethodName = (methodId: string) => {
-    // For now, we'll try to map the method_id to our predefined methods
-    // In the future, we might need to update the database to store the method type directly
-    return paymentMethodsMap[methodId as keyof typeof paymentMethodsMap] || methodId;
   };
 
   const filteredPayments = payments?.filter(payment =>
@@ -148,7 +131,9 @@ const PaymentsTab = () => {
                         {clientName && (
                           <p>Cliente: {clientName}</p>
                         )}
-                        <p>Método: {getPaymentMethodName(payment.payment_method_id)}</p>
+                        {payment.payment_methods && (
+                          <p>Método: {payment.payment_methods.name}</p>
+                        )}
                         <p>Criado em: {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
                       </div>
                     </div>

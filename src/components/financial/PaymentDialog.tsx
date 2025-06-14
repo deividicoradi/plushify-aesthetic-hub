@@ -31,19 +31,22 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
     status: payment?.status || 'pendente'
   });
 
-  // Métodos de pagamento mais usados atualmente
-  const paymentMethods = [
-    { id: 'pix', name: 'PIX' },
-    { id: 'dinheiro', name: 'Dinheiro' },
-    { id: 'cartao_debito', name: 'Cartão de Débito' },
-    { id: 'cartao_credito', name: 'Cartão de Crédito' },
-    { id: 'transferencia', name: 'Transferência Bancária' },
-    { id: 'boleto', name: 'Boleto' },
-    { id: 'cheque', name: 'Cheque' },
-    { id: 'vale_alimentacao', name: 'Vale Alimentação' },
-    { id: 'vale_refeicao', name: 'Vale Refeição' },
-    { id: 'outros', name: 'Outros' }
-  ];
+  // Buscar métodos de pagamento do banco de dados
+  const { data: paymentMethods } = useQuery({
+    queryKey: ['payment-methods', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('payment_methods')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('active', true)
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   const { data: clients } = useQuery({
     queryKey: ['clients', user?.id],
@@ -187,7 +190,7 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
                 <SelectValue placeholder="Selecione o método" />
               </SelectTrigger>
               <SelectContent>
-                {paymentMethods.map((method) => (
+                {paymentMethods?.map((method) => (
                   <SelectItem key={method.id} value={method.id}>
                     {method.name}
                   </SelectItem>
