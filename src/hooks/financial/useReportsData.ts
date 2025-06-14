@@ -47,17 +47,35 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
 
       // Buscar informações dos clientes separadamente
       const clientIds = payments?.map(p => p.client_id).filter(Boolean) || [];
-      const { data: clients } = clientIds.length > 0 ? await supabase
-        .from('clients')
-        .select('id, name')
-        .in('id', clientIds) : { data: [] };
+      let clients: any[] = [];
+      if (clientIds.length > 0) {
+        const { data: clientsData, error: clientsError } = await supabase
+          .from('clients')
+          .select('id, name')
+          .in('id', clientIds);
+        
+        if (clientsError) {
+          console.error('❌ Erro ao buscar clientes:', clientsError);
+        } else {
+          clients = clientsData || [];
+        }
+      }
 
       // Buscar informações dos métodos de pagamento separadamente
       const paymentMethodIds = payments?.map(p => p.payment_method_id).filter(Boolean) || [];
-      const { data: paymentMethods } = paymentMethodIds.length > 0 ? await supabase
-        .from('payment_methods')
-        .select('id, name, type')
-        .in('id', paymentMethodIds) : { data: [] };
+      let paymentMethods: any[] = [];
+      if (paymentMethodIds.length > 0) {
+        const { data: paymentMethodsData, error: paymentMethodsError } = await supabase
+          .from('payment_methods')
+          .select('id, name, type')
+          .in('id', paymentMethodIds);
+        
+        if (paymentMethodsError) {
+          console.error('❌ Erro ao buscar métodos de pagamento:', paymentMethodsError);
+        } else {
+          paymentMethods = paymentMethodsData || [];
+        }
+      }
 
       // Buscar pagamentos excluídos através dos logs de auditoria
       const { data: deletedPayments, error: deletedError } = await supabase
@@ -136,8 +154,8 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
 
       // Fix TypeScript error by properly typing the payments
       const validPayments: Payment[] = (payments || []).map(p => {
-        const client = clients?.find(c => c.id === p.client_id);
-        const paymentMethod = paymentMethods?.find(pm => pm.id === p.payment_method_id);
+        const client = clients.find(c => c.id === p.client_id);
+        const paymentMethod = paymentMethods.find(pm => pm.id === p.payment_method_id);
         
         return {
           id: p.id,
