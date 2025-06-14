@@ -75,7 +75,7 @@ const Reports = () => {
                   growth={metrics?.clientsGrowth}
                   icon={Users}
                   description="Clientes cadastrados"
-                  colorClass="from-green-500/20 to-emerald-500/20 border-green-500/30 dark:from-green-500/10 dark:to-emerald-500/10 dark:border-green-500/20"
+                  colorClass="from-emerald-500 to-emerald-600"
                   loading={loading}
                 />
 
@@ -85,7 +85,7 @@ const Reports = () => {
                   growth={metrics?.revenueGrowth}
                   icon={Receipt}
                   description="Receita acumulada"
-                  colorClass="from-blue-500/20 to-cyan-500/20 border-blue-500/30 dark:from-blue-500/10 dark:to-cyan-500/10 dark:border-blue-500/20"
+                  colorClass="from-blue-500 to-blue-600"
                   loading={loading}
                 />
 
@@ -95,7 +95,7 @@ const Reports = () => {
                   growth={metrics?.appointmentsGrowth}
                   icon={CalendarDays}
                   description="Total de agendamentos"
-                  colorClass="from-purple-500/20 to-pink-500/20 border-purple-500/30 dark:from-purple-500/10 dark:to-pink-500/10 dark:border-purple-500/20"
+                  colorClass="from-purple-500 to-purple-600"
                   loading={loading}
                 />
 
@@ -104,7 +104,7 @@ const Reports = () => {
                   value={metrics?.totalProducts || 0}
                   icon={Package}
                   description={`${metrics?.lowStockProducts || 0} com estoque baixo`}
-                  colorClass="from-orange-500/20 to-yellow-500/20 border-orange-500/30 dark:from-orange-500/10 dark:to-yellow-500/10 dark:border-orange-500/20"
+                  colorClass="from-orange-500 to-orange-600"
                   loading={loading}
                 />
               </div>

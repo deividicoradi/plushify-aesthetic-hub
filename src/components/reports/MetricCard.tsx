@@ -56,27 +56,27 @@ export const MetricCard = ({
   }
 
   return (
-    <Card className={`bg-gradient-to-br ${colorClass} border-0 hover:scale-105 transition-transform duration-200`}>
+    <Card className={`bg-gradient-to-br ${colorClass} border-0 hover:scale-105 transition-transform duration-200 shadow-lg`}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <div className="p-2 rounded-lg bg-white/20">
-            <Icon className="w-5 h-5 text-white" />
+          <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
+            <Icon className="w-6 h-6 text-white" />
           </div>
           {growth !== undefined && (
-            <span className={`text-sm font-medium text-white/90 bg-white/20 px-2 py-1 rounded-full`}>
+            <span className={`text-sm font-medium text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full`}>
               {formatGrowth(growth)}
             </span>
           )}
         </div>
-        <div className="space-y-1">
-          <h3 className="font-medium text-white/90">{title}</h3>
-          <p className="text-2xl font-semibold text-white">
+        <div className="space-y-2">
+          <h3 className="font-semibold text-white/95 text-lg">{title}</h3>
+          <p className="text-3xl font-bold text-white">
             {typeof value === 'number' && title.includes('Receita') 
               ? `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
               : value.toLocaleString('pt-BR')
             }
           </p>
-          <p className="text-sm text-white/80">{description}</p>
+          <p className="text-sm text-white/80 font-medium">{description}</p>
         </div>
       </CardContent>
     </Card>
