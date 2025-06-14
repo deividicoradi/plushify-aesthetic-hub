@@ -1,10 +1,13 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from 'lucide-react';
 import PaymentFormFields from './PaymentFormFields';
 import { usePaymentForm } from '@/hooks/usePaymentForm';
+import { useCashOpeningValidation } from '@/hooks/financial/useCashOpeningValidation';
 
 interface PaymentDialogProps {
   open: boolean;
@@ -17,6 +20,32 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
     payment,
     () => onOpenChange(false)
   );
+  
+  const { validateTodayCashStatus } = useCashOpeningValidation();
+  const [cashStatus, setCashStatus] = useState<{ shouldProceed: boolean } | null>(null);
+  const [validatingCash, setValidatingCash] = useState(false);
+
+  // Verificar status do caixa quando o diálogo abrir
+  useEffect(() => {
+    if (open && !payment) { // Apenas para novos pagamentos
+      const checkCashStatus = async () => {
+        setValidatingCash(true);
+        const status = await validateTodayCashStatus();
+        setCashStatus(status);
+        setValidatingCash(false);
+      };
+      
+      checkCashStatus();
+    } else if (open && payment) {
+      // Para edições, sempre permitir (a validação será feita no submit)
+      setCashStatus({ shouldProceed: true });
+    } else {
+      setCashStatus(null);
+    }
+  }, [open, payment, validateTodayCashStatus]);
+
+  // Se está validando ou o caixa está fechado para novos pagamentos
+  const isFormBlocked = validatingCash || (cashStatus && !cashStatus.shouldProceed && !payment);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -26,6 +55,20 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
             {payment ? 'Editar Pagamento' : 'Novo Pagamento'}
           </DialogTitle>
         </DialogHeader>
+        
+        {isFormBlocked && (
+          <div className="px-6">
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                {validatingCash 
+                  ? "Verificando status do caixa..." 
+                  : "🚫 O caixa não está aberto para hoje. É obrigatório abrir o caixa antes de criar novos pagamentos!"
+                }
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
           <ScrollArea className="max-h-[60vh] px-6">
@@ -41,7 +84,10 @@ const PaymentDialog = ({ open, onOpenChange, payment }: PaymentDialogProps) => {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              disabled={isLoading || isFormBlocked}
+            >
               {isLoading ? 'Salvando...' : payment ? 'Atualizar' : 'Criar'}
             </Button>
           </div>

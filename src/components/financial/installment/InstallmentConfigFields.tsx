@@ -8,13 +8,15 @@ interface InstallmentConfigFieldsProps {
   amount: string;
   onTotalInstallmentsChange: (value: number) => void;
   onAmountChange: (value: string) => void;
+  disabled?: boolean;
 }
 
 const InstallmentConfigFields = ({ 
   totalInstallments, 
   amount, 
   onTotalInstallmentsChange, 
-  onAmountChange 
+  onAmountChange,
+  disabled = false
 }: InstallmentConfigFieldsProps) => {
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -28,6 +30,7 @@ const InstallmentConfigFields = ({
           value={totalInstallments}
           onChange={(e) => onTotalInstallmentsChange(Number(e.target.value))}
           required
+          disabled={disabled}
         />
       </div>
 
@@ -42,6 +45,7 @@ const InstallmentConfigFields = ({
           onChange={(e) => onAmountChange(e.target.value)}
           placeholder="0,00"
           required
+          disabled={disabled}
         />
       </div>
     </div>
