@@ -1,20 +1,17 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DoorOpen, Edit, Trash2, Calculator } from 'lucide-react';
+import { DoorOpen, Calculator } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import MetricCard from './MetricCard';
 
 interface CashOpeningCardProps {
   opening: any;
-  onEdit: (opening: any) => void;
-  onDelete: (openingId: string) => void;
 }
 
-const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) => {
+const CashOpeningCard = ({ opening }: CashOpeningCardProps) => {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       aberto: { label: 'Aberto', variant: 'secondary' as const },
@@ -38,27 +35,10 @@ const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) =>
               {getStatusBadge(opening.status)}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-right mr-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Aberto em: {format(new Date(opening.opened_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(opening)}
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(opening.id)}
-              className="text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+          <div className="text-right">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Aberto em: {format(new Date(opening.opened_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+            </p>
           </div>
         </div>
       </CardHeader>

@@ -1,20 +1,17 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Calculator, TrendingUp, TrendingDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import MetricCard from './MetricCard';
 
 interface CashClosureCardProps {
   closure: any;
-  onEdit: (closure: any) => void;
-  onDelete: (closureId: string) => void;
 }
 
-const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) => {
+const CashClosureCard = ({ closure }: CashClosureCardProps) => {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       aberto: { label: 'Aberto', variant: 'secondary' as const },
@@ -45,29 +42,12 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
               {getStatusBadge(closure.status)}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-right mr-4">
-              {closure.closed_at && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Fechado em: {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                </p>
-              )}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(closure)}
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(closure.id)}
-              className="text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+          <div className="text-right">
+            {closure.closed_at && (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Fechado em: {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+              </p>
+            )}
           </div>
         </div>
       </CardHeader>
