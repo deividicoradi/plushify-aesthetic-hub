@@ -1,10 +1,11 @@
 
 import React from "react";
-import { ArrowDownCircle, ArrowUpCircle, Search, Pencil, Check } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Search, Pencil, Package2 } from "lucide-react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -54,18 +55,34 @@ export const ProductsTable = ({
       selectedProducts.some(p => p.id === product.id)
     );
 
+  if (filteredProducts.length === 0 && searchTerm === '') {
+    return (
+      <Card className="border border-border bg-card shadow-sm">
+        <CardContent className="flex flex-col items-center justify-center p-12">
+          <Package2 className="w-12 h-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            Nenhum produto cadastrado
+          </h3>
+          <p className="text-muted-foreground text-center">
+            Comece adicionando seu primeiro produto ao estoque.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="rounded-2xl shadow-xl border-border bg-card mb-10 animate-fade-in delay-100">
-      <CardHeader className="p-6 pb-3 border-b border-border">
+    <Card className="border border-border bg-card shadow-sm">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-serif text-primary">Produtos em Estoque</CardTitle>
+          <CardTitle className="text-lg font-semibold">Produtos</CardTitle>
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Buscar produtos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-background border-border"
+              className="pl-10"
             />
           </div>
         </div>
@@ -73,85 +90,92 @@ export const ProductsTable = ({
       <CardContent className="p-0">
         <Table>
           <TableHeader>
-            <TableRow className="border-border">
-              <TableHead className="w-[30px] pr-0">
+            <TableRow>
+              <TableHead className="w-[30px]">
                 <Checkbox 
                   checked={allSelected}
                   onCheckedChange={onSelectAll}
-                  aria-label="Selecionar todos"
                 />
               </TableHead>
-              <TableHead className="text-foreground">Produto</TableHead>
-              <TableHead className="text-foreground">Categoria</TableHead>
-              <TableHead className="text-center text-foreground">Quantidade</TableHead>
-              <TableHead className="text-center text-foreground">Estoque Mínimo</TableHead>
-              <TableHead className="text-center text-foreground">Status</TableHead>
-              <TableHead className="text-right text-foreground">Ações</TableHead>
+              <TableHead>Produto</TableHead>
+              <TableHead>Categoria</TableHead>
+              <TableHead className="text-center">Estoque</TableHead>
+              <TableHead className="text-center">Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredProducts.map((product) => {
               const isSelected = selectedProducts.some(p => p.id === product.id);
+              const isLowStock = product.stock <= product.min_stock;
               
               return (
                 <TableRow 
                   key={product.id} 
-                  className={`hover:bg-muted/50 transition border-border ${isSelected ? 'bg-muted/30' : ''}`}
+                  className={`hover:bg-muted/50 transition-colors ${isSelected ? 'bg-muted/30' : ''}`}
                 >
-                  <TableCell className="pr-0">
+                  <TableCell>
                     <Checkbox 
                       checked={isSelected}
                       onCheckedChange={() => onToggleSelect(product)}
-                      aria-label={`Selecionar ${product.name}`}
                     />
                   </TableCell>
                   <TableCell>
-                    <span className="font-bold text-foreground">{product.name}</span>
-                    {product.barcode && (
-                      <div className="text-xs text-muted-foreground">
-                        Código: {product.barcode}
-                      </div>
-                    )}
+                    <div>
+                      <div className="font-medium">{product.name}</div>
+                      {product.barcode && (
+                        <div className="text-xs text-muted-foreground">
+                          {product.barcode}
+                        </div>
+                      )}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-foreground">{product.category}</TableCell>
-                  <TableCell className="text-center font-mono text-foreground">{product.stock}</TableCell>
-                  <TableCell className="text-center text-foreground">{product.min_stock}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className="text-xs">
+                      {product.category}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="text-center">
-                    {product.stock > product.min_stock ? (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
-                        OK
-                      </span>
+                    <span className={`font-mono ${isLowStock ? 'text-destructive' : ''}`}>
+                      {product.stock}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {isLowStock ? (
+                      <Badge variant="destructive" className="text-xs">
+                        Baixo
+                      </Badge>
                     ) : (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 animate-pulse">
-                        Crítico
-                      </span>
+                      <Badge variant="default" className="text-xs bg-green-100 text-green-700 hover:bg-green-100">
+                        OK
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-1">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => onEditProduct(product)}
-                        className="hover:bg-secondary border-border"
+                        className="h-8 w-8 p-0"
                       >
-                        <Pencil className="w-4 h-4 text-secondary-foreground" />
+                        <Pencil className="w-4 h-4" />
                       </Button>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => onTransaction(product, 'entrada')}
-                        className="hover:bg-green-50 dark:hover:bg-green-900/30 border-border"
+                        className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
                       >
-                        <ArrowDownCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        <ArrowDownCircle className="w-4 h-4" />
                       </Button>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => onTransaction(product, 'saida')}
-                        className="hover:bg-red-50 dark:hover:bg-red-900/30 border-border"
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                       >
-                        <ArrowUpCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        <ArrowUpCircle className="w-4 h-4" />
                       </Button>
                     </div>
                   </TableCell>

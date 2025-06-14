@@ -7,19 +7,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
 import { ProductForm } from "./ProductForm";
 import { EditProductForm } from "./EditProductForm";
 import { StockTransaction } from "./StockTransaction";
-import { TransactionHistory } from "./TransactionHistory";
-import { CategoryManagement } from "./CategoryManagement";
-import { InventoryReports } from "./InventoryReports";
 
 type Product = {
   id: string;
@@ -54,12 +44,6 @@ export const InventoryDialogs = ({
   setIsEditProductOpen,
   isTransactionOpen,
   setIsTransactionOpen,
-  isHistoryOpen,
-  setIsHistoryOpen,
-  isCategoriesOpen,
-  setIsCategoriesOpen,
-  isReportsOpen,
-  setIsReportsOpen,
   selectedProduct,
   transactionType,
   onSuccess
@@ -67,7 +51,7 @@ export const InventoryDialogs = ({
   return (
     <>
       <Sheet open={isNewProductOpen} onOpenChange={setIsNewProductOpen}>
-        <SheetContent>
+        <SheetContent className="sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>Novo Produto</SheetTitle>
           </SheetHeader>
@@ -81,7 +65,7 @@ export const InventoryDialogs = ({
       </Sheet>
       
       <Sheet open={isEditProductOpen} onOpenChange={setIsEditProductOpen}>
-        <SheetContent>
+        <SheetContent className="sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>Editar Produto</SheetTitle>
           </SheetHeader>
@@ -100,11 +84,16 @@ export const InventoryDialogs = ({
       </Sheet>
 
       <Sheet open={isTransactionOpen} onOpenChange={setIsTransactionOpen}>
-        <SheetContent>
+        <SheetContent className="sm:max-w-lg">
           <SheetHeader>
             <SheetTitle>
-              {transactionType === 'entrada' ? 'Entrada' : 'Saída'} de Estoque - {selectedProduct?.name}
+              {transactionType === 'entrada' ? 'Entrada' : 'Saída'} de Estoque
             </SheetTitle>
+            {selectedProduct && (
+              <p className="text-sm text-muted-foreground">
+                {selectedProduct.name}
+              </p>
+            )}
           </SheetHeader>
           <div className="mt-6">
             {selectedProduct && (
@@ -120,33 +109,6 @@ export const InventoryDialogs = ({
           </div>
         </SheetContent>
       </Sheet>
-      
-      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Histórico de Transações</DialogTitle>
-          </DialogHeader>
-          <TransactionHistory />
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={isCategoriesOpen} onOpenChange={setIsCategoriesOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Gerenciamento de Categorias</DialogTitle>
-          </DialogHeader>
-          <CategoryManagement />
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={isReportsOpen} onOpenChange={setIsReportsOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Relatórios de Estoque</DialogTitle>
-          </DialogHeader>
-          <InventoryReports />
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

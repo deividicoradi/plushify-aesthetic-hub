@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Product } from "@/hooks/useInventory";
-import { ImportHandler } from "./ImportHandler";
 import { ExportHandler } from "./ExportHandler";
 import { DeleteHandler } from "./DeleteHandler";
 
@@ -18,22 +17,15 @@ export const BatchActions = ({
   onSuccess,
   allProducts
 }: BatchActionsProps) => {
-  const isAnySelected = selectedProducts.length > 0;
-
   return (
-    <div className="flex space-x-2">
-      <ImportHandler 
-        onSuccess={onSuccess} 
-        allProducts={allProducts} 
-      />
-      
+    <div className="flex items-center gap-2">
       <ExportHandler 
         selectedProducts={selectedProducts}
         setSelectedProducts={setSelectedProducts}
         allProducts={allProducts}
       />
 
-      {isAnySelected && (
+      {selectedProducts.length > 0 && (
         <DeleteHandler
           selectedProducts={selectedProducts}
           setSelectedProducts={setSelectedProducts}
