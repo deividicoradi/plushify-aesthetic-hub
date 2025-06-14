@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,10 +25,10 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      pago: 'bg-green-100 text-green-800 border-green-200',
-      pendente: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      parcial: 'bg-orange-100 text-orange-800 border-orange-200',
-      cancelado: 'bg-red-100 text-red-800 border-red-200'
+      pago: 'default',
+      pendente: 'secondary', 
+      parcial: 'outline',
+      cancelado: 'destructive'
     };
     
     return variants[status as keyof typeof variants] || variants.pendente;
@@ -98,7 +97,7 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
                   <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">
                     {payment.description || 'Pagamento sem descrição'}
                   </h3>
-                  <Badge className={getStatusBadge(payment.status)}>
+                  <Badge variant={getStatusBadge(payment.status)}>
                     {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
                   </Badge>
                 </div>
