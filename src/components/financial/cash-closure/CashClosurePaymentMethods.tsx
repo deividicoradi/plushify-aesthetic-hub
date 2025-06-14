@@ -31,7 +31,7 @@ const CashClosurePaymentMethods = ({
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-lg">
+      <h3 className="font-semibold text-lg text-foreground">
         Detalhamento por Método de Pagamento
         {movementData && (
           <Badge variant="outline" className="ml-2">
@@ -42,7 +42,7 @@ const CashClosurePaymentMethods = ({
       
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="cash_amount">
+          <Label htmlFor="cash_amount" className="text-foreground">
             Dinheiro
             {movementData && (
               <Badge variant="secondary" className="ml-2">
@@ -58,12 +58,15 @@ const CashClosurePaymentMethods = ({
             onChange={(e) => onFieldChange('cash_amount', e.target.value)}
             placeholder="0,00"
             readOnly={!!movementData}
-            className={movementData ? "bg-gray-100" : ""}
+            className={movementData 
+              ? "bg-muted border-border text-muted-foreground" 
+              : "bg-background border-border text-foreground"
+            }
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="card_amount">
+          <Label htmlFor="card_amount" className="text-foreground">
             Cartão
             {movementData && (
               <Badge variant="secondary" className="ml-2">
@@ -79,12 +82,15 @@ const CashClosurePaymentMethods = ({
             onChange={(e) => onFieldChange('card_amount', e.target.value)}
             placeholder="0,00"
             readOnly={!!movementData}
-            className={movementData ? "bg-gray-100" : ""}
+            className={movementData 
+              ? "bg-muted border-border text-muted-foreground" 
+              : "bg-background border-border text-foreground"
+            }
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="pix_amount">
+          <Label htmlFor="pix_amount" className="text-foreground">
             PIX
             {movementData && (
               <Badge variant="secondary" className="ml-2">
@@ -100,12 +106,15 @@ const CashClosurePaymentMethods = ({
             onChange={(e) => onFieldChange('pix_amount', e.target.value)}
             placeholder="0,00"
             readOnly={!!movementData}
-            className={movementData ? "bg-gray-100" : ""}
+            className={movementData 
+              ? "bg-muted border-border text-muted-foreground" 
+              : "bg-background border-border text-foreground"
+            }
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="other_amount">
+          <Label htmlFor="other_amount" className="text-foreground">
             Outros
             {movementData && (
               <Badge variant="secondary" className="ml-2">
@@ -121,12 +130,15 @@ const CashClosurePaymentMethods = ({
             onChange={(e) => onFieldChange('other_amount', e.target.value)}
             placeholder="0,00"
             readOnly={!!movementData}
-            className={movementData ? "bg-gray-100" : ""}
+            className={movementData 
+              ? "bg-muted border-border text-muted-foreground" 
+              : "bg-background border-border text-foreground"
+            }
           />
         </div>
       </div>
 
-      <div className="p-3 bg-blue-50 dark:bg-blue-800/20 rounded-lg">
+      <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
         <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
           Total por método: {formatCurrency(total)}
         </p>

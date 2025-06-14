@@ -11,12 +11,13 @@ interface CashClosureNotesProps {
 const CashClosureNotes = ({ notes, onNotesChange }: CashClosureNotesProps) => {
   return (
     <div className="space-y-2">
-      <Label htmlFor="notes">Observações</Label>
+      <Label htmlFor="notes" className="text-foreground">Observações</Label>
       <Textarea
         id="notes"
         value={notes}
         onChange={(e) => onNotesChange(e.target.value)}
         placeholder="Observações sobre o fechamento"
+        className="bg-background border-border text-foreground placeholder:text-muted-foreground"
       />
     </div>
   );
