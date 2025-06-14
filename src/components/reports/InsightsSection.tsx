@@ -97,8 +97,13 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
     });
   }
 
-  // Combinar insights salvos e em tempo real
-  const allInsights = [...savedInsights, ...realTimeInsights];
+  // Combinar insights salvos e em tempo real - garantindo que todos tenham icon
+  const processedSavedInsights = savedInsights.map(insight => ({
+    ...insight,
+    icon: insight.icon || Lightbulb // Fallback icon
+  }));
+
+  const allInsights = [...processedSavedInsights, ...realTimeInsights];
 
   // Insight sobre meta de receita
   const projectedRevenue = metrics.totalRevenue * (1 + Math.max(metrics.revenueGrowth, 0) / 100);
@@ -183,24 +188,27 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {sortedInsights.map((insight, index) => (
-          <div key={index} className={getCardClass(insight.type)}>
-            <div className="flex items-start gap-4">
-              <div className={`flex-shrink-0 w-8 h-8 ${getIconColor(insight.type)} rounded-lg flex items-center justify-center`}>
-                <insight.icon className="w-4 h-4 text-white" />
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <h4 className={`font-semibold ${getTextColor(insight.type)} mb-1`}>
-                  {insight.title}
-                </h4>
-                <p className={`text-sm ${getTextColor(insight.type)} opacity-90`}>
-                  {insight.message}
-                </p>
+        {sortedInsights.map((insight, index) => {
+          const IconComponent = insight.icon || Lightbulb; // Fallback component
+          return (
+            <div key={index} className={getCardClass(insight.type)}>
+              <div className="flex items-start gap-4">
+                <div className={`flex-shrink-0 w-8 h-8 ${getIconColor(insight.type)} rounded-lg flex items-center justify-center`}>
+                  <IconComponent className="w-4 h-4 text-white" />
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <h4 className={`font-semibold ${getTextColor(insight.type)} mb-1`}>
+                    {insight.title}
+                  </h4>
+                  <p className={`text-sm ${getTextColor(insight.type)} opacity-90`}>
+                    {insight.message}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </CardContent>
     </Card>
   );
