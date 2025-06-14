@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Clock, User, Package, MoreVertical, Phone, MessageCircle } from 'lucide-react';
+import { Clock, User, Package, MoreVertical } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -103,12 +103,6 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
 
           {/* Actions */}
           <div className="flex items-center gap-2 ml-4">
-            <Button variant="ghost" size="sm">
-              <Phone className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <MessageCircle className="w-4 h-4" />
-            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">

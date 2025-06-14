@@ -4,7 +4,7 @@ import { Calendar, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppointmentCard } from './AppointmentCard';
 import { useAppointments } from '@/hooks/useAppointments';
-import { format, isToday, isTomorrow } from 'date-fns';
+import { format, isToday, isTomorrow, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface AppointmentsListProps {
@@ -23,11 +23,17 @@ export const AppointmentsList = ({ searchQuery }: AppointmentsListProps) => {
   }, [appointments, searchQuery]);
 
   const todayAppointments = useMemo(() => {
-    return filteredAppointments.filter(apt => isToday(new Date(apt.appointment_date)));
+    return filteredAppointments.filter(apt => {
+      const appointmentDate = parseISO(apt.appointment_date);
+      return isToday(appointmentDate);
+    });
   }, [filteredAppointments]);
 
   const tomorrowAppointments = useMemo(() => {
-    return filteredAppointments.filter(apt => isTomorrow(new Date(apt.appointment_date)));
+    return filteredAppointments.filter(apt => {
+      const appointmentDate = parseISO(apt.appointment_date);
+      return isTomorrow(appointmentDate);
+    });
   }, [filteredAppointments]);
 
   if (isLoading) {

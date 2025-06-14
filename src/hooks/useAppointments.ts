@@ -85,9 +85,6 @@ export const useAppointments = () => {
         status: data.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
       };
 
-      // Atualizar a lista local e fazer refetch para garantir sincronização
-      setAppointments(prev => [...prev, formattedData]);
-      
       // Fazer refetch para garantir que temos os dados mais atualizados
       await fetchAppointments();
 
