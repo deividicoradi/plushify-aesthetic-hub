@@ -80,20 +80,9 @@ export const useReportsData = () => {
             new Date(t.transaction_date) <= lastMonthEnd
       ).reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
-      // Buscar agendamentos
-      const { data: appointments } = await supabase
-        .from('appointments')
-        .select('created_at')
-        .eq('user_id', user.id);
-
-      const currentMonthAppointments = appointments?.filter(
-        apt => new Date(apt.created_at) >= currentMonthStart
-      ).length || 0;
-
-      const lastMonthAppointments = appointments?.filter(
-        apt => new Date(apt.created_at) >= lastMonthStart && 
-               new Date(apt.created_at) <= lastMonthEnd
-      ).length || 0;
+      // Como não temos mais agendamentos, definir valores como 0
+      const currentMonthAppointments = 0;
+      const lastMonthAppointments = 0;
 
       // Buscar produtos
       const { data: products } = await supabase
@@ -111,7 +100,7 @@ export const useReportsData = () => {
         clientsGrowth: calculateGrowthRate(currentMonthClients, lastMonthClients),
         totalRevenue: transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0,
         revenueGrowth: calculateGrowthRate(currentMonthRevenue, lastMonthRevenue),
-        totalAppointments: appointments?.length || 0,
+        totalAppointments: 0, // Sistema de agendamentos será recriado
         appointmentsGrowth: calculateGrowthRate(currentMonthAppointments, lastMonthAppointments),
         totalProducts,
         lowStockProducts
@@ -138,12 +127,6 @@ export const useReportsData = () => {
         .eq('type', 'receita')
         .gte('transaction_date', sixMonthsAgo.toISOString());
 
-      const { data: appointments } = await supabase
-        .from('appointments')
-        .select('created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', sixMonthsAgo.toISOString());
-
       const { data: clients } = await supabase
         .from('clients')
         .select('created_at')
@@ -163,7 +146,7 @@ export const useReportsData = () => {
         monthlyDataMap.set(monthKey, {
           month: monthName,
           revenue: 0,
-          appointments: 0,
+          appointments: 0, // Sistema de agendamentos será recriado
           newClients: 0
         });
       }
@@ -174,15 +157,6 @@ export const useReportsData = () => {
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
           existing.revenue += Number(t.amount);
-        }
-      });
-
-      // Agregar agendamentos
-      appointments?.forEach(apt => {
-        const monthKey = apt.created_at.slice(0, 7);
-        const existing = monthlyDataMap.get(monthKey);
-        if (existing) {
-          existing.appointments += 1;
         }
       });
 

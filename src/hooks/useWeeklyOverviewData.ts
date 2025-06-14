@@ -42,30 +42,10 @@ export const useWeeklyOverviewData = () => {
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 7);
 
-      // Buscar todos os agendamentos da semana
-      const { data: appointments } = await supabase
-        .from('appointments')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('start_time', startOfWeek.toISOString())
-        .lt('start_time', endOfWeek.toISOString());
-
-      const appointmentsTotal = appointments?.length || 0;
-      const appointmentsCompleted = appointments?.filter(apt => apt.status === 'concluido').length || 0;
-
-      // Calcular tempo médio dos serviços concluídos
-      const completedAppointments = appointments?.filter(apt => apt.status === 'concluido') || [];
-      let averageServiceTime = 0;
-      
-      if (completedAppointments.length > 0) {
-        const totalMinutes = completedAppointments.reduce((sum, apt) => {
-          const start = new Date(apt.start_time);
-          const end = new Date(apt.end_time);
-          const duration = (end.getTime() - start.getTime()) / (1000 * 60); // em minutos
-          return sum + duration;
-        }, 0);
-        averageServiceTime = Math.round(totalMinutes / completedAppointments.length);
-      }
+      // Como não temos mais agendamentos, definir valores como 0
+      const appointmentsTotal = 0;
+      const appointmentsCompleted = 0;
+      const averageServiceTime = 0;
 
       // Buscar receita da semana (pagamentos)
       const { data: payments } = await supabase
