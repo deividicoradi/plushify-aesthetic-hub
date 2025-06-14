@@ -218,18 +218,13 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       return;
     }
 
-    // Se status é parcial, deve ter paid_amount menor que amount
+    // Para pagamentos parciais, validar se tem valor pago e se é menor que o total
     if (formData.status === 'parcial') {
+      // Se não informou valor pago, mudar para pendente
       if (!formData.paid_amount || Number(formData.paid_amount) <= 0) {
-        toast({
-          title: "Erro",
-          description: 'Para pagamentos parciais, informe o valor pago',
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (Number(formData.paid_amount) >= Number(formData.amount)) {
+        console.log('⚠️ Pagamento parcial sem valor pago - convertendo para pendente');
+        setFormData(prev => ({ ...prev, status: 'pendente' }));
+      } else if (Number(formData.paid_amount) >= Number(formData.amount)) {
         toast({
           title: "Erro",
           description: 'Para pagamentos parciais, o valor pago deve ser menor que o valor total',
@@ -246,9 +241,9 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
       client_id: formData.client_id || null,
       due_date: formData.due_date || null,
       notes: formData.notes || null,
-      status: formData.status,
+      status: formData.status === 'parcial' && (!formData.paid_amount || Number(formData.paid_amount) <= 0) ? 'pendente' : formData.status,
       paid_amount: parseFloat(formData.paid_amount) || 0,
-      payment_date: ['pago', 'parcial'].includes(formData.status) ? new Date().toISOString() : null,
+      payment_date: ['pago', 'parcial'].includes(formData.status) && Number(formData.paid_amount) > 0 ? new Date().toISOString() : null,
       installments: parseInt(formData.installments) || 1
     };
 
