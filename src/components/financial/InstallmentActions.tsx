@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, DollarSign, CheckCircle, Trash2 } from 'lucide-react';
 import PasswordDialog from '@/components/ui/password-dialog';
 import { useAuthorizationPassword } from '@/hooks/useAuthorizationPassword';
 import { useSecureInstallmentMutation } from '@/hooks/financial/useSecureInstallmentMutation';
+import { useCashStatusValidation } from '@/hooks/financial/useCashStatusValidation';
 import { toast } from "@/hooks/use-toast";
 
 interface InstallmentActionsProps {
@@ -20,8 +21,22 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
     type: 'edit' | 'delete' | 'markPaid' | 'markPartial'; 
     data?: any 
   } | null>(null);
+  const [isCashClosed, setIsCashClosed] = useState(false);
   const { verifyPassword, isVerifying } = useAuthorizationPassword();
   const { updateInstallment, deleteInstallment, isUpdating, isDeleting } = useSecureInstallmentMutation(onUpdate);
+  const { validateCashIsOpen } = useCashStatusValidation();
+
+  // Verificar status do caixa quando o componente montar
+  useEffect(() => {
+    const checkCashStatus = async () => {
+      if (installment?.created_at) {
+        const validation = await validateCashIsOpen(installment.created_at);
+        setIsCashClosed(!validation.isValid);
+      }
+    };
+
+    checkCashStatus();
+  }, [installment?.created_at, validateCashIsOpen]);
 
   const handleSecureAction = (type: 'edit' | 'delete' | 'markPaid' | 'markPartial', data?: any) => {
     setPendingAction({ type, data });
@@ -29,6 +44,15 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
   };
 
   const handlePartialPayment = () => {
+    if (isCashClosed) {
+      toast({
+        title: "Caixa fechado",
+        description: "Não é possível realizar pagamentos com o caixa fechado",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const paidAmount = prompt(`Digite o valor pago (máximo R$ ${Number(installment.amount).toFixed(2)}):`);
     if (paidAmount && !isNaN(Number(paidAmount))) {
       const amount = Number(paidAmount);
@@ -120,7 +144,7 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
             <Button
               size="sm"
               onClick={() => handleSecureAction('markPaid')}
-              disabled={isUpdating}
+              disabled={isUpdating || isCashClosed}
               className="w-full"
             >
               <CheckCircle className="w-3 h-3 mr-1" />
@@ -130,7 +154,7 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
               size="sm"
               variant="outline"
               onClick={handlePartialPayment}
-              disabled={isUpdating}
+              disabled={isUpdating || isCashClosed}
               className="w-full"
             >
               <DollarSign className="w-3 h-3 mr-1" />
@@ -147,7 +171,7 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
             <Button
               size="sm"
               onClick={() => handleSecureAction('markPaid')}
-              disabled={isUpdating}
+              disabled={isUpdating || isCashClosed}
               className="w-full"
             >
               <CheckCircle className="w-3 h-3 mr-1" />
@@ -161,6 +185,7 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
             size="sm"
             variant="outline"
             onClick={() => handleSecureAction('edit')}
+            disabled={isCashClosed}
             className="flex-1"
           >
             <Edit className="w-3 h-3 mr-1" />
@@ -171,7 +196,7 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
             variant="outline"
             onClick={() => handleSecureAction('delete')}
             className="text-red-600 hover:text-red-700"
-            disabled={isDeleting}
+            disabled={isDeleting || isCashClosed}
           >
             <Trash2 className="w-3 h-3" />
           </Button>

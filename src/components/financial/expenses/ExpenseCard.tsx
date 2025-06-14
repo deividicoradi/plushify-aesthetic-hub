@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useCashStatusValidation } from '@/hooks/financial/useCashStatusValidation';
 
 interface ExpenseCardProps {
   expense: any;
@@ -14,6 +15,21 @@ interface ExpenseCardProps {
 }
 
 const ExpenseCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
+  const [isCashClosed, setIsCashClosed] = useState(false);
+  const { validateCashIsOpen } = useCashStatusValidation();
+
+  // Verificar status do caixa quando o componente montar
+  useEffect(() => {
+    const checkCashStatus = async () => {
+      if (expense?.created_at) {
+        const validation = await validateCashIsOpen(expense.created_at);
+        setIsCashClosed(!validation.isValid);
+      }
+    };
+
+    checkCashStatus();
+  }, [expense?.created_at, validateCashIsOpen]);
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -69,6 +85,7 @@ const ExpenseCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(expense)}
+                disabled={isCashClosed}
               >
                 <Edit className="w-4 h-4" />
               </Button>
@@ -77,6 +94,7 @@ const ExpenseCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
                 size="sm"
                 onClick={() => onDelete(expense.id)}
                 className="text-red-600 hover:text-red-700"
+                disabled={isCashClosed}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>

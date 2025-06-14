@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { formatDate } from '@/utils/reports/formatters';
 import PasswordDialog from '@/components/ui/password-dialog';
 import { useAuthorizationPassword } from '@/hooks/useAuthorizationPassword';
 import { useSecurePaymentMutation } from '@/hooks/financial/useSecurePaymentMutation';
+import { useCashStatusValidation } from '@/hooks/financial/useCashStatusValidation';
 
 interface PaymentsListProps {
   payments: any[];
@@ -20,13 +22,33 @@ interface PaymentsListProps {
 const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: PaymentsListProps) => {
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{ type: 'edit' | 'delete'; payment: any } | null>(null);
+  const [cashStatusMap, setCashStatusMap] = useState<Map<string, boolean>>(new Map());
   const { verifyPassword, isVerifying } = useAuthorizationPassword();
+  const { validateCashIsOpen } = useCashStatusValidation();
 
   // Hook para operações seguras - usado para exclusões
   const { deletePayment, isDeleting } = useSecurePaymentMutation(pendingAction?.payment, () => {
     setPasswordDialogOpen(false);
     setPendingAction(null);
   });
+
+  // Verificar status do caixa para todos os pagamentos
+  useEffect(() => {
+    const checkCashStatus = async () => {
+      const statusMap = new Map<string, boolean>();
+      
+      for (const payment of payments) {
+        const validation = await validateCashIsOpen(payment.created_at);
+        statusMap.set(payment.id, !validation.isValid);
+      }
+      
+      setCashStatusMap(statusMap);
+    };
+
+    if (payments.length > 0) {
+      checkCashStatus();
+    }
+  }, [payments, validateCashIsOpen]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -121,79 +143,84 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {payments.map((payment) => (
-          <Card key={payment.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
-                    {payment.description || 'Pagamento sem descrição'}
-                  </h3>
-                  {getStatusBadge(payment.status)}
+        {payments.map((payment) => {
+          const isCashClosed = cashStatusMap.get(payment.id) || false;
+          
+          return (
+            <Card key={payment.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
+                      {payment.description || 'Pagamento sem descrição'}
+                    </h3>
+                    {getStatusBadge(payment.status)}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-green-600">
+                      {formatCurrency(Number(payment.amount))}
+                    </p>
+                    {payment.status === 'parcial' && (
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Pago: {formatCurrency(Number(payment.paid_amount || 0))}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-green-600">
-                    {formatCurrency(Number(payment.amount))}
-                  </p>
-                  {payment.status === 'parcial' && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Pago: {formatCurrency(Number(payment.paid_amount || 0))}
+
+                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  {getClientName(payment.client_id) && (
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      <span>{getClientName(payment.client_id)}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    <span>{payment.payment_methods?.name || 'Método não informado'}</span>
+                  </div>
+
+                  {payment.due_date && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>Venc: {formatDate(payment.due_date)}</span>
+                    </div>
+                  )}
+
+                  {payment.notes && (
+                    <p className="text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded mt-2 line-clamp-2">
+                      {payment.notes}
                     </p>
                   )}
                 </div>
-              </div>
 
-              <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                {getClientName(payment.client_id) && (
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    <span>{getClientName(payment.client_id)}</span>
-                  </div>
-                )}
-                
-                <div className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  <span>{payment.payment_methods?.name || 'Método não informado'}</span>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleSecureAction('edit', payment)}
+                    disabled={isCashClosed}
+                    className="flex-1"
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    Editar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleSecureAction('delete', payment)}
+                    className="text-red-600 hover:text-red-700"
+                    disabled={isDeleting || isCashClosed}
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    {isDeleting ? 'Excluindo...' : 'Excluir'}
+                  </Button>
                 </div>
-
-                {payment.due_date && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>Venc: {formatDate(payment.due_date)}</span>
-                  </div>
-                )}
-
-                {payment.notes && (
-                  <p className="text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded mt-2 line-clamp-2">
-                    {payment.notes}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleSecureAction('edit', payment)}
-                  className="flex-1"
-                >
-                  <Edit className="w-3 h-3 mr-1" />
-                  Editar
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleSecureAction('delete', payment)}
-                  className="text-red-600 hover:text-red-700"
-                  disabled={isDeleting}
-                >
-                  <Trash2 className="w-3 h-3 mr-1" />
-                  {isDeleting ? 'Excluindo...' : 'Excluir'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <PasswordDialog
