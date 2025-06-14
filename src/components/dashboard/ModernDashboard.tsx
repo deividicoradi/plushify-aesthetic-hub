@@ -115,10 +115,10 @@ export const ModernDashboard = () => {
         </div>
       </div>
 
-      {/* Métricas Principais */}
+      {/* Métricas Principais com bordas finas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {metrics.map((metric, index) => (
-          <Card key={index} className="relative overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
+          <Card key={index} className="relative overflow-hidden border border-border bg-card shadow-sm hover:shadow-md transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
@@ -148,7 +148,7 @@ export const ModernDashboard = () => {
       </div>
 
       {/* Ações Rápidas */}
-      <Card className="shadow-md">
+      <Card className="border border-border bg-card shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ArrowRight className="w-5 h-5 text-primary" />
