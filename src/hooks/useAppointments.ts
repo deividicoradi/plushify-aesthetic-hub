@@ -39,7 +39,14 @@ export const useAppointments = () => {
         .order('appointment_time', { ascending: true });
 
       if (error) throw error;
-      setAppointments(data || []);
+      
+      // Garantir que o status está correto
+      const formattedData = (data || []).map(appointment => ({
+        ...appointment,
+        status: appointment.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
+      }));
+      
+      setAppointments(formattedData);
     } catch (error: any) {
       console.error('Erro ao buscar agendamentos:', error);
       toast({
@@ -67,13 +74,18 @@ export const useAppointments = () => {
 
       if (error) throw error;
 
-      setAppointments(prev => [...prev, data]);
+      const formattedData = {
+        ...data,
+        status: data.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
+      };
+
+      setAppointments(prev => [...prev, formattedData]);
       toast({
         title: "Sucesso",
         description: "Agendamento criado com sucesso!"
       });
 
-      return data;
+      return formattedData;
     } catch (error: any) {
       console.error('Erro ao criar agendamento:', error);
       toast({
@@ -99,9 +111,14 @@ export const useAppointments = () => {
 
       if (error) throw error;
 
+      const formattedData = {
+        ...data,
+        status: data.status as 'agendado' | 'confirmado' | 'concluido' | 'cancelado'
+      };
+
       setAppointments(prev => 
         prev.map(appointment => 
-          appointment.id === id ? data : appointment
+          appointment.id === id ? formattedData : appointment
         )
       );
 
@@ -110,7 +127,7 @@ export const useAppointments = () => {
         description: "Agendamento atualizado com sucesso!"
       });
 
-      return data;
+      return formattedData;
     } catch (error: any) {
       console.error('Erro ao atualizar agendamento:', error);
       toast({

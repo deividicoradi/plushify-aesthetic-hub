@@ -12,7 +12,7 @@ import { useServices, Service } from '@/hooks/useServices';
 const Services = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const { services, loading, createService, updateService, deleteService, toggleServiceStatus } = useServices();
+  const { services, isLoading, createService, updateService, deleteService, toggleServiceStatus } = useServices();
 
   const handleCreateService = async (data: any) => {
     const success = await createService(data);
@@ -117,7 +117,7 @@ const Services = () => {
                   <CardTitle>Lista de Serviços</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {loading ? (
+                  {isLoading ? (
                     <div className="text-center py-8">
                       <p>Carregando serviços...</p>
                     </div>
