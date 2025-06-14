@@ -68,6 +68,13 @@ export const useWeeklyOverviewData = () => {
       const totalDuration = weeklyAppointments?.reduce((sum, apt) => sum + apt.duration, 0) || 0;
       const averageServiceTime = appointmentsTotal > 0 ? Math.round(totalDuration / appointmentsTotal) : 0;
 
+      console.log('Weekly overview data updated:', {
+        appointmentsTotal,
+        appointmentsCompleted,
+        revenueActual,
+        averageServiceTime
+      });
+
       setData({
         appointmentsCompleted,
         appointmentsTotal,
@@ -86,9 +93,9 @@ export const useWeeklyOverviewData = () => {
   useEffect(() => {
     fetchWeeklyData();
 
-    // Configurar listener em tempo real
-    const channel = supabase
-      .channel('weekly-overview-changes')
+    // Configurar listener em tempo real para agendamentos
+    const appointmentsChannel = supabase
+      .channel('weekly-overview-appointments')
       .on(
         'postgres_changes',
         {
@@ -102,6 +109,11 @@ export const useWeeklyOverviewData = () => {
           fetchWeeklyData();
         }
       )
+      .subscribe();
+
+    // Configurar listener em tempo real para pagamentos
+    const paymentsChannel = supabase
+      .channel('weekly-overview-payments')
       .on(
         'postgres_changes',
         {
@@ -118,7 +130,8 @@ export const useWeeklyOverviewData = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(appointmentsChannel);
+      supabase.removeChannel(paymentsChannel);
     };
   }, [user]);
 
