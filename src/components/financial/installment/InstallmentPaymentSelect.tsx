@@ -12,10 +12,10 @@ interface InstallmentPaymentSelectProps {
 const InstallmentPaymentSelect = ({ value, onValueChange, payments }: InstallmentPaymentSelectProps) => {
   return (
     <div className="space-y-2">
-      <Label htmlFor="payment_id">Pagamento Base</Label>
+      <Label htmlFor="payment_id">Pagamento para Parcelar</Label>
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger>
-          <SelectValue placeholder="Selecione um pagamento" />
+          <SelectValue placeholder="Selecione um pagamento pendente ou parcial" />
         </SelectTrigger>
         <SelectContent>
           {payments?.map((payment) => (
@@ -23,7 +23,7 @@ const InstallmentPaymentSelect = ({ value, onValueChange, payments }: Installmen
               <div className="flex flex-col">
                 <span className="font-medium">{payment.description}</span>
                 <div className="text-sm text-muted-foreground">
-                  R$ {Number(payment.amount).toFixed(2)}
+                  R$ {Number(payment.amount).toFixed(2)} - {payment.status}
                   {payment.clients && ` - ${payment.clients.name}`}
                 </div>
               </div>

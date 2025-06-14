@@ -31,23 +31,31 @@ const InstallmentDialog = ({ open, onOpenChange, onSuccess, installment }: Insta
     onOpenChange(false);
   });
 
-  // Buscar todos os pagamentos disponíveis (removendo o filtro de status)
+  // Buscar pagamentos que podem ser parcelados
   const { data: payments } = useQuery({
     queryKey: ['payments-for-installments', user?.id],
     queryFn: async () => {
+      console.log('🔍 Buscando pagamentos para parcelamento');
       const { data, error } = await supabase
         .from('payments')
         .select(`
           id, 
           description, 
           amount,
-          clients(name)
+          status,
+          clients(id, name)
         `)
         .eq('user_id', user?.id)
+        .in('status', ['pendente', 'parcial'])
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('❌ Erro ao buscar pagamentos:', error);
+        throw error;
+      }
+      
+      console.log('💰 Pagamentos encontrados para parcelamento:', data?.length || 0);
+      return data || [];
     },
     enabled: !!user?.id && open,
   });
@@ -68,12 +76,29 @@ const InstallmentDialog = ({ open, onOpenChange, onSuccess, installment }: Insta
             payments={payments || []}
           />
 
-          <InstallmentConfigFields
-            totalInstallments={formData.total_installments}
-            amount={formData.amount}
-            onTotalInstallmentsChange={(value) => handleFieldChange('total_installments', value)}
-            onAmountChange={(value) => handleFieldChange('amount', value)}
-          />
+          {!installment && (
+            <InstallmentConfigFields
+              totalInstallments={formData.total_installments}
+              amount={formData.amount}
+              onTotalInstallmentsChange={(value) => handleFieldChange('total_installments', value)}
+              onAmountChange={(value) => handleFieldChange('amount', value)}
+            />
+          )}
+
+          {installment && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Valor da Parcela</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.amount}
+                onChange={(e) => handleFieldChange('amount', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+          )}
 
           <InstallmentDueDatePicker
             dueDate={formData.due_date}

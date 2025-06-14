@@ -49,46 +49,74 @@ export const useInstallmentForm = (installment: any, onSuccess: () => void) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.id || !formData.payment_id || !formData.amount) return;
+    if (!user?.id || !formData.payment_id || !formData.amount) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
       const installmentAmount = Number(formData.amount);
 
-      // Criar as parcelas
-      const installments = [];
-      for (let i = 1; i <= formData.total_installments; i++) {
-        const dueDate = new Date(formData.due_date);
-        dueDate.setMonth(dueDate.getMonth() + (i - 1));
+      if (installment) {
+        // Editando parcelamento existente
+        const { error } = await supabase
+          .from('installments')
+          .update({
+            amount: installmentAmount,
+            due_date: formData.due_date.toISOString(),
+            notes: formData.notes,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', installment.id);
 
-        installments.push({
-          user_id: user.id,
-          payment_id: formData.payment_id,
-          installment_number: i,
-          total_installments: formData.total_installments,
-          amount: installmentAmount,
-          due_date: dueDate.toISOString(),
-          status: 'pendente',
-          notes: formData.notes
+        if (error) throw error;
+
+        toast({
+          title: "Sucesso!",
+          description: "Parcelamento atualizado com sucesso.",
+        });
+      } else {
+        // Criando novo parcelamento
+        const installments = [];
+        for (let i = 1; i <= formData.total_installments; i++) {
+          const dueDate = new Date(formData.due_date);
+          dueDate.setMonth(dueDate.getMonth() + (i - 1));
+
+          installments.push({
+            user_id: user.id,
+            payment_id: formData.payment_id,
+            installment_number: i,
+            total_installments: formData.total_installments,
+            amount: installmentAmount,
+            due_date: dueDate.toISOString(),
+            status: 'pendente',
+            notes: formData.notes
+          });
+        }
+
+        const { error } = await supabase
+          .from('installments')
+          .insert(installments);
+
+        if (error) throw error;
+
+        toast({
+          title: "Sucesso!",
+          description: `Parcelamento criado com ${formData.total_installments} parcelas.`,
         });
       }
 
-      const { error } = await supabase
-        .from('installments')
-        .insert(installments);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso!",
-        description: `Parcelamento criado com ${formData.total_installments} parcelas.`,
-      });
-
       onSuccess();
     } catch (error: any) {
+      console.error('Erro ao salvar parcelamento:', error);
       toast({
         title: "Erro",
-        description: error.message || "Erro ao criar parcelamento",
+        description: error.message || "Erro ao salvar parcelamento",
         variant: "destructive",
       });
     } finally {
