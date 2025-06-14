@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, DollarSign, CheckCircle } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { Edit, DollarSign, CheckCircle, Trash2 } from 'lucide-react';
+import PasswordDialog from '@/components/ui/password-dialog';
+import { useAuthorizationPassword } from '@/hooks/useAuthorizationPassword';
+import { useSecureInstallmentMutation } from '@/hooks/financial/useSecureInstallmentMutation';
 import { toast } from "@/hooks/use-toast";
 
 interface InstallmentActionsProps {
@@ -14,83 +15,25 @@ interface InstallmentActionsProps {
 }
 
 const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentActionsProps) => {
-  const queryClient = useQueryClient();
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ 
+    type: 'edit' | 'delete' | 'markPaid' | 'markPartial'; 
+    data?: any 
+  } | null>(null);
+  const { verifyPassword, isVerifying } = useAuthorizationPassword();
+  const { updateInstallment, deleteInstallment, isUpdating, isDeleting } = useSecureInstallmentMutation(onUpdate);
 
-  const markAsPaidMutation = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase
-        .from('installments')
-        .update({
-          status: 'pago',
-          paid_amount: installment.amount,
-          payment_date: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', installment.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Sucesso!",
-        description: "Parcela marcada como paga!",
-      });
-      queryClient.invalidateQueries({ queryKey: ['installments-by-client'] });
-      onUpdate();
-    },
-    onError: (error) => {
-      console.error('Erro ao marcar parcela como paga:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao marcar parcela como paga",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const markAsPartialMutation = useMutation({
-    mutationFn: async (paidAmount: number) => {
-      const { data, error } = await supabase
-        .from('installments')
-        .update({
-          status: 'parcial',
-          paid_amount: paidAmount,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', installment.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Sucesso!",
-        description: "Pagamento parcial registrado!",
-      });
-      queryClient.invalidateQueries({ queryKey: ['installments-by-client'] });
-      onUpdate();
-    },
-    onError: (error) => {
-      console.error('Erro ao registrar pagamento parcial:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao registrar pagamento parcial",
-        variant: "destructive",
-      });
-    },
-  });
+  const handleSecureAction = (type: 'edit' | 'delete' | 'markPaid' | 'markPartial', data?: any) => {
+    setPendingAction({ type, data });
+    setPasswordDialogOpen(true);
+  };
 
   const handlePartialPayment = () => {
     const paidAmount = prompt(`Digite o valor pago (máximo R$ ${Number(installment.amount).toFixed(2)}):`);
     if (paidAmount && !isNaN(Number(paidAmount))) {
       const amount = Number(paidAmount);
       if (amount > 0 && amount <= Number(installment.amount)) {
-        markAsPartialMutation.mutate(amount);
+        handleSecureAction('markPartial', { paidAmount: amount });
       } else {
         toast({
           title: "Valor inválido",
@@ -101,59 +44,150 @@ const InstallmentActions = ({ installment, onEdit, onUpdate }: InstallmentAction
     }
   };
 
+  const handlePasswordConfirm = async (password: string, reason?: string) => {
+    if (!pendingAction) return;
+
+    const isValid = await verifyPassword(password);
+    if (!isValid) return;
+
+    switch (pendingAction.type) {
+      case 'edit':
+        onEdit(installment);
+        break;
+      
+      case 'delete':
+        deleteInstallment({ 
+          installmentId: installment.id, 
+          reason 
+        });
+        break;
+      
+      case 'markPaid':
+        updateInstallment({
+          installmentId: installment.id,
+          data: {
+            status: 'pago',
+            paid_amount: installment.amount,
+            payment_date: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          reason
+        });
+        break;
+      
+      case 'markPartial':
+        updateInstallment({
+          installmentId: installment.id,
+          data: {
+            status: 'parcial',
+            paid_amount: pendingAction.data.paidAmount,
+            updated_at: new Date().toISOString()
+          },
+          reason
+        });
+        break;
+    }
+
+    setPasswordDialogOpen(false);
+    setPendingAction(null);
+  };
+
+  const getDialogTitle = () => {
+    switch (pendingAction?.type) {
+      case 'edit': return 'Confirmar Edição';
+      case 'delete': return 'Confirmar Exclusão';
+      case 'markPaid': return 'Confirmar Pagamento';
+      case 'markPartial': return 'Confirmar Pagamento Parcial';
+      default: return 'Confirmar Ação';
+    }
+  };
+
+  const getDialogDescription = () => {
+    switch (pendingAction?.type) {
+      case 'edit': return 'Digite sua senha para autorizar a edição desta parcela.';
+      case 'delete': return 'Digite sua senha para autorizar a exclusão desta parcela. Esta ação não pode ser desfeita.';
+      case 'markPaid': return 'Digite sua senha para autorizar a marcação desta parcela como paga.';
+      case 'markPartial': return 'Digite sua senha para autorizar o registro do pagamento parcial.';
+      default: return 'Digite sua senha para autorizar esta ação.';
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-2 mt-auto">
-      {installment.status === 'pendente' && (
-        <>
+    <>
+      <div className="flex flex-col gap-2 mt-auto">
+        {installment.status === 'pendente' && (
+          <>
+            <Button
+              size="sm"
+              onClick={() => handleSecureAction('markPaid')}
+              disabled={isUpdating}
+              className="w-full"
+            >
+              <CheckCircle className="w-3 h-3 mr-1" />
+              Marcar como Pago
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handlePartialPayment}
+              disabled={isUpdating}
+              className="w-full"
+            >
+              <DollarSign className="w-3 h-3 mr-1" />
+              Pagamento Parcial
+            </Button>
+          </>
+        )}
+        
+        {installment.status === 'parcial' && (
+          <div className="space-y-2">
+            <Badge variant="outline" className="w-full justify-center bg-orange-50 text-orange-700 border-orange-200">
+              Restante: R$ {(Number(installment.amount) - Number(installment.paid_amount || 0)).toFixed(2)}
+            </Badge>
+            <Button
+              size="sm"
+              onClick={() => handleSecureAction('markPaid')}
+              disabled={isUpdating}
+              className="w-full"
+            >
+              <CheckCircle className="w-3 h-3 mr-1" />
+              Quitar Restante
+            </Button>
+          </div>
+        )}
+
+        <div className="flex gap-1">
           <Button
             size="sm"
-            onClick={() => markAsPaidMutation.mutate()}
-            disabled={markAsPaidMutation.isPending}
-            className="w-full"
+            variant="outline"
+            onClick={() => handleSecureAction('edit')}
+            className="flex-1"
           >
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Marcar como Pago
+            <Edit className="w-3 h-3 mr-1" />
+            Editar
           </Button>
           <Button
             size="sm"
             variant="outline"
-            onClick={handlePartialPayment}
-            disabled={markAsPartialMutation.isPending}
-            className="w-full"
+            onClick={() => handleSecureAction('delete')}
+            className="text-red-600 hover:text-red-700"
+            disabled={isDeleting}
           >
-            <DollarSign className="w-3 h-3 mr-1" />
-            Pagamento Parcial
-          </Button>
-        </>
-      )}
-      
-      {installment.status === 'parcial' && (
-        <div className="space-y-2">
-          <Badge variant="outline" className="w-full justify-center bg-orange-50 text-orange-700 border-orange-200">
-            Restante: R$ {(Number(installment.amount) - Number(installment.paid_amount || 0)).toFixed(2)}
-          </Badge>
-          <Button
-            size="sm"
-            onClick={() => markAsPaidMutation.mutate()}
-            disabled={markAsPaidMutation.isPending}
-            className="w-full"
-          >
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Quitar Restante
+            <Trash2 className="w-3 h-3" />
           </Button>
         </div>
-      )}
+      </div>
 
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => onEdit(installment)}
-        className="w-full"
-      >
-        <Edit className="w-3 h-3 mr-1" />
-        Editar
-      </Button>
-    </div>
+      <PasswordDialog
+        open={passwordDialogOpen}
+        onOpenChange={setPasswordDialogOpen}
+        onConfirm={handlePasswordConfirm}
+        title={getDialogTitle()}
+        description={getDialogDescription()}
+        isLoading={isVerifying}
+        requireReason={true}
+      />
+    </>
   );
 };
 

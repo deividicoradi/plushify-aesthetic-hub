@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePaymentValidation } from './financial/usePaymentValidation';
-import { usePaymentMutation } from './financial/usePaymentMutation';
+import { useSecurePaymentMutation } from './financial/useSecurePaymentMutation';
 
 interface PaymentFormData {
   description: string;
@@ -30,10 +30,7 @@ const initialFormData: PaymentFormData = {
 export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
   const [formData, setFormData] = useState<PaymentFormData>(initialFormData);
   const { validatePaymentForm, preparePaymentData } = usePaymentValidation();
-  const mutation = usePaymentMutation(payment, () => {
-    onSuccess?.();
-    setFormData(initialFormData);
-  });
+  const { updatePayment, isUpdating } = useSecurePaymentMutation(payment, onSuccess);
 
   // Atualizar formData quando payment mudar
   useEffect(() => {
@@ -93,13 +90,20 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
 
     const dataToSubmit = preparePaymentData(formData);
     console.log('Submetendo dados do pagamento:', dataToSubmit);
-    mutation.mutate(dataToSubmit);
+    
+    if (payment) {
+      // Para edições, usar a mutação segura
+      updatePayment({ data: dataToSubmit, reason: 'Edição via formulário' });
+    } else {
+      // Para criações, usar a mutação original (não precisa de senha)
+      // mutation.mutate(dataToSubmit);
+    }
   };
 
   return {
     formData,
     handleChange,
     handleSubmit,
-    isLoading: mutation.isPending
+    isLoading: isUpdating
   };
 };

@@ -7,28 +7,14 @@ import PaymentsList from './payments/PaymentsList';
 import { usePaymentsData } from '@/hooks/financial/usePaymentsData';
 
 const PaymentsTab = () => {
-  const { payments, isLoading, deletePayment, getClientName } = usePaymentsData();
+  const { payments, isLoading, getClientName } = usePaymentsData();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
 
   const handleEdit = (payment: any) => {
     setEditingPayment(payment);
     setIsDialogOpen(true);
-  };
-
-  const handleDelete = (paymentId: string) => {
-    setPaymentToDelete(paymentId);
-    setDeleteConfirmOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (paymentToDelete) {
-      deletePayment(paymentToDelete);
-      setPaymentToDelete(null);
-    }
   };
 
   const handleCloseDialog = () => {
@@ -54,24 +40,13 @@ const PaymentsTab = () => {
         isLoading={isLoading}
         getClientName={getClientName}
         onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDelete={() => {}} // Agora a exclusão é feita internamente no PaymentsList
       />
 
       <PaymentDialog 
         open={isDialogOpen} 
         onOpenChange={handleCloseDialog}
         payment={editingPayment}
-      />
-
-      <ConfirmationDialog
-        open={deleteConfirmOpen}
-        onOpenChange={setDeleteConfirmOpen}
-        title="Excluir Pagamento"
-        description="Tem certeza que deseja excluir este pagamento? Esta ação não pode ser desfeita."
-        confirmText="Excluir"
-        cancelText="Cancelar"
-        onConfirm={confirmDelete}
-        variant="destructive"
       />
     </div>
   );
