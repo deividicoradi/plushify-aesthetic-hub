@@ -18,7 +18,7 @@ export const useCashIntegration = () => {
       paymentMethodId: string; 
       description: string; 
     }) => {
-      console.log('💰 Atualizando caixa com pagamento recebido:', { paymentAmount, paymentMethodId, description });
+      console.log('💰 Atualizando caixa com valor:', { paymentAmount, paymentMethodId, description });
 
       if (!user?.id) {
         throw new Error('Usuário não autenticado');
@@ -86,6 +86,11 @@ export const useCashIntegration = () => {
 
         console.log('✅ Caixa atualizado com sucesso');
       } else {
+        // Se for um valor negativo e não há caixa, avisar que não pode descontar
+        if (paymentAmount < 0) {
+          throw new Error('Não é possível descontar de um caixa que não existe. Abra o caixa primeiro.');
+        }
+        
         console.log('Nenhum caixa aberto encontrado, criando novo...');
         
         // Criar uma nova abertura de caixa se não existir
@@ -97,7 +102,7 @@ export const useCashIntegration = () => {
           card_amount: 0,
           pix_amount: 0,
           other_amount: 0,
-          notes: `Caixa criado automaticamente ao receber pagamento: ${description}`,
+          notes: `Caixa criado automaticamente: ${description}`,
           status: 'aberto'
         };
 
@@ -131,18 +136,11 @@ export const useCashIntegration = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cash-openings'] });
       queryClient.invalidateQueries({ queryKey: ['cash-closures'] });
-      toast({
-        title: "Caixa Atualizado!",
-        description: "O valor do pagamento foi adicionado ao caixa.",
-      });
+      // Não mostrar toast aqui, deixar para quem chama a função decidir
     },
     onError: (error: any) => {
       console.error('❌ Erro ao atualizar caixa:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar o caixa com o pagamento: " + (error.message || 'Erro desconhecido'),
-        variant: "destructive",
-      });
+      throw error; // Re-throw para que quem chama possa tratar
     },
   });
 
