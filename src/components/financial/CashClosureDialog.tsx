@@ -84,7 +84,11 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess }: CashClosureDialogP
     e.preventDefault();
     
     if (!formData.closure_date || !formData.closing_balance) {
-      toast.error('Preencha todos os campos obrigatórios');
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive",
+      });
       return;
     }
 
