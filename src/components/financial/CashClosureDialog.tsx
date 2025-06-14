@@ -8,14 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/hooks/use-toast";
 
 interface CashClosureDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-const CashClosureDialog = ({ open, onOpenChange }: CashClosureDialogProps) => {
+const CashClosureDialog = ({ open, onOpenChange, onSuccess }: CashClosureDialogProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
@@ -50,8 +51,12 @@ const CashClosureDialog = ({ open, onOpenChange }: CashClosureDialogProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cash-closures'] });
-      toast.success('Fechamento de caixa criado!');
+      toast({
+        title: "Sucesso!",
+        description: "Fechamento de caixa criado com sucesso.",
+      });
       onOpenChange(false);
+      onSuccess?.();
       setFormData({
         closure_date: new Date().toISOString().split('T')[0],
         opening_balance: '',
@@ -66,7 +71,11 @@ const CashClosureDialog = ({ open, onOpenChange }: CashClosureDialogProps) => {
       });
     },
     onError: (error) => {
-      toast.error('Erro ao criar fechamento de caixa');
+      toast({
+        title: "Erro",
+        description: "Erro ao criar fechamento de caixa",
+        variant: "destructive",
+      });
       console.error(error);
     },
   });
