@@ -135,6 +135,54 @@ export type Database = {
         }
         Relationships: []
       }
+      cash_openings: {
+        Row: {
+          card_amount: number
+          cash_amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          opened_at: string
+          opening_balance: number
+          opening_date: string
+          other_amount: number
+          pix_amount: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_amount?: number
+          cash_amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opening_balance?: number
+          opening_date: string
+          other_amount?: number
+          pix_amount?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_amount?: number
+          cash_amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opening_balance?: number
+          opening_date?: string
+          other_amount?: number
+          pix_amount?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           created_at: string
