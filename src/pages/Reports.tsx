@@ -2,7 +2,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Users, CalendarDays, Receipt, Package, AlertTriangle, BarChart3, PieChart, Activity } from 'lucide-react';
-import { MetricCard } from '@/components/reports/MetricCard';
 import { MonthlyChart } from '@/components/reports/MonthlyChart';
 import { CategoryChart } from '@/components/reports/CategoryChart';
 import { InsightsSection } from '@/components/reports/InsightsSection';
@@ -12,6 +11,47 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+
+// Componente MetricCard inline para substituir o deletado
+interface MetricCardProps {
+  title: string;
+  value: number;
+  growth?: number;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+  colorClass: string;
+  loading: boolean;
+  onClick: () => void;
+}
+
+const MetricCard = ({ title, value, growth, icon: Icon, description, colorClass, loading, onClick }: MetricCardProps) => {
+  return (
+    <Card 
+      className="cursor-pointer hover:shadow-lg transition-shadow duration-200 bg-card border-border"
+      onClick={onClick}
+    >
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <p className="text-2xl font-bold text-foreground">
+              {loading ? '...' : (title.includes('Receita') ? `R$ ${value.toLocaleString('pt-BR')}` : value.toString())}
+            </p>
+            <p className="text-xs text-muted-foreground">{description}</p>
+            {growth !== undefined && (
+              <div className={`text-xs font-medium ${growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {growth >= 0 ? '+' : ''}{growth.toFixed(1)}% vs mês anterior
+              </div>
+            )}
+          </div>
+          <div className={`p-3 rounded-full ${colorClass} text-white`}>
+            <Icon className="w-6 h-6" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const Reports = () => {
   const navigate = useNavigate();
@@ -197,7 +237,7 @@ const Reports = () => {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </div>
 
               {/* Insights Section */}
               <InsightsSection metrics={metrics} loading={loading} />

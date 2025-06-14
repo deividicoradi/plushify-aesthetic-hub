@@ -2,7 +2,6 @@
 import React from 'react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { PlanInfoBanner } from '@/components/dashboard/PlanInfoBanner';
-import { DashboardMetrics } from '@/components/dashboard/DashboardMetrics';
 import { DashboardContent } from '@/components/dashboard/DashboardContent';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -28,7 +27,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       {/* Main content com espaçamento reduzido */}
       <main className="flex-1 p-4 space-y-4">
         <PlanInfoBanner currentPlan={currentPlan} isSubscribed={isSubscribed} />
-        <DashboardMetrics />
         <DashboardContent />
         {children}
       </main>
