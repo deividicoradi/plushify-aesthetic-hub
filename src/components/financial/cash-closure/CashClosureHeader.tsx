@@ -19,9 +19,8 @@ const CashClosureHeader = ({ onOpenCashOpening, onOpenCashClosure }: CashClosure
       </div>
       <div className="flex gap-2">
         <Button 
-          variant="outline" 
           onClick={onOpenCashOpening}
-          className="bg-green-500 text-white border-green-500 hover:bg-green-600 hover:border-green-600"
+          className="bg-green-500 text-white hover:bg-green-600"
         >
           <DoorOpen className="w-4 h-4 mr-2" />
           Abrir Caixa
