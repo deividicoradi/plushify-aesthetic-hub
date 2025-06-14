@@ -37,7 +37,7 @@ const CashClosureBasicFields = ({
       {loadingMovement && (
         <div className="p-3 bg-blue-50 dark:bg-blue-800/20 rounded-lg">
           <p className="text-sm text-blue-800 dark:text-blue-200">
-            📊 Calculando movimento do dia automaticamente...
+            📊 Calculando receitas do dia automaticamente...
           </p>
         </div>
       )}
@@ -45,14 +45,15 @@ const CashClosureBasicFields = ({
       {movementData && !loadingMovement && (
         <div className="p-3 bg-green-50 dark:bg-green-800/20 rounded-lg">
           <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-            ✅ Dados calculados automaticamente do movimento do dia
+            ✅ Receitas calculadas automaticamente do movimento do dia
           </p>
           <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
             <span>Receitas: {formatCurrency(movementData.totalIncome)}</span>
-            <span>Despesas: {formatCurrency(movementData.totalExpenses)}</span>
             <span>Pagamentos: {movementData.paymentsCount}</span>
-            <span>Despesas: {movementData.expensesCount}</span>
           </div>
+          <p className="text-xs text-green-600 dark:text-green-300 mt-1">
+            💡 Insira as despesas manualmente para calcular o saldo final
+          </p>
         </div>
       )}
       
@@ -96,17 +97,17 @@ const CashClosureBasicFields = ({
             value={formData.total_income}
             onChange={(e) => onFieldChange('total_income', e.target.value)}
             placeholder="0,00"
+            readOnly={!!movementData}
+            className={movementData ? "bg-gray-100" : ""}
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="total_expenses">
             Total de Despesas
-            {movementData && (
-              <Badge variant="secondary" className="ml-2">
-                Auto
-              </Badge>
-            )}
+            <Badge variant="outline" className="ml-2">
+              Manual
+            </Badge>
           </Label>
           <Input
             id="total_expenses"
@@ -116,16 +117,17 @@ const CashClosureBasicFields = ({
             onChange={(e) => onFieldChange('total_expenses', e.target.value)}
             placeholder="0,00"
           />
+          <p className="text-xs text-gray-500">
+            Insira o total de despesas registradas no sistema
+          </p>
         </div>
 
         <div className="space-y-2 col-span-2">
           <Label htmlFor="closing_balance">
             Saldo Final
-            {movementData && (
-              <Badge variant="secondary" className="ml-2">
-                Auto
-              </Badge>
-            )}
+            <Badge variant="outline" className="ml-2">
+              Calculado
+            </Badge>
           </Label>
           <Input
             id="closing_balance"
@@ -136,6 +138,9 @@ const CashClosureBasicFields = ({
             placeholder="0,00"
             required
           />
+          <p className="text-xs text-gray-500">
+            Saldo Inicial + Receitas - Despesas
+          </p>
         </div>
       </div>
     </div>

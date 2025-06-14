@@ -30,22 +30,6 @@ export const useCashMovementData = (date: string) => {
         throw paymentsError;
       }
 
-      // Buscar despesas do dia
-      const { data: expenses, error: expensesError } = await supabase
-        .from('expenses')
-        .select(`
-          *,
-          payment_methods (name, type)
-        `)
-        .eq('user_id', user.id)
-        .gte('expense_date', `${date}T00:00:00`)
-        .lt('expense_date', `${date}T23:59:59`);
-
-      if (expensesError) {
-        console.error('❌ Erro ao buscar despesas:', expensesError);
-        throw expensesError;
-      }
-
       // Buscar abertura de caixa do dia
       const { data: cashOpening, error: openingError } = await supabase
         .from('cash_openings')
@@ -59,7 +43,7 @@ export const useCashMovementData = (date: string) => {
         throw openingError;
       }
 
-      // Calcular totais por método de pagamento
+      // Calcular totais por método de pagamento (apenas receitas)
       let cashAmount = 0;
       let cardAmount = 0;
       let pixAmount = 0;
@@ -83,18 +67,14 @@ export const useCashMovementData = (date: string) => {
         }
       });
 
-      // Calcular total de despesas
-      const totalExpenses = expenses?.reduce((sum, expense) => sum + Number(expense.amount), 0) || 0;
-
       // Usar saldo inicial da abertura ou 0
       const openingBalance = Number(cashOpening?.opening_balance) || 0;
       
-      // Calcular saldo final
-      const closingBalance = openingBalance + totalIncome - totalExpenses;
+      // Calcular saldo final (abertura + receitas - despesas que serão inseridas manualmente)
+      const closingBalance = openingBalance + totalIncome;
 
-      console.log('💰 Dados de movimento calculados:', {
+      console.log('💰 Dados de movimento calculados (apenas receitas):', {
         totalIncome,
-        totalExpenses,
         openingBalance,
         closingBalance,
         cashAmount,
@@ -106,14 +86,14 @@ export const useCashMovementData = (date: string) => {
       return {
         openingBalance,
         totalIncome,
-        totalExpenses,
-        closingBalance,
+        totalExpenses: 0, // Despesas devem ser inseridas manualmente
+        closingBalance, // Será ajustado quando as despesas forem inseridas
         cashAmount,
         cardAmount,
         pixAmount,
         otherAmount,
         paymentsCount: payments?.length || 0,
-        expensesCount: expenses?.length || 0
+        expensesCount: 0 // Não calculamos automaticamente
       };
     },
     enabled: !!user?.id && !!date,

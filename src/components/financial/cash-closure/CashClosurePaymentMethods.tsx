@@ -35,7 +35,7 @@ const CashClosurePaymentMethods = ({
         Detalhamento por Método de Pagamento
         {movementData && (
           <Badge variant="outline" className="ml-2">
-            Calculado automaticamente
+            Calculado das receitas
           </Badge>
         )}
       </h3>
@@ -57,6 +57,8 @@ const CashClosurePaymentMethods = ({
             value={formData.cash_amount}
             onChange={(e) => onFieldChange('cash_amount', e.target.value)}
             placeholder="0,00"
+            readOnly={!!movementData}
+            className={movementData ? "bg-gray-100" : ""}
           />
         </div>
 
@@ -76,6 +78,8 @@ const CashClosurePaymentMethods = ({
             value={formData.card_amount}
             onChange={(e) => onFieldChange('card_amount', e.target.value)}
             placeholder="0,00"
+            readOnly={!!movementData}
+            className={movementData ? "bg-gray-100" : ""}
           />
         </div>
 
@@ -95,6 +99,8 @@ const CashClosurePaymentMethods = ({
             value={formData.pix_amount}
             onChange={(e) => onFieldChange('pix_amount', e.target.value)}
             placeholder="0,00"
+            readOnly={!!movementData}
+            className={movementData ? "bg-gray-100" : ""}
           />
         </div>
 
@@ -114,17 +120,19 @@ const CashClosurePaymentMethods = ({
             value={formData.other_amount}
             onChange={(e) => onFieldChange('other_amount', e.target.value)}
             placeholder="0,00"
+            readOnly={!!movementData}
+            className={movementData ? "bg-gray-100" : ""}
           />
         </div>
       </div>
 
       <div className="p-3 bg-blue-50 dark:bg-blue-800/20 rounded-lg">
         <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-          Total calculado: {formatCurrency(total)}
+          Total por método: {formatCurrency(total)}
         </p>
         {movementData && (
           <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-            Baseado nos pagamentos recebidos durante o dia
+            Valores baseados apenas nos pagamentos recebidos durante o dia
           </p>
         )}
       </div>

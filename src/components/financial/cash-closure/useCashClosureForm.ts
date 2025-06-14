@@ -57,30 +57,38 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
         notes: closure.notes || ''
       });
     } else if (movementData && !loadingMovement) {
-      // Novo fechamento com dados automáticos
-      console.log('📊 Preenchendo formulário com dados automáticos:', movementData);
+      // Novo fechamento com dados automáticos (apenas receitas)
+      console.log('📊 Preenchendo formulário com dados automáticos (receitas):', movementData);
       setFormData(prev => ({
         ...prev,
         opening_balance: movementData.openingBalance.toString(),
-        closing_balance: movementData.closingBalance.toString(),
         total_income: movementData.totalIncome.toString(),
-        total_expenses: movementData.totalExpenses.toString(),
         cash_amount: movementData.cashAmount.toString(),
         card_amount: movementData.cardAmount.toString(),
         pix_amount: movementData.pixAmount.toString(),
         other_amount: movementData.otherAmount.toString(),
-        notes: `Fechamento automático - ${movementData.paymentsCount} pagamento(s), ${movementData.expensesCount} despesa(s)`
+        // Despesas e saldo final ficam vazios para preenchimento manual
+        total_expenses: '',
+        closing_balance: '',
+        notes: `Fechamento automático - ${movementData.paymentsCount} pagamento(s) recebido(s). Insira as despesas manualmente.`
       }));
     }
   }, [closure, movementData, loadingMovement]);
 
-  // Atualizar dados automáticos quando a data mudar
+  // Recalcular saldo final quando receitas ou despesas mudarem
   useEffect(() => {
-    if (!closure && formData.closure_date) {
-      // Reset para permitir recálculo automático
-      console.log('📅 Data alterada, dados serão recalculados automaticamente');
+    if (!closure && formData.total_income && formData.total_expenses) {
+      const income = parseFloat(formData.total_income) || 0;
+      const expenses = parseFloat(formData.total_expenses) || 0;
+      const opening = parseFloat(formData.opening_balance) || 0;
+      const calculatedClosing = opening + income - expenses;
+      
+      setFormData(prev => ({
+        ...prev,
+        closing_balance: calculatedClosing.toString()
+      }));
     }
-  }, [formData.closure_date, closure]);
+  }, [formData.total_income, formData.total_expenses, formData.opening_balance, closure]);
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
@@ -115,7 +123,7 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
       queryClient.invalidateQueries({ queryKey: ['cash-openings'] });
       toast({
         title: "Sucesso!",
-        description: closure ? "Fechamento atualizado!" : "Fechamento de caixa criado automaticamente com dados do movimento do dia.",
+        description: closure ? "Fechamento atualizado!" : "Fechamento de caixa criado com receitas automáticas. Despesas inseridas manualmente.",
       });
       onSuccess?.();
     },
