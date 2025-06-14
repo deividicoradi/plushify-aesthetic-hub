@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,16 +78,34 @@ const PaymentsTab = () => {
     },
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, dueDate?: string) => {
+    const isOverdue = dueDate && new Date(dueDate) < new Date() && status === 'pendente';
+    
     const statusConfig = {
-      pendente: { label: 'Pendente', variant: 'secondary' as const },
-      pago: { label: 'Pago', variant: 'default' as const },
-      parcial: { label: 'Parcial', variant: 'outline' as const },
-      cancelado: { label: 'Cancelado', variant: 'destructive' as const },
+      pendente: { 
+        label: isOverdue ? 'Atrasado' : 'Pendente', 
+        variant: 'secondary' as const,
+        className: isOverdue ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-red-500 text-white hover:bg-red-600'
+      },
+      pago: { 
+        label: 'Pago', 
+        variant: 'default' as const,
+        className: 'bg-green-500 text-white hover:bg-green-600'
+      },
+      parcial: { 
+        label: 'Parcial', 
+        variant: 'outline' as const,
+        className: 'bg-orange-500 text-white hover:bg-orange-600 border-orange-500'
+      },
+      cancelado: { 
+        label: 'Cancelado', 
+        variant: 'destructive' as const,
+        className: 'bg-gray-500 text-white hover:bg-gray-600'
+      },
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendente;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
   };
 
   const formatCurrency = (value: number) => {
@@ -170,7 +187,7 @@ const PaymentsTab = () => {
                         <h3 className="font-semibold">
                           {payment.description || 'Pagamento sem descrição'}
                         </h3>
-                        {getStatusBadge(payment.status)}
+                        {getStatusBadge(payment.status, payment.due_date)}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                         {clientName && (
