@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from "@/hooks/use-toast";
+import { useCashClosureForm } from './cash-closure/useCashClosureForm';
+import CashClosureBasicFields from './cash-closure/CashClosureBasicFields';
+import CashClosurePaymentMethods from './cash-closure/CashClosurePaymentMethods';
+import CashClosureNotes from './cash-closure/CashClosureNotes';
 
 interface CashClosureDialogProps {
   open: boolean;
@@ -17,145 +15,16 @@ interface CashClosureDialogProps {
 }
 
 const CashClosureDialog = ({ open, onOpenChange, onSuccess, closure }: CashClosureDialogProps) => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  
-  const [formData, setFormData] = useState({
-    closure_date: new Date().toISOString().split('T')[0],
-    opening_balance: '',
-    closing_balance: '',
-    total_income: '',
-    total_expenses: '',
-    cash_amount: '',
-    card_amount: '',
-    pix_amount: '',
-    other_amount: '',
-    notes: ''
+  const {
+    formData,
+    handleChange,
+    handleSubmit,
+    calculateTotal,
+    isLoading,
+  } = useCashClosureForm(closure, () => {
+    onOpenChange(false);
+    onSuccess?.();
   });
-
-  useEffect(() => {
-    if (closure) {
-      setFormData({
-        closure_date: closure.closure_date || new Date().toISOString().split('T')[0],
-        opening_balance: closure.opening_balance?.toString() || '',
-        closing_balance: closure.closing_balance?.toString() || '',
-        total_income: closure.total_income?.toString() || '',
-        total_expenses: closure.total_expenses?.toString() || '',
-        cash_amount: closure.cash_amount?.toString() || '',
-        card_amount: closure.card_amount?.toString() || '',
-        pix_amount: closure.pix_amount?.toString() || '',
-        other_amount: closure.other_amount?.toString() || '',
-        notes: closure.notes || ''
-      });
-    } else {
-      setFormData({
-        closure_date: new Date().toISOString().split('T')[0],
-        opening_balance: '',
-        closing_balance: '',
-        total_income: '',
-        total_expenses: '',
-        cash_amount: '',
-        card_amount: '',
-        pix_amount: '',
-        other_amount: '',
-        notes: ''
-      });
-    }
-  }, [closure, open]);
-
-  const mutation = useMutation({
-    mutationFn: async (data: any) => {
-      const calculatedDifference = Number(data.closing_balance) - Number(data.opening_balance);
-      
-      if (closure) {
-        const { error } = await supabase
-          .from('cash_closures')
-          .update({ 
-            ...data, 
-            difference: calculatedDifference,
-            status: 'fechado',
-            closed_at: new Date().toISOString()
-          })
-          .eq('id', closure.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('cash_closures')
-          .insert([{ 
-            ...data, 
-            user_id: user?.id,
-            difference: calculatedDifference,
-            status: 'fechado',
-            closed_at: new Date().toISOString()
-          }]);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cash-closures'] });
-      toast({
-        title: "Sucesso!",
-        description: closure ? "Fechamento atualizado!" : "Fechamento de caixa criado com sucesso.",
-      });
-      onOpenChange(false);
-      onSuccess?.();
-    },
-    onError: (error) => {
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar fechamento de caixa",
-        variant: "destructive",
-      });
-      console.error(error);
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.closure_date || !formData.closing_balance) {
-      toast({
-        title: "Erro",
-        description: "Preencha todos os campos obrigatórios",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const processedData = {
-      closure_date: formData.closure_date,
-      opening_balance: parseFloat(formData.opening_balance) || 0,
-      closing_balance: parseFloat(formData.closing_balance),
-      total_income: parseFloat(formData.total_income) || 0,
-      total_expenses: parseFloat(formData.total_expenses) || 0,
-      cash_amount: parseFloat(formData.cash_amount) || 0,
-      card_amount: parseFloat(formData.card_amount) || 0,
-      pix_amount: parseFloat(formData.pix_amount) || 0,
-      other_amount: parseFloat(formData.other_amount) || 0,
-      notes: formData.notes || null,
-    };
-
-    mutation.mutate(processedData);
-  };
-
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const calculateTotal = () => {
-    const cash = parseFloat(formData.cash_amount) || 0;
-    const card = parseFloat(formData.card_amount) || 0;
-    const pix = parseFloat(formData.pix_amount) || 0;
-    const other = parseFloat(formData.other_amount) || 0;
-    return cash + card + pix + other;
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -165,146 +34,39 @@ const CashClosureDialog = ({ open, onOpenChange, onSuccess, closure }: CashClosu
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="closure_date">Data do Fechamento *</Label>
-            <Input
-              id="closure_date"
-              type="date"
-              value={formData.closure_date}
-              onChange={(e) => handleChange('closure_date', e.target.value)}
-              required
-            />
-          </div>
+          <CashClosureBasicFields
+            formData={{
+              closure_date: formData.closure_date,
+              opening_balance: formData.opening_balance,
+              closing_balance: formData.closing_balance,
+              total_income: formData.total_income,
+              total_expenses: formData.total_expenses,
+            }}
+            onFieldChange={handleChange}
+          />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="opening_balance">Saldo Inicial</Label>
-              <Input
-                id="opening_balance"
-                type="number"
-                step="0.01"
-                value={formData.opening_balance}
-                onChange={(e) => handleChange('opening_balance', e.target.value)}
-                placeholder="0,00"
-              />
-            </div>
+          <CashClosurePaymentMethods
+            formData={{
+              cash_amount: formData.cash_amount,
+              card_amount: formData.card_amount,
+              pix_amount: formData.pix_amount,
+              other_amount: formData.other_amount,
+            }}
+            onFieldChange={handleChange}
+            total={calculateTotal()}
+          />
 
-            <div className="space-y-2">
-              <Label htmlFor="closing_balance">Saldo Final *</Label>
-              <Input
-                id="closing_balance"
-                type="number"
-                step="0.01"
-                value={formData.closing_balance}
-                onChange={(e) => handleChange('closing_balance', e.target.value)}
-                placeholder="0,00"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="total_income">Total de Receitas</Label>
-              <Input
-                id="total_income"
-                type="number"
-                step="0.01"
-                value={formData.total_income}
-                onChange={(e) => handleChange('total_income', e.target.value)}
-                placeholder="0,00"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="total_expenses">Total de Despesas</Label>
-              <Input
-                id="total_expenses"
-                type="number"
-                step="0.01"
-                value={formData.total_expenses}
-                onChange={(e) => handleChange('total_expenses', e.target.value)}
-                placeholder="0,00"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Detalhamento por Método de Pagamento</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="cash_amount">Dinheiro</Label>
-                <Input
-                  id="cash_amount"
-                  type="number"
-                  step="0.01"
-                  value={formData.cash_amount}
-                  onChange={(e) => handleChange('cash_amount', e.target.value)}
-                  placeholder="0,00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="card_amount">Cartão</Label>
-                <Input
-                  id="card_amount"
-                  type="number"
-                  step="0.01"
-                  value={formData.card_amount}
-                  onChange={(e) => handleChange('card_amount', e.target.value)}
-                  placeholder="0,00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="pix_amount">PIX</Label>
-                <Input
-                  id="pix_amount"
-                  type="number"
-                  step="0.01"
-                  value={formData.pix_amount}
-                  onChange={(e) => handleChange('pix_amount', e.target.value)}
-                  placeholder="0,00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="other_amount">Outros</Label>
-                <Input
-                  id="other_amount"
-                  type="number"
-                  step="0.01"
-                  value={formData.other_amount}
-                  onChange={(e) => handleChange('other_amount', e.target.value)}
-                  placeholder="0,00"
-                />
-              </div>
-            </div>
-
-            <div className="p-3 bg-blue-50 dark:bg-blue-800/20 rounded-lg">
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                Total calculado: {formatCurrency(calculateTotal())}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes">Observações</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
-              placeholder="Observações sobre o fechamento"
-            />
-          </div>
+          <CashClosureNotes
+            notes={formData.notes}
+            onNotesChange={(notes) => handleChange('notes', notes)}
+          />
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Salvando...' : closure ? 'Atualizar' : 'Criar Fechamento'}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Salvando...' : closure ? 'Atualizar' : 'Criar Fechamento'}
             </Button>
           </div>
         </form>
