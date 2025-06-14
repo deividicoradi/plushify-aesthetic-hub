@@ -16,7 +16,7 @@ export const useCashStatusValidation = () => {
     
     console.log('🔍 Verificando status do caixa para a data:', recordDateOnly);
 
-    // Verificar se existe um caixa fechado para esta data
+    // PRIMEIRO: Verificar se existe um caixa fechado para esta data
     const { data: closedCash, error: closureError } = await supabase
       .from('cash_closures')
       .select('id, closure_date, status')
@@ -30,15 +30,16 @@ export const useCashStatusValidation = () => {
       return { isValid: false, message: 'Erro ao verificar status do caixa' };
     }
 
+    // Se encontrou um caixa fechado, bloquear operação
     if (closedCash) {
       console.log('❌ Caixa está fechado para a data:', recordDateOnly);
       return { 
         isValid: false, 
-        message: `O caixa do dia ${new Date(recordDateOnly).toLocaleDateString('pt-BR')} está fechado. Não é possível editar ou excluir registros desta data.` 
+        message: `O caixa do dia ${new Date(recordDateOnly + 'T00:00:00').toLocaleDateString('pt-BR')} está fechado. Não é possível editar ou excluir registros desta data.` 
       };
     }
 
-    // Verificar se existe um caixa aberto para esta data
+    // SEGUNDO: Se não há caixa fechado, verificar se existe um caixa aberto
     const { data: openCash, error: openingError } = await supabase
       .from('cash_openings')
       .select('id, opening_date, status')
@@ -52,11 +53,12 @@ export const useCashStatusValidation = () => {
       return { isValid: false, message: 'Erro ao verificar status do caixa' };
     }
 
+    // Se não há caixa aberto, também bloquear
     if (!openCash) {
       console.log('❌ Não há caixa aberto para a data:', recordDateOnly);
       return { 
         isValid: false, 
-        message: `Não há caixa aberto para o dia ${new Date(recordDateOnly).toLocaleDateString('pt-BR')}. Abra o caixa desta data para poder editar ou excluir registros.` 
+        message: `Não há caixa aberto para o dia ${new Date(recordDateOnly + 'T00:00:00').toLocaleDateString('pt-BR')}. Abra o caixa desta data para poder editar ou excluir registros.` 
       };
     }
 
