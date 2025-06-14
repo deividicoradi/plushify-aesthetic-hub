@@ -46,7 +46,15 @@ export const generateFinancialReport = async (data: ReportData, reportType: stri
 
   // Resumo Executivo
   if (reportType === 'consolidado') {
-    const totalReceitas = data.payments.reduce((sum, p) => sum + Number(p.paid_amount || 0), 0);
+    // Calcular receitas incluindo pagamentos realizados + fechamentos de caixa
+    const totalReceitasFromPayments = data.payments
+      .filter(p => p.status === 'pago')
+      .reduce((sum, p) => sum + Number(p.paid_amount || 0), 0);
+    
+    const totalReceitasFromCashClosures = data.cashClosures
+      .reduce((sum, c) => sum + Number(c.total_income || 0), 0);
+    
+    const totalReceitas = totalReceitasFromPayments + totalReceitasFromCashClosures;
     const totalDespesas = data.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
     const saldoLiquido = totalReceitas - totalDespesas;
 
@@ -61,6 +69,7 @@ export const generateFinancialReport = async (data: ReportData, reportType: stri
       ['Saldo Líquido', formatCurrency(saldoLiquido)],
       ['Número de Pagamentos', data.payments.length.toString()],
       ['Número de Despesas', data.expenses.length.toString()],
+      ['Número de Fechamentos', data.cashClosures.length.toString()],
     ];
 
     autoTable(doc, {
