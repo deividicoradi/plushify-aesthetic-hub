@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Label } from "@/components/ui/label";
@@ -99,7 +98,6 @@ const PaymentFormFields = ({ formData, onFieldChange }: PaymentFormFieldsProps) 
       <PaymentMethodSelect
         value={formData.payment_method_id}
         onValueChange={(value) => onFieldChange('payment_method_id', value)}
-        required
       />
 
       <div className="space-y-2">
