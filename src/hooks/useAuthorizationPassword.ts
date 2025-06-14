@@ -4,30 +4,33 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
 
-const DEFAULT_PASSWORD = "admin123"; // Senha padrão para desenvolvimento
-
 export const useAuthorizationPassword = () => {
   const { user } = useAuth();
   const [isVerifying, setIsVerifying] = useState(false);
 
   const verifyPassword = async (password: string): Promise<boolean> => {
-    if (!user?.id) return false;
+    if (!user?.email) return false;
 
     setIsVerifying(true);
     try {
-      // Por simplicidade, vamos usar uma senha padrão para todos os usuários
-      // Em produção, você pode implementar hash de senhas e armazenamento personalizado
-      const isValid = password === DEFAULT_PASSWORD;
+      // Tentar fazer login com o email do usuário atual e a senha fornecida
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: password,
+      });
       
-      if (!isValid) {
+      if (error) {
+        console.error('Erro na verificação da senha:', error);
         toast({
           title: "Senha Incorreta",
           description: "A senha de autorização está incorreta.",
           variant: "destructive",
         });
+        return false;
       }
 
-      return isValid;
+      // Se chegou até aqui, a senha está correta
+      return true;
     } catch (error) {
       console.error('Erro ao verificar senha:', error);
       toast({
