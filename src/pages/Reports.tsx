@@ -237,7 +237,7 @@ const Reports = () => {
                     </div>
                   </div>
                 </CardContent>
-              </div>
+              </Card>
 
               {/* Insights Section */}
               <InsightsSection metrics={metrics} loading={loading} />
