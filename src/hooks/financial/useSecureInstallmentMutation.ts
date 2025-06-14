@@ -3,19 +3,31 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useCashStatusValidation } from './useCashStatusValidation';
 
 export const useSecureInstallmentMutation = (onSuccess?: () => void) => {
   const queryClient = useQueryClient();
   const { createAuditLog } = useAuditLog();
+  const { validateCashIsOpen } = useCashStatusValidation();
 
   const updateMutation = useMutation({
     mutationFn: async ({ installmentId, data, reason }: { installmentId: string; data: any; reason?: string }) => {
-      // Buscar dados originais para auditoria
+      // Buscar dados originais para auditoria e validação
       const { data: originalData } = await supabase
         .from('installments')
         .select('*')
         .eq('id', installmentId)
         .single();
+
+      if (!originalData) {
+        throw new Error('Parcelamento não encontrado');
+      }
+
+      // Validar se o caixa está aberto para a data de criação do parcelamento
+      const validation = await validateCashIsOpen(originalData.created_at);
+      if (!validation.isValid) {
+        throw new Error(validation.message);
+      }
 
       const { data: updateResult, error } = await supabase
         .from('installments')
@@ -51,7 +63,7 @@ export const useSecureInstallmentMutation = (onSuccess?: () => void) => {
       console.error('Erro ao atualizar parcela:', error);
       toast({
         title: "Erro",
-        description: "Erro ao atualizar parcela",
+        description: error.message || "Erro ao atualizar parcela",
         variant: "destructive",
       });
     },
@@ -59,12 +71,22 @@ export const useSecureInstallmentMutation = (onSuccess?: () => void) => {
 
   const deleteMutation = useMutation({
     mutationFn: async ({ installmentId, reason }: { installmentId: string; reason?: string }) => {
-      // Buscar dados originais para auditoria
+      // Buscar dados originais para auditoria e validação
       const { data: originalData } = await supabase
         .from('installments')
         .select('*')
         .eq('id', installmentId)
         .single();
+
+      if (!originalData) {
+        throw new Error('Parcelamento não encontrado');
+      }
+
+      // Validar se o caixa está aberto para a data de criação do parcelamento
+      const validation = await validateCashIsOpen(originalData.created_at);
+      if (!validation.isValid) {
+        throw new Error(validation.message);
+      }
 
       const { error } = await supabase
         .from('installments')
@@ -97,7 +119,7 @@ export const useSecureInstallmentMutation = (onSuccess?: () => void) => {
       console.error('Erro ao excluir parcela:', error);
       toast({
         title: "Erro",
-        description: "Erro ao excluir parcela",
+        description: error.message || "Erro ao excluir parcela",
         variant: "destructive",
       });
     },

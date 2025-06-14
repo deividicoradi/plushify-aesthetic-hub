@@ -1,0 +1,68 @@
+
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+export const useCashStatusValidation = () => {
+  const { user } = useAuth();
+
+  const validateCashIsOpen = async (recordDate: string): Promise<{ isValid: boolean; message?: string }> => {
+    if (!user?.id) {
+      return { isValid: false, message: 'Usuário não autenticado' };
+    }
+
+    // Extrair apenas a data (YYYY-MM-DD) do timestamp
+    const recordDateOnly = recordDate.split('T')[0];
+    
+    console.log('🔍 Verificando status do caixa para a data:', recordDateOnly);
+
+    // Verificar se existe um caixa fechado para esta data
+    const { data: closedCash, error: closureError } = await supabase
+      .from('cash_closures')
+      .select('id, closure_date, status')
+      .eq('user_id', user.id)
+      .eq('closure_date', recordDateOnly)
+      .eq('status', 'fechado')
+      .maybeSingle();
+
+    if (closureError) {
+      console.error('❌ Erro ao verificar fechamento do caixa:', closureError);
+      return { isValid: false, message: 'Erro ao verificar status do caixa' };
+    }
+
+    if (closedCash) {
+      console.log('❌ Caixa está fechado para a data:', recordDateOnly);
+      return { 
+        isValid: false, 
+        message: `O caixa do dia ${new Date(recordDateOnly).toLocaleDateString('pt-BR')} está fechado. Não é possível editar ou excluir registros desta data.` 
+      };
+    }
+
+    // Verificar se existe um caixa aberto para esta data
+    const { data: openCash, error: openingError } = await supabase
+      .from('cash_openings')
+      .select('id, opening_date, status')
+      .eq('user_id', user.id)
+      .eq('opening_date', recordDateOnly)
+      .eq('status', 'aberto')
+      .maybeSingle();
+
+    if (openingError) {
+      console.error('❌ Erro ao verificar abertura do caixa:', openingError);
+      return { isValid: false, message: 'Erro ao verificar status do caixa' };
+    }
+
+    if (!openCash) {
+      console.log('❌ Não há caixa aberto para a data:', recordDateOnly);
+      return { 
+        isValid: false, 
+        message: `Não há caixa aberto para o dia ${new Date(recordDateOnly).toLocaleDateString('pt-BR')}. Abra o caixa desta data para poder editar ou excluir registros.` 
+      };
+    }
+
+    console.log('✅ Caixa está aberto para a data:', recordDateOnly);
+    return { isValid: true };
+  };
+
+  return { validateCashIsOpen };
+};

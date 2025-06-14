@@ -6,6 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { useCashIntegration } from '@/hooks/useCashIntegration';
 import { usePaymentInstallments } from './usePaymentInstallments';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useCashStatusValidation } from './useCashStatusValidation';
 
 export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) => {
   const { user } = useAuth();
@@ -13,17 +14,28 @@ export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) 
   const { updateCashFromPayment } = useCashIntegration();
   const { createInstallmentsForPartialPayment } = usePaymentInstallments();
   const { createAuditLog } = useAuditLog();
+  const { validateCashIsOpen } = useCashStatusValidation();
 
   const updateMutation = useMutation({
     mutationFn: async ({ data, reason }: { data: any; reason?: string }) => {
       console.log('💾 Atualizando pagamento com auditoria:', data);
       
-      // Buscar dados originais para auditoria
+      // Buscar dados originais para auditoria e validação
       const { data: originalData } = await supabase
         .from('payments')
         .select('*')
         .eq('id', payment.id)
         .single();
+
+      if (!originalData) {
+        throw new Error('Pagamento não encontrado');
+      }
+
+      // Validar se o caixa está aberto para a data de criação do pagamento
+      const validation = await validateCashIsOpen(originalData.created_at);
+      if (!validation.isValid) {
+        throw new Error(validation.message);
+      }
 
       const { data: updateResult, error } = await supabase
         .from('payments')
@@ -99,7 +111,7 @@ export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) 
       console.error('❌ Erro completo:', error);
       toast({
         title: "Erro",
-        description: 'Erro ao atualizar pagamento: ' + (error.message || 'Erro desconhecido'),
+        description: error.message || 'Erro desconhecido',
         variant: "destructive",
       });
     },
@@ -113,12 +125,22 @@ export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) 
 
       console.log('🗑️ Excluindo pagamento:', payment.id);
 
-      // Buscar dados originais para auditoria
+      // Buscar dados originais para auditoria e validação
       const { data: originalData } = await supabase
         .from('payments')
         .select('*')
         .eq('id', payment.id)
         .single();
+
+      if (!originalData) {
+        throw new Error('Pagamento não encontrado');
+      }
+
+      // Validar se o caixa está aberto para a data de criação do pagamento
+      const validation = await validateCashIsOpen(originalData.created_at);
+      if (!validation.isValid) {
+        throw new Error(validation.message);
+      }
 
       const { error } = await supabase
         .from('payments')
@@ -149,7 +171,7 @@ export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) 
         console.log('💰 Descontando valor excluído do caixa:', deletedPayment.paid_amount);
         try {
           await updateCashFromPayment.mutateAsync({
-            paymentAmount: -Number(deletedPayment.paid_amount), // Valor negativo para descontar
+            paymentAmount: -Number(deletedPayment.paid_amount),
             paymentMethodId: deletedPayment.payment_method_id,
             description: `Desconto por exclusão: ${deletedPayment.description || 'Pagamento excluído'}`
           });
@@ -182,7 +204,7 @@ export const useSecurePaymentMutation = (payment?: any, onSuccess?: () => void) 
       console.error('❌ Erro ao excluir pagamento:', error);
       toast({
         title: "Erro",
-        description: "Erro ao excluir pagamento: " + (error.message || 'Erro desconhecido'),
+        description: error.message || 'Erro desconhecido',
         variant: "destructive",
       });
     },
