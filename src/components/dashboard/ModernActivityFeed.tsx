@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { User, Calendar, Receipt, TrendingUp, Clock, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -53,6 +54,8 @@ const activities = [
 ];
 
 export const ModernActivityFeed = () => {
+  const navigate = useNavigate();
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'success': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
@@ -60,6 +63,32 @@ export const ModernActivityFeed = () => {
       case 'completed': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300';
       case 'achievement': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
+    }
+  };
+
+  const handleViewAllActivities = () => {
+    // Por enquanto vamos navegar para a página de relatórios que seria onde ficaria o histórico completo
+    // No futuro pode ser criada uma página específica para atividades
+    navigate('/reports');
+  };
+
+  const handleViewDetails = (activity: any) => {
+    // Navegar para a página específica baseada no tipo de atividade
+    switch (activity.type) {
+      case 'client':
+        navigate('/clients');
+        break;
+      case 'appointment':
+        navigate('/appointments');
+        break;
+      case 'payment':
+        navigate('/financial');
+        break;
+      case 'growth':
+        navigate('/reports');
+        break;
+      default:
+        break;
     }
   };
 
@@ -119,7 +148,12 @@ export const ModernActivityFeed = () => {
                   
                   {/* Interactive elements */}
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <button className="text-xs text-primary hover:underline">Ver detalhes</button>
+                    <button 
+                      className="text-xs text-primary hover:underline"
+                      onClick={() => handleViewDetails(activity)}
+                    >
+                      Ver detalhes
+                    </button>
                     <span className="text-xs text-muted-foreground">•</span>
                     <button className="text-xs text-muted-foreground hover:text-foreground">Marcar como lido</button>
                   </div>
@@ -131,7 +165,10 @@ export const ModernActivityFeed = () => {
 
         {/* View all button */}
         <div className="mt-6 pt-4 border-t border-border/50">
-          <button className="w-full p-3 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 transition-all duration-200 text-primary font-medium text-sm group">
+          <button 
+            className="w-full p-3 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 transition-all duration-200 text-primary font-medium text-sm group"
+            onClick={handleViewAllActivities}
+          >
             Ver todas as atividades
             <span className="ml-2 group-hover:translate-x-1 transition-transform duration-200">→</span>
           </button>
