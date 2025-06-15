@@ -1,12 +1,11 @@
 
 import React from 'react';
-import { Settings as SettingsIcon, User, Shield, Bell, Save, X } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
@@ -20,14 +19,6 @@ const Settings = () => {
     toast({
       title: "Perfil atualizado",
       description: "Suas informações foram salvas com sucesso.",
-    });
-  };
-
-  const handleSaveNotifications = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Notificações atualizadas",
-      description: "Suas preferências de notificação foram salvas.",
     });
   };
 
@@ -61,7 +52,7 @@ const Settings = () => {
             {/* Settings Content */}
             <div className="max-w-4xl">
               <Tabs defaultValue="profile" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+                <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
                   <TabsTrigger value="profile" className="flex items-center gap-2">
                     <User className="w-4 h-4" />
                     Perfil
@@ -69,10 +60,6 @@ const Settings = () => {
                   <TabsTrigger value="account" className="flex items-center gap-2">
                     <Shield className="w-4 h-4" />
                     Conta
-                  </TabsTrigger>
-                  <TabsTrigger value="notifications" className="flex items-center gap-2">
-                    <Bell className="w-4 h-4" />
-                    Notificações
                   </TabsTrigger>
                 </TabsList>
                 
@@ -212,82 +199,6 @@ const Settings = () => {
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-                
-                <TabsContent value="notifications" className="space-y-6">
-                  <Card className="border shadow-sm">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                          <Bell className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <CardTitle>Preferências de Notificação</CardTitle>
-                          <CardDescription>
-                            Gerencie como você quer receber notificações
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <form id="notifications-form" onSubmit={handleSaveNotifications} className="space-y-6">
-                        <div className="space-y-6">
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold">Notificações por E-mail</h3>
-                            <div className="space-y-4">
-                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
-                                <div className="space-y-1">
-                                  <Label htmlFor="email-marketing" className="font-medium">Marketing</Label>
-                                  <p className="text-sm text-muted-foreground">Receba novidades e ofertas exclusivas</p>
-                                </div>
-                                <Switch id="email-marketing" />
-                              </div>
-                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
-                                <div className="space-y-1">
-                                  <Label htmlFor="email-appointments" className="font-medium">Agendamentos</Label>
-                                  <p className="text-sm text-muted-foreground">Receba notificações sobre seus agendamentos</p>
-                                </div>
-                                <Switch id="email-appointments" defaultChecked />
-                              </div>
-                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
-                                <div className="space-y-1">
-                                  <Label htmlFor="email-updates" className="font-medium">Atualizações da Plataforma</Label>
-                                  <p className="text-sm text-muted-foreground">Saiba quando novos recursos são lançados</p>
-                                </div>
-                                <Switch id="email-updates" defaultChecked />
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold">Notificações Push</h3>
-                            <div className="space-y-4">
-                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
-                                <div className="space-y-1">
-                                  <Label htmlFor="push-appointments" className="font-medium">Agendamentos</Label>
-                                  <p className="text-sm text-muted-foreground">Receba alertas sobre novos agendamentos</p>
-                                </div>
-                                <Switch id="push-appointments" defaultChecked />
-                              </div>
-                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
-                                <div className="space-y-1">
-                                  <Label htmlFor="push-messages" className="font-medium">Mensagens</Label>
-                                  <p className="text-sm text-muted-foreground">Seja notificado sobre novas mensagens</p>
-                                </div>
-                                <Switch id="push-messages" defaultChecked />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex justify-end pt-4">
-                          <Button type="submit" className="bg-primary hover:bg-primary/90 gap-2">
-                            <Save className="w-4 h-4" />
-                            Salvar Preferências
-                          </Button>
-                        </div>
-                      </form>
                     </CardContent>
                   </Card>
                 </TabsContent>
