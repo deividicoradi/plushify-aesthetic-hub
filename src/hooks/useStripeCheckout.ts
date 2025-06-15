@@ -26,6 +26,12 @@ export const useStripeCheckout = () => {
   };
 
   const createCheckout = async (planType: 'professional' | 'premium', billingPeriod: 'monthly' | 'annual' = 'monthly') => {
+    // Evitar múltiplas chamadas simultâneas
+    if (loading) {
+      console.log('SECURITY: Checkout already in progress, ignoring duplicate request');
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -104,6 +110,12 @@ export const useStripeCheckout = () => {
   };
 
   const openCustomerPortal = async () => {
+    // Evitar múltiplas chamadas simultâneas
+    if (loading) {
+      console.log('SECURITY: Portal opening already in progress, ignoring duplicate request');
+      return;
+    }
+
     try {
       setLoading(true);
       

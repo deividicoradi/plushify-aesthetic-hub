@@ -175,10 +175,18 @@ serve(async (req) => {
         logStep("SECURITY ALERT: Inactive price ID attempted", { priceId });
         throw new Error("SECURITY: Selected plan is not available");
       }
+      
+      // Verificar se o price é recorrente para subscription mode
+      if (!price.recurring) {
+        logStep("SECURITY ALERT: Non-recurring price used for subscription", { priceId });
+        throw new Error("SECURITY: Invalid price configuration for subscription");
+      }
+      
       logStep("SECURITY: Price validated on Stripe", { 
         priceId, 
         amount: price.unit_amount, 
-        currency: price.currency 
+        currency: price.currency,
+        recurring: price.recurring 
       });
     } catch (stripeError: any) {
       logStep("SECURITY ALERT: Price validation failed", { priceId, error: stripeError.message });
@@ -193,7 +201,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: priceId, // SEGURANÇA: Usar apenas Price ID oficial validado
+          price: priceId, // SEGURANÇA: Usar apenas Price ID oficial validado e recorrente
           quantity: 1,
         },
       ],
