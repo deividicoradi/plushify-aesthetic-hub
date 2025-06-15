@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { DashboardSidebar } from '@/components/layout/DashboardSidebar';
+import DashboardSidebar from '@/components/layout/DashboardSidebar';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
