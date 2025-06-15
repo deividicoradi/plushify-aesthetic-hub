@@ -40,7 +40,9 @@ export const useProductsData = () => {
 
   const refetch = async () => {
     if (!user) {
-      console.log("Usuário não autenticado, não carregando produtos");
+      console.log("Usuário não autenticado, limpando produtos");
+      setProducts([]);
+      setStats({ total: 0, lowStock: 0, categories: 0 });
       return;
     }
     
@@ -59,8 +61,7 @@ export const useProductsData = () => {
         throw error;
       }
 
-      console.log("Produtos encontrados:", data?.length || 0);
-      console.log("Lista de produtos:", data?.map(p => ({ id: p.id, name: p.name })));
+      console.log("Produtos carregados:", data?.length || 0);
       
       const productsData = data || [];
       setProducts(productsData);
@@ -69,6 +70,8 @@ export const useProductsData = () => {
     } catch (error: any) {
       console.error("Erro ao carregar produtos:", error);
       toast.error("Erro ao carregar produtos: " + error.message);
+      setProducts([]);
+      setStats({ total: 0, lowStock: 0, categories: 0 });
     } finally {
       setIsLoading(false);
     }

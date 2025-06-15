@@ -37,23 +37,15 @@ export const DeleteProductDialog = ({
     setIsDeleting(true);
     
     try {
-      console.log("Tentando excluir produto:", product.id, product.name);
+      console.log("Iniciando exclusão do produto:", product.id, product.name);
       
-      // Primeiro verificar se o produto existe
-      const { data: existingProduct, error: checkError } = await supabase
-        .from('products')
-        .select('id, name')
-        .eq('id', product.id)
-        .single();
-
-      if (checkError) {
-        console.error("Erro ao verificar produto:", checkError);
-        throw new Error("Produto não encontrado");
+      // Aplicar update otimístico imediatamente para feedback visual
+      if (onOptimisticDelete) {
+        onOptimisticDelete(product.id);
       }
-
-      console.log("Produto encontrado para exclusão:", existingProduct);
-
-      // Excluir transações de estoque relacionadas primeiro
+      
+      // Primeiro excluir transações de estoque relacionadas
+      console.log("Excluindo transações relacionadas...");
       const { error: transactionsError } = await supabase
         .from('inventory_transactions')
         .delete()
@@ -61,41 +53,43 @@ export const DeleteProductDialog = ({
 
       if (transactionsError) {
         console.error("Erro ao excluir transações:", transactionsError);
-        // Continuar mesmo se houver erro nas transações
+        // Não falhar se houver erro nas transações, continuar com a exclusão do produto
+      } else {
+        console.log("Transações excluídas com sucesso");
       }
 
       // Agora excluir o produto
+      console.log("Excluindo produto...");
       const { error: deleteError } = await supabase
         .from('products')
         .delete()
-        .eq('id', product.id);
+        .eq('id', product.id)
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id); // Garantir que só exclui produtos do usuário atual
 
       if (deleteError) {
         console.error("Erro na exclusão do produto:", deleteError);
         throw deleteError;
       }
 
-      console.log("Produto excluído com sucesso do banco");
+      console.log("Produto excluído com sucesso do banco de dados");
       
-      // Aplicar update otimístico imediatamente
-      if (onOptimisticDelete) {
-        onOptimisticDelete(product.id);
-      }
-      
-      toast.success("Produto excluído com sucesso!");
+      toast.success(`Produto "${product.name}" excluído com sucesso!`);
       
       // Fechar o dialog
       onOpenChange(false);
       
-      // Recarregar a lista após um pequeno delay
-      setTimeout(() => {
-        console.log("Recarregando lista após exclusão");
-        onSuccess();
-      }, 100);
+      // Recarregar a lista
+      console.log("Recarregando lista de produtos...");
+      onSuccess();
       
     } catch (error: any) {
       console.error("Erro ao excluir produto:", error);
-      toast.error("Erro ao excluir produto: " + (error.message || "Erro desconhecido"));
+      
+      // Se houve erro, precisamos reverter o update otimístico
+      // Para isso, vamos forçar um reload da lista
+      onSuccess();
+      
+      toast.error(`Erro ao excluir produto: ${error.message || "Erro desconhecido"}`);
     } finally {
       setIsDeleting(false);
     }
