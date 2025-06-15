@@ -21,7 +21,7 @@ const Reports = () => {
   };
 
   if (error) {
-    return <ReportsErrorState onRetry={refetch} />;
+    return <ReportsErrorState error={error} onRetry={refetch} />;
   }
 
   return (
@@ -34,7 +34,7 @@ const Reports = () => {
             <header className="flex items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
               <SidebarTrigger />
               <div className="flex-1">
-                <ReportsHeader />
+                <ReportsHeader onRefresh={refetch} />
               </div>
             </header>
 

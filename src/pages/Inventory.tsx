@@ -4,8 +4,22 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/s
 import { AppSidebar } from '@/components/AppSidebar';
 import { FeatureGuard } from '@/components/FeatureGuard';
 import { InventoryContainer } from '@/components/inventory/InventoryContainer';
+import { useInventory } from '@/hooks/useInventory';
 
 const Inventory = () => {
+  const {
+    products,
+    searchTerm,
+    setSearchTerm,
+    stats,
+    loading,
+    selectedProducts,
+    handleToggleSelect,
+    handleSelectAll,
+    handleStockTransaction,
+    handleEditProduct
+  } = useInventory();
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -27,7 +41,17 @@ const Inventory = () => {
                 requiredPlan="professional"
                 showUpgradePrompt={true}
               >
-                <InventoryContainer />
+                <InventoryContainer
+                  products={products}
+                  stats={stats}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  onTransaction={handleStockTransaction}
+                  onEditProduct={handleEditProduct}
+                  selectedProducts={selectedProducts}
+                  onToggleSelect={handleToggleSelect}
+                  onSelectAll={handleSelectAll}
+                />
               </FeatureGuard>
             </main>
           </div>

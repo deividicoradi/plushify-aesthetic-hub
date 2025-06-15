@@ -1,37 +1,76 @@
 
 import React from 'react';
-import { Crown, ArrowRight } from 'lucide-react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Crown, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
 
 export const PlanInfoBanner = () => {
+  const { currentPlan, limits } = usePlanLimits();
   const navigate = useNavigate();
 
-  return (
-    <Card className="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border-primary/20 dark:border-primary/30">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 dark:bg-primary/20 rounded-full">
-              <Crown className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-medium text-card-foreground">Plano Gratuito</h3>
-              <p className="text-sm text-muted-foreground">
-                Acesso às funcionalidades básicas
-              </p>
-            </div>
+  const getPlanColor = (plan: string) => {
+    switch (plan) {
+      case 'trial': return 'bg-yellow-500';
+      case 'professional': return 'bg-blue-500';
+      case 'premium': return 'bg-purple-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getPlanLabel = (plan: string) => {
+    switch (plan) {
+      case 'trial': return 'Gratuito';
+      case 'professional': return 'Professional';
+      case 'premium': return 'Premium';
+      default: return 'Desconhecido';
+    }
+  };
+
+  if (currentPlan === 'premium') {
+    return (
+      <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+        <CheckCircle className="h-4 w-4 text-green-600" />
+        <AlertDescription className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-green-800 dark:text-green-200">
+              Você tem acesso completo a todas as funcionalidades!
+            </span>
+            <Badge className={`${getPlanColor(currentPlan)} text-white`}>
+              <Crown className="w-3 h-3 mr-1" />
+              {getPlanLabel(currentPlan)}
+            </Badge>
           </div>
-          <Button 
-            onClick={() => navigate('/planos')}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            Ver planos
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <Alert className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950">
+      <AlertTriangle className="h-4 w-4 text-orange-600" />
+      <AlertDescription className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-orange-800 dark:text-orange-200">
+            {currentPlan === 'trial' 
+              ? 'Você está no plano gratuito com funcionalidades limitadas.'
+              : 'Algumas funcionalidades avançadas requerem upgrade.'
+            }
+          </span>
+          <Badge className={`${getPlanColor(currentPlan)} text-white`}>
+            {getPlanLabel(currentPlan)}
+          </Badge>
         </div>
-      </CardContent>
-    </Card>
+        <Button 
+          size="sm" 
+          onClick={() => navigate('/planos')}
+          className="bg-primary hover:bg-primary/90"
+        >
+          Fazer Upgrade
+        </Button>
+      </AlertDescription>
+    </Alert>
   );
 };

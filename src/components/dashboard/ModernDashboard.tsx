@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Users, Calendar, DollarSign, Package } from 'lucide-react';
 import { FeatureGuard } from '@/components/FeatureGuard';
 import { DashboardHeader } from './DashboardHeader';
 import { ModernMetricCard } from './ModernMetricCard';
@@ -19,15 +20,15 @@ import { useFinancialData } from '@/hooks/useFinancialData';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 
 export const ModernDashboard = () => {
-  const { stats, loading: statsLoading } = useDashboardStats();
-  const { chartData, loading: chartLoading } = useInteractiveChartData();
-  const { weeklyData, loading: weeklyLoading } = useWeeklyOverviewData();
-  const { data: appointments } = useAppointments();
+  const dashboardStats = useDashboardStats();
+  const chartDataHook = useInteractiveChartData();
+  const weeklyOverviewHook = useWeeklyOverviewData();
+  const appointmentsHook = useAppointments();
   const { metrics } = useFinancialData();
   const { currentPlan, limits } = usePlanLimits();
 
   // Filtrar próximos agendamentos
-  const upcomingAppointments = appointments?.filter(apt => 
+  const upcomingAppointments = appointmentsHook.appointments?.filter(apt => 
     new Date(apt.appointment_date) >= new Date() && apt.status === 'agendado'
   )?.slice(0, 5) || [];
 
@@ -35,38 +36,38 @@ export const ModernDashboard = () => {
     <div className="space-y-6 pb-20">
       <DashboardHeader />
       
-      <PlanInfoBanner currentPlan={currentPlan} limits={limits} />
+      <PlanInfoBanner />
       
       <div className="grid gap-6 lg:grid-cols-4">
         <ModernMetricCard
           title="Clientes"
-          value={stats?.totalClients || 0}
-          change={stats?.clientsGrowth || 0}
-          icon="users"
-          loading={statsLoading}
+          value={dashboardStats.totalClients || 0}
+          change={dashboardStats.newThisMonth || 0}
+          icon={Users}
+          loading={dashboardStats.loading}
           limit={limits.clients}
-          currentCount={stats?.totalClients || 0}
+          currentCount={dashboardStats.totalClients || 0}
           feature="clients"
         />
         
         <ModernMetricCard
           title="Agendamentos"
-          value={stats?.totalAppointments || 0}
-          change={stats?.appointmentsGrowth || 0}
-          icon="calendar"
-          loading={statsLoading}
+          value={dashboardStats.totalAppointments || 0}
+          change={dashboardStats.weeklyAppointments || 0}
+          icon={Calendar}
+          loading={dashboardStats.loading}
           limit={limits.appointments}
-          currentCount={stats?.totalAppointments || 0}
+          currentCount={dashboardStats.totalAppointments || 0}
           feature="appointments"
         />
         
         <FeatureGuard planFeature="hasFinancialManagement" showUpgradePrompt={false}>
           <ModernMetricCard
             title="Receita Mensal"
-            value={metrics?.totalRevenue || 0}
-            change={metrics?.revenueGrowth || 0}
-            icon="dollar-sign"
-            loading={statsLoading}
+            value={metrics?.receitasMesAtual || 0}
+            change={metrics?.crescimentoReceitas || 0}
+            icon={DollarSign}
+            loading={dashboardStats.loading}
             isCurrency
             feature="revenue"
           />
@@ -75,12 +76,12 @@ export const ModernDashboard = () => {
         <FeatureGuard planFeature="hasInventoryAdvanced" showUpgradePrompt={false}>
           <ModernMetricCard
             title="Produtos"
-            value={stats?.totalProducts || 0}
-            change={stats?.productsGrowth || 0}
-            icon="package"
-            loading={statsLoading}
+            value={dashboardStats.totalClients || 0}
+            change={0}
+            icon={Package}
+            loading={dashboardStats.loading}
             limit={limits.products}
-            currentCount={stats?.totalProducts || 0}
+            currentCount={dashboardStats.totalClients || 0}
             feature="products"
           />
         </FeatureGuard>
@@ -95,23 +96,23 @@ export const ModernDashboard = () => {
               <div className="bg-card rounded-lg border p-6 text-center">
                 <h3 className="text-lg font-semibold mb-2">Gráficos Avançados</h3>
                 <p className="text-muted-foreground text-sm">
-                  Disponível apenas no plano Enterprise
+                  Disponível apenas no plano Premium
                 </p>
               </div>
             }
           >
-            <InteractiveChart data={chartData} loading={chartLoading} />
+            <InteractiveChart />
           </FeatureGuard>
         </div>
         
         <div className="space-y-6">
-          <WeeklyOverview data={weeklyData} loading={weeklyLoading} />
+          <WeeklyOverview />
           <AlertsPanel />
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <UpcomingAppointments appointments={upcomingAppointments} />
+        <UpcomingAppointments />
         <FeatureGuard 
           planFeature="hasAdvancedAnalytics" 
           showUpgradePrompt={false}
@@ -119,7 +120,7 @@ export const ModernDashboard = () => {
             <div className="bg-card rounded-lg border p-6 text-center">
               <h3 className="text-lg font-semibold mb-2">Feed de Atividades</h3>
               <p className="text-muted-foreground text-sm">
-                Disponível apenas no plano Enterprise
+                Disponível apenas no plano Premium
               </p>
             </div>
           }
