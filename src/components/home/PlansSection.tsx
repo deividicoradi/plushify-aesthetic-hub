@@ -207,7 +207,7 @@ export const PlansSection = () => {
         {/* CTA */}
         <div className="text-center mt-16">
           <p className="text-muted-foreground mb-6">
-            Todos os planos incluem 7 dias de teste grátis
+            Comece hoje mesmo • Resultados garantidos • Suporte completo
           </p>
           <Button 
             size="lg"
