@@ -460,44 +460,6 @@ export type Database = {
           },
         ]
       }
-      inventory_transactions: {
-        Row: {
-          created_at: string
-          id: string
-          notes: string | null
-          product_id: string
-          quantity: number
-          type: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          notes?: string | null
-          product_id: string
-          quantity: number
-          type: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          notes?: string | null
-          product_id?: string
-          quantity?: number
-          type?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inventory_transactions_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       notes: {
         Row: {
           content: string | null
@@ -616,90 +578,6 @@ export type Database = {
             columns: ["payment_method_id"]
             isOneToOne: false
             referencedRelation: "payment_methods"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      products: {
-        Row: {
-          category: string
-          created_at: string
-          id: string
-          min_stock: number
-          name: string
-          stock: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          id?: string
-          min_stock?: number
-          name: string
-          stock?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          id?: string
-          min_stock?: number
-          name?: string
-          stock?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      sales: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          id: string
-          product_id: string | null
-          quantity: number
-          sale_date: string
-          total_price: number
-          unit_price: number
-          user_id: string
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          id?: string
-          product_id?: string | null
-          quantity: number
-          sale_date?: string
-          total_price: number
-          unit_price: number
-          user_id: string
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          id?: string
-          product_id?: string | null
-          quantity?: number
-          sale_date?: string
-          total_price?: number
-          unit_price?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sales_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sales_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
