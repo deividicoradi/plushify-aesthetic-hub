@@ -11,38 +11,42 @@ const Plans = () => {
   const plans = [
     {
       id: 'basic',
-      name: 'Gratuito',
-      price: 'R$ 0',
-      period: '/mês',
+      name: 'Starter',
+      price: 'Gratuito',
+      period: '',
+      originalPrice: '',
       description: 'Perfeito para começar',
       icon: Star,
       gradient: 'from-gray-500 to-gray-600',
       features: [
         'Dashboard com métricas básicas',
-        'Gestão de clientes',
+        'Gestão de clientes (até 50)',
         'Agendamentos simples',
-        'Controle de serviços',
-        'Estoque básico',
+        'Controle de serviços básico',
+        'Estoque básico (até 100 produtos)',
         'Anotações pessoais',
         'Relatórios simples'
       ],
       limitations: [
         'Funcionalidades limitadas',
-        'Suporte básico'
+        'Suporte básico por email',
+        'Sem backup automático'
       ],
       current: true
     },
     {
       id: 'professional',
-      name: 'Profissional',
-      price: 'R$ 29',
+      name: 'Professional',
+      price: 'R$ 47',
       period: '/mês',
+      originalPrice: 'R$ 67',
       description: 'Para profissionais em crescimento',
       icon: Zap,
       gradient: 'from-blue-500 to-cyan-500',
       popular: true,
       features: [
-        'Tudo do plano Gratuito',
+        'Tudo do plano Starter',
+        'Clientes ilimitados',
         'Dashboard avançado com insights',
         'Gestão financeira completa',
         'Controle de pagamentos',
@@ -60,25 +64,27 @@ const Plans = () => {
     },
     {
       id: 'premium',
-      name: 'Premium',
-      price: 'R$ 59',
+      name: 'Enterprise',
+      price: 'R$ 97',
       period: '/mês',
+      originalPrice: 'R$ 147',
       description: 'Para clínicas e salões',
       icon: Crown,
       gradient: 'from-purple-500 to-pink-500',
       features: [
-        'Tudo do plano Profissional',
+        'Tudo do plano Professional',
         'Analytics avançados',
         'Dashboard executivo',
         'Auditoria completa',
         'Logs de segurança',
         'Backup automático',
-        'Múltiplos usuários',
+        'Múltiplos usuários (até 10)',
         'Relatórios personalizados',
         'Exportação PDF/Excel',
-        'Suporte 24/7',
+        'Suporte 24/7 prioritário',
         'Consultoria mensal',
-        'Integrações futuras'
+        'Integrações futuras',
+        'API personalizada'
       ],
       limitations: []
     }
@@ -100,6 +106,10 @@ const Plans = () => {
     {
       question: 'Os dados ficam seguros?',
       answer: 'Sim! Utilizamos criptografia de ponta e todas as operações são registradas em logs de auditoria para garantir a segurança total dos seus dados.'
+    },
+    {
+      question: 'Há desconto para pagamento anual?',
+      answer: 'Sim! Oferecemos 20% de desconto para pagamentos anuais em todos os planos pagos. Entre em contato para mais detalhes.'
     }
   ];
 
@@ -133,6 +143,9 @@ const Plans = () => {
                     Sistema completo para gestão do seu negócio. 
                     Dashboard, clientes, agendamentos, financeiro e muito mais.
                   </p>
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-sm font-medium border border-green-200 dark:border-green-800">
+                    🎉 Promoção de Lançamento: 30% OFF nos primeiros 3 meses
+                  </div>
                 </div>
 
                 {/* Plans Grid */}
@@ -175,10 +188,18 @@ const Plans = () => {
                         </div>
                         
                         <div className="space-y-1">
-                          <div className="flex items-baseline justify-center gap-1">
+                          <div className="flex items-baseline justify-center gap-2">
+                            {plan.originalPrice && (
+                              <span className="text-lg text-muted-foreground line-through">{plan.originalPrice}</span>
+                            )}
                             <span className="text-5xl font-bold text-foreground">{plan.price}</span>
-                            <span className="text-muted-foreground text-lg">{plan.period}</span>
+                            {plan.period && <span className="text-muted-foreground text-lg">{plan.period}</span>}
                           </div>
+                          {plan.originalPrice && (
+                            <div className="text-sm text-green-600 dark:text-green-400 font-medium">
+                              Economize {Math.round((1 - parseInt(plan.price.replace('R$ ', '')) / parseInt(plan.originalPrice.replace('R$ ', ''))) * 100)}%
+                            </div>
+                          )}
                         </div>
                       </CardHeader>
 
