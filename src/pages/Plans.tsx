@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Check, Crown, Zap, Star, ArrowRight, Sparkles, Clock, AlertTriangle, TrendingUp, Shield, Users, Rocket, Gift, BadgePercent } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -69,17 +68,17 @@ const Plans = () => {
       annualPrice: 'Gratuito',
       annualPeriod: '',
       annualOriginalPrice: '',
-      description: 'Apenas para testes',
+      description: 'Para teste da plataforma',
       subtitle: 'Funcionalidades limitadas',
       icon: Clock,
       features: [
-        '⏰ Apenas 3 dias de teste',
-        '👥 Até 5 clientes',
-        '📅 Até 3 agendamentos',
-        '🔧 Até 2 serviços',
-        '📦 Estoque básico (10 produtos)',
-        '❌ Sem relatórios',
-        '❌ Sem backup'
+        'Apenas 3 dias de teste',
+        'Até 5 clientes',
+        'Até 3 agendamentos',
+        'Até 2 serviços',
+        'Estoque básico (10 produtos)',
+        'Sem relatórios avançados',
+        'Sem backup automático'
       ],
       limitations: [
         'Acesso limitado a 3 dias',
@@ -99,20 +98,19 @@ const Plans = () => {
       annualPrice: 'R$ 890',
       annualPeriod: '/ano',
       annualOriginalPrice: 'R$ 1.270',
-      description: 'Para profissionais que querem crescer',
+      description: 'Para profissionais em crescimento',
       subtitle: 'Ideal para freelancers e pequenos negócios',
       icon: Zap,
-      popular: false,
       features: [
-        '🚀 Acesso completo e ilimitado',
-        '👥 Clientes ilimitados',
-        '📊 Dashboard avançado',
-        '💰 Gestão financeira completa',
-        '💳 Sistema de parcelas',
-        '📈 Relatórios detalhados',
-        '📦 Gestão de estoque',
-        '🔔 Alertas inteligentes',
-        '📞 Suporte prioritário'
+        'Acesso completo e ilimitado',
+        'Clientes ilimitados',
+        'Dashboard avançado',
+        'Gestão financeira completa',
+        'Sistema de parcelas',
+        'Relatórios detalhados',
+        'Gestão de estoque',
+        'Alertas inteligentes',
+        'Suporte prioritário'
       ],
       limitations: [],
       current: currentPlan === 'professional'
@@ -126,30 +124,30 @@ const Plans = () => {
       annualPrice: 'R$ 1.790',
       annualPeriod: '/ano',
       annualOriginalPrice: 'R$ 2.490',
-      description: '🔥 RECOMENDADO - Para crescimento acelerado',
+      description: 'RECOMENDADO - Para crescimento acelerado',
       subtitle: 'A escolha dos profissionais que faturam mais',
       icon: Crown,
       premium: true,
       mostComplete: true,
       features: [
-        '⭐ TUDO do plano Professional',
-        '🎯 Analytics avançados e IA',
-        '👑 Dashboard executivo premium',
-        '🔒 Auditoria e logs de segurança',
-        '☁️ Backup automático na nuvem',
-        '👥 Múltiplos usuários (até 10)',
-        '📋 Relatórios personalizados',
-        '📄 Exportação PDF/Excel',
-        '🚀 Suporte VIP 24/7',
-        '💼 Consultoria mensal GRATUITA',
-        '🔌 Integrações exclusivas',
-        '⚡ API personalizada'
+        'TUDO do plano Professional',
+        'Analytics avançados e IA',
+        'Dashboard executivo premium',
+        'Auditoria e logs de segurança',
+        'Backup automático na nuvem',
+        'Múltiplos usuários (até 10)',
+        'Relatórios personalizados',
+        'Exportação PDF/Excel',
+        'Suporte VIP 24/7',
+        'Consultoria mensal GRATUITA',
+        'Integrações exclusivas',
+        'API personalizada'
       ],
       bonuses: [
-        '🎁 Setup personalizado GRÁTIS',
-        '📚 Treinamento VIP incluso',
-        '💎 Acesso a funcionalidades BETA',
-        '🏆 Selo de cliente Premium'
+        'Setup personalizado GRÁTIS',
+        'Treinamento VIP incluso',
+        'Acesso a funcionalidades BETA',
+        'Selo de cliente Premium'
       ],
       limitations: [],
       current: currentPlan === 'premium'
@@ -212,56 +210,56 @@ const Plans = () => {
         <SidebarInset className="flex-1">
           <div className="flex flex-col min-h-screen w-full">
             {/* Header */}
-            <header className="flex items-center gap-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
+            <header className="flex items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
               <SidebarTrigger />
               <div className="flex-1">
-                <h1 className="text-xl font-semibold text-foreground">Planos</h1>
+                <h1 className="text-xl font-semibold">Planos</h1>
               </div>
             </header>
 
             {/* Main content */}
             <main className="flex-1 p-6 bg-background overflow-y-auto">
-              <div className="max-w-7xl mx-auto space-y-12">
+              <div className="max-w-7xl mx-auto space-y-8">
                 {/* Hero Section */}
-                <div className="text-center space-y-8 py-12">
-                  <div className="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 border border-primary/20 text-primary rounded-full text-sm font-medium">
-                    <Rocket className="w-5 h-5" />
-                    🔥 OFERTA LIMITADA - Apenas este mês!
+                <div className="text-center space-y-6 py-8">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 text-primary rounded-full text-sm font-medium">
+                    <Rocket className="w-4 h-4" />
+                    Oferta Limitada - Apenas este mês!
                   </div>
-                  <h1 className="text-5xl font-bold text-foreground max-w-4xl mx-auto leading-tight">
+                  <h1 className="text-4xl font-bold max-w-4xl mx-auto leading-tight">
                     Transforme Seu Negócio de <span className="text-primary">Estética</span>
                   </h1>
-                  <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                    Mais de <span className="text-primary font-bold">10.000+ profissionais</span> já escolheram nossa plataforma. 
-                    Sistema completo que <span className="text-green-600 font-bold">aumenta vendas em até 200%</span>.
+                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                    Mais de <span className="text-primary font-semibold">10.000+ profissionais</span> já escolheram nossa plataforma. 
+                    Sistema completo que <span className="text-green-600 font-semibold">aumenta vendas em até 200%</span>.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-                    <div className="flex items-center gap-2 px-6 py-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full border border-green-200 dark:border-green-800">
-                      <TrendingUp className="w-5 h-5" />
-                      <span className="font-semibold">Aumento médio de 150% no faturamento</span>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full border border-green-200 dark:border-green-800">
+                      <TrendingUp className="w-4 h-4" />
+                      <span className="font-medium">Aumento médio de 150% no faturamento</span>
                     </div>
-                    <div className="flex items-center gap-2 px-6 py-3 bg-muted text-muted-foreground rounded-full border border-border">
-                      <Shield className="w-5 h-5" />
-                      <span className="font-semibold">Garantia de 30 dias</span>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-muted text-muted-foreground rounded-full border">
+                      <Shield className="w-4 h-4" />
+                      <span className="font-medium">Garantia de 30 dias</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Current Plan Alert */}
                 {currentPlan === 'trial' && (
-                  <Card className="border-orange-300 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-900/20">
+                  <Card className="border-orange-200 bg-orange-50/50 dark:border-orange-800 dark:bg-orange-900/20">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
-                        <AlertTriangle className="w-8 h-8 text-orange-600 dark:text-orange-400 animate-bounce" />
+                        <AlertTriangle className="w-8 h-8 text-orange-600 animate-bounce" />
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-orange-800 dark:text-orange-200">⚠️ Trial Expirando!</h3>
+                          <h3 className="text-lg font-semibold text-orange-800 dark:text-orange-200">Trial Expirando!</h3>
                           <p className="text-orange-700 dark:text-orange-300 mt-1">
                             Não perca seus dados! Escolha um plano agora e continue crescendo seu negócio.
                           </p>
                         </div>
                         <Button 
                           onClick={() => handlePlanSelection('premium')}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                          className="bg-primary hover:bg-primary/90"
                         >
                           Upgrade Agora!
                         </Button>
@@ -272,7 +270,7 @@ const Plans = () => {
 
                 {/* Manage Subscription Button for paid plans */}
                 {(currentPlan === 'professional' || currentPlan === 'premium') && (
-                  <Card className="border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/20">
+                  <Card className="border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/20">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -280,8 +278,8 @@ const Plans = () => {
                             <Check className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-green-800 dark:text-green-200">
-                              ✅ Plano {currentPlan === 'professional' ? 'Professional' : 'Enterprise'} Ativo
+                            <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">
+                              Plano {currentPlan === 'professional' ? 'Professional' : 'Enterprise'} Ativo
                             </h3>
                             <p className="text-green-700 dark:text-green-300">
                               Você está aproveitando todo o poder da nossa plataforma!
@@ -292,7 +290,7 @@ const Plans = () => {
                           onClick={handleManageSubscription}
                           disabled={stripeLoading}
                           variant="outline"
-                          className="border-green-500 text-green-700 hover:bg-green-50 shadow-md"
+                          className="border-green-500 text-green-700 hover:bg-green-50"
                         >
                           {stripeLoading ? "Carregando..." : "Gerenciar Assinatura"}
                         </Button>
@@ -302,32 +300,27 @@ const Plans = () => {
                 )}
 
                 {/* Billing Toggle */}
-                <div className="flex items-center justify-center gap-6 py-6">
-                  <span className={`text-lg font-semibold transition-colors ${!isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    💳 Mensal
+                <div className="flex items-center justify-center gap-4 py-4">
+                  <span className={`text-lg font-medium transition-colors ${!isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    Mensal
                   </span>
-                  <div className="relative">
-                    <Switch
-                      checked={isAnnual}
-                      onCheckedChange={setIsAnnual}
-                      className="data-[state=checked]:bg-primary scale-125"
-                    />
-                  </div>
-                  <span className={`text-lg font-semibold transition-colors ${isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    💰 Anual
+                  <Switch
+                    checked={isAnnual}
+                    onCheckedChange={setIsAnnual}
+                    className="data-[state=checked]:bg-primary"
+                  />
+                  <span className={`text-lg font-medium transition-colors ${isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    Anual
                   </span>
                   {isAnnual && (
-                    <Badge className="bg-green-500 text-white text-sm px-4 py-2 animate-pulse shadow-lg">
-                      💸 ECONOMIZE 30% + Parcele em 10x
+                    <Badge className="bg-green-500 text-white text-sm px-3 py-1">
+                      Economize 30%
                     </Badge>
                   )}
                 </div>
 
                 {/* Plans Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
-                  {/* Premium Plan Highlight Background */}
-                  <div className="absolute inset-0 lg:left-[66.666%] lg:right-0 bg-primary/5 rounded-3xl -z-10 lg:transform lg:scale-105"></div>
-                  
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
                   {plans.map((plan, index) => {
                     const currentPrice = isAnnual ? plan.annualPrice : plan.price;
                     const currentPeriod = isAnnual ? plan.annualPeriod : plan.period;
@@ -339,117 +332,110 @@ const Plans = () => {
                     return (
                       <Card 
                         key={plan.id} 
-                        className={`relative overflow-hidden transition-all duration-500 hover:shadow-2xl transform hover:scale-105 ${
+                        className={`relative overflow-hidden transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] h-full flex flex-col ${
                           plan.mostComplete
-                            ? 'border-4 border-primary shadow-2xl bg-gradient-to-br from-background to-primary/5 lg:scale-110 z-10' 
-                            : plan.premium 
-                              ? 'border-2 border-primary/50 shadow-xl bg-gradient-to-br from-background to-primary/5' 
-                              : plan.current 
-                                ? plan.trial
-                                  ? 'border-2 border-orange-400 bg-gradient-to-br from-background to-orange-50/20 dark:to-orange-950/20' 
-                                  : 'border-2 border-green-400 bg-gradient-to-br from-background to-green-50/20 dark:to-green-950/20'
-                                : 'border border-border hover:border-primary/50 bg-card'
+                            ? 'border-2 border-primary shadow-xl bg-gradient-to-br from-background to-primary/5 scale-105 z-10' 
+                            : plan.current 
+                              ? plan.trial
+                                ? 'border-2 border-orange-400 bg-gradient-to-br from-background to-orange-50/20 dark:to-orange-950/20' 
+                                : 'border-2 border-green-400 bg-gradient-to-br from-background to-green-50/20 dark:to-green-950/20'
+                              : 'border hover:border-primary/50'
                         }`}
                       >
-                        {/* Premium Glow Effect */}
-                        {plan.mostComplete && (
-                          <div className="absolute inset-0 bg-primary/10 animate-pulse"></div>
-                        )}
-
                         {/* Top Badges */}
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-20">
                           {plan.mostComplete && (
-                            <Badge className="bg-primary text-primary-foreground shadow-lg text-sm px-4 py-2 animate-bounce">
-                              🔥 MAIS COMPLETO - RECOMENDADO
-                            </Badge>
-                          )}
-                          {plan.popular && (
-                            <Badge className="bg-secondary text-secondary-foreground shadow-lg">
-                              ⭐ Popular
+                            <Badge className="bg-primary text-primary-foreground shadow-lg text-sm px-3 py-1 animate-pulse">
+                              🔥 MAIS COMPLETO
                             </Badge>
                           )}
                           {plan.current && (
                             <Badge className={`${plan.trial ? 'bg-orange-500' : 'bg-green-500'} text-white shadow-lg`}>
-                              {plan.trial ? '⏱️ Trial Ativo' : '✅ Plano Atual'}
+                              {plan.trial ? 'Trial Ativo' : 'Plano Atual'}
                             </Badge>
                           )}
                         </div>
 
-                        <CardHeader className="text-center space-y-6 pt-12 relative z-10">
-                          <div className={`w-24 h-24 mx-auto rounded-3xl bg-primary/10 flex items-center justify-center shadow-lg ${plan.mostComplete ? 'animate-pulse' : ''}`}>
-                            <plan.icon className={`${plan.mostComplete ? 'w-14 h-14' : 'w-12 h-12'} text-primary`} />
+                        <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
+                          <div className={`w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center ${plan.mostComplete ? 'animate-pulse' : ''}`}>
+                            <plan.icon className={`${plan.mostComplete ? 'w-10 h-10' : 'w-8 h-8'} text-primary`} />
                           </div>
                           
-                          <div className="space-y-3">
-                            <h3 className={`${plan.mostComplete ? 'text-3xl' : 'text-2xl'} font-bold text-foreground`}>
+                          <div className="space-y-2">
+                            <h3 className={`${plan.mostComplete ? 'text-2xl' : 'text-xl'} font-bold`}>
                               {plan.name}
                             </h3>
-                            <p className={`${plan.mostComplete ? 'text-lg font-semibold text-primary' : 'text-muted-foreground'}`}>
+                            <p className={`text-sm ${plan.mostComplete ? 'font-medium text-primary' : 'text-muted-foreground'}`}>
                               {plan.description}
                             </p>
-                            <p className="text-sm text-muted-foreground italic">
+                            <p className="text-xs text-muted-foreground">
                               {plan.subtitle}
                             </p>
                           </div>
                           
-                          <div className="space-y-2">
-                            <div className="flex items-baseline justify-center gap-2">
+                          <div className="space-y-1">
+                            <div className="flex items-baseline justify-center gap-1">
                               {currentOriginalPrice && (
-                                <span className="text-xl text-muted-foreground line-through">{currentOriginalPrice}</span>
+                                <span className="text-lg text-muted-foreground line-through">{currentOriginalPrice}</span>
                               )}
-                              <span className={`${plan.mostComplete ? 'text-6xl text-primary' : 'text-5xl text-foreground'} font-bold`}>
+                              <span className={`${plan.mostComplete ? 'text-4xl text-primary' : 'text-3xl'} font-bold`}>
                                 {currentPrice}
                               </span>
-                              {currentPeriod && <span className="text-muted-foreground text-lg">{currentPeriod}</span>}
+                              {currentPeriod && <span className="text-muted-foreground">{currentPeriod}</span>}
                             </div>
                             {currentOriginalPrice && (
-                              <div className={`text-sm font-bold ${plan.mostComplete ? 'text-green-600 text-lg animate-pulse' : 'text-green-600'}`}>
-                                💰 Economize {Math.round((1 - parseInt(currentPrice.replace('R$ ', '').replace('.', '')) / parseInt(currentOriginalPrice.replace('R$ ', '').replace('.', ''))) * 100)}%
+                              <div className={`text-sm font-semibold ${plan.mostComplete ? 'text-green-600 animate-pulse' : 'text-green-600'}`}>
+                                Economize {Math.round((1 - parseInt(currentPrice.replace('R$ ', '').replace('.', '')) / parseInt(currentOriginalPrice.replace('R$ ', '').replace('.', ''))) * 100)}%
                               </div>
                             )}
                             {installmentPrice && (
-                              <div className={`text-sm ${plan.mostComplete ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
+                              <div className={`text-sm ${plan.mostComplete ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
                                 ou 10x de R$ {installmentPrice} sem juros
                               </div>
                             )}
                           </div>
                         </CardHeader>
 
-                        <CardContent className="space-y-6 px-6 relative z-10">
+                        <CardContent className="space-y-4 px-6 flex-1">
                           {/* Features */}
-                          <div className="space-y-4">
-                            <h4 className={`font-bold text-foreground flex items-center gap-2 ${plan.mostComplete ? 'text-lg' : ''}`}>
-                              <Star className={`${plan.mostComplete ? 'w-6 h-6 text-yellow-500' : 'w-5 h-5 text-green-500'}`} />
-                              {plan.trial ? '⚠️ Limitações do Trial:' : '✨ Recursos inclusos:'}
+                          <div className="space-y-3">
+                            <h4 className={`font-semibold flex items-center gap-2 ${plan.mostComplete ? 'text-base' : 'text-sm'}`}>
+                              <Star className={`${plan.mostComplete ? 'w-5 h-5 text-yellow-500' : 'w-4 h-4 text-green-500'}`} />
+                              {plan.trial ? 'Limitações do Trial:' : 'Recursos inclusos:'}
                             </h4>
-                            <ul className="space-y-3">
-                              {plan.features.map((feature, index) => (
-                                <li key={index} className="flex items-start gap-3">
-                                  <div className={`w-6 h-6 rounded-full ${plan.mostComplete ? 'bg-primary' : 'bg-green-500'} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                                    <Check className="w-4 h-4 text-white" />
+                            <ul className="space-y-2">
+                              {plan.features.slice(0, 6).map((feature, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <div className={`w-4 h-4 rounded-full ${plan.mostComplete ? 'bg-primary' : 'bg-green-500'} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                                    <Check className="w-2.5 h-2.5 text-white" />
                                   </div>
-                                  <span className={`text-sm leading-relaxed ${plan.mostComplete ? 'font-medium' : ''}`}>
+                                  <span className={`text-xs leading-relaxed ${plan.mostComplete ? 'font-medium' : ''}`}>
                                     {feature}
                                   </span>
                                 </li>
                               ))}
+                              {plan.features.length > 6 && (
+                                <li className="text-xs text-muted-foreground italic">
+                                  + {plan.features.length - 6} recursos adicionais
+                                </li>
+                              )}
                             </ul>
                           </div>
 
                           {/* Premium Bonuses */}
                           {plan.bonuses && (
-                            <div className="space-y-4 pt-4 border-t border-border">
-                              <h4 className="font-bold text-primary text-lg flex items-center gap-2">
-                                <Gift className="w-6 h-6" />
-                                🎁 Bônus Exclusivos:
+                            <div className="space-y-3 pt-3 border-t border-border/50">
+                              <h4 className="font-semibold text-primary text-sm flex items-center gap-2">
+                                <Gift className="w-4 h-4" />
+                                Bônus Exclusivos:
                               </h4>
-                              <ul className="space-y-3">
-                                {plan.bonuses.map((bonus, index) => (
-                                  <li key={index} className="flex items-center gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0">
-                                      <Gift className="w-4 h-4 text-white" />
+                              <ul className="space-y-2">
+                                {plan.bonuses.slice(0, 3).map((bonus, index) => (
+                                  <li key={index} className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0">
+                                      <Gift className="w-2.5 h-2.5 text-white" />
                                     </div>
-                                    <span className="text-sm font-semibold text-primary">{bonus}</span>
+                                    <span className="text-xs font-medium text-primary">{bonus}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -458,18 +444,18 @@ const Plans = () => {
 
                           {/* Limitations */}
                           {plan.limitations.length > 0 && (
-                            <div className="space-y-4 pt-4 border-t border-border/50">
-                              <h4 className="font-semibold text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                            <div className="space-y-3 pt-3 border-t border-border/50">
+                              <h4 className="font-medium text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
                                 <AlertTriangle className="w-4 h-4" />
-                                ⚠️ Limitações:
+                                Limitações:
                               </h4>
                               <ul className="space-y-2">
-                                {plan.limitations.map((limitation, index) => (
-                                  <li key={index} className="flex items-center gap-3">
-                                    <div className="w-4 h-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-                                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                {plan.limitations.slice(0, 3).map((limitation, index) => (
+                                  <li key={index} className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
                                     </div>
-                                    <span className="text-sm text-red-600 dark:text-red-400">{limitation}</span>
+                                    <span className="text-xs text-red-600 dark:text-red-400">{limitation}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -477,18 +463,16 @@ const Plans = () => {
                           )}
                         </CardContent>
 
-                        <CardFooter className="pt-6 px-6 pb-6 relative z-10">
+                        <CardFooter className="pt-4 px-6 pb-6 flex-shrink-0">
                           <Button 
-                            className={`w-full h-14 text-lg font-bold transition-all duration-300 transform hover:scale-105 ${
+                            className={`w-full h-12 text-base font-semibold transition-all duration-300 transform hover:scale-105 ${
                               plan.current 
                                 ? plan.trial
-                                  ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg' 
-                                  : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg'
+                                  ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' 
+                                  : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white'
                                 : plan.mostComplete 
-                                  ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xl hover:shadow-3xl animate-pulse' 
-                                  : plan.premium
-                                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg'
-                                    : 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-md'
+                                  ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg animate-pulse' 
+                                  : 'bg-primary hover:bg-primary/90 text-primary-foreground'
                             }`}
                             disabled={(plan.current && !plan.trial) || stripeLoading}
                             onClick={() => handlePlanSelection(plan.id)}
@@ -498,20 +482,20 @@ const Plans = () => {
                             ) : plan.current ? (
                               plan.trial ? (
                                 <>
-                                  <Rocket className="w-5 h-5 mr-2" />
-                                  🚀 FAZER UPGRADE AGORA!
+                                  <Rocket className="w-4 h-4 mr-2" />
+                                  FAZER UPGRADE AGORA!
                                 </>
                               ) : (
                                 <>
-                                  <Check className="w-5 h-5 mr-2" />
-                                  ✅ Plano Atual
+                                  <Check className="w-4 h-4 mr-2" />
+                                  Plano Atual
                                 </>
                               )
                             ) : plan.mostComplete ? (
                               <>
-                                <Crown className="w-6 h-6 mr-2" />
-                                👑 ESCOLHER O MELHOR!
-                                <ArrowRight className="w-5 h-5 ml-2" />
+                                <Crown className="w-5 h-5 mr-2" />
+                                ESCOLHER O MELHOR!
+                                <ArrowRight className="w-4 h-4 ml-2" />
                               </>
                             ) : (
                               <>
@@ -522,9 +506,9 @@ const Plans = () => {
                           </Button>
                           
                           {plan.mostComplete && (
-                            <div className="text-center mt-3">
-                              <p className="text-xs text-primary font-semibold animate-pulse">
-                                🔥 Escolha de 89% dos nossos clientes de sucesso!
+                            <div className="text-center mt-2">
+                              <p className="text-xs text-primary font-medium animate-pulse">
+                                Escolha de 89% dos nossos clientes de sucesso!
                               </p>
                             </div>
                           )}
@@ -535,25 +519,25 @@ const Plans = () => {
                 </div>
 
                 {/* Social Proof Section */}
-                <Card className="bg-muted/30 border-border">
+                <Card className="bg-muted/30">
                   <CardContent className="p-8">
                     <div className="text-center space-y-6">
-                      <h2 className="text-3xl font-bold text-foreground">
-                        🏆 O que nossos clientes Enterprise estão dizendo
+                      <h2 className="text-2xl font-bold">
+                        O que nossos clientes Enterprise estão dizendo
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                         {testimonials.map((testimonial, index) => (
-                          <Card key={index} className="p-6 bg-card border-border">
+                          <Card key={index} className="p-6">
                             <div className="space-y-4">
                               <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
-                                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                                 ))}
                               </div>
-                              <p className="text-card-foreground italic">"{testimonial.text}"</p>
+                              <p className="italic">"{testimonial.text}"</p>
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="font-semibold text-foreground">{testimonial.name}</p>
+                                  <p className="font-medium">{testimonial.name}</p>
                                   <p className="text-sm text-muted-foreground">{testimonial.business}</p>
                                 </div>
                                 <Badge className="bg-primary text-primary-foreground">
@@ -569,24 +553,24 @@ const Plans = () => {
                 </Card>
 
                 {/* FAQ Section */}
-                <div className="space-y-8 py-8">
-                  <div className="text-center space-y-4">
-                    <h2 className="text-4xl font-bold text-foreground">
-                      💬 Perguntas Frequentes
+                <div className="space-y-6 py-6">
+                  <div className="text-center space-y-3">
+                    <h2 className="text-2xl font-bold">
+                      Perguntas Frequentes
                     </h2>
-                    <p className="text-xl text-muted-foreground">
+                    <p className="text-lg text-muted-foreground">
                       Tudo que você precisa saber para tomar a melhor decisão
                     </p>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
                     {faqs.map((faq, index) => (
-                      <Card key={index} className="hover:shadow-lg transition-all duration-300 border-border p-6">
+                      <Card key={index} className="hover:shadow-md transition-all duration-300 p-6">
                         <CardContent className="p-0">
-                          <h3 className="font-bold text-foreground mb-4 text-lg leading-relaxed">
+                          <h3 className="font-semibold mb-3 text-base leading-relaxed">
                             {faq.question}
                           </h3>
-                          <p className="text-muted-foreground leading-relaxed">
+                          <p className="text-muted-foreground text-sm leading-relaxed">
                             {faq.answer}
                           </p>
                         </CardContent>
@@ -596,33 +580,32 @@ const Plans = () => {
                 </div>
 
                 {/* Final CTA Section */}
-                <Card className="text-center bg-primary text-primary-foreground relative overflow-hidden">
-                  <div className="absolute inset-0 bg-primary/90"></div>
-                  <CardContent className="relative z-10 p-12 space-y-8">
-                    <div className="w-20 h-20 mx-auto rounded-full bg-primary-foreground/20 flex items-center justify-center backdrop-blur-sm">
-                      <Crown className="w-10 h-10 text-primary-foreground" />
+                <Card className="text-center bg-primary text-primary-foreground">
+                  <CardContent className="p-10 space-y-6">
+                    <div className="w-16 h-16 mx-auto rounded-full bg-primary-foreground/20 flex items-center justify-center">
+                      <Crown className="w-8 h-8 text-primary-foreground" />
                     </div>
-                    <div className="space-y-4">
-                      <h2 className="text-4xl font-bold">
-                        🚀 Pronto para revolucionar seu negócio?
+                    <div className="space-y-3">
+                      <h2 className="text-3xl font-bold">
+                        Pronto para revolucionar seu negócio?
                       </h2>
-                      <p className="text-xl opacity-90 max-w-2xl mx-auto">
+                      <p className="text-lg opacity-90 max-w-2xl mx-auto">
                         Junte-se aos milhares de profissionais que já transformaram seus negócios com nossa plataforma. 
-                        <span className="font-bold">O sucesso está a um clique de distância!</span>
+                        <span className="font-semibold">O sucesso está a um clique de distância!</span>
                       </p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                       <Button 
                         size="lg" 
                         onClick={() => handlePlanSelection('premium')}
-                        className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-bold text-lg px-8 py-4 shadow-2xl transform hover:scale-105 transition-all"
+                        className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold text-lg px-6 py-3 shadow-lg transform hover:scale-105 transition-all"
                       >
-                        <Crown className="w-6 h-6 mr-2" />
+                        <Crown className="w-5 h-5 mr-2" />
                         Começar com Enterprise
-                        <ArrowRight className="w-5 h-5 ml-2" />
+                        <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                       <div className="text-sm opacity-75">
-                        ✅ Sem compromisso • ✅ Cancele quando quiser • ✅ Suporte 24/7
+                        Sem compromisso • Cancele quando quiser • Suporte 24/7
                       </div>
                     </div>
                   </CardContent>
