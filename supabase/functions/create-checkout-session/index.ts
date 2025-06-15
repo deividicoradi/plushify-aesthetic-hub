@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@13.2.0?target=deno";
 import { authenticateUser, getOrCreateCustomer } from "../_shared/stripeUtils.ts";
@@ -58,7 +59,6 @@ const getPlanConfig = (planId: string, isYearly: boolean): PlanConfig => {
   }
 };
 
-
 // Checkout session creation
 const createCheckoutSession = async (
   stripe: Stripe,
@@ -115,17 +115,16 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     const { user, supabase } = await authenticateUser(authHeader);
 
-    // Better error handling for JSON parsing
     let requestBody: CheckoutRequest;
     try {
-      const bodyText = await req.text();
-      console.log("📦 Request body text:", bodyText);
+      const bodyContent = await req.json();
+      console.log("📦 Request body recebido:", bodyContent);
       
-      if (!bodyText.trim()) {
-        throw new Error("Corpo da requisição vazio");
+      if (!bodyContent || typeof bodyContent !== 'object') {
+        throw new Error("Corpo da requisição inválido");
       }
       
-      requestBody = JSON.parse(bodyText);
+      requestBody = bodyContent as CheckoutRequest;
     } catch (jsonError) {
       console.error("❌ Erro ao parsear JSON:", jsonError);
       throw new Error("Formato de dados inválido na requisição");
