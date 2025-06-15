@@ -9,33 +9,34 @@ const Plans = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen w-full">
+      <div className="min-h-screen bg-background">
         <DashboardSidebar />
-        <div className="flex-1">
+        <main className="ml-64 min-h-screen">
           <div className="flex items-center justify-center h-screen">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col min-h-screen w-full">
+      <main className="ml-64 min-h-screen">
         {/* Header */}
-        <header className="flex items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold">Planos</h1>
+        <header className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+          <div className="px-6 py-4">
+            <h1 className="text-2xl font-bold text-foreground">Planos</h1>
+            <p className="text-sm text-muted-foreground mt-1">Escolha o plano ideal para seu negócio</p>
           </div>
         </header>
 
-        {/* Main content */}
-        <main className="flex-1 p-6 bg-background overflow-y-auto">
+        {/* Content */}
+        <div className="p-6">
           <PlansPage />
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

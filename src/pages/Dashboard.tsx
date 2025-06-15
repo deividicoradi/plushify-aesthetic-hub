@@ -5,13 +5,13 @@ import { DashboardContent } from '@/components/dashboard/DashboardContent';
 
 const Dashboard = () => {
   return (
-    <div className="flex min-h-screen w-full bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <DashboardSidebar />
-      <div className="flex-1 bg-background">
-        <div className="p-4">
+      <main className="ml-64 min-h-screen">
+        <div className="p-6">
           <DashboardContent />
         </div>
-      </div>
+      </main>
     </div>
   );
 };

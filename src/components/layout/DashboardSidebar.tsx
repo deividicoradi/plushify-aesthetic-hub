@@ -42,10 +42,10 @@ const DashboardSidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-card border-r border-border h-full flex flex-col">
+    <aside className="fixed top-0 left-0 z-30 w-64 h-screen bg-background border-r border-border shadow-sm">
       {/* Logo */}
-      <div className="p-6 border-b border-border">
-        <Link to="/dashboard" className="flex items-center space-x-2">
+      <div className="flex items-center justify-start p-6 border-b border-border bg-background">
+        <Link to="/dashboard" className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">P</span>
           </div>
@@ -54,8 +54,8 @@ const DashboardSidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-4">
-        <ul className="space-y-1 px-3">
+      <nav className="flex-1 overflow-y-auto py-4 px-3 h-[calc(100vh-140px)]">
+        <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -65,14 +65,17 @@ const DashboardSidebar = () => {
                 <Link
                   to={item.path}
                   className={cn(
-                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.label}</span>
+                  <Icon className={cn(
+                    "h-5 w-5 transition-colors",
+                    isActive ? "text-primary-foreground" : "group-hover:text-accent-foreground"
+                  )} />
+                  <span className="truncate">{item.label}</span>
                 </Link>
               </li>
             );
@@ -80,20 +83,20 @@ const DashboardSidebar = () => {
         </ul>
       </nav>
 
-      {/* Theme Toggle and Sign Out */}
-      <div className="p-4 border-t border-border space-y-3">
+      {/* Footer with Theme Toggle and Sign Out */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background space-y-3">
         <div className="flex justify-center">
           <ThemeToggle />
         </div>
         <Button 
           onClick={signOut}
           variant="ghost" 
-          className="w-full text-muted-foreground hover:text-foreground hover:bg-accent"
+          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
         >
           Sair
         </Button>
       </div>
-    </div>
+    </aside>
   );
 };
 
