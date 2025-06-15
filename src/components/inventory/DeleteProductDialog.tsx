@@ -35,16 +35,25 @@ export const DeleteProductDialog = ({
     setIsDeleting(true);
     
     try {
+      console.log("Tentando excluir produto:", product.id);
+      
       const { error } = await supabase
         .from('products')
         .delete()
         .eq('id', product.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro na exclusão:", error);
+        throw error;
+      }
 
+      console.log("Produto excluído com sucesso");
       toast.success("Produto excluído com sucesso!");
-      onSuccess();
       onOpenChange(false);
+      // Aguardar um pouco antes de chamar onSuccess para garantir que a exclusão foi processada
+      setTimeout(() => {
+        onSuccess();
+      }, 100);
     } catch (error: any) {
       console.error("Erro ao excluir produto:", error);
       toast.error("Erro ao excluir produto: " + error.message);
