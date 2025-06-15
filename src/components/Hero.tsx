@@ -154,7 +154,7 @@ const Hero = () => {
                   onClick={handleStartFree}
                   className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground h-12 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                 >
-                  Experimente Grátis por 7 dias
+                  Experimente Grátis por 3 dias
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
