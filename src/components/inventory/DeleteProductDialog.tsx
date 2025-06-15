@@ -10,10 +10,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Product } from "@/hooks/useInventory";
+import { Product } from "@/hooks/inventory/useProductsData";
 
 interface DeleteProductDialogProps {
   open: boolean;
@@ -47,6 +46,7 @@ export const DeleteProductDialog = ({
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
+      console.error("Erro ao excluir produto:", error);
       toast.error("Erro ao excluir produto: " + error.message);
     } finally {
       setIsDeleting(false);
