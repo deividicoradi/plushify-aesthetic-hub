@@ -4,27 +4,7 @@ import { Check, Crown, Zap, Star, ArrowRight, Clock, AlertTriangle, Gift, Rocket
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
-interface PlanFeature {
-  id: string;
-  name: string;
-  price: string;
-  period: string;
-  originalPrice: string;
-  annualPrice: string;
-  annualPeriod: string;
-  annualOriginalPrice: string;
-  description: string;
-  subtitle: string;
-  icon: React.ComponentType<any>;
-  features: string[];
-  limitations: string[];
-  bonuses?: string[];
-  trial?: boolean;
-  current: boolean;
-  premium?: boolean;
-  mostComplete?: boolean;
-}
+import { PlanFeature } from '@/utils/plans/plansData';
 
 interface PlanCardProps {
   plan: PlanFeature;
