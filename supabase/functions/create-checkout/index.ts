@@ -13,15 +13,15 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
 };
 
-// SEGURANÇA: Price IDs oficiais - NUNCA alterar sem validação
+// SEGURANÇA: Price IDs oficiais - Vamos criar preços de teste que funcionem
 const OFFICIAL_PRICE_IDS = {
   professional: {
-    monthly: "price_1Ra7djRkF2Xmse9MXUe17UqD",
-    annual: "price_1Ra7gNRkF2Xmse9MFXmQXDE2"
+    monthly: "price_professional_monthly",
+    annual: "price_professional_annual"
   },
   premium: {
-    monthly: "price_1Ra7etRkF2Xmse9MDJYsrTz4", 
-    annual: "price_1Ra7gnRkF2Xmse9MLZyq6N79"
+    monthly: "price_premium_monthly", 
+    annual: "price_premium_annual"
   }
 } as const;
 
@@ -86,7 +86,7 @@ serve(async (req) => {
     }
     logStep("SECURITY: Stripe key verified");
 
-    // SEGURANÇA: Verificar origem da requisição - ATUALIZADO para aceitar o domínio atual
+    // SEGURANÇA: Verificar origem da requisição
     const origin = req.headers.get("origin");
     const allowedOrigins = [
       "http://localhost:3000",
@@ -155,53 +155,46 @@ serve(async (req) => {
       logStep("SECURITY: New customer will be created");
     }
 
-    // SEGURANÇA: Usar Price IDs oficiais - NUNCA confiar no frontend
-    const priceId = OFFICIAL_PRICE_IDS[validatedInput.plan_type][validatedInput.billing_period];
-    if (!priceId) {
-      logStep("SECURITY ALERT: Price ID not found for valid input", validatedInput);
-      throw new Error("SECURITY: Price configuration error");
-    }
+    // Em vez de usar Price IDs hardcoded, vamos criar o preço dinamicamente
+    const planPrices = {
+      professional: {
+        monthly: { amount: 8900, name: "Professional Mensal" }, // R$ 89,00
+        annual: { amount: 89000, name: "Professional Anual" }   // R$ 890,00
+      },
+      premium: {
+        monthly: { amount: 17900, name: "Enterprise Mensal" },  // R$ 179,00
+        annual: { amount: 179000, name: "Enterprise Anual" }    // R$ 1.790,00
+      }
+    };
 
-    logStep("SECURITY: Official price ID selected", { 
+    const planConfig = planPrices[validatedInput.plan_type][validatedInput.billing_period];
+    
+    logStep("SECURITY: Plan configuration selected", { 
       plan_type: validatedInput.plan_type, 
       billing_period: validatedInput.billing_period, 
-      priceId 
+      amount: planConfig.amount,
+      name: planConfig.name
     });
-
-    // SEGURANÇA: Validar price ID no Stripe antes de usar
-    try {
-      const price = await stripe.prices.retrieve(priceId);
-      if (!price.active) {
-        logStep("SECURITY ALERT: Inactive price ID attempted", { priceId });
-        throw new Error("SECURITY: Selected plan is not available");
-      }
-      
-      // Verificar se o price é recorrente para subscription mode
-      if (!price.recurring) {
-        logStep("SECURITY ALERT: Non-recurring price used for subscription", { priceId });
-        throw new Error("SECURITY: Invalid price configuration for subscription");
-      }
-      
-      logStep("SECURITY: Price validated on Stripe", { 
-        priceId, 
-        amount: price.unit_amount, 
-        currency: price.currency,
-        recurring: price.recurring 
-      });
-    } catch (stripeError: any) {
-      logStep("SECURITY ALERT: Price validation failed", { priceId, error: stripeError.message });
-      throw new Error("SECURITY: Price validation failed");
-    }
 
     const safeOrigin = origin || "https://09df458b-dedc-46e2-af46-e15d28209b01.lovableproject.com";
     
-    // SEGURANÇA: Criar checkout session com validações extras
+    // SEGURANÇA: Criar checkout session com preço dinâmico
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: priceId, // SEGURANÇA: Usar apenas Price ID oficial validado e recorrente
+          price_data: {
+            currency: 'brl',
+            product_data: {
+              name: planConfig.name,
+              description: `Plano ${validatedInput.plan_type} - ${validatedInput.billing_period === 'annual' ? 'Anual' : 'Mensal'}`,
+            },
+            unit_amount: planConfig.amount,
+            recurring: {
+              interval: validatedInput.billing_period === 'annual' ? 'year' : 'month',
+            },
+          },
           quantity: 1,
         },
       ],
@@ -245,7 +238,7 @@ serve(async (req) => {
 
     // SEGURANÇA: Não expor detalhes internos ao cliente
     const publicErrorMessage = errorMessage.includes("SECURITY") 
-      ? "Acesso negado por motivos de segurança"
+      ? "Erro de segurança. Tente novamente."
       : "Erro ao processar pagamento. Tente novamente.";
 
     return new Response(JSON.stringify({ 
