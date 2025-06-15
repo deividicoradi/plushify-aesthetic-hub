@@ -60,7 +60,7 @@ export const useReportsMetrics = () => {
         // Buscar todos os pagamentos primeiro, filtraremos por status depois
         supabase.from('payments').select('paid_amount, status').eq('user_id', user.id),
         supabase.from('appointments').select('id').eq('user_id', user.id),
-        supabase.from('products').select('id, stock, min_stock').eq('user_id', user.id),
+        supabase.from('products').select('id, stock_quantity, min_stock_level').eq('user_id', user.id),
         
         // Buscar fechamentos de caixa
         supabase.from('cash_closures').select('total_income').eq('user_id', user.id),
@@ -113,7 +113,9 @@ export const useReportsMetrics = () => {
       
       const totalAppointments = appointmentsResult.data?.length || 0;
       const totalProducts = productsResult.data?.length || 0;
-      const lowStockProducts = productsResult.data?.filter(p => p.stock <= p.min_stock).length || 0;
+      const lowStockProducts = productsResult.data?.filter(p => 
+        p.min_stock_level && p.stock_quantity <= p.min_stock_level
+      ).length || 0;
 
       // Calcular crescimento incluindo fechamentos de caixa
       const currentMonthRevenueFromPayments = currentMonthPaymentsResult.data?.filter(p => p.status === 'pago').reduce((sum, payment) => sum + Number(payment.paid_amount), 0) || 0;
