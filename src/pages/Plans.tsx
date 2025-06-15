@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Clock, Zap, Crown } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -77,13 +78,19 @@ const Plans = () => {
         'Até 5 clientes',
         'Até 3 agendamentos',
         'Até 2 serviços',
-        'Estoque básico (10 produtos)'
+        'Estoque básico (10 produtos)',
+        'Dashboard básico',
+        'Gestão financeira limitada',
+        'Relatórios básicos',
+        'Sistema de notas básico'
       ],
       limitations: [
         'Acesso limitado a 3 dias',
         'Funcionalidades muito restritas',
         'Sem suporte técnico',
-        'Dados removidos após trial'
+        'Dados removidos após trial',
+        'Sem exportação de relatórios',
+        'Sem backup automático'
       ],
       trial: true,
       current: currentPlan === 'trial'
@@ -105,12 +112,18 @@ const Plans = () => {
         'Agendamentos ilimitados',
         'Gestão de serviços completa',
         'Gestão de estoque ilimitada',
-        'Dashboard com métricas',
-        'Gestão financeira (pagamentos e parcelas)',
-        'Gestão de despesas',
-        'Controle de caixa',
-        'Relatórios detalhados',
-        'Sistema de notas'
+        'Dashboard com métricas avançadas',
+        'Gestão financeira completa (pagamentos e parcelas)',
+        'Gestão de despesas detalhada',
+        'Controle de caixa com abertura/fechamento',
+        'Relatórios financeiros detalhados',
+        'Sistema de notas completo',
+        'Histórico de transações',
+        'Controle de estoque com alertas',
+        'Gestão de categorias',
+        'Sistema de filtros avançados',
+        'Exportação básica de dados',
+        'Backup manual dos dados'
       ],
       limitations: [],
       current: currentPlan === 'professional'
@@ -131,20 +144,28 @@ const Plans = () => {
       mostComplete: true,
       features: [
         'TUDO do plano Professional',
-        'Dashboard executivo avançado',
-        'Relatórios avançados com gráficos',
-        'Exportação de relatórios (PDF)',
-        'Analytics detalhados',
-        'Histórico de auditoria',
+        'Dashboard executivo com analytics avançados',
+        'Relatórios avançados com gráficos interativos',
+        'Exportação de relatórios (PDF completo)',
+        'Analytics detalhados de performance',
+        'Histórico de auditoria completo',
         'Sistema de backup automático',
-        'Múltiplos usuários (até 10)',
-        'Suporte VIP prioritário'
+        'Múltiplos usuários (até 10 colaboradores)',
+        'Suporte VIP prioritário',
+        'Relatórios comparativos mensais',
+        'Análises preditivas de faturamento',
+        'Dashboard de métricas executivas',
+        'Alertas inteligentes personalizados',
+        'Histórico completo de todas as operações',
+        'Segurança avançada com logs detalhados'
       ],
       bonuses: [
         'Setup personalizado GRÁTIS',
         'Treinamento VIP incluso',
         'Suporte técnico exclusivo',
-        'Selo de cliente Premium'
+        'Selo de cliente Premium',
+        'Acesso prioritário a novas funcionalidades',
+        'Consultoria de negócios inclusa'
       ],
       limitations: [],
       current: currentPlan === 'premium'
