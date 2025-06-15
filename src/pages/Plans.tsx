@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Clock, Zap, Crown } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -79,10 +78,7 @@ const Plans = () => {
         'Até 3 agendamentos',
         'Até 2 serviços',
         'Estoque básico (10 produtos)',
-        'Dashboard básico',
-        'Gestão financeira limitada',
-        'Relatórios básicos',
-        'Sistema de notas básico'
+        'Dashboard básico'
       ],
       limitations: [
         'Acesso limitado a 3 dias',
@@ -113,17 +109,11 @@ const Plans = () => {
         'Gestão de serviços completa',
         'Gestão de estoque ilimitada',
         'Dashboard com métricas avançadas',
-        'Gestão financeira completa (pagamentos e parcelas)',
-        'Gestão de despesas detalhada',
-        'Controle de caixa com abertura/fechamento',
+        'Gestão financeira completa',
+        'Controle de caixa',
         'Relatórios financeiros detalhados',
         'Sistema de notas completo',
-        'Histórico de transações',
-        'Controle de estoque com alertas',
-        'Gestão de categorias',
-        'Sistema de filtros avançados',
-        'Exportação básica de dados',
-        'Backup manual dos dados'
+        'Exportação básica de dados'
       ],
       limitations: [],
       current: currentPlan === 'professional'
@@ -144,20 +134,15 @@ const Plans = () => {
       mostComplete: true,
       features: [
         'TUDO do plano Professional',
-        'Dashboard executivo com analytics avançados',
-        'Relatórios avançados com gráficos interativos',
+        'Dashboard executivo com analytics',
+        'Relatórios avançados com gráficos',
         'Exportação de relatórios (PDF completo)',
         'Analytics detalhados de performance',
-        'Histórico de auditoria completo',
         'Sistema de backup automático',
-        'Múltiplos usuários (até 10 colaboradores)',
+        'Múltiplos usuários (até 10)',
         'Suporte VIP prioritário',
-        'Relatórios comparativos mensais',
         'Análises preditivas de faturamento',
-        'Dashboard de métricas executivas',
-        'Alertas inteligentes personalizados',
-        'Histórico completo de todas as operações',
-        'Segurança avançada com logs detalhados'
+        'Segurança avançada com logs'
       ],
       bonuses: [
         'Setup personalizado GRÁTIS',
