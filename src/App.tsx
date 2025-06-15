@@ -19,7 +19,6 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Plans from './pages/Plans';
 import Courses from './pages/Courses';
-import About from './pages/About';
 import Help from './pages/Help';
 import NotFound from './pages/NotFound';
 import { AuthProvider } from './contexts/AuthContext';
@@ -109,7 +108,6 @@ function App() {
               
               <Route path="/planos" element={<Plans />} />
               <Route path="/courses" element={<Courses />} />
-              <Route path="/about" element={<About />} />
               <Route path="/help" element={<Help />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
