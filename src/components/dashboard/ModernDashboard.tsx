@@ -6,7 +6,7 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useInteractiveChartData } from '@/hooks/useInteractiveChartData';
 import { useWeeklyOverviewData } from '@/hooks/useWeeklyOverviewData';
 import { useFinancialData } from '@/hooks/useFinancialData';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart as RechartsPieChart, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
 
 export const ModernDashboard = () => {
   const dashboardStats = useDashboardStats();
@@ -181,7 +181,7 @@ export const ModernDashboard = () => {
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPieChart>
-                  <RechartsPieChart.Pie
+                  <Pie
                     data={pieData}
                     cx="50%"
                     cy="50%"
@@ -194,7 +194,7 @@ export const ModernDashboard = () => {
                     {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
-                  </RechartsPieChart.Pie>
+                  </Pie>
                   <Tooltip 
                     formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
                     contentStyle={{ 
