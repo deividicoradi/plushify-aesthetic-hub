@@ -7,13 +7,13 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { useStripeCheckoutIndividual } from '@/hooks/useStripeCheckoutIndividual';
 import { useToast } from '@/hooks/use-toast';
 
 const Plans = () => {
   const [isAnnual, setIsAnnual] = useState(false);
   const { currentPlan, subscription, loading, checkSubscriptionStatus } = useSubscription();
-  const { createCheckout, openCustomerPortal, loading: stripeLoading } = useStripeCheckout();
+  const { createCheckout, openCustomerPortal, isLoading } = useStripeCheckoutIndividual();
   const { toast } = useToast();
 
   // Check for success/cancel parameters in URL
@@ -259,9 +259,10 @@ const Plans = () => {
                         </div>
                         <Button 
                           onClick={() => handlePlanSelection('premium')}
+                          disabled={isLoading('premium_' + (isAnnual ? 'annual' : 'monthly'))}
                           className="bg-primary hover:bg-primary/90"
                         >
-                          Upgrade Agora!
+                          {isLoading('premium_' + (isAnnual ? 'annual' : 'monthly')) ? "Processando..." : "Upgrade Agora!"}
                         </Button>
                       </div>
                     </CardContent>
@@ -288,11 +289,11 @@ const Plans = () => {
                         </div>
                         <Button 
                           onClick={handleManageSubscription}
-                          disabled={stripeLoading}
+                          disabled={isLoading('customer_portal')}
                           variant="outline"
                           className="border-green-500 text-green-700 hover:bg-green-50"
                         >
-                          {stripeLoading ? "Carregando..." : "Gerenciar Assinatura"}
+                          {isLoading('customer_portal') ? "Carregando..." : "Gerenciar Assinatura"}
                         </Button>
                       </div>
                     </CardContent>
@@ -330,6 +331,8 @@ const Plans = () => {
                       : null;
 
                     const IconComponent = plan.icon;
+                    const planLoadingKey = `${plan.id}_${isAnnual ? 'annual' : 'monthly'}`;
+                    const isPlanLoading = isLoading(planLoadingKey);
 
                     return (
                       <Card 
@@ -480,10 +483,10 @@ const Plans = () => {
                                     ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg animate-pulse' 
                                     : 'bg-primary hover:bg-primary/90 text-primary-foreground'
                               }`}
-                              disabled={(plan.current && !plan.trial) || stripeLoading}
+                              disabled={(plan.current && !plan.trial) || isPlanLoading}
                               onClick={() => handlePlanSelection(plan.id)}
                             >
-                              {stripeLoading ? (
+                              {isPlanLoading ? (
                                 "Processando..."
                               ) : plan.current ? (
                                 plan.trial ? (
@@ -605,12 +608,13 @@ const Plans = () => {
                       <Button 
                         size="lg" 
                         onClick={() => handlePlanSelection('premium')}
+                        disabled={isLoading('premium_' + (isAnnual ? 'annual' : 'monthly'))}
                         className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold text-lg px-6 py-3 shadow-lg transform hover:scale-105 transition-all h-14"
                       >
                         <div className="flex items-center justify-center gap-3">
                           <Crown className="w-6 h-6 flex-shrink-0" />
-                          <span>Começar com Enterprise</span>
-                          <ArrowRight className="w-5 h-5 flex-shrink-0" />
+                          <span>{isLoading('premium_' + (isAnnual ? 'annual' : 'monthly')) ? "Processando..." : "Começar com Enterprise"}</span>
+                          {!isLoading('premium_' + (isAnnual ? 'annual' : 'monthly')) && <ArrowRight className="w-5 h-5 flex-shrink-0" />}
                         </div>
                       </Button>
                       <div className="text-sm opacity-75">
