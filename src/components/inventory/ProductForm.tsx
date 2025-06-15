@@ -44,24 +44,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const activeValue = watch("active");
 
   return (
-    <div className="bg-gray-900 text-white p-6 rounded-lg">
+    <div className="bg-card text-card-foreground p-6 rounded-lg border">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-white">Nome do Produto *</Label>
+            <Label htmlFor="name">Nome do Produto *</Label>
             <Input
               id="name"
               {...register("name", { required: "Nome é obrigatório" })}
               placeholder="Ex: Shampoo Anti-Caspa"
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+              className="focus:border-primary focus:ring-primary"
             />
             {errors.name && (
-              <p className="text-sm text-red-400">{errors.name.message}</p>
+              <p className="text-sm text-destructive">{errors.name.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cost_price" className="text-white">Custo por Unidade *</Label>
+            <Label htmlFor="cost_price">Custo por Unidade *</Label>
             <Input
               id="cost_price"
               type="number"
@@ -71,15 +71,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 min: { value: 0, message: "Custo deve ser positivo" }
               })}
               placeholder="0"
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+              className="focus:border-primary focus:ring-primary"
             />
             {errors.cost_price && (
-              <p className="text-sm text-red-400">{errors.cost_price.message}</p>
+              <p className="text-sm text-destructive">{errors.cost_price.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price" className="text-white">Valor de Referência</Label>
+            <Label htmlFor="price">Valor de Referência</Label>
             <Input
               id="price"
               type="number"
@@ -88,15 +88,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 min: { value: 0, message: "Valor deve ser positivo" }
               })}
               placeholder="0"
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+              className="focus:border-primary focus:ring-primary"
             />
             {errors.price && (
-              <p className="text-sm text-red-400">{errors.price.message}</p>
+              <p className="text-sm text-destructive">{errors.price.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="stock_quantity" className="text-white">Quantidade em Estoque *</Label>
+            <Label htmlFor="stock_quantity">Quantidade em Estoque *</Label>
             <Input
               id="stock_quantity"
               type="number"
@@ -105,15 +105,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 min: { value: 0, message: "Quantidade deve ser positiva" }
               })}
               placeholder="0"
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+              className="focus:border-primary focus:ring-primary"
             />
             {errors.stock_quantity && (
-              <p className="text-sm text-red-400">{errors.stock_quantity.message}</p>
+              <p className="text-sm text-destructive">{errors.stock_quantity.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="min_stock_level" className="text-white">Estoque Mínimo</Label>
+            <Label htmlFor="min_stock_level">Estoque Mínimo</Label>
             <Input
               id="min_stock_level"
               type="number"
@@ -121,27 +121,27 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 min: { value: 0, message: "Estoque mínimo deve ser positivo" }
               })}
               placeholder="0"
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+              className="focus:border-primary focus:ring-primary"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category" className="text-white">Categoria</Label>
+            <Label htmlFor="category">Categoria</Label>
             <Input
               id="category"
               {...register("category")}
               placeholder="Ex: Cabelo, Pele, etc."
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+              className="focus:border-primary focus:ring-primary"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="brand" className="text-white">Marca</Label>
+            <Label htmlFor="brand">Marca</Label>
             <Input
               id="brand"
               {...register("brand")}
               placeholder="Ex: L'Oréal, Garnier, etc."
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+              className="focus:border-primary focus:ring-primary"
             />
           </div>
 
@@ -151,21 +151,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 id="active"
                 checked={activeValue}
                 onCheckedChange={(checked) => setValue("active", checked)}
-                className="data-[state=checked]:bg-pink-600"
+                className="data-[state=checked]:bg-primary"
               />
-              <Label htmlFor="active" className="text-white">Produto Ativo</Label>
+              <Label htmlFor="active">Produto Ativo</Label>
             </div>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-white">Descrição</Label>
+          <Label htmlFor="description">Descrição</Label>
           <Textarea
             id="description"
             {...register("description")}
             placeholder="Descrição detalhada do produto..."
             rows={3}
-            className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+            className="focus:border-primary focus:ring-primary"
           />
         </div>
 
@@ -174,14 +174,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             type="button" 
             variant="outline" 
             onClick={onCancel}
-            className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
           >
             Cancelar
           </Button>
           <Button 
             type="submit" 
             disabled={isLoading}
-            className="bg-pink-600 hover:bg-pink-700 text-white"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {isLoading ? "Salvando..." : initialData ? "Atualizar" : "Criar Produto"}
           </Button>
