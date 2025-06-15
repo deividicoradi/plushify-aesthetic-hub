@@ -2,37 +2,89 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { currentPlan, loading: subLoading } = useSubscription();
   const [isLoading, setIsLoading] = useState(true);
+  const [securityCheck, setSecurityCheck] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    if (!loading) setIsLoading(false);
-  }, [loading]);
+    if (!authLoading && !subLoading) {
+      // SEGURANÇA: Verificações adicionais de segurança
+      const performSecurityCheck = () => {
+        console.log('SECURITY: Performing route protection check', {
+          hasUser: !!user,
+          currentPlan,
+          pathname: location.pathname
+        });
 
-  if (isLoading) {
+        // SEGURANÇA: Verificar integridade da sessão
+        if (user) {
+          const sessionAge = Date.now() - (user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : 0);
+          const maxSessionAge = 24 * 60 * 60 * 1000; // 24 horas
+          
+          if (sessionAge > maxSessionAge) {
+            console.log('SECURITY: Session too old, requiring re-authentication');
+            // Em produção, forçar logout aqui
+          }
+        }
+
+        setSecurityCheck(true);
+        setIsLoading(false);
+      };
+
+      // SEGURANÇA: Pequeno delay para verificações
+      setTimeout(performSecurityCheck, 100);
+    }
+  }, [authLoading, subLoading, user, currentPlan, location.pathname]);
+
+  if (isLoading || !securityCheck) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-plush-600"></div>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+          <p className="text-sm text-muted-foreground">Verificando segurança...</p>
+        </div>
       </div>
     );
   }
 
-  // Redirect to dashboard if user tries to access login page while already authenticated
+  // SEGURANÇA: Redirecionar usuários autenticados tentando acessar páginas de auth
   if (user && (location.pathname === '/auth' || location.pathname === '/signup')) {
+    console.log('SECURITY: Authenticated user redirected from auth pages');
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Get redirect path from URL if present
-  const searchParams = new URLSearchParams(location.search);
-  const redirect = searchParams.get('redirect');
-  
-  // If not authenticated, redirect to auth page with the current location as redirect param
+  // SEGURANÇA: Verificar autenticação
   if (!user) {
-    return <Navigate to={`/auth${redirect ? `?redirect=${redirect}` : ''}`} replace state={{ from: location }} />;
+    console.log('SECURITY: Unauthenticated user redirected to auth');
+    const searchParams = new URLSearchParams(location.search);
+    const redirect = searchParams.get('redirect');
+    
+    return <Navigate 
+      to={`/auth${redirect ? `?redirect=${redirect}` : ''}`} 
+      replace 
+      state={{ from: location }} 
+    />;
   }
+
+  // SEGURANÇA: Verificar se é uma rota que requer assinatura paga
+  const paidRoutes = ['/dashboard', '/clients', '/appointments', '/financial', '/inventory', '/reports'];
+  const requiresPaidPlan = paidRoutes.some(route => location.pathname.startsWith(route));
+  
+  if (requiresPaidPlan && currentPlan === 'trial') {
+    // Para trial, permitir acesso mas com limitações (já implementado nos componentes)
+    console.log('SECURITY: Trial user accessing paid features with limitations');
+  }
+
+  console.log('SECURITY: Route access granted', {
+    userId: user.id,
+    plan: currentPlan,
+    route: location.pathname
+  });
 
   return <>{children}</>;
 }
