@@ -32,6 +32,28 @@ const Navbar = () => {
     setIsOpen(false);
   };
 
+  const handleFuncionalidadesClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Se estamos na página inicial, fazer scroll até a seção
+    if (location.pathname === '/') {
+      const featuresSection = document.getElementById('features');
+      if (featuresSection) {
+        featuresSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Se não estamos na página inicial, navegar para ela e depois fazer scroll
+      navigate('/', { replace: true });
+      setTimeout(() => {
+        const featuresSection = document.getElementById('features');
+        if (featuresSection) {
+          featuresSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+    setIsOpen(false);
+  };
+
   const handleStartFree = () => {
     navigate('/auth?tab=signup');
     setIsOpen(false);
@@ -59,9 +81,12 @@ const Navbar = () => {
             <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Início
             </Link>
-            <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+            <button 
+              onClick={handleFuncionalidadesClick}
+              className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+            >
               Funcionalidades
-            </Link>
+            </button>
             <button 
               onClick={handlePlanosClick}
               className="text-muted-foreground hover:text-foreground transition-colors font-medium"
@@ -115,13 +140,12 @@ const Navbar = () => {
               >
                 Início
               </Link>
-              <Link
-                to="/about"
-                className="block px-3 py-2 text-muted-foreground hover:text-foreground transition-colors font-medium"
-                onClick={() => setIsOpen(false)}
+              <button
+                onClick={handleFuncionalidadesClick}
+                className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground transition-colors font-medium"
               >
                 Funcionalidades
-              </Link>
+              </button>
               <button
                 onClick={handlePlanosClick}
                 className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground transition-colors font-medium"
