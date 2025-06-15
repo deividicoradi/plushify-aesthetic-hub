@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Users, Calendar, DollarSign, Package } from 'lucide-react';
 import { FeatureGuard } from '@/components/FeatureGuard';

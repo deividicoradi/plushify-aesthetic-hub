@@ -10,7 +10,7 @@ const Dashboard = () => {
       <div className="flex min-h-screen w-full bg-background text-foreground">
         <AppSidebar />
         <SidebarInset className="flex-1 bg-background">
-          <div className="p-6">
+          <div className="p-4">
             <DashboardContent />
           </div>
         </SidebarInset>
