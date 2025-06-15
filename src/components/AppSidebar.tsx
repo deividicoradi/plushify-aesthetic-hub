@@ -33,17 +33,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { Badge } from "@/components/ui/badge"
-import { useSubscription } from '@/hooks/useSubscription'
 
 interface NavItemProps {
   icon: LucideIcon;
   label: string;
   href: string;
-  badge?: string;
 }
 
-const NavItem = ({ icon: Icon, label, href, badge }: NavItemProps) => {
+const NavItem = ({ icon: Icon, label, href }: NavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === href;
 
@@ -53,11 +50,6 @@ const NavItem = ({ icon: Icon, label, href, badge }: NavItemProps) => {
         <Link to={href} className="flex items-center gap-3 relative">
           <Icon className="w-4 h-4" />
           <span className="flex-1">{label}</span>
-          {badge && (
-            <Badge variant="secondary" className="ml-auto text-xs">
-              {badge}
-            </Badge>
-          )}
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -66,7 +58,6 @@ const NavItem = ({ icon: Icon, label, href, badge }: NavItemProps) => {
 
 export const AppSidebar = () => {
   const { user, signOut } = useAuth();
-  const { tier, isSubscribed } = useSubscription();
 
   const mainMenuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
@@ -79,7 +70,7 @@ export const AppSidebar = () => {
   const financialItems = [
     { icon: CreditCard, label: 'Financeiro', href: '/financial' },
     { icon: TrendingUp, label: 'Painel Financeiro', href: '/financial-dashboard' },
-    { icon: FileText, label: 'Relatórios', href: '/reports', badge: isSubscribed ? undefined : 'Pro' },
+    { icon: FileText, label: 'Relatórios', href: '/reports' },
   ];
 
   const otherItems = [
@@ -99,11 +90,6 @@ export const AppSidebar = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-semibold text-sm">Plushify</span>
-              {isSubscribed && (
-                <Badge variant="outline" className="text-xs w-fit">
-                  {tier === 'starter' ? 'Starter' : tier === 'pro' ? 'Pro' : 'Premium'}
-                </Badge>
-              )}
             </div>
           </div>
         </div>
