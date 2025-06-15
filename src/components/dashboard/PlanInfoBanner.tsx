@@ -3,13 +3,20 @@ import React from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Crown, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Crown, AlertTriangle, CheckCircle, TestTube } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { useAuth } from '@/contexts/AuthContext';
+
+// E-mail do usuário de teste
+const TEST_USER_EMAIL = 'deividi@teste.com';
 
 export const PlanInfoBanner = () => {
   const { currentPlan, limits } = usePlanLimits();
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  const isTestUser = user?.email === TEST_USER_EMAIL;
 
   const getPlanColor = (plan: string) => {
     switch (plan) {
@@ -28,6 +35,26 @@ export const PlanInfoBanner = () => {
       default: return 'Desconhecido';
     }
   };
+
+  // Banner especial para usuário de teste
+  if (isTestUser) {
+    return (
+      <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+        <TestTube className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-blue-800 dark:text-blue-200">
+              Modo de teste ativo - Você tem acesso completo a todas as funcionalidades!
+            </span>
+            <Badge className="bg-blue-500 text-white">
+              <TestTube className="w-3 h-3 mr-1" />
+              Usuário de Teste
+            </Badge>
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   if (currentPlan === 'premium') {
     return (

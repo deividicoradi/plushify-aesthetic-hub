@@ -1,5 +1,6 @@
 
 import { useSubscription, PlanType } from './useSubscription';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PlanLimits {
   clients: number;
@@ -81,34 +82,47 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
   },
 };
 
+// E-mail do usuário de teste com acesso completo
+const TEST_USER_EMAIL = 'deividi@teste.com';
+
 export const usePlanLimits = () => {
   const { currentPlan } = useSubscription();
+  const { user } = useAuth();
   
-  const limits = PLAN_LIMITS[currentPlan];
+  // Verificar se é o usuário de teste
+  const isTestUser = user?.email === TEST_USER_EMAIL;
+  
+  // Se for usuário de teste, usar limites do plano premium
+  const limits = isTestUser ? PLAN_LIMITS.premium : PLAN_LIMITS[currentPlan];
   
   const isLimited = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>) => {
+    if (isTestUser) return false; // Usuário de teste não tem limites
     return limits[type] !== -1;
   };
   
   const getLimit = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>) => {
+    if (isTestUser) return -1; // Usuário de teste tem limite infinito
     return limits[type];
   };
   
   const hasReachedLimit = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>, currentCount: number) => {
+    if (isTestUser) return false; // Usuário de teste nunca atinge limite
     const limit = limits[type];
     return limit !== -1 && currentCount >= limit;
   };
 
   const hasFeature = (feature: keyof Omit<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>) => {
+    if (isTestUser) return true; // Usuário de teste tem todas as funcionalidades
     return limits[feature];
   };
 
   return {
     limits,
-    currentPlan,
+    currentPlan: isTestUser ? 'premium' : currentPlan, // Mostrar como premium para usuário de teste
     isLimited,
     getLimit,
     hasReachedLimit,
     hasFeature,
+    isTestUser, // Expor se é usuário de teste
   };
 };

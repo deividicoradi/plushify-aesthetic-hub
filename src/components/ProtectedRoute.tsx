@@ -4,6 +4,9 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 
+// E-mail do usuário de teste com acesso completo
+const TEST_USER_EMAIL = 'deividi@teste.com';
+
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const { currentPlan, loading: subLoading } = useSubscription();
@@ -71,11 +74,14 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     />;
   }
 
-  // SEGURANÇA: Verificar acesso a funcionalidades premium para usuários trial
+  // Verificar se é o usuário de teste
+  const isTestUser = user.email === TEST_USER_EMAIL;
+
+  // SEGURANÇA: Verificar acesso a funcionalidades premium para usuários trial (exceto usuário de teste)
   const restrictedRoutes = ['/inventory', '/reports'];
   const financialAdvancedFeatures = ['/financial/installments', '/financial/reports'];
   
-  if (currentPlan === 'trial') {
+  if (currentPlan === 'trial' && !isTestUser) {
     if (restrictedRoutes.some(route => location.pathname.startsWith(route))) {
       console.log('SECURITY: Trial user blocked from premium features');
       return <Navigate to="/planos" replace state={{ 
@@ -97,16 +103,24 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const paidRoutes = ['/dashboard', '/clients', '/appointments', '/financial', '/inventory', '/reports'];
   const requiresPaidPlan = paidRoutes.some(route => location.pathname.startsWith(route));
   
-  if (requiresPaidPlan && currentPlan === 'trial') {
+  if (requiresPaidPlan && currentPlan === 'trial' && !isTestUser) {
     // Para trial, permitir acesso mas com limitações (já implementado nos componentes)
     console.log('SECURITY: Trial user accessing paid features with limitations');
   }
 
-  console.log('SECURITY: Route access granted', {
-    userId: user.id,
-    plan: currentPlan,
-    route: location.pathname
-  });
+  if (isTestUser) {
+    console.log('SECURITY: Test user granted full access', {
+      userId: user.id,
+      email: user.email,
+      route: location.pathname
+    });
+  } else {
+    console.log('SECURITY: Route access granted', {
+      userId: user.id,
+      plan: currentPlan,
+      route: location.pathname
+    });
+  }
 
   return <>{children}</>;
 }

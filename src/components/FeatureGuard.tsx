@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Crown, Lock } from 'lucide-react';
@@ -16,6 +17,9 @@ interface FeatureGuardProps {
   showUpgradePrompt?: boolean;
 }
 
+// E-mail do usuário de teste com acesso completo
+const TEST_USER_EMAIL = 'deividi@teste.com';
+
 export const FeatureGuard = ({ 
   feature, 
   planFeature,
@@ -26,13 +30,24 @@ export const FeatureGuard = ({
 }: FeatureGuardProps) => {
   const { hasFeatureAccess, currentPlan, loading } = useSubscription();
   const { hasFeature } = usePlanLimits();
+  const { user } = useAuth();
   const [hasAccess, setHasAccess] = useState(false);
   const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
 
+  // Verificar se é o usuário de teste
+  const isTestUser = user?.email === TEST_USER_EMAIL;
+
   useEffect(() => {
     const checkAccess = async () => {
       setChecking(true);
+      
+      // Se for usuário de teste, sempre tem acesso
+      if (isTestUser) {
+        setHasAccess(true);
+        setChecking(false);
+        return;
+      }
       
       let access = false;
       
@@ -60,7 +75,7 @@ export const FeatureGuard = ({
     if (!loading) {
       checkAccess();
     }
-  }, [feature, planFeature, requiredPlan, hasFeatureAccess, hasFeature, currentPlan, loading]);
+  }, [feature, planFeature, requiredPlan, hasFeatureAccess, hasFeature, currentPlan, loading, isTestUser]);
 
   if (loading || checking) {
     return (
