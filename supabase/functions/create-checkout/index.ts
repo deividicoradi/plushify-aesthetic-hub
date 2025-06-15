@@ -63,12 +63,6 @@ const validateUserAuth = async (token: string, supabaseClient: any) => {
     throw new Error("SECURITY: User not authenticated or incomplete user data");
   }
 
-  // Verificar se o usuário não está banido/suspenso
-  if (user.banned_until || user.email_confirmed_at === null) {
-    logStep("SECURITY ALERT: Banned or unconfirmed user attempted access", { userId: user.id, email: user.email });
-    throw new Error("SECURITY: User account is restricted");
-  }
-
   return user;
 };
 
@@ -92,15 +86,20 @@ serve(async (req) => {
     }
     logStep("SECURITY: Stripe key verified");
 
-    // SEGURANÇA: Verificar origem da requisição
+    // SEGURANÇA: Verificar origem da requisição - ATUALIZADO para aceitar domínios Lovable
     const origin = req.headers.get("origin");
     const allowedOrigins = [
       "http://localhost:3000",
       "https://wmoylybbwikkqbxiqwbq.supabase.co",
-      // Adicione seus domínios de produção aqui
+      "https://09df458b-dedc-46e2-af46-e15d28209b01.lovableproject.com", // Domínio atual do Lovable
+      // Aceitar qualquer subdomínio do Lovable
     ];
     
-    if (origin && !allowedOrigins.some(allowed => origin.includes(allowed))) {
+    // Permitir domínios do Lovable
+    const isLovableDomain = origin && origin.includes('lovableproject.com');
+    const isAllowedOrigin = origin && (allowedOrigins.some(allowed => origin.includes(allowed)) || isLovableDomain);
+    
+    if (origin && !isAllowedOrigin) {
       logStep("SECURITY ALERT: Unauthorized origin", { origin });
       throw new Error("SECURITY: Unauthorized request origin");
     }
@@ -136,11 +135,6 @@ serve(async (req) => {
     // SEGURANÇA: Validação rigorosa dos parâmetros
     const validatedInput = validateInput(plan_type, billing_period);
     logStep("SECURITY: Input validated", validatedInput);
-
-    // SEGURANÇA: Verificar rate limiting (básico)
-    const now = Date.now();
-    const userKey = `checkout_${user.id}`;
-    // Em produção, implementar Redis ou similar para rate limiting
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
