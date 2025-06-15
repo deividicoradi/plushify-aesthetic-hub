@@ -37,9 +37,9 @@ const FinancialDashboard = () => {
 
   if (error) {
     return (
-      <div className="flex min-h-screen w-full">
+      <div className="min-h-screen bg-background">
         <DashboardSidebar />
-        <div className="flex-1 flex flex-col min-h-screen w-full bg-background">
+        <div className="ml-64 min-h-screen flex flex-col bg-background">
           <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-3">
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-foreground">Painel Financeiro</h1>
@@ -60,9 +60,9 @@ const FinancialDashboard = () => {
   }
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col min-h-screen w-full bg-background">
+      <div className="ml-64 min-h-screen flex flex-col bg-background">
         {/* Header */}
         <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-3">
           <div className="flex-1">

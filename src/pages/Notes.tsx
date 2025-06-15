@@ -31,9 +31,9 @@ const Notes = () => {
   );
 
   return (
-    <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col min-h-screen w-full">
+      <div className="ml-64 min-h-screen flex flex-col">
         {/* Header */}
         <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-2">
           <div className="flex-1">

@@ -13,21 +13,21 @@ export default function Loyalty() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen w-full">
+      <div className="min-h-screen bg-background">
         <DashboardSidebar />
-        <div className="flex-1">
+        <main className="ml-64 min-h-screen">
           <div className="flex items-center justify-center h-screen">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex-1">
+      <main className="ml-64 min-h-screen">
         <div className="p-6 space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -56,7 +56,7 @@ export default function Loyalty() {
           {/* All Clients Table */}
           <LoyaltyClientsTable clients={clients} />
         </div>
-      </div>
+      </main>
     </div>
   );
 }

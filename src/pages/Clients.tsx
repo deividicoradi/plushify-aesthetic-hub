@@ -22,9 +22,9 @@ const Clients = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="ml-64 min-h-screen flex flex-col">
         <ClientsHeader onNewClientClick={() => setDrawerOpen(true)} />
 
         {/* Main Content with Modern Layout */}
