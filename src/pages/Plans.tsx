@@ -18,16 +18,17 @@ const Plans = () => {
       icon: Star,
       gradient: 'from-gray-500 to-gray-600',
       features: [
-        'Até 50 clientes',
-        'Agendamentos básicos',
-        'Relatórios simples',
-        'Suporte por email',
-        '1 usuário'
+        'Dashboard com métricas básicas',
+        'Gestão de clientes',
+        'Agendamentos simples',
+        'Controle de serviços',
+        'Estoque básico',
+        'Anotações pessoais',
+        'Relatórios simples'
       ],
       limitations: [
-        'Sem backup automático',
-        'Sem integrações',
-        'Funcionalidades limitadas'
+        'Funcionalidades limitadas',
+        'Suporte básico'
       ],
       current: true
     },
@@ -41,15 +42,19 @@ const Plans = () => {
       gradient: 'from-blue-500 to-cyan-500',
       popular: true,
       features: [
-        'Clientes ilimitados',
-        'Agendamentos avançados',
-        'Relatórios detalhados',
-        'Suporte prioritário',
-        'Até 3 usuários',
-        'Backup automático',
-        'Integrações básicas',
-        'Gestão de estoque',
-        'Marketing por email'
+        'Tudo do plano Gratuito',
+        'Dashboard avançado com insights',
+        'Gestão financeira completa',
+        'Controle de pagamentos',
+        'Sistema de parcelas',
+        'Fechamento de caixa',
+        'Controle de despesas',
+        'Relatórios financeiros detalhados',
+        'Gestão de estoque avançada',
+        'Transações de estoque',
+        'Alertas de estoque baixo',
+        'Histórico completo',
+        'Suporte prioritário'
       ],
       limitations: []
     },
@@ -62,16 +67,18 @@ const Plans = () => {
       icon: Crown,
       gradient: 'from-purple-500 to-pink-500',
       features: [
-        'Tudo do Profissional',
-        'Usuários ilimitados',
-        'IA para insights',
-        'App personalizado',
-        'Suporte 24/7',
-        'Integrações avançadas',
-        'Multi-localização',
-        'Automação completa',
+        'Tudo do plano Profissional',
+        'Analytics avançados',
         'Dashboard executivo',
-        'Consultoria mensal'
+        'Auditoria completa',
+        'Logs de segurança',
+        'Backup automático',
+        'Múltiplos usuários',
+        'Relatórios personalizados',
+        'Exportação PDF/Excel',
+        'Suporte 24/7',
+        'Consultoria mensal',
+        'Integrações futuras'
       ],
       limitations: []
     }
@@ -87,12 +94,12 @@ const Plans = () => {
       answer: 'Não! Todos os nossos planos são mensais e você pode cancelar a qualquer momento sem taxas adicionais.'
     },
     {
-      question: 'Os dados ficam seguros?',
-      answer: 'Sim! Utilizamos criptografia de ponta e backups automáticos para garantir a segurança total dos seus dados.'
+      question: 'Quais funcionalidades estão disponíveis agora?',
+      answer: 'Atualmente temos: Dashboard, Clientes, Agendamentos, Serviços, Estoque, Financeiro, Relatórios, Anotações e Configurações totalmente funcionais.'
     },
     {
-      question: 'Posso testar antes de assinar?',
-      answer: 'Claro! O plano gratuito permite testar todas as funcionalidades básicas sem compromisso.'
+      question: 'Os dados ficam seguros?',
+      answer: 'Sim! Utilizamos criptografia de ponta e todas as operações são registradas em logs de auditoria para garantir a segurança total dos seus dados.'
     }
   ];
 
@@ -123,8 +130,8 @@ const Plans = () => {
                     Impulsione seu negócio de estética
                   </h1>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                    Ferramentas profissionais para fazer seu negócio crescer. 
-                    Todos os planos incluem suporte e atualizações gratuitas.
+                    Sistema completo para gestão do seu negócio. 
+                    Dashboard, clientes, agendamentos, financeiro e muito mais.
                   </p>
                 </div>
 
@@ -180,7 +187,7 @@ const Plans = () => {
                         <div className="space-y-4">
                           <h4 className="font-semibold text-foreground flex items-center gap-2">
                             <Check className="w-4 h-4 text-green-500" />
-                            Recursos inclusos:
+                            Recursos disponíveis:
                           </h4>
                           <ul className="space-y-3">
                             {plan.features.map((feature, index) => (
