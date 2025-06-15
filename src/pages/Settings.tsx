@@ -1,14 +1,15 @@
+
 import React from 'react';
-import { Settings as SettingsIcon } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Settings as SettingsIcon, User, Shield, Bell, Save, X } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from "@/components/ui/sonner";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { toast } from "@/hooks/use-toast";
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 
 const Settings = () => {
@@ -16,183 +17,282 @@ const Settings = () => {
   
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Perfil atualizado com sucesso");
+    toast({
+      title: "Perfil atualizado",
+      description: "Suas informações foram salvas com sucesso.",
+    });
   };
 
   const handleSaveNotifications = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Notificações atualizadas");
+    toast({
+      title: "Notificações atualizadas",
+      description: "Suas preferências de notificação foram salvas.",
+    });
+  };
+
+  const handleSavePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Senha alterada",
+      description: "Sua senha foi alterada com sucesso.",
+    });
   };
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="flex min-h-screen w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
-          <div className="flex flex-col min-h-screen w-full">
-            {/* Header with sidebar trigger */}
-            <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-2">
-              <SidebarTrigger />
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
-              </div>
-            </header>
-
-            {/* Main content */}
-            <main className="flex-1 p-8 bg-background dark:bg-background">
-              <div className="max-w-4xl mx-auto space-y-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <SettingsIcon className="w-6 h-6 text-plush-600" />
-                  <h1 className="text-2xl font-bold">Configurações</h1>
+          <div className="p-6 space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <SettingsIcon className="w-6 h-6 text-primary" />
                 </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
+                  <p className="text-muted-foreground">Gerencie suas preferências e configurações da conta</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Settings Content */}
+            <div className="max-w-4xl">
+              <Tabs defaultValue="profile" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+                  <TabsTrigger value="profile" className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Perfil
+                  </TabsTrigger>
+                  <TabsTrigger value="account" className="flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Conta
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="flex items-center gap-2">
+                    <Bell className="w-4 h-4" />
+                    Notificações
+                  </TabsTrigger>
+                </TabsList>
                 
-                <Tabs defaultValue="profile">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="profile">Perfil</TabsTrigger>
-                    <TabsTrigger value="account">Conta</TabsTrigger>
-                    <TabsTrigger value="notifications">Notificações</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="profile">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Perfil</CardTitle>
-                        <CardDescription>
-                          Atualize suas informações pessoais e profissionais
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <form id="profile-form" onSubmit={handleSaveProfile}>
-                          <div className="grid gap-6">
-                            <div className="grid gap-3">
-                              <Label htmlFor="name">Nome</Label>
-                              <Input id="name" placeholder="Seu nome completo" />
+                <TabsContent value="profile" className="space-y-6">
+                  <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-200 dark:bg-blue-800 rounded-lg">
+                          <User className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-blue-900 dark:text-blue-100">Informações do Perfil</CardTitle>
+                          <CardDescription className="text-blue-700 dark:text-blue-300">
+                            Atualize suas informações pessoais e profissionais
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <form id="profile-form" onSubmit={handleSaveProfile} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="name" className="text-sm font-medium">Nome Completo</Label>
+                            <Input 
+                              id="name" 
+                              placeholder="Seu nome completo"
+                              className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
+                            <Input 
+                              id="email" 
+                              type="email" 
+                              value={user?.email || ''} 
+                              disabled 
+                              className="bg-gray-100 dark:bg-gray-700 border-blue-200 dark:border-blue-800"
+                            />
+                            <p className="text-xs text-blue-600 dark:text-blue-400">O e-mail não pode ser alterado</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="phone" className="text-sm font-medium">Telefone</Label>
+                            <Input 
+                              id="phone" 
+                              placeholder="(00) 00000-0000"
+                              className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="profession" className="text-sm font-medium">Profissão</Label>
+                            <Input 
+                              id="profession" 
+                              placeholder="Sua profissão"
+                              className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-3 pt-4">
+                          <Button variant="outline" type="button" className="gap-2">
+                            <X className="w-4 h-4" />
+                            Cancelar
+                          </Button>
+                          <Button type="submit" className="gap-2 bg-blue-600 hover:bg-blue-700">
+                            <Save className="w-4 h-4" />
+                            Salvar alterações
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="account" className="space-y-6">
+                  <Card className="border-0 shadow-sm bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-200 dark:bg-purple-800 rounded-lg">
+                          <Shield className="w-5 h-5 text-purple-600 dark:text-purple-300" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-purple-900 dark:text-purple-100">Segurança da Conta</CardTitle>
+                          <CardDescription className="text-purple-700 dark:text-purple-300">
+                            Gerencie suas preferências de conta e segurança
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0 space-y-6">
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">Alterar Senha</h3>
+                        <form onSubmit={handleSavePassword} className="space-y-4">
+                          <div className="grid grid-cols-1 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="current-password" className="text-sm font-medium">Senha Atual</Label>
+                              <Input 
+                                id="current-password" 
+                                type="password"
+                                className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800"
+                              />
                             </div>
-                            <div className="grid gap-3">
-                              <Label htmlFor="email">E-mail</Label>
-                              <Input id="email" type="email" value={user?.email || ''} disabled />
-                              <p className="text-sm text-gray-500">O e-mail não pode ser alterado</p>
+                            <div className="space-y-2">
+                              <Label htmlFor="new-password" className="text-sm font-medium">Nova Senha</Label>
+                              <Input 
+                                id="new-password" 
+                                type="password"
+                                className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800"
+                              />
                             </div>
-                            <div className="grid gap-3">
-                              <Label htmlFor="phone">Telefone</Label>
-                              <Input id="phone" placeholder="(00) 00000-0000" />
-                            </div>
-                            <div className="grid gap-3">
-                              <Label htmlFor="profession">Profissão</Label>
-                              <Input id="profession" placeholder="Sua profissão" />
+                            <div className="space-y-2">
+                              <Label htmlFor="confirm-password" className="text-sm font-medium">Confirmar Nova Senha</Label>
+                              <Input 
+                                id="confirm-password" 
+                                type="password"
+                                className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800"
+                              />
                             </div>
                           </div>
+                          <Button type="submit" className="bg-purple-600 hover:bg-purple-700 gap-2">
+                            <Save className="w-4 h-4" />
+                            Alterar Senha
+                          </Button>
                         </form>
-                      </CardContent>
-                      <CardFooter className="flex justify-between">
-                        <Button variant="outline">Cancelar</Button>
-                        <Button type="submit" form="profile-form">Salvar alterações</Button>
-                      </CardFooter>
-                    </Card>
-                  </TabsContent>
-                  
-                  <TabsContent value="account">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Conta</CardTitle>
-                        <CardDescription>
-                          Gerencie suas preferências de conta e segurança
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                          <h3 className="text-lg font-medium">Alterar senha</h3>
-                          <div className="grid gap-3">
-                            <Label htmlFor="current-password">Senha atual</Label>
-                            <Input id="current-password" type="password" />
+                      </div>
+                      
+                      <div className="border-t border-purple-200 dark:border-purple-800 pt-6">
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">Zona de Perigo</h3>
+                          <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
+                            <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                              A exclusão da sua conta é permanente e não pode ser desfeita.
+                              Todos os seus dados serão excluídos permanentemente.
+                            </p>
+                            <Button variant="destructive" className="gap-2">
+                              <X className="w-4 h-4" />
+                              Excluir Conta
+                            </Button>
                           </div>
-                          <div className="grid gap-3">
-                            <Label htmlFor="new-password">Nova senha</Label>
-                            <Input id="new-password" type="password" />
-                          </div>
-                          <div className="grid gap-3">
-                            <Label htmlFor="confirm-password">Confirmar senha</Label>
-                            <Input id="confirm-password" type="password" />
-                          </div>
-                          <Button className="mt-2" variant="outline">Alterar senha</Button>
                         </div>
-                        
-                        <div className="space-y-2 border-t pt-4">
-                          <h3 className="text-lg font-medium">Excluir conta</h3>
-                          <p className="text-sm text-gray-500">
-                            A exclusão da sua conta é permanente e não pode ser desfeita.
-                            Todos os seus dados serão excluídos permanentemente.
-                          </p>
-                          <Button variant="destructive">Excluir conta</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="notifications" className="space-y-6">
+                  <Card className="border-0 shadow-sm bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-200 dark:bg-green-800 rounded-lg">
+                          <Bell className="w-5 h-5 text-green-600 dark:text-green-300" />
                         </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                  
-                  <TabsContent value="notifications">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Notificações</CardTitle>
-                        <CardDescription>
-                          Gerencie como você quer receber notificações
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <form id="notifications-form" onSubmit={handleSaveNotifications}>
-                          <div className="space-y-6">
+                        <div>
+                          <CardTitle className="text-green-900 dark:text-green-100">Preferências de Notificação</CardTitle>
+                          <CardDescription className="text-green-700 dark:text-green-300">
+                            Gerencie como você quer receber notificações
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <form id="notifications-form" onSubmit={handleSaveNotifications} className="space-y-6">
+                        <div className="space-y-6">
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">Notificações por E-mail</h3>
                             <div className="space-y-4">
-                              <h3 className="text-lg font-medium">Notificações por e-mail</h3>
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <Label htmlFor="email-marketing">Marketing</Label>
-                                  <p className="text-sm text-gray-500">Receba novidades e ofertas exclusivas</p>
+                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                                <div className="space-y-1">
+                                  <Label htmlFor="email-marketing" className="font-medium">Marketing</Label>
+                                  <p className="text-sm text-muted-foreground">Receba novidades e ofertas exclusivas</p>
                                 </div>
                                 <Switch id="email-marketing" />
                               </div>
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <Label htmlFor="email-appointments">Agendamentos</Label>
-                                  <p className="text-sm text-gray-500">Receba notificações sobre seus agendamentos</p>
+                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                                <div className="space-y-1">
+                                  <Label htmlFor="email-appointments" className="font-medium">Agendamentos</Label>
+                                  <p className="text-sm text-muted-foreground">Receba notificações sobre seus agendamentos</p>
                                 </div>
                                 <Switch id="email-appointments" defaultChecked />
                               </div>
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <Label htmlFor="email-updates">Atualizações da plataforma</Label>
-                                  <p className="text-sm text-gray-500">Saiba quando novos recursos são lançados</p>
+                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                                <div className="space-y-1">
+                                  <Label htmlFor="email-updates" className="font-medium">Atualizações da Plataforma</Label>
+                                  <p className="text-sm text-muted-foreground">Saiba quando novos recursos são lançados</p>
                                 </div>
                                 <Switch id="email-updates" defaultChecked />
                               </div>
                             </div>
-                            
+                          </div>
+                          
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">Notificações Push</h3>
                             <div className="space-y-4">
-                              <h3 className="text-lg font-medium">Notificações push</h3>
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <Label htmlFor="push-appointments">Agendamentos</Label>
-                                  <p className="text-sm text-gray-500">Receba alertas sobre novos agendamentos</p>
+                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                                <div className="space-y-1">
+                                  <Label htmlFor="push-appointments" className="font-medium">Agendamentos</Label>
+                                  <p className="text-sm text-muted-foreground">Receba alertas sobre novos agendamentos</p>
                                 </div>
                                 <Switch id="push-appointments" defaultChecked />
                               </div>
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <Label htmlFor="push-messages">Mensagens</Label>
-                                  <p className="text-sm text-gray-500">Seja notificado sobre novas mensagens</p>
+                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                                <div className="space-y-1">
+                                  <Label htmlFor="push-messages" className="font-medium">Mensagens</Label>
+                                  <p className="text-sm text-muted-foreground">Seja notificado sobre novas mensagens</p>
                                 </div>
                                 <Switch id="push-messages" defaultChecked />
                               </div>
                             </div>
                           </div>
-                        </form>
-                      </CardContent>
-                      <CardFooter>
-                        <Button type="submit" form="notifications-form">Salvar preferências</Button>
-                      </CardFooter>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </main>
+                        </div>
+                        <div className="flex justify-end pt-4">
+                          <Button type="submit" className="bg-green-600 hover:bg-green-700 gap-2">
+                            <Save className="w-4 h-4" />
+                            Salvar Preferências
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </SidebarInset>
       </div>
