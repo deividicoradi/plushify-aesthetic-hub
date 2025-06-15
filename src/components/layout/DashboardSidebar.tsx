@@ -13,7 +13,8 @@ import {
   Heart,
   GraduationCap,
   HelpCircle,
-  CreditCard
+  CreditCard,
+  TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,17 +27,18 @@ const DashboardSidebar = () => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: Calendar, label: 'Agendamentos', path: '/agendamentos' },
-    { icon: Users, label: 'Clientes', path: '/clientes' },
+    { icon: Calendar, label: 'Agendamentos', path: '/appointments' },
+    { icon: Users, label: 'Clientes', path: '/clients' },
     { icon: Wrench, label: 'Serviços', path: '/servicos' },
-    { icon: Package, label: 'Estoque', path: '/estoque' },
-    { icon: CreditCard, label: 'Financeiro', path: '/financeiro' },
-    { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
+    { icon: Package, label: 'Estoque', path: '/inventory' },
+    { icon: CreditCard, label: 'Financeiro', path: '/financial' },
+    { icon: BarChart3, label: 'Relatórios', path: '/reports' },
+    { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics' },
     { icon: StickyNote, label: 'Anotações', path: '/anotacoes' },
     { icon: Heart, label: 'Fidelidade', path: '/fidelidade' },
     { icon: GraduationCap, label: 'Cursos', path: '/cursos' },
     { icon: HelpCircle, label: 'Ajuda', path: '/help' },
-    { icon: Settings, label: 'Configurações', path: '/configuracoes' },
+    { icon: Settings, label: 'Configurações', path: '/settings' },
   ];
 
   return (
