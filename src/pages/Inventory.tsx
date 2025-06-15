@@ -5,6 +5,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { FeatureGuard } from '@/components/FeatureGuard';
 import { InventoryContainer } from '@/components/inventory/InventoryContainer';
 import { useInventory } from '@/hooks/useInventory';
+import { useProductsData } from '@/hooks/inventory/useProductsData';
 
 const Inventory = () => {
   const {
@@ -12,13 +13,14 @@ const Inventory = () => {
     searchTerm,
     setSearchTerm,
     stats,
-    loading,
     selectedProducts,
-    handleToggleSelect,
-    handleSelectAll,
+    toggleSelect,
+    selectAll,
     handleStockTransaction,
     handleEditProduct
   } = useInventory();
+
+  const { refetch } = useProductsData();
 
   return (
     <SidebarProvider>
@@ -49,8 +51,8 @@ const Inventory = () => {
                   onTransaction={handleStockTransaction}
                   onEditProduct={handleEditProduct}
                   selectedProducts={selectedProducts}
-                  onToggleSelect={handleToggleSelect}
-                  onSelectAll={handleSelectAll}
+                  onToggleSelect={toggleSelect}
+                  onSelectAll={selectAll}
                 />
               </FeatureGuard>
             </main>

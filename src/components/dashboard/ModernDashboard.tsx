@@ -41,8 +41,8 @@ export const ModernDashboard = () => {
       <div className="grid gap-6 lg:grid-cols-4">
         <ModernMetricCard
           title="Clientes"
-          value={dashboardStats.totalClients || 0}
-          change={dashboardStats.newThisMonth || 0}
+          value={String(dashboardStats.totalClients || 0)}
+          change={String(dashboardStats.newThisMonth || 0)}
           icon={Users}
           loading={dashboardStats.loading}
           limit={limits.clients}
@@ -52,8 +52,8 @@ export const ModernDashboard = () => {
         
         <ModernMetricCard
           title="Agendamentos"
-          value={dashboardStats.totalAppointments || 0}
-          change={dashboardStats.weeklyAppointments || 0}
+          value={String(dashboardStats.totalAppointments || 0)}
+          change={String(dashboardStats.weeklyAppointments || 0)}
           icon={Calendar}
           loading={dashboardStats.loading}
           limit={limits.appointments}
@@ -64,8 +64,8 @@ export const ModernDashboard = () => {
         <FeatureGuard planFeature="hasFinancialManagement" showUpgradePrompt={false}>
           <ModernMetricCard
             title="Receita Mensal"
-            value={metrics?.receitasMesAtual || 0}
-            change={metrics?.crescimentoReceitas || 0}
+            value={String(metrics?.receitasMesAtual || 0)}
+            change={String(metrics?.crescimentoReceitas || 0)}
             icon={DollarSign}
             loading={dashboardStats.loading}
             isCurrency
@@ -76,8 +76,8 @@ export const ModernDashboard = () => {
         <FeatureGuard planFeature="hasInventoryAdvanced" showUpgradePrompt={false}>
           <ModernMetricCard
             title="Produtos"
-            value={dashboardStats.totalClients || 0}
-            change={0}
+            value={String(dashboardStats.totalClients || 0)}
+            change={String(0)}
             icon={Package}
             loading={dashboardStats.loading}
             limit={limits.products}
