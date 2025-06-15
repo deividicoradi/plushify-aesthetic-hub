@@ -1,117 +1,114 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import Auth from './pages/Auth';
-import Index from './pages/Index';
-import Signup from './pages/Signup';
-import Dashboard from './pages/Dashboard';
-import Clients from './pages/Clients';
-import Appointments from './pages/Appointments';
-import Services from './pages/Services';
-import Inventory from './pages/Inventory';
-import Notes from './pages/Notes';
-import Loyalty from './pages/Loyalty';
-import Financial from './pages/Financial';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
-import Plans from './pages/Plans';
-import Help from './pages/Help';
-import NotFound from './pages/NotFound';
-import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/layout/ProtectedRoute';
-import FinancialDashboard from './pages/FinancialDashboard';
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
-const queryClient = new QueryClient();
+// Pages
+import Landing from '@/pages/Landing';
+import Auth from '@/pages/Auth';
+import Dashboard from '@/pages/Dashboard';
+import Clients from '@/pages/Clients';
+import Appointments from '@/pages/Appointments';
+import Payments from '@/pages/Payments';
+import FinancialDashboard from '@/pages/FinancialDashboard';
+import AdvancedAnalytics from '@/pages/AdvancedAnalytics';
+import Reports from '@/pages/Reports';
+import Inventory from '@/pages/Inventory';
+import Settings from '@/pages/Settings';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const QueryClient = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
+};
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <BrowserRouter>
-            <Toaster />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/signup" element={<Signup />} />
-              
-              {/* Protected Routes */}
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/clients" element={
-                <ProtectedRoute>
-                  <Clients />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/appointments" element={
-                <ProtectedRoute>
-                  <Appointments />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/services" element={
-                <ProtectedRoute>
-                  <Services />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/inventory" element={
-                <ProtectedRoute>
-                  <Inventory />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/notes" element={
-                <ProtectedRoute>
-                  <Notes />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/loyalty" element={
-                <ProtectedRoute>
-                  <Loyalty />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/financial" element={
-                <ProtectedRoute>
-                  <Financial />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/financial-dashboard" element={
-                <ProtectedRoute>
-                  <FinancialDashboard />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/reports" element={
-                <ProtectedRoute>
-                  <Reports />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/settings" element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/planos" element={<Plans />} />
-              <Route path="/help" element={<Help />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <QueryClient>
+          <ThemeProvider defaultTheme="light" storageKey="plushify-ui-theme">
+            <div className="min-h-screen bg-background text-foreground">
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/auth" element={<Auth />} />
+                
+                {/* Protected Routes */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/clients" element={
+                  <ProtectedRoute>
+                    <Clients />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/appointments" element={
+                  <ProtectedRoute>
+                    <Appointments />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/payments" element={
+                  <ProtectedRoute>
+                    <Payments />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/financial" element={
+                  <ProtectedRoute>
+                    <FinancialDashboard />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/analytics" element={
+                  <ProtectedRoute>
+                    <AdvancedAnalytics />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/reports" element={
+                  <ProtectedRoute>
+                    <Reports />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/inventory" element={
+                  <ProtectedRoute>
+                    <Inventory />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
+              </Routes>
+              <Toaster />
+            </div>
+          </ThemeProvider>
+        </QueryClient>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
