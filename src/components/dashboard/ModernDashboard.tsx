@@ -12,7 +12,7 @@ export const ModernDashboard = () => {
   const dashboardStats = useDashboardStats();
   const chartDataHook = useInteractiveChartData();
   const weeklyOverviewHook = useWeeklyOverviewData();
-  const { metrics } = useFinancialData();
+  const { metrics, monthlyData, expensesByCategory, revenueByMethod, loading } = useFinancialData();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -21,22 +21,25 @@ export const ModernDashboard = () => {
     }).format(value);
   };
 
-  // Dados para gráfico de pizza - categorias de receita
-  const pieData = [
-    { name: 'Serviços', value: metrics?.receitasMesAtual || 0, color: '#8B5CF6' },
-    { name: 'Produtos', value: (metrics?.receitasMesAtual || 0) * 0.3, color: '#06B6D4' },
-    { name: 'Outros', value: (metrics?.receitasMesAtual || 0) * 0.1, color: '#10B981' },
-  ];
-
-  // Dados para gráfico de evolução mensal
-  const monthlyData = [
-    { month: 'Jan', receitas: 3200, despesas: 1800, clientes: 45 },
-    { month: 'Fev', receitas: 4100, despesas: 2200, clientes: 52 },
-    { month: 'Mar', receitas: 3800, despesas: 1900, clientes: 48 },
-    { month: 'Abr', receitas: 5200, despesas: 2800, clientes: 61 },
-    { month: 'Mai', receitas: 4800, despesas: 2500, clientes: 58 },
-    { month: 'Jun', receitas: metrics?.receitasMesAtual || 5500, despesas: 2900, clientes: dashboardStats.totalClients || 65 },
-  ];
+  if (loading || dashboardStats.loading || chartDataHook.loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-20 bg-gray-200 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-muted-foreground mt-2">Carregando dados...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -121,7 +124,7 @@ export const ModernDashboard = () => {
 
       {/* Gráficos Principais */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Gráfico de Receitas vs Despesas */}
+        {/* Gráfico de Receitas vs Despesas - Dados Reais */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -131,50 +134,189 @@ export const ModernDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => formatCurrency(value)} />
-                  <Tooltip 
-                    formatter={(value, name) => [
-                      formatCurrency(Number(value)), 
-                      name === 'receitas' ? 'Receitas' : 'Despesas'
-                    ]}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="receitas" 
-                    stackId="1"
-                    stroke="#10B981" 
-                    fill="#10B981" 
-                    fillOpacity={0.6}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="despesas" 
-                    stackId="2"
-                    stroke="#EF4444" 
-                    fill="#EF4444" 
-                    fillOpacity={0.6}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {monthlyData && monthlyData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => formatCurrency(value)} />
+                    <Tooltip 
+                      formatter={(value, name) => [
+                        formatCurrency(Number(value)), 
+                        name === 'receitas' ? 'Receitas' : 'Despesas'
+                      ]}
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="receitas" 
+                      stackId="1"
+                      stroke="#10B981" 
+                      fill="#10B981" 
+                      fillOpacity={0.6}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="despesas" 
+                      stackId="2"
+                      stroke="#EF4444" 
+                      fill="#EF4444" 
+                      fillOpacity={0.6}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground">
+                  Nenhum dado financeiro disponível
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Gráfico de Pizza - Distribuição de Receitas */}
+        {/* Gráfico de Pizza - Distribuição de Receitas por Método */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <PieChart className="w-5 h-5 text-purple-600" />
-              Distribuição de Receitas
+              Receitas por Método de Pagamento
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              {revenueByMethod && revenueByMethod.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie
+                      data={revenueByMethod}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {revenueByMethod.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground">
+                  Nenhum dado de receita disponível
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos da Semana - Dados Reais */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Agendamentos da Semana */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-indigo-600" />
+              Agendamentos da Semana
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              {chartDataHook.data && chartDataHook.data.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartDataHook.data}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="agendamentos" 
+                      stroke="#6366F1" 
+                      strokeWidth={3}
+                      dot={{ fill: '#6366F1', strokeWidth: 2, r: 6 }}
+                      activeDot={{ r: 8 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground">
+                  Nenhum agendamento esta semana
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Faturamento da Semana */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-600" />
+              Faturamento Semanal
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              {chartDataHook.data && chartDataHook.data.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartDataHook.data}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => formatCurrency(value)} />
+                    <Tooltip 
+                      formatter={(value) => [formatCurrency(Number(value)), 'Faturamento']}
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <Bar 
+                      dataKey="faturamento" 
+                      fill="#10B981" 
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground">
+                  Nenhum faturamento esta semana
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráfico de Despesas por Categoria - Dados Reais */}
+      {expensesByCategory && expensesByCategory.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-red-600" />
+              Despesas por Categoria
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -182,7 +324,7 @@ export const ModernDashboard = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPieChart>
                   <Pie
-                    data={pieData}
+                    data={expensesByCategory}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -191,7 +333,7 @@ export const ModernDashboard = () => {
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {pieData.map((entry, index) => (
+                    {expensesByCategory.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -208,126 +350,7 @@ export const ModernDashboard = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Gráficos da Semana */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Agendamentos da Semana */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-indigo-600" />
-              Agendamentos da Semana
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartDataHook.data}>
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="agendamentos" 
-                    stroke="#6366F1" 
-                    strokeWidth={3}
-                    dot={{ fill: '#6366F1', strokeWidth: 2, r: 6 }}
-                    activeDot={{ r: 8 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Faturamento da Semana */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-emerald-600" />
-              Faturamento Semanal
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartDataHook.data}>
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => formatCurrency(value)} />
-                  <Tooltip 
-                    formatter={(value) => [formatCurrency(Number(value)), 'Faturamento']}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="faturamento" 
-                    fill="#10B981" 
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Gráfico de Crescimento de Clientes */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-cyan-600" />
-            Crescimento de Clientes e Performance
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip 
-                  formatter={(value, name) => [
-                    name === 'clientes' ? `${value} clientes` : formatCurrency(Number(value)),
-                    name === 'clientes' ? 'Total de Clientes' : 'Receitas'
-                  ]}
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="clientes" 
-                  stroke="#06B6D4" 
-                  fill="#06B6D4" 
-                  fillOpacity={0.3}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="receitas" 
-                  stroke="#8B5CF6" 
-                  strokeWidth={2}
-                  dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 4 }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      )}
     </div>
   );
 };
