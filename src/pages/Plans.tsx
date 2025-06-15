@@ -334,7 +334,7 @@ const Plans = () => {
                     return (
                       <Card 
                         key={plan.id} 
-                        className={`relative overflow-hidden transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] h-full flex flex-col ${
+                        className={`relative transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] h-full flex flex-col ${
                           plan.mostComplete
                             ? 'border-2 border-primary shadow-xl bg-gradient-to-br from-background to-primary/5 scale-105 z-10' 
                             : plan.current 
@@ -359,9 +359,9 @@ const Plans = () => {
                         </div>
 
                         <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
-                          <div className={`w-20 h-20 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center overflow-visible ${plan.mostComplete ? 'animate-pulse' : ''}`}>
+                          <div className={`w-24 h-24 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center p-4 ${plan.mostComplete ? 'animate-pulse' : ''}`}>
                             <IconComponent 
-                              className={`${plan.mostComplete ? 'w-12 h-12' : 'w-10 h-10'} text-primary flex-shrink-0`} 
+                              className={`${plan.mostComplete ? 'w-14 h-14' : 'w-12 h-12'} text-primary`} 
                               strokeWidth={1.5}
                             />
                           </div>
