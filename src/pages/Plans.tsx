@@ -37,9 +37,9 @@ const Plans = () => {
     {
       id: 'professional',
       name: 'Professional',
-      price: 'R$ 47',
+      price: 'R$ 89',
       period: '/mês',
-      originalPrice: 'R$ 67',
+      originalPrice: 'R$ 127',
       description: 'Para profissionais em crescimento',
       icon: Zap,
       gradient: 'from-blue-500 to-cyan-500',
@@ -65,9 +65,9 @@ const Plans = () => {
     {
       id: 'premium',
       name: 'Enterprise',
-      price: 'R$ 97',
+      price: 'R$ 179',
       period: '/mês',
-      originalPrice: 'R$ 147',
+      originalPrice: 'R$ 249',
       description: 'Para clínicas e salões',
       icon: Crown,
       gradient: 'from-purple-500 to-pink-500',
