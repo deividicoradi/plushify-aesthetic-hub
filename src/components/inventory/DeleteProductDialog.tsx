@@ -37,7 +37,7 @@ export const DeleteProductDialog = ({
     setIsDeleting(true);
     
     try {
-      console.log("=== INICIANDO EXCLUSÃO ===");
+      console.log("=== INICIANDO EXCLUSÃO MELHORADA ===");
       console.log("Produto:", product.id, product.name);
       
       // Buscar o usuário atual
@@ -50,7 +50,7 @@ export const DeleteProductDialog = ({
       
       console.log("Usuário autenticado:", user.id);
       
-      // Verificar se o produto pertence ao usuário
+      // Verificar se o produto realmente existe e pertence ao usuário
       const { data: productCheck, error: checkError } = await supabase
         .from('products')
         .select('id, name, user_id')
@@ -65,13 +65,7 @@ export const DeleteProductDialog = ({
       
       console.log("Produto verificado:", productCheck);
       
-      // Aplicar update otimístico
-      if (onOptimisticDelete) {
-        console.log("Aplicando update otimístico...");
-        onOptimisticDelete(product.id);
-      }
-      
-      // Excluir transações relacionadas primeiro
+      // Excluir transações relacionadas primeiro (sem falhar se não houver)
       console.log("Excluindo transações relacionadas...");
       const { error: transactionsError } = await supabase
         .from('inventory_transactions')
@@ -80,15 +74,15 @@ export const DeleteProductDialog = ({
         .eq('user_id', user.id);
 
       if (transactionsError) {
-        console.error("Erro ao excluir transações:", transactionsError);
-        // Não falhar se houver erro nas transações
+        console.warn("Aviso ao excluir transações:", transactionsError);
+        // Continuar mesmo se houver erro nas transações
       } else {
         console.log("Transações excluídas com sucesso");
       }
 
-      // Excluir o produto
+      // Excluir o produto do banco
       console.log("Excluindo produto do banco...");
-      const { error: deleteError } = await supabase
+      const { error: deleteError, data: deletedData } = await supabase
         .from('products')
         .delete()
         .eq('id', product.id)
@@ -99,24 +93,33 @@ export const DeleteProductDialog = ({
         throw deleteError;
       }
 
+      console.log("Produto excluído do banco:", deletedData);
       console.log("=== PRODUTO EXCLUÍDO COM SUCESSO ===");
+      
+      // Aplicar update otimístico APÓS confirmação do banco
+      if (onOptimisticDelete) {
+        console.log("Aplicando update otimístico pós-exclusão...");
+        onOptimisticDelete(product.id);
+      }
       
       toast.success(`Produto "${product.name}" excluído com sucesso!`);
       
-      // Fechar o dialog primeiro
+      // Fechar o dialog
       onOpenChange(false);
       
-      // Aguardar um momento e recarregar a lista
+      // Aguardar mais tempo antes de recarregar para garantir sincronização
       setTimeout(() => {
-        console.log("Recarregando lista de produtos...");
+        console.log("Recarregando lista após exclusão confirmada...");
         onSuccess();
-      }, 500);
+      }, 1000);
       
     } catch (error: any) {
       console.error("=== ERRO AO EXCLUIR PRODUTO ===", error);
       
-      // Se houve erro, recarregar a lista para reverter o update otimístico
-      onSuccess();
+      // Recarregar a lista em caso de erro para garantir consistência
+      setTimeout(() => {
+        onSuccess();
+      }, 500);
       
       toast.error(`Erro ao excluir produto: ${error.message || "Erro desconhecido"}`);
     } finally {

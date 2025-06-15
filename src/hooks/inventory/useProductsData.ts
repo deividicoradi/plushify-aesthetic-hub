@@ -48,8 +48,11 @@ export const useProductsData = () => {
     
     setIsLoading(true);
     try {
-      console.log("=== CARREGANDO PRODUTOS ===");
+      console.log("=== RECARREGANDO PRODUTOS ===");
       console.log("Usuário:", user.id);
+      
+      // Aguardar um momento para garantir que o banco de dados está atualizado
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       const { data, error } = await supabase
         .from('products')
@@ -62,9 +65,9 @@ export const useProductsData = () => {
         throw error;
       }
 
-      console.log("Produtos carregados:", data?.length || 0);
+      console.log("Produtos carregados do banco:", data?.length || 0);
       if (data && data.length > 0) {
-        console.log("Lista de produtos:", data.map(p => ({ id: p.id, name: p.name })));
+        console.log("Lista atualizada de produtos:", data.map(p => ({ id: p.id, name: p.name })));
       }
       
       const productsData = data || [];
@@ -83,13 +86,13 @@ export const useProductsData = () => {
 
   // Função para remover produto da lista local (otimistic update)
   const removeProductFromList = (productId: string) => {
-    console.log("=== UPDATE OTIMÍSTICO ===");
+    console.log("=== UPDATE OTIMÍSTICO - REMOVENDO ===");
     console.log("Removendo produto da lista local:", productId);
     setProducts(prevProducts => {
-      const updatedProducts = prevProducts.filter(p => p.id !== productId);
-      console.log("Produtos restantes:", updatedProducts.length);
-      setStats(calculateStats(updatedProducts));
-      return updatedProducts;
+      const filteredProducts = prevProducts.filter(p => p.id !== productId);
+      console.log("Produtos restantes na lista local:", filteredProducts.length);
+      setStats(calculateStats(filteredProducts));
+      return filteredProducts;
     });
   };
 
