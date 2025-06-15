@@ -11,7 +11,6 @@ import {
   Wrench,
   StickyNote,
   Heart,
-  GraduationCap,
   HelpCircle,
   CreditCard,
   TrendingUp
@@ -36,7 +35,6 @@ const DashboardSidebar = () => {
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics' },
     { icon: StickyNote, label: 'Anotações', path: '/anotacoes' },
     { icon: Heart, label: 'Fidelidade', path: '/fidelidade' },
-    { icon: GraduationCap, label: 'Cursos', path: '/cursos' },
     { icon: HelpCircle, label: 'Ajuda', path: '/help' },
     { icon: Settings, label: 'Configurações', path: '/settings' },
   ];
