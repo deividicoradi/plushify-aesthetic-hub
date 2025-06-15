@@ -23,6 +23,7 @@ import Services from '@/pages/Services';
 import Notes from '@/pages/Notes';
 import Loyalty from '@/pages/Loyalty';
 import Plans from '@/pages/Plans';
+import Help from '@/pages/Help';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -92,6 +93,12 @@ function App() {
                 <Route path="/planos" element={
                   <ProtectedRoute>
                     <Plans />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/help" element={
+                  <ProtectedRoute>
+                    <Help />
                   </ProtectedRoute>
                 } />
                 
