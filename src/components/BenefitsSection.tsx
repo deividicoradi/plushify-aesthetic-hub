@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TrendingUp, Clock, Shield, Sparkles, Users, BarChart3 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,9 +6,9 @@ const BenefitsSection = () => {
   const benefits = [
     {
       icon: TrendingUp,
-      title: "Aumento de 150% no Faturamento",
-      description: "Nossos clientes reportam um aumento médio de 150% no faturamento após 3 meses de uso",
-      stat: "+150%",
+      title: "Aumento de até 200% no Faturamento",
+      description: "Nossos clientes reportam um crescimento significativo no faturamento após 3 meses de uso",
+      stat: "+200%",
       color: "text-green-500",
       bgColor: "bg-green-50 dark:bg-green-900/20"
     },
