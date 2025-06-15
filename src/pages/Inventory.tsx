@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
-import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import DashboardSidebar from '@/components/layout/DashboardSidebar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useProductsData, Product } from '@/hooks/inventory/useProductsData';
@@ -81,35 +80,30 @@ const Inventory = () => {
   };
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <SidebarInset className="flex-1">
-          <div className="flex flex-col min-h-screen w-full">
-            <header className="flex items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
-              <SidebarTrigger />
-            </header>
+    <div className="flex min-h-screen w-full">
+      <DashboardSidebar />
+      <div className="flex-1 flex flex-col min-h-screen w-full">
+        <header className="flex items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
+        </header>
 
-            <main className="flex-1 bg-background p-6">
-              <div className="space-y-6">
-                <InventoryHeader
-                  onCreateProduct={handleCreateProduct}
-                  searchTerm={searchTerm}
-                  onSearchChange={setSearchTerm}
-                />
-                
-                <StatsCards products={products} />
-                
-                <ProductsTable
-                  products={filteredProducts}
-                  onEdit={handleEditProduct}
-                  onDelete={handleDeleteProduct}
-                  isLoading={isLoading}
-                />
-              </div>
-            </main>
+        <main className="flex-1 bg-background p-6">
+          <div className="space-y-6">
+            <InventoryHeader
+              onCreateProduct={handleCreateProduct}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+            />
+            
+            <StatsCards products={products} />
+            
+            <ProductsTable
+              products={filteredProducts}
+              onEdit={handleEditProduct}
+              onDelete={handleDeleteProduct}
+              isLoading={isLoading}
+            />
           </div>
-        </SidebarInset>
+        </main>
       </div>
 
       {/* Form Dialog */}
@@ -150,7 +144,7 @@ const Inventory = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </SidebarProvider>
+    </div>
   );
 };
 

@@ -19,6 +19,10 @@ import AdvancedAnalytics from '@/pages/AdvancedAnalytics';
 import Reports from '@/pages/Reports';
 import Inventory from '@/pages/Inventory';
 import Settings from '@/pages/Settings';
+import Services from '@/pages/Services';
+import Notes from '@/pages/Notes';
+import Loyalty from '@/pages/Loyalty';
+import Plans from '@/pages/Plans';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,6 +68,30 @@ function App() {
                 <Route path="/appointments" element={
                   <ProtectedRoute>
                     <Appointments />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/servicos" element={
+                  <ProtectedRoute>
+                    <Services />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/anotacoes" element={
+                  <ProtectedRoute>
+                    <Notes />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/fidelidade" element={
+                  <ProtectedRoute>
+                    <Loyalty />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/planos" element={
+                  <ProtectedRoute>
+                    <Plans />
                   </ProtectedRoute>
                 } />
                 
