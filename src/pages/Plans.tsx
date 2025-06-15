@@ -359,8 +359,11 @@ const Plans = () => {
                         </div>
 
                         <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
-                          <div className={`w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center ${plan.mostComplete ? 'animate-pulse' : ''}`}>
-                            <IconComponent className={`${plan.mostComplete ? 'w-10 h-10' : 'w-8 h-8'} text-primary`} />
+                          <div className={`w-20 h-20 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center overflow-visible ${plan.mostComplete ? 'animate-pulse' : ''}`}>
+                            <IconComponent 
+                              className={`${plan.mostComplete ? 'w-12 h-12' : 'w-10 h-10'} text-primary flex-shrink-0`} 
+                              strokeWidth={1.5}
+                            />
                           </div>
                           
                           <div className="space-y-2">
