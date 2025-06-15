@@ -60,32 +60,24 @@ serve(async (req) => {
       logStep("No existing customer found");
     }
 
-    // Define pricing based on plan
-    const planPricing = {
-      professional: { amount: 8900, name: "Plano Professional" }, // R$ 89.00
-      premium: { amount: 17900, name: "Plano Premium" } // R$ 179.00
+    // Define Price IDs for each plan
+    const planPriceIds = {
+      professional: "price_1Ra7djRkF2Xmse9MXUe17UqD", // R$ 89/mês
+      premium: "price_1Ra7etRkF2Xmse9MDJYsrTz4" // R$ 179/mês
     };
 
-    const pricing = planPricing[plan_type as keyof typeof planPricing];
-    logStep("Pricing determined", pricing);
+    const priceId = planPriceIds[plan_type as keyof typeof planPriceIds];
+    logStep("Price ID determined", { plan_type, priceId });
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
     
-    // Create checkout session
+    // Create checkout session using Price IDs
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price_data: {
-            currency: "brl",
-            product_data: { 
-              name: pricing.name,
-              description: `Assinatura mensal do ${pricing.name}`
-            },
-            unit_amount: pricing.amount,
-            recurring: { interval: "month" },
-          },
+          price: priceId,
           quantity: 1,
         },
       ],
