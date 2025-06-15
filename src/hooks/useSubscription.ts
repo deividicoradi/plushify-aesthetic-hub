@@ -87,6 +87,31 @@ export const useSubscription = () => {
     }
   };
 
+  const checkSubscriptionStatus = async (): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+
+      if (error) {
+        console.error('Erro ao verificar assinatura:', error);
+        return false;
+      }
+
+      if (data) {
+        setCurrentPlan(data.plan_type);
+        // Refetch local subscription data after Stripe check
+        await fetchSubscription();
+        return data.subscribed || false;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Erro ao verificar assinatura:', error);
+      return false;
+    }
+  };
+
   const hasFeatureAccess = async (featureName: string): Promise<boolean> => {
     if (!user) return false;
 
@@ -116,6 +141,7 @@ export const useSubscription = () => {
     currentPlan,
     loading,
     hasFeatureAccess,
+    checkSubscriptionStatus,
     refetch: fetchSubscription
   };
 };

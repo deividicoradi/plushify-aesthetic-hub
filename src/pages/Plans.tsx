@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, Crown, Zap, Star, ArrowRight, Sparkles, Clock, AlertTriangle } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -7,10 +7,53 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { useToast } from '@/hooks/use-toast';
 
 const Plans = () => {
   const [isAnnual, setIsAnnual] = useState(false);
-  const { currentPlan, subscription, loading } = useSubscription();
+  const { currentPlan, subscription, loading, checkSubscriptionStatus } = useSubscription();
+  const { createCheckout, openCustomerPortal, loading: stripeLoading } = useStripeCheckout();
+  const { toast } = useToast();
+
+  // Check for success/cancel parameters in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const canceled = urlParams.get('canceled');
+    const plan = urlParams.get('plan');
+
+    if (success === 'true') {
+      toast({
+        title: "Pagamento realizado com sucesso!",
+        description: `Bem-vindo ao plano ${plan}! Verificando sua assinatura...`,
+      });
+      // Check subscription status after successful payment
+      checkSubscriptionStatus();
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (canceled === 'true') {
+      toast({
+        title: "Pagamento cancelado",
+        description: "Você pode tentar novamente quando quiser.",
+        variant: "destructive",
+      });
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [toast, checkSubscriptionStatus]);
+
+  const handlePlanSelection = async (planId: string) => {
+    if (planId === 'trial') return;
+    
+    if (planId === 'professional' || planId === 'premium') {
+      await createCheckout(planId as 'professional' | 'premium');
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    await openCustomerPortal();
+  };
 
   const plans = [
     {
@@ -204,6 +247,33 @@ const Plans = () => {
                   </div>
                 )}
 
+                {/* Manage Subscription Button for paid plans */}
+                {(currentPlan === 'professional' || currentPlan === 'premium') && (
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
+                        <div>
+                          <h3 className="font-medium text-green-800 dark:text-green-200">
+                            Plano {currentPlan === 'professional' ? 'Professional' : 'Enterprise'} Ativo
+                          </h3>
+                          <p className="text-sm text-green-700 dark:text-green-300">
+                            Gerencie sua assinatura, altere o método de pagamento ou cancele quando quiser.
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={handleManageSubscription}
+                        disabled={stripeLoading}
+                        variant="outline"
+                        className="border-green-500 text-green-700 hover:bg-green-50"
+                      >
+                        {stripeLoading ? "Carregando..." : "Gerenciar Assinatura"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Billing Toggle */}
                 <div className="flex items-center justify-center gap-4 py-4">
                   <span className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
@@ -351,9 +421,12 @@ const Plans = () => {
                                   ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl' 
                                   : 'bg-background border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground'
                             }`}
-                            disabled={plan.current && !plan.trial}
+                            disabled={(plan.current && !plan.trial) || stripeLoading}
+                            onClick={() => handlePlanSelection(plan.id)}
                           >
-                            {plan.current ? (
+                            {stripeLoading ? (
+                              "Processando..."
+                            ) : plan.current ? (
                               plan.trial ? (
                                 <>
                                   <Clock className="w-4 h-4 mr-2" />
