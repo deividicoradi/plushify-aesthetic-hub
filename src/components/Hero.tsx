@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { ArrowRight, Calendar, MessageSquare, Award, PenTool, Users, BarChart3, Box, Star } from 'lucide-react';
+import { ArrowRight, Calendar, MessageSquare, Award, PenTool, Users, BarChart3, Box, Star, Sparkles, TrendingUp, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -20,98 +21,163 @@ const Hero = () => {
   };
   
   return (
-    <section className="relative pt-28 pb-20 overflow-hidden bg-background">
-      {/* Background decorations */}
-      <div className="absolute top-20 right-0 w-64 h-64 bg-primary/10 rounded-full filter blur-3xl opacity-60 -z-10"></div>
-      <div className="absolute bottom-10 left-10 w-72 h-72 bg-accent/20 rounded-full filter blur-3xl opacity-60 -z-10"></div>
+    <section className="relative pt-28 pb-20 overflow-hidden bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Enhanced Background decorations */}
+      <div className="absolute top-20 right-0 w-96 h-96 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full filter blur-3xl opacity-60 -z-10 animate-pulse-soft"></div>
+      <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-tr from-accent/30 to-primary/20 rounded-full filter blur-3xl opacity-60 -z-10 animate-float"></div>
+      <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full filter blur-2xl opacity-40 -z-10"></div>
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="text-center lg:text-left">
-            <div className="inline-block px-4 py-1.5 mb-6 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
-              ✨ Software para profissionais de estética
+            {/* Enhanced Badge */}
+            <div className="inline-flex items-center gap-2 px-6 py-2 mb-8 rounded-full bg-gradient-to-r from-primary/15 to-accent/15 border border-primary/30 text-primary text-sm font-medium shadow-lg backdrop-blur-sm">
+              <Sparkles className="w-4 h-4 animate-pulse" />
+              ✨ Software completo para profissionais de estética
+              <Badge className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5">NOVO</Badge>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-serif leading-tight text-foreground">
-              <span className="gradient-text">Sua estética,</span> seu negócio, sua liberdade
+
+            {/* Enhanced Title */}
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-8 font-serif leading-tight">
+              <span className="block text-foreground mb-2">Sua estética,</span>
+              <span className="gradient-text bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
+                seu sucesso
+              </span>
             </h1>
-            <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto lg:mx-0">
-              Gerencie agendamentos, clientes, campanhas e cursos com um sistema completo e inteligente para profissionais de estética.
+
+            {/* Enhanced Description */}
+            <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              Gerencie <span className="font-semibold text-primary">agendamentos</span>, 
+              <span className="font-semibold text-primary"> clientes</span>, 
+              <span className="font-semibold text-primary"> campanhas</span> e 
+              <span className="font-semibold text-primary"> cursos</span> com o sistema mais completo do mercado.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start mb-12">
               <Button 
                 size="lg" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 px-8 rounded-full shadow-md"
+                className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground h-14 px-10 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-lg font-semibold"
                 onClick={handleStartFree}
               >
-                Começar Grátis
-                <ArrowRight className="ml-2 w-5 h-5" />
+                <Sparkles className="mr-3 w-5 h-5" />
+                Começar Grátis Agora
+                <ArrowRight className="ml-3 w-5 h-5" />
               </Button>
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-border hover:border-primary/30 text-foreground hover:bg-accent h-12 px-8 rounded-full"
+                className="border-2 border-primary/30 hover:border-primary/60 text-foreground hover:bg-primary/5 h-14 px-10 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg font-semibold backdrop-blur-sm"
                 onClick={handleShowDemo}
               >
+                <Award className="mr-3 w-5 h-5" />
                 Ver Demonstração
               </Button>
             </div>
             
-            <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 text-center lg:text-left">
-              <div className="flex flex-col items-center lg:items-start">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  <Calendar className="w-5 h-5 text-primary" />
+            {/* Social Proof */}
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 mb-12">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {[1,2,3,4,5].map((i) => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-background"></div>
+                  ))}
                 </div>
-                <span className="text-sm text-muted-foreground">Agenda Inteligente</span>
+                <span className="text-sm text-muted-foreground">+1.200 profissionais</span>
               </div>
-              <div className="flex flex-col items-center lg:items-start">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  <Users className="w-5 h-5 text-primary" />
+              <div className="flex items-center gap-1">
+                {[1,2,3,4,5].map((i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                ))}
+                <span className="text-sm text-muted-foreground ml-2">4.9/5 avaliação</span>
+              </div>
+            </div>
+            
+            {/* Feature Icons Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { icon: Calendar, label: "Agenda Inteligente", color: "text-blue-500" },
+                { icon: Users, label: "Gestão de Clientes", color: "text-green-500" },
+                { icon: BarChart3, label: "Relatórios Avançados", color: "text-purple-500" },
+                { icon: Star, label: "Programa Fidelidade", color: "text-yellow-500" }
+              ].map((feature, index) => (
+                <div key={index} className="flex flex-col items-center lg:items-start group">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 border border-primary/20">
+                    <feature.icon className={`w-6 h-6 ${feature.color}`} />
+                  </div>
+                  <span className="text-sm font-medium text-muted-foreground text-center lg:text-left">{feature.label}</span>
                 </div>
-                <span className="text-sm text-muted-foreground">Gestão de Clientes</span>
-              </div>
-              <div className="flex flex-col items-center lg:items-start">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  <BarChart3 className="w-5 h-5 text-primary" />
-                </div>
-                <span className="text-sm text-muted-foreground">Relatórios</span>
-              </div>
-              <div className="flex flex-col items-center lg:items-start">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  <Star className="w-5 h-5 text-primary" />
-                </div>
-                <span className="text-sm text-muted-foreground">Programa Fidelidade</span>
-              </div>
+              ))}
             </div>
           </div>
           
+          {/* Enhanced Right Side */}
           <div className="relative">
-            <div className="bg-card rounded-xl p-8 border border-border shadow-lg">
+            {/* Main Card */}
+            <div className="bg-gradient-to-br from-card to-card/80 rounded-2xl p-8 border border-border/50 shadow-2xl backdrop-blur-sm relative z-10">
               <div className="text-center">
-                <h3 className="text-2xl font-bold mb-4 font-serif text-foreground">Funcionalidades Principais</h3>
-                <p className="text-muted-foreground mb-6">
-                  Tudo que você precisa para gerenciar seu negócio de estética com eficiência
+                <div className="flex items-center justify-center gap-2 mb-6">
+                  <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="text-sm font-medium text-green-600">Sistema Ativo</span>
+                </div>
+                
+                <h3 className="text-3xl font-bold mb-4 font-serif text-foreground">Dashboard Completo</h3>
+                <p className="text-muted-foreground mb-8 text-lg">
+                  Controle total do seu negócio em uma interface moderna e intuitiva
                 </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <Calendar className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-foreground">Agendamentos</p>
+                
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl border border-green-200 dark:border-green-800">
+                    <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-green-600">+150%</p>
+                    <p className="text-sm text-green-700 dark:text-green-300">Faturamento</p>
                   </div>
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <Users className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-foreground">Clientes</p>
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-blue-600">1.2k+</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">Clientes</p>
                   </div>
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <Box className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-foreground">Estoque</p>
+                  <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl border border-purple-200 dark:border-purple-800">
+                    <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-purple-600">98%</p>
+                    <p className="text-sm text-purple-700 dark:text-purple-300">Taxa de Sucesso</p>
                   </div>
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <BarChart3 className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-foreground">Financeiro</p>
+                  <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-xl border border-orange-200 dark:border-orange-800">
+                    <Shield className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-orange-600">24/7</p>
+                    <p className="text-sm text-orange-700 dark:text-orange-300">Suporte</p>
                   </div>
                 </div>
+
+                <Button 
+                  onClick={handleStartFree}
+                  className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground h-12 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                >
+                  Experimente Grátis por 7 dias
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
               </div>
             </div>
+
+            {/* Floating Elements */}
+            <div className="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full opacity-60 animate-float"></div>
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-gradient-to-tr from-accent/20 to-primary/20 rounded-full opacity-40 animate-pulse-soft"></div>
+            
+            {/* Decorative Grid */}
+            <div className="absolute inset-0 bg-grid-white/10 dark:bg-grid-purple-500/10 -z-10 rounded-2xl"></div>
+          </div>
+        </div>
+
+        {/* Trust Indicators */}
+        <div className="mt-20 text-center">
+          <p className="text-muted-foreground mb-8 text-lg">Confiado por milhares de profissionais em todo o Brasil</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
+            {["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador"].map((city, index) => (
+              <div key={index} className="px-6 py-3 bg-muted/50 rounded-lg border text-muted-foreground font-medium">
+                {city}
+              </div>
+            ))}
           </div>
         </div>
       </div>
