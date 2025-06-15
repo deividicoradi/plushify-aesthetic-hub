@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 
 export const LoyaltyRulesCard: React.FC = () => {
   return (
-    <Card>
+    <Card className="bg-card/80 backdrop-blur-sm border-border/50">
       <CardHeader className="pb-4">
         <CardTitle className="text-lg flex items-center gap-2">
           <Gift className="w-5 h-5 text-primary" />
@@ -16,7 +16,7 @@ export const LoyaltyRulesCard: React.FC = () => {
       <CardContent className="space-y-4">
         <div className="space-y-3">
           <div className="flex items-start gap-3">
-            <div className="p-1 bg-green-100 dark:bg-green-900 rounded">
+            <div className="p-1 bg-green-100/80 dark:bg-green-900/80 rounded">
               <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
             </div>
             <div>
@@ -26,7 +26,7 @@ export const LoyaltyRulesCard: React.FC = () => {
           </div>
           
           <div className="flex items-start gap-3">
-            <div className="p-1 bg-blue-100 dark:bg-blue-900 rounded">
+            <div className="p-1 bg-blue-100/80 dark:bg-blue-900/80 rounded">
               <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
@@ -36,7 +36,7 @@ export const LoyaltyRulesCard: React.FC = () => {
           </div>
           
           <div className="flex items-start gap-3">
-            <div className="p-1 bg-purple-100 dark:bg-purple-900 rounded">
+            <div className="p-1 bg-purple-100/80 dark:bg-purple-900/80 rounded">
               <Award className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
@@ -46,11 +46,11 @@ export const LoyaltyRulesCard: React.FC = () => {
           </div>
         </div>
 
-        <div className="pt-3 border-t space-y-2">
+        <div className="pt-3 border-t border-border/50 space-y-2">
           <h4 className="font-medium text-sm">Níveis de Fidelidade:</h4>
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs">
-              <Badge variant="secondary" className="text-xs">Bronze</Badge>
+              <Badge variant="secondary" className="text-xs bg-secondary/80">Bronze</Badge>
               <span className="text-muted-foreground">R$ 0+</span>
             </div>
             <div className="flex items-center justify-between text-xs">

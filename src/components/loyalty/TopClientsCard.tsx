@@ -46,7 +46,7 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
   const topClients = clients.slice(0, 5);
 
   return (
-    <Card>
+    <Card className="bg-card/80 backdrop-blur-sm border-border/50">
       <CardHeader className="pb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg">
@@ -66,7 +66,7 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
               const isTop3 = index < 3;
               
               return (
-                <div key={client.id} className={`p-4 rounded-xl transition-all hover:scale-[1.02] ${isTop3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950 border-2 border-yellow-200 dark:border-yellow-800' : 'bg-muted/50 hover:bg-muted/70'}`}>
+                <div key={client.id} className={`p-4 rounded-xl transition-all hover:scale-[1.02] ${isTop3 ? 'bg-gradient-to-r from-yellow-50/80 to-orange-50/80 dark:from-yellow-950/30 dark:to-orange-950/30 border-2 border-yellow-200/50 dark:border-yellow-800/30' : 'bg-muted/30 hover:bg-muted/50 dark:bg-muted/20 dark:hover:bg-muted/40'}`}>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="relative">
                       <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm ${isTop3 ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white' : 'bg-primary text-primary-foreground'}`}>
@@ -76,7 +76,7 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
                       {index === 1 && <Flame className="w-4 h-4 text-orange-500 absolute -top-1 -right-1" />}
                       {index === 2 && <Star className="w-4 h-4 text-amber-500 absolute -top-1 -right-1" />}
                     </div>
-                    <Avatar className="w-12 h-12 border-2 border-white shadow-md">
+                    <Avatar className="w-12 h-12 border-2 border-white/50 dark:border-gray-700 shadow-md">
                       <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-bold">
                         {getInitials(client.name)}
                       </AvatarFallback>

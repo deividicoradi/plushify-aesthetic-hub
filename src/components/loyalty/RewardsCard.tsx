@@ -80,7 +80,7 @@ const getTierColor = (tier: string) => {
 
 export const RewardsCard: React.FC = () => {
   return (
-    <Card>
+    <Card className="bg-card/80 backdrop-blur-sm border-border/50">
       <CardHeader className="pb-4">
         <CardTitle className="text-lg flex items-center gap-2">
           <Gift className="w-5 h-5 text-primary" />
@@ -91,7 +91,7 @@ export const RewardsCard: React.FC = () => {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 gap-3">
           {mockRewards.map((reward) => (
-            <div key={reward.id} className={`p-4 rounded-lg border transition-all hover:shadow-md ${!reward.available ? 'opacity-60' : ''}`}>
+            <div key={reward.id} className={`p-4 rounded-lg border border-border/50 transition-all hover:shadow-md ${!reward.available ? 'opacity-60' : ''} bg-card/30 dark:bg-card/20`}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-primary/10 rounded">
@@ -101,7 +101,7 @@ export const RewardsCard: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium text-sm">{reward.title}</h4>
                       {reward.popular && (
-                        <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 text-xs">
+                        <Badge className="bg-orange-100/80 text-orange-700 dark:bg-orange-900/80 dark:text-orange-300 text-xs">
                           🔥 Popular
                         </Badge>
                       )}
@@ -132,7 +132,7 @@ export const RewardsCard: React.FC = () => {
           ))}
         </div>
         
-        <div className="pt-2 text-center border-t">
+        <div className="pt-2 text-center border-t border-border/50">
           <p className="text-xs text-muted-foreground">
             💎 Novos níveis desbloqueiam recompensas exclusivas
           </p>

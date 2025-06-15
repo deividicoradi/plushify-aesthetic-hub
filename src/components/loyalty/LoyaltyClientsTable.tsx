@@ -35,17 +35,17 @@ const getInitials = (name: string) => {
 
 export const LoyaltyClientsTable: React.FC<LoyaltyClientsTableProps> = ({ clients }) => {
   return (
-    <Card>
+    <Card className="bg-card/80 backdrop-blur-sm border-border/50">
       <CardHeader>
         <CardTitle className="text-lg">Todos os Clientes Fidelizados</CardTitle>
         <CardDescription>Histórico completo de pontuação e tier dos clientes</CardDescription>
       </CardHeader>
       <CardContent>
         {clients.length > 0 ? (
-          <div className="rounded-md border">
+          <div className="rounded-md border border-border/50 bg-card/30 dark:bg-card/20">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="border-border/50">
                   <TableHead>Cliente</TableHead>
                   <TableHead>Tier</TableHead>
                   <TableHead className="text-right">Pontos</TableHead>
@@ -56,7 +56,7 @@ export const LoyaltyClientsTable: React.FC<LoyaltyClientsTableProps> = ({ client
               </TableHeader>
               <TableBody>
                 {clients.map((client) => (
-                  <TableRow key={client.id} className="hover:bg-muted/50">
+                  <TableRow key={client.id} className="hover:bg-muted/30 dark:hover:bg-muted/20 border-border/50">
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8">
