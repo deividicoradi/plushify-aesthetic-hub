@@ -5,15 +5,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { AuthProvider } from '@/contexts/AuthContext';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Pages
-import Landing from '@/pages/Landing';
+import Landing from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import Dashboard from '@/pages/Dashboard';
 import Clients from '@/pages/Clients';
 import Appointments from '@/pages/Appointments';
-import Payments from '@/pages/Payments';
+import Payments from '@/pages/Financial';
 import FinancialDashboard from '@/pages/FinancialDashboard';
 import AdvancedAnalytics from '@/pages/AdvancedAnalytics';
 import Reports from '@/pages/Reports';
@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const QueryClient = ({ children }: { children: React.ReactNode }) => {
+const QueryProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
@@ -41,7 +41,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <QueryClient>
+        <QueryProvider>
           <ThemeProvider defaultTheme="light" storageKey="plushify-ui-theme">
             <div className="min-h-screen bg-background text-foreground">
               <Routes>
@@ -106,7 +106,7 @@ function App() {
               <Toaster />
             </div>
           </ThemeProvider>
-        </QueryClient>
+        </QueryProvider>
       </AuthProvider>
     </BrowserRouter>
   );
