@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Check, Crown, Zap, Star, ArrowRight, Sparkles, Clock, AlertTriangle, TrendingUp, Shield, Users, Rocket, Gift, BadgePercent } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -359,9 +360,9 @@ const Plans = () => {
                         </div>
 
                         <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
-                          <div className={`w-24 h-24 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center p-4 ${plan.mostComplete ? 'animate-pulse' : ''}`}>
+                          <div className={`w-28 h-28 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center p-6 ${plan.mostComplete ? 'animate-pulse' : ''}`}>
                             <IconComponent 
-                              className={`${plan.mostComplete ? 'w-14 h-14' : 'w-12 h-12'} text-primary`} 
+                              className={`${plan.mostComplete ? 'w-16 h-16' : 'w-14 h-14'} text-primary`} 
                               strokeWidth={1.5}
                             />
                           </div>
@@ -470,7 +471,7 @@ const Plans = () => {
 
                         <CardFooter className="pt-4 px-6 pb-6 flex-shrink-0">
                           <Button 
-                            className={`w-full h-12 text-base font-semibold transition-all duration-300 transform hover:scale-105 ${
+                            className={`w-full h-14 text-base font-semibold transition-all duration-300 transform hover:scale-105 ${
                               plan.current 
                                 ? plan.trial
                                   ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' 
@@ -486,27 +487,27 @@ const Plans = () => {
                               "Processando..."
                             ) : plan.current ? (
                               plan.trial ? (
-                                <>
-                                  <Rocket className="w-4 h-4 mr-2" />
-                                  FAZER UPGRADE AGORA!
-                                </>
+                                <div className="flex items-center justify-center gap-3">
+                                  <Rocket className="w-5 h-5 flex-shrink-0" />
+                                  <span>FAZER UPGRADE AGORA!</span>
+                                </div>
                               ) : (
-                                <>
-                                  <Check className="w-4 h-4 mr-2" />
-                                  Plano Atual
-                                </>
+                                <div className="flex items-center justify-center gap-3">
+                                  <Check className="w-5 h-5 flex-shrink-0" />
+                                  <span>Plano Atual</span>
+                                </div>
                               )
                             ) : plan.mostComplete ? (
-                              <>
-                                <Crown className="w-5 h-5 mr-2" />
-                                ESCOLHER O MELHOR!
-                                <ArrowRight className="w-4 h-4 ml-2" />
-                              </>
+                              <div className="flex items-center justify-center gap-3">
+                                <Crown className="w-6 h-6 flex-shrink-0" />
+                                <span>ESCOLHER O MELHOR!</span>
+                                <ArrowRight className="w-5 h-5 flex-shrink-0" />
+                              </div>
                             ) : (
-                              <>
-                                Escolher {plan.name}
-                                <ArrowRight className="w-4 h-4 ml-2" />
-                              </>
+                              <div className="flex items-center justify-center gap-3">
+                                <span>Escolher {plan.name}</span>
+                                <ArrowRight className="w-5 h-5 flex-shrink-0" />
+                              </div>
                             )}
                           </Button>
                           
@@ -603,11 +604,13 @@ const Plans = () => {
                       <Button 
                         size="lg" 
                         onClick={() => handlePlanSelection('premium')}
-                        className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold text-lg px-6 py-3 shadow-lg transform hover:scale-105 transition-all"
+                        className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold text-lg px-6 py-3 shadow-lg transform hover:scale-105 transition-all h-14"
                       >
-                        <Crown className="w-5 h-5 mr-2" />
-                        Começar com Enterprise
-                        <ArrowRight className="w-4 h-4 ml-2" />
+                        <div className="flex items-center justify-center gap-3">
+                          <Crown className="w-6 h-6 flex-shrink-0" />
+                          <span>Começar com Enterprise</span>
+                          <ArrowRight className="w-5 h-5 flex-shrink-0" />
+                        </div>
                       </Button>
                       <div className="text-sm opacity-75">
                         Sem compromisso • Cancele quando quiser • Suporte 24/7
