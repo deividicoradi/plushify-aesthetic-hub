@@ -112,7 +112,6 @@ const Plans = () => {
         'Gestão financeira completa',
         'Controle de caixa',
         'Relatórios financeiros detalhados',
-        'Sistema de notas completo',
         'Exportação básica de dados'
       ],
       limitations: [],
@@ -138,8 +137,6 @@ const Plans = () => {
         'Relatórios avançados com gráficos',
         'Exportação de relatórios (PDF completo)',
         'Analytics detalhados de performance',
-        'Sistema de backup automático',
-        'Múltiplos usuários (até 10)',
         'Suporte VIP prioritário',
         'Análises preditivas de faturamento',
         'Segurança avançada com logs'
