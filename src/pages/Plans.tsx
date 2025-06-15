@@ -329,6 +329,8 @@ const Plans = () => {
                       ? `${Math.round(parseInt(plan.annualPrice.replace('R$ ', '').replace('.', '')) / 10)}`
                       : null;
 
+                    const IconComponent = plan.icon;
+
                     return (
                       <Card 
                         key={plan.id} 
@@ -358,7 +360,7 @@ const Plans = () => {
 
                         <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
                           <div className={`w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center ${plan.mostComplete ? 'animate-pulse' : ''}`}>
-                            <plan.icon className={`${plan.mostComplete ? 'w-10 h-10' : 'w-8 h-8'} text-primary`} />
+                            <IconComponent className={`${plan.mostComplete ? 'w-10 h-10' : 'w-8 h-8'} text-primary`} />
                           </div>
                           
                           <div className="space-y-2">
