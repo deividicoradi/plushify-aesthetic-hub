@@ -31,14 +31,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
-      sku: initialData?.sku || "",
       price: initialData?.price || 0,
       cost_price: initialData?.cost_price || 0,
       stock_quantity: initialData?.stock_quantity || 0,
       min_stock_level: initialData?.min_stock_level || 0,
       category: initialData?.category || "",
       brand: initialData?.brand || "",
-      barcode: initialData?.barcode || "",
       active: initialData?.active ?? true,
     },
   });
@@ -60,16 +58,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             {errors.name && (
               <p className="text-sm text-red-400">{errors.name.message}</p>
             )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="sku" className="text-white">SKU</Label>
-            <Input
-              id="sku"
-              {...register("sku")}
-              placeholder="Ex: SH001"
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
-            />
           </div>
 
           <div className="space-y-2">
@@ -153,16 +141,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               id="brand"
               {...register("brand")}
               placeholder="Ex: L'Oréal, Garnier, etc."
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="barcode" className="text-white">Código de Barras</Label>
-            <Input
-              id="barcode"
-              {...register("barcode")}
-              placeholder="Ex: 1234567890123"
               className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
             />
           </div>
