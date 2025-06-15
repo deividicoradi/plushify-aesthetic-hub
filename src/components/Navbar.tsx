@@ -54,6 +54,28 @@ const Navbar = () => {
     setIsOpen(false);
   };
 
+  const handleDepoimentosClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Se estamos na página inicial, fazer scroll até a seção
+    if (location.pathname === '/') {
+      const testimonialsSection = document.getElementById('testimonials');
+      if (testimonialsSection) {
+        testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Se não estamos na página inicial, navegar para ela e depois fazer scroll
+      navigate('/', { replace: true });
+      setTimeout(() => {
+        const testimonialsSection = document.getElementById('testimonials');
+        if (testimonialsSection) {
+          testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+    setIsOpen(false);
+  };
+
   const handleStartFree = () => {
     navigate('/auth?tab=signup');
     setIsOpen(false);
@@ -93,9 +115,12 @@ const Navbar = () => {
             >
               Planos
             </button>
-            <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+            <button 
+              onClick={handleDepoimentosClick}
+              className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+            >
               Depoimentos
-            </Link>
+            </button>
           </div>
 
           {/* Desktop CTA Buttons */}
@@ -152,13 +177,12 @@ const Navbar = () => {
               >
                 Planos
               </button>
-              <Link
-                to="/about"
-                className="block px-3 py-2 text-muted-foreground hover:text-foreground transition-colors font-medium"
-                onClick={() => setIsOpen(false)}
+              <button
+                onClick={handleDepoimentosClick}
+                className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground transition-colors font-medium"
               >
                 Depoimentos
-              </Link>
+              </button>
               <div className="border-t border-border/40 pt-4 pb-2 space-y-2">
                 <Button 
                   variant="ghost" 
