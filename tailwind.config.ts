@@ -159,8 +159,9 @@ export default {
 				'pulse-soft': 'pulse-soft 3s ease-in-out infinite',
 			},
 			fontFamily: {
+				'sans': ['Poppins', 'sans-serif'],
 				'serif': ['Playfair Display', 'serif'],
-				'sans': ['Inter', 'sans-serif'],
+				'poppins': ['Poppins', 'sans-serif'],
 			}
 		}
 	},
