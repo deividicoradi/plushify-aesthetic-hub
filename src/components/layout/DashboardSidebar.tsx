@@ -40,14 +40,14 @@ const DashboardSidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 h-full flex flex-col">
+    <div className="w-64 bg-card border-r border-border h-full flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+      <div className="p-6 border-b border-border">
         <Link to="/dashboard" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-plush-500 to-plush-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">P</span>
+          <div className="w-8 h-8 bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-sm">P</span>
           </div>
-          <span className="text-xl font-bold text-gray-900 dark:text-white">Plushify</span>
+          <span className="text-xl font-bold text-foreground">Plushify</span>
         </Link>
       </div>
 
@@ -63,10 +63,10 @@ const DashboardSidebar = () => {
                 <Link
                   to={item.path}
                   className={cn(
-                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-plush-100 dark:bg-plush-900/20 text-plush-900 dark:text-plush-100"
-                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -79,14 +79,14 @@ const DashboardSidebar = () => {
       </nav>
 
       {/* Theme Toggle and Sign Out */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
+      <div className="p-4 border-t border-border space-y-3">
         <div className="flex justify-center">
           <ThemeToggle />
         </div>
         <Button 
           onClick={signOut}
           variant="ghost" 
-          className="w-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+          className="w-full text-muted-foreground hover:text-foreground hover:bg-accent"
         >
           Sair
         </Button>
