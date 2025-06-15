@@ -8,7 +8,15 @@ export type { Product } from "./inventory/useProductsData";
 
 export const useInventory = () => {
   // Get product data
-  const { products, stats, refetch } = useProductsData();
+  const { 
+    products, 
+    stats, 
+    isLoading,
+    refetch, 
+    removeProductFromList,
+    addProductToList,
+    updateProductInList
+  } = useProductsData();
 
   // Get product selection functionality
   const { 
@@ -63,11 +71,37 @@ export const useInventory = () => {
     setIsDeleteDialogOpen(true);
   };
 
+  // Enhanced success handlers for CRUD operations
+  const handleCreateSuccess = () => {
+    setIsNewProductOpen(false);
+    refetch(); // Recarrega toda a lista para ter certeza
+  };
+
+  const handleUpdateSuccess = () => {
+    setIsEditProductOpen(false);
+    refetch(); // Recarrega toda a lista para ter certeza
+  };
+
+  const handleDeleteSuccess = () => {
+    setIsDeleteDialogOpen(false);
+    refetch(); // Recarrega toda a lista para ter certeza
+  };
+
+  const handleTransactionSuccess = () => {
+    setIsTransactionOpen(false);
+    refetch(); // Recarrega toda a lista para atualizar estoque
+  };
+
   return {
     // Product data
     products,
     stats,
+    isLoading,
     refetch,
+    // Local list management
+    removeProductFromList,
+    addProductToList,
+    updateProductInList,
     // Selection state
     selectedProduct,
     selectedProducts,
@@ -97,5 +131,10 @@ export const useInventory = () => {
     clearSelection,
     openDialog,
     closeDialog,
+    // Enhanced success handlers
+    handleCreateSuccess,
+    handleUpdateSuccess,
+    handleDeleteSuccess,
+    handleTransactionSuccess,
   };
 };

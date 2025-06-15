@@ -14,6 +14,7 @@ const Inventory = () => {
     searchTerm,
     setSearchTerm,
     stats,
+    isLoading,
     selectedProducts,
     selectedProduct,
     toggleSelect,
@@ -31,8 +32,38 @@ const Inventory = () => {
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     transactionType,
-    refetch
+    refetch,
+    removeProductFromList,
+    handleCreateSuccess,
+    handleUpdateSuccess,
+    handleDeleteSuccess,
+    handleTransactionSuccess
   } = useInventory();
+
+  if (isLoading) {
+    return (
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <SidebarInset className="flex-1">
+            <div className="flex flex-col min-h-screen w-full">
+              <header className="flex items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
+                <SidebarTrigger />
+              </header>
+              <main className="flex-1 bg-background overflow-hidden p-6">
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Carregando produtos...</p>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -93,6 +124,11 @@ const Inventory = () => {
                   selectedProduct={selectedProduct}
                   transactionType={transactionType}
                   onSuccess={refetch}
+                  onOptimisticDelete={removeProductFromList}
+                  onCreateSuccess={handleCreateSuccess}
+                  onUpdateSuccess={handleUpdateSuccess}
+                  onDeleteSuccess={handleDeleteSuccess}
+                  onTransactionSuccess={handleTransactionSuccess}
                 />
               </FeatureGuard>
             </main>

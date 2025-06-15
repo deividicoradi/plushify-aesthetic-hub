@@ -21,6 +21,7 @@ export type ProductStats = {
 
 export const useProductsData = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState<ProductStats>({
     total: 0,
     lowStock: 0,
@@ -28,33 +29,74 @@ export const useProductsData = () => {
   });
   const { user } = useAuth();
 
+  const calculateStats = (data: Product[]) => {
+    const uniqueCategories = new Set(data?.map(p => p.category));
+    return {
+      total: data?.length || 0,
+      lowStock: data?.filter(p => p.stock <= p.min_stock).length || 0,
+      categories: uniqueCategories.size
+    };
+  };
+
   const refetch = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
     try {
-      console.log("Buscando produtos...");
+      console.log("Iniciando busca de produtos...");
       
       const { data, error } = await supabase
         .from('products')
         .select('*')
+        .eq('user_id', user.id)
         .order('name');
 
       if (error) {
-        console.error("Erro ao buscar produtos:", error);
+        console.error("Erro na consulta:", error);
         throw error;
       }
 
       console.log("Produtos encontrados:", data?.length || 0);
-      setProducts(data || []);
       
-      const uniqueCategories = new Set(data?.map(p => p.category));
-      setStats({
-        total: data?.length || 0,
-        lowStock: data?.filter(p => p.stock <= p.min_stock).length || 0,
-        categories: uniqueCategories.size
-      });
+      const productsData = data || [];
+      setProducts(productsData);
+      setStats(calculateStats(productsData));
+      
     } catch (error: any) {
-      console.error("Erro completo:", error);
+      console.error("Erro ao carregar produtos:", error);
       toast.error("Erro ao carregar produtos: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Função para remover produto da lista local (otimistic update)
+  const removeProductFromList = (productId: string) => {
+    setProducts(prevProducts => {
+      const updatedProducts = prevProducts.filter(p => p.id !== productId);
+      setStats(calculateStats(updatedProducts));
+      return updatedProducts;
+    });
+  };
+
+  // Função para adicionar produto à lista local
+  const addProductToList = (newProduct: Product) => {
+    setProducts(prevProducts => {
+      const updatedProducts = [...prevProducts, newProduct];
+      setStats(calculateStats(updatedProducts));
+      return updatedProducts;
+    });
+  };
+
+  // Função para atualizar produto na lista local
+  const updateProductInList = (updatedProduct: Product) => {
+    setProducts(prevProducts => {
+      const updatedProducts = prevProducts.map(p => 
+        p.id === updatedProduct.id ? updatedProduct : p
+      );
+      setStats(calculateStats(updatedProducts));
+      return updatedProducts;
+    });
   };
 
   useEffect(() => {
@@ -66,6 +108,10 @@ export const useProductsData = () => {
   return {
     products,
     stats,
+    isLoading,
     refetch,
+    removeProductFromList,
+    addProductToList,
+    updateProductInList,
   };
 };

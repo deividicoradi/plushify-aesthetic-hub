@@ -19,13 +19,15 @@ interface DeleteProductDialogProps {
   onOpenChange: (open: boolean) => void;
   product: Product | null;
   onSuccess: () => void;
+  onOptimisticDelete?: (productId: string) => void;
 }
 
 export const DeleteProductDialog = ({
   open,
   onOpenChange,
   product,
-  onSuccess
+  onSuccess,
+  onOptimisticDelete
 }: DeleteProductDialogProps) => {
   const [isDeleting, setIsDeleting] = React.useState(false);
 
@@ -35,7 +37,12 @@ export const DeleteProductDialog = ({
     setIsDeleting(true);
     
     try {
-      console.log("Tentando excluir produto:", product.id);
+      console.log("Iniciando exclusão do produto:", product.id);
+      
+      // Optimistic update - remove da lista imediatamente
+      if (onOptimisticDelete) {
+        onOptimisticDelete(product.id);
+      }
       
       const { error } = await supabase
         .from('products')
@@ -44,22 +51,19 @@ export const DeleteProductDialog = ({
 
       if (error) {
         console.error("Erro na exclusão:", error);
+        // Se houve erro, recarrega a lista para reverter o optimistic update
+        onSuccess();
         throw error;
       }
 
-      console.log("Produto excluído com sucesso");
+      console.log("Produto excluído com sucesso no banco");
       toast.success("Produto excluído com sucesso!");
       
-      // Fechar o dialog primeiro
+      // Fechar o dialog
       onOpenChange(false);
       
-      // Forçar atualização da lista
+      // Garantir que a lista seja atualizada
       onSuccess();
-      
-      // Força uma nova busca após um pequeno delay para garantir que a exclusão foi processada
-      setTimeout(() => {
-        onSuccess();
-      }, 500);
       
     } catch (error: any) {
       console.error("Erro ao excluir produto:", error);

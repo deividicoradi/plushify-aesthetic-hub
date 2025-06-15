@@ -38,6 +38,11 @@ type InventoryDialogsProps = {
   selectedProduct: Product | null;
   transactionType: 'entrada' | 'saida';
   onSuccess: () => void;
+  onOptimisticDelete?: (productId: string) => void;
+  onCreateSuccess?: () => void;
+  onUpdateSuccess?: () => void;
+  onDeleteSuccess?: () => void;
+  onTransactionSuccess?: () => void;
 };
 
 export const InventoryDialogs = ({
@@ -51,7 +56,12 @@ export const InventoryDialogs = ({
   setIsDeleteDialogOpen,
   selectedProduct,
   transactionType,
-  onSuccess
+  onSuccess,
+  onOptimisticDelete,
+  onCreateSuccess,
+  onUpdateSuccess,
+  onDeleteSuccess,
+  onTransactionSuccess
 }: InventoryDialogsProps) => {
   return (
     <>
@@ -61,10 +71,10 @@ export const InventoryDialogs = ({
             <SheetTitle>Novo Produto</SheetTitle>
           </SheetHeader>
           <div className="mt-6">
-            <ProductForm onSuccess={() => {
+            <ProductForm onSuccess={onCreateSuccess || (() => {
               setIsNewProductOpen(false);
               onSuccess();
-            }} />
+            })} />
           </div>
         </SheetContent>
       </Sheet>
@@ -78,10 +88,10 @@ export const InventoryDialogs = ({
             {selectedProduct && (
               <EditProductForm
                 product={selectedProduct}
-                onSuccess={() => {
+                onSuccess={onUpdateSuccess || (() => {
                   setIsEditProductOpen(false);
                   onSuccess();
-                }}
+                })}
               />
             )}
           </div>
@@ -105,10 +115,10 @@ export const InventoryDialogs = ({
               <StockTransaction
                 productId={selectedProduct.id}
                 type={transactionType}
-                onSuccess={() => {
+                onSuccess={onTransactionSuccess || (() => {
                   setIsTransactionOpen(false);
                   onSuccess();
-                }}
+                })}
               />
             )}
           </div>
@@ -119,7 +129,8 @@ export const InventoryDialogs = ({
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         product={selectedProduct}
-        onSuccess={onSuccess}
+        onSuccess={onDeleteSuccess || onSuccess}
+        onOptimisticDelete={onOptimisticDelete}
       />
     </>
   );
