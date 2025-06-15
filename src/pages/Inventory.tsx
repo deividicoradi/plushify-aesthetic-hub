@@ -1,11 +1,85 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { Card, CardContent } from '@/components/ui/card';
-import { Package } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useProductsData, Product } from '@/hooks/inventory/useProductsData';
+import { InventoryHeader } from '@/components/inventory/InventoryHeader';
+import { StatsCards } from '@/components/inventory/StatsCards';
+import { ProductsTable } from '@/components/inventory/ProductsTable';
+import { ProductForm } from '@/components/inventory/ProductForm';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Inventory = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
+
+  const {
+    products,
+    isLoading,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  } = useProductsData();
+
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.brand?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleCreateProduct = () => {
+    setEditingProduct(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    setIsFormOpen(true);
+  };
+
+  const handleFormSubmit = (data: any) => {
+    if (editingProduct) {
+      updateProduct({ id: editingProduct.id, data });
+    } else {
+      createProduct(data);
+    }
+    setIsFormOpen(false);
+    setEditingProduct(null);
+  };
+
+  const handleDeleteProduct = (id: string) => {
+    setProductToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (productToDelete) {
+      deleteProduct(productToDelete);
+      setProductToDelete(null);
+    }
+  };
+
+  const handleFormCancel = () => {
+    setIsFormOpen(false);
+    setEditingProduct(null);
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -16,26 +90,66 @@ const Inventory = () => {
               <SidebarTrigger />
             </header>
 
-            <main className="flex-1 bg-background overflow-hidden">
-              <div className="p-6 flex items-center justify-center min-h-[calc(100vh-80px)]">
-                <Card className="max-w-md w-full">
-                  <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                    <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-full mb-6">
-                      <Package className="w-16 h-16 text-gray-400" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-foreground mb-3">
-                      Funcionalidade Removida
-                    </h2>
-                    <p className="text-muted-foreground">
-                      A funcionalidade de estoque foi removida do sistema conforme solicitado.
-                    </p>
-                  </CardContent>
-                </Card>
+            <main className="flex-1 bg-background p-6">
+              <div className="space-y-6">
+                <InventoryHeader
+                  onCreateProduct={handleCreateProduct}
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                />
+                
+                <StatsCards products={products} />
+                
+                <ProductsTable
+                  products={filteredProducts}
+                  onEdit={handleEditProduct}
+                  onDelete={handleDeleteProduct}
+                  isLoading={isLoading}
+                />
               </div>
             </main>
           </div>
         </SidebarInset>
       </div>
+
+      {/* Form Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduct ? 'Editar Produto' : 'Novo Produto'}
+            </DialogTitle>
+          </DialogHeader>
+          <ProductForm
+            onSubmit={handleFormSubmit}
+            initialData={editingProduct || undefined}
+            isLoading={isCreating || isUpdating}
+            onCancel={handleFormCancel}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 };
