@@ -1,13 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Crown, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface FeatureGuardProps {
-  feature: string;
+  feature?: string;
+  planFeature?: string;
+  requiredPlan?: 'professional' | 'premium';
   children: React.ReactNode;
   fallback?: React.ReactNode;
   showUpgradePrompt?: boolean;
@@ -15,11 +18,14 @@ interface FeatureGuardProps {
 
 export const FeatureGuard = ({ 
   feature, 
+  planFeature,
+  requiredPlan,
   children, 
   fallback, 
   showUpgradePrompt = true 
 }: FeatureGuardProps) => {
   const { hasFeatureAccess, currentPlan, loading } = useSubscription();
+  const { hasFeature } = usePlanLimits();
   const [hasAccess, setHasAccess] = useState(false);
   const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
@@ -27,7 +33,26 @@ export const FeatureGuard = ({
   useEffect(() => {
     const checkAccess = async () => {
       setChecking(true);
-      const access = await hasFeatureAccess(feature);
+      
+      let access = false;
+      
+      // Check by required plan
+      if (requiredPlan) {
+        if (requiredPlan === 'professional') {
+          access = currentPlan === 'professional' || currentPlan === 'premium';
+        } else if (requiredPlan === 'premium') {
+          access = currentPlan === 'premium';
+        }
+      }
+      // Check by plan feature
+      else if (planFeature) {
+        access = hasFeature(planFeature as any);
+      }
+      // Check by Supabase feature
+      else if (feature) {
+        access = await hasFeatureAccess(feature);
+      }
+      
       setHasAccess(access);
       setChecking(false);
     };
@@ -35,7 +60,7 @@ export const FeatureGuard = ({
     if (!loading) {
       checkAccess();
     }
-  }, [feature, hasFeatureAccess, loading]);
+  }, [feature, planFeature, requiredPlan, hasFeatureAccess, hasFeature, currentPlan, loading]);
 
   if (loading || checking) {
     return (
@@ -54,16 +79,24 @@ export const FeatureGuard = ({
   }
 
   if (showUpgradePrompt) {
+    const planName = currentPlan === 'trial' ? 'Trial' : 
+                    currentPlan === 'professional' ? 'Professional' : 'Enterprise';
+    
+    const requiredPlanName = requiredPlan === 'professional' ? 'Professional' : 'Enterprise';
+
     return (
       <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-900/20">
         <Lock className="h-4 w-4 text-orange-600" />
         <AlertDescription className="flex items-center justify-between">
           <div>
             <p className="text-orange-800 dark:text-orange-200 font-medium">
-              Funcionalidade não disponível no plano {currentPlan}
+              Funcionalidade não disponível no plano {planName}
             </p>
             <p className="text-orange-700 dark:text-orange-300 text-sm mt-1">
-              Faça upgrade para acessar esta funcionalidade.
+              {requiredPlan ? 
+                `Faça upgrade para o plano ${requiredPlanName} ou superior para acessar esta funcionalidade.` :
+                'Faça upgrade para acessar esta funcionalidade.'
+              }
             </p>
           </div>
           <Button 

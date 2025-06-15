@@ -13,6 +13,12 @@ interface PlanLimits {
   hasAutomaticBackup: boolean;
   hasPrioritySupport: boolean;
   has24_7Support: boolean;
+  hasInventoryAdvanced: boolean;
+  hasReportsDetailed: boolean;
+  hasExportReports: boolean;
+  hasCashFlow: boolean;
+  hasRecurringPayments: boolean;
+  hasMultiplePaymentMethods: boolean;
 }
 
 const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
@@ -28,19 +34,31 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasAutomaticBackup: false,
     hasPrioritySupport: false,
     has24_7Support: false,
+    hasInventoryAdvanced: false,
+    hasReportsDetailed: false,
+    hasExportReports: false,
+    hasCashFlow: false,
+    hasRecurringPayments: false,
+    hasMultiplePaymentMethods: false,
   },
   professional: {
     clients: -1, // unlimited
     appointments: -1, // unlimited
-    products: -1, // unlimited
-    services: -1, // unlimited
+    products: 100, // limited to 100
+    services: 20, // limited to 20
     hasFinancialManagement: true,
-    hasAdvancedReports: true,
+    hasAdvancedReports: false,
     hasAdvancedAnalytics: false,
     hasTeamManagement: false,
     hasAutomaticBackup: false,
     hasPrioritySupport: true,
     has24_7Support: false,
+    hasInventoryAdvanced: false,
+    hasReportsDetailed: true,
+    hasExportReports: false,
+    hasCashFlow: true,
+    hasRecurringPayments: false,
+    hasMultiplePaymentMethods: true,
   },
   premium: {
     clients: -1, // unlimited
@@ -54,6 +72,12 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasAutomaticBackup: true,
     hasPrioritySupport: true,
     has24_7Support: true,
+    hasInventoryAdvanced: true,
+    hasReportsDetailed: true,
+    hasExportReports: true,
+    hasCashFlow: true,
+    hasRecurringPayments: true,
+    hasMultiplePaymentMethods: true,
   },
 };
 
@@ -75,11 +99,16 @@ export const usePlanLimits = () => {
     return limit !== -1 && currentCount >= limit;
   };
 
+  const hasFeature = (feature: keyof Omit<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>) => {
+    return limits[feature];
+  };
+
   return {
     limits,
     currentPlan,
     isLimited,
     getLimit,
     hasReachedLimit,
+    hasFeature,
   };
 };

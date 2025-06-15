@@ -45,11 +45,12 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
     ],
     limitations: [
       'Acesso limitado a 3 dias',
-      'Funcionalidades muito restritas',
-      'Sem suporte técnico',
-      'Dados removidos após trial',
-      'Sem exportação de relatórios',
-      'Sem backup automático'
+      'SEM gestão financeira',
+      'SEM relatórios avançados',
+      'SEM controle de caixa',
+      'SEM exportação de dados',
+      'SEM suporte técnico',
+      'Dados removidos após trial'
     ],
     trial: true,
     current: currentPlan === 'trial'
@@ -69,13 +70,22 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
     features: [
       'Clientes ilimitados',
       'Agendamentos ilimitados',
-      'Gestão de serviços completa',
-      'Gestão de estoque básica',
-      'Dashboard com métricas básicas',
-      'Controle de caixa simples',
-      'Relatórios básicos'
+      'Até 20 serviços',
+      'Estoque até 100 produtos',
+      'Gestão financeira básica',
+      'Controle de caixa',
+      'Relatórios básicos',
+      'Métodos de pagamento múltiplos',
+      'Dashboard com métricas',
+      'Suporte prioritário'
     ],
-    limitations: [],
+    limitations: [
+      'SEM analytics avançados',
+      'SEM exportação de relatórios',
+      'SEM pagamentos recorrentes',
+      'SEM gestão de equipe',
+      'SEM backup automático'
+    ],
     current: currentPlan === 'professional'
   },
   {
@@ -94,16 +104,16 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
     mostComplete: true,
     features: [
       'TUDO do plano Professional',
-      'Gestão financeira completa avançada',
-      'Dashboard executivo com analytics',
-      'Relatórios avançados com gráficos',
-      'Exportação de relatórios (PDF completo)',
-      'Analytics detalhados de performance',
+      'Serviços e produtos ilimitados',
+      'Analytics avançados e preditivos',
+      'Relatórios completos com exportação',
+      'Pagamentos recorrentes e parcelamentos',
+      'Gestão de equipe avançada',
+      'Backup automático',
+      'Suporte VIP 24/7',
       'Gestão de estoque avançada',
-      'Controle de caixa com múltiplos métodos',
-      'Parcelamentos e recorrências',
-      'Suporte VIP prioritário',
-      'Análises preditivas de faturamento'
+      'Dashboard executivo completo',
+      'Análises de performance detalhadas'
     ],
     bonuses: [
       'Setup personalizado GRÁTIS',

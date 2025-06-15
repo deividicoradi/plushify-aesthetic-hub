@@ -91,7 +91,7 @@ BEGIN
 END;
 $$;
 
--- Função para verificar acesso a funcionalidades
+-- Função para verificar acesso a funcionalidades - MAIS RESTRITIVA
 CREATE OR REPLACE FUNCTION public.has_feature_access(feature_name TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -110,36 +110,59 @@ BEGIN
   -- Obter o plano do usuário
   user_plan := public.get_user_plan();
   
-  -- Definir acesso às funcionalidades por plano
+  -- Definir acesso às funcionalidades por plano - MAIS RESTRITIVO
   CASE feature_name
+    -- Funcionalidades básicas (Trial)
     WHEN 'dashboard_basic' THEN
       RETURN user_plan IN ('trial', 'professional', 'premium');
-    WHEN 'clients_unlimited' THEN
-      RETURN user_plan IN ('professional', 'premium');
     WHEN 'clients_limited' THEN
       RETURN user_plan = 'trial';
-    WHEN 'appointments_unlimited' THEN
-      RETURN user_plan IN ('professional', 'premium');
     WHEN 'appointments_limited' THEN
       RETURN user_plan = 'trial';
-    WHEN 'financial_management' THEN
-      RETURN user_plan IN ('professional', 'premium');
-    WHEN 'inventory_advanced' THEN
-      RETURN user_plan IN ('professional', 'premium');
     WHEN 'inventory_basic' THEN
       RETURN user_plan = 'trial';
-    WHEN 'reports_detailed' THEN
+    
+    -- Funcionalidades Professional
+    WHEN 'clients_unlimited' THEN
       RETURN user_plan IN ('professional', 'premium');
+    WHEN 'appointments_unlimited' THEN
+      RETURN user_plan IN ('professional', 'premium');
+    WHEN 'financial_management' THEN
+      RETURN user_plan IN ('professional', 'premium');
+    WHEN 'inventory_intermediate' THEN
+      RETURN user_plan IN ('professional', 'premium');
+    WHEN 'reports_basic' THEN
+      RETURN user_plan IN ('professional', 'premium');
+    WHEN 'cash_flow' THEN
+      RETURN user_plan IN ('professional', 'premium');
+    WHEN 'multiple_payment_methods' THEN
+      RETURN user_plan IN ('professional', 'premium');
+    WHEN 'support_priority' THEN
+      RETURN user_plan IN ('professional', 'premium');
+    
+    -- Funcionalidades APENAS Premium/Enterprise
     WHEN 'analytics_advanced' THEN
+      RETURN user_plan = 'premium';
+    WHEN 'reports_detailed' THEN
+      RETURN user_plan = 'premium';
+    WHEN 'reports_export' THEN
+      RETURN user_plan = 'premium';
+    WHEN 'inventory_advanced' THEN
+      RETURN user_plan = 'premium';
+    WHEN 'recurring_payments' THEN
       RETURN user_plan = 'premium';
     WHEN 'team_management' THEN
       RETURN user_plan = 'premium';
     WHEN 'backup_automatic' THEN
       RETURN user_plan = 'premium';
-    WHEN 'support_priority' THEN
-      RETURN user_plan IN ('professional', 'premium');
     WHEN 'support_24_7' THEN
       RETURN user_plan = 'premium';
+    WHEN 'executive_dashboard' THEN
+      RETURN user_plan = 'premium';
+    WHEN 'predictive_analytics' THEN
+      RETURN user_plan = 'premium';
+    
+    -- Qualquer funcionalidade não mapeada = NEGADO
     ELSE
       RETURN FALSE;
   END CASE;
