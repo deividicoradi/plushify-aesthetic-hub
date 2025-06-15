@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Check, Crown, Zap, Star, ArrowRight, Sparkles } from 'lucide-react';
+import { Check, Crown, Zap, Star, ArrowRight, Sparkles, Clock, AlertTriangle } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Button } from '@/components/ui/button';
@@ -13,31 +13,38 @@ const Plans = () => {
 
   const plans = [
     {
-      id: 'basic',
-      name: 'Starter',
+      id: 'trial',
+      name: 'Trial Gratuito',
       price: 'Gratuito',
       period: '',
       originalPrice: '',
       annualPrice: 'Gratuito',
       annualPeriod: '',
       annualOriginalPrice: '',
-      description: 'Perfeito para começar',
-      icon: Star,
-      gradient: 'from-gray-500 to-gray-600',
+      description: 'Teste por 3 dias',
+      icon: Clock,
+      gradient: 'from-orange-500 to-red-500',
       features: [
-        'Dashboard com métricas básicas',
-        'Gestão de clientes (até 50)',
-        'Agendamentos simples',
-        'Controle de serviços básico',
-        'Estoque básico (até 100 produtos)',
-        'Anotações pessoais',
-        'Relatórios simples'
+        'Apenas 3 dias de teste',
+        'Dashboard básico (limitado)',
+        'Até 5 clientes',
+        'Até 3 agendamentos',
+        'Até 2 serviços',
+        'Estoque básico (até 10 produtos)',
+        'Sem relatórios',
+        'Sem backup'
       ],
       limitations: [
-        'Funcionalidades limitadas',
-        'Suporte básico por email',
-        'Sem backup automático'
+        'Acesso limitado a 3 dias',
+        'Funcionalidades muito restritas',
+        'Sem suporte técnico',
+        'Sem exportação de dados',
+        'Sem controle financeiro',
+        'Sem gestão de despesas',
+        'Dados removidos após trial',
+        'Marca d\'água no sistema'
       ],
+      trial: true,
       current: true
     },
     {
@@ -54,7 +61,7 @@ const Plans = () => {
       gradient: 'from-blue-500 to-cyan-500',
       popular: true,
       features: [
-        'Tudo do plano Starter',
+        'Acesso completo e ilimitado',
         'Clientes ilimitados',
         'Dashboard avançado com insights',
         'Gestão financeira completa',
@@ -104,6 +111,14 @@ const Plans = () => {
 
   const faqs = [
     {
+      question: 'Como funciona o trial gratuito de 3 dias?',
+      answer: 'O trial oferece acesso limitado por 3 dias para você testar o sistema. Após esse período, é necessário escolher um plano pago para continuar usando.'
+    },
+    {
+      question: 'O que acontece com meus dados após o trial?',
+      answer: 'Os dados inseridos durante o trial são removidos automaticamente após 7 dias. Para manter seus dados, faça upgrade para um plano pago antes do fim do trial.'
+    },
+    {
       question: 'Posso trocar de plano a qualquer momento?',
       answer: 'Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. As mudanças entram em vigor imediatamente.'
     },
@@ -114,14 +129,6 @@ const Plans = () => {
     {
       question: 'Como funciona o parcelamento do plano anual?',
       answer: 'O pagamento anual pode ser parcelado em até 10x sem juros no cartão de crédito, facilitando o investimento no seu negócio.'
-    },
-    {
-      question: 'Quais funcionalidades estão disponíveis agora?',
-      answer: 'Atualmente temos: Dashboard, Clientes, Agendamentos, Serviços, Estoque, Financeiro, Relatórios, Anotações e Configurações totalmente funcionais.'
-    },
-    {
-      question: 'Os dados ficam seguros?',
-      answer: 'Sim! Utilizamos criptografia de ponta e todas as operações são registradas em logs de auditoria para garantir a segurança total dos seus dados.'
     },
     {
       question: 'Há desconto para pagamento anual?',
@@ -164,6 +171,19 @@ const Plans = () => {
                   </div>
                 </div>
 
+                {/* Trial Alert */}
+                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                    <div className="flex-1">
+                      <h3 className="font-medium text-orange-800 dark:text-orange-200">Trial Gratuito Ativo</h3>
+                      <p className="text-sm text-orange-700 dark:text-orange-300">
+                        Você está no trial gratuito. Restam 2 dias para escolher um plano e manter seus dados.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Billing Toggle */}
                 <div className="flex items-center justify-center gap-4 py-4">
                   <span className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
@@ -201,7 +221,9 @@ const Plans = () => {
                           plan.popular 
                             ? 'border-primary shadow-xl scale-[1.02] bg-gradient-to-b from-background to-primary/5' 
                             : plan.current 
-                              ? 'border-green-500 bg-gradient-to-b from-background to-green-50 dark:to-green-950/20' 
+                              ? plan.trial
+                                ? 'border-orange-500 bg-gradient-to-b from-background to-orange-50 dark:to-orange-950/20' 
+                                : 'border-green-500 bg-gradient-to-b from-background to-green-50 dark:to-green-950/20'
                               : 'border-border hover:border-primary/50'
                         }`}
                       >
@@ -215,8 +237,8 @@ const Plans = () => {
                         
                         {plan.current && (
                           <div className="absolute -top-0 left-1/2 -translate-x-1/2">
-                            <Badge className="bg-green-500 text-white shadow-lg">
-                              ✅ Plano Atual
+                            <Badge className={`${plan.trial ? 'bg-orange-500' : 'bg-green-500'} text-white shadow-lg`}>
+                              {plan.trial ? '⏱️ Trial Ativo' : '✅ Plano Atual'}
                             </Badge>
                           </div>
                         )}
@@ -229,6 +251,12 @@ const Plans = () => {
                           <div className="space-y-2">
                             <h3 className="text-2xl font-bold text-foreground">{plan.name}</h3>
                             <p className="text-muted-foreground">{plan.description}</p>
+                            {plan.trial && (
+                              <div className="flex items-center justify-center gap-2 text-orange-600 dark:text-orange-400 text-sm font-medium">
+                                <Clock className="w-4 h-4" />
+                                Expira em 2 dias
+                              </div>
+                            )}
                           </div>
                           
                           <div className="space-y-1">
@@ -257,7 +285,7 @@ const Plans = () => {
                           <div className="space-y-4">
                             <h4 className="font-semibold text-foreground flex items-center gap-2">
                               <Check className="w-4 h-4 text-green-500" />
-                              Recursos disponíveis:
+                              {plan.trial ? 'Recursos limitados:' : 'Recursos disponíveis:'}
                             </h4>
                             <ul className="space-y-3">
                               {plan.features.map((feature, index) => (
@@ -274,14 +302,17 @@ const Plans = () => {
                           {/* Limitations */}
                           {plan.limitations.length > 0 && (
                             <div className="space-y-4 pt-4 border-t border-border/50">
-                              <h4 className="font-semibold text-muted-foreground text-sm">Limitações:</h4>
+                              <h4 className="font-semibold text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                                <AlertTriangle className="w-4 h-4" />
+                                Limitações:
+                              </h4>
                               <ul className="space-y-2">
                                 {plan.limitations.map((limitation, index) => (
                                   <li key={index} className="flex items-center gap-3">
-                                    <div className="w-4 h-4 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-                                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    <div className="w-4 h-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                                     </div>
-                                    <span className="text-sm text-muted-foreground">{limitation}</span>
+                                    <span className="text-sm text-red-600 dark:text-red-400">{limitation}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -293,18 +324,27 @@ const Plans = () => {
                           <Button 
                             className={`w-full h-12 text-base font-medium transition-all duration-200 ${
                               plan.current 
-                                ? 'bg-green-500 hover:bg-green-600 text-white' 
+                                ? plan.trial
+                                  ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                                  : 'bg-green-500 hover:bg-green-600 text-white'
                                 : plan.popular 
                                   ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl' 
                                   : 'bg-background border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground'
                             }`}
-                            disabled={plan.current}
+                            disabled={plan.current && !plan.trial}
                           >
                             {plan.current ? (
-                              <>
-                                <Check className="w-4 h-4 mr-2" />
-                                Plano Atual
-                              </>
+                              plan.trial ? (
+                                <>
+                                  <Clock className="w-4 h-4 mr-2" />
+                                  Fazer Upgrade
+                                </>
+                              ) : (
+                                <>
+                                  <Check className="w-4 h-4 mr-2" />
+                                  Plano Atual
+                                </>
+                              )
                             ) : (
                               <>
                                 Escolher {plan.name}
