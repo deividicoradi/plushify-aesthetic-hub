@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Clock, Zap, Crown } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -138,8 +139,7 @@ const Plans = () => {
         'Exportação de relatórios (PDF completo)',
         'Analytics detalhados de performance',
         'Suporte VIP prioritário',
-        'Análises preditivas de faturamento',
-        'Segurança avançada com logs'
+        'Análises preditivas de faturamento'
       ],
       bonuses: [
         'Setup personalizado GRÁTIS',
