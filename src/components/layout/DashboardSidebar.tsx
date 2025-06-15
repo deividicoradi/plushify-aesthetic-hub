@@ -13,7 +13,8 @@ import {
   Heart,
   HelpCircle,
   CreditCard,
-  TrendingUp
+  TrendingUp,
+  Crown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,6 +36,7 @@ const DashboardSidebar = () => {
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics' },
     { icon: StickyNote, label: 'Anotações', path: '/anotacoes' },
     { icon: Heart, label: 'Fidelidade', path: '/fidelidade' },
+    { icon: Crown, label: 'Planos', path: '/planos' },
     { icon: HelpCircle, label: 'Ajuda', path: '/help' },
     { icon: Settings, label: 'Configurações', path: '/settings' },
   ];
