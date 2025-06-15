@@ -39,11 +39,14 @@ export const useProductsData = () => {
   };
 
   const refetch = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log("Usuário não autenticado, não carregando produtos");
+      return;
+    }
     
     setIsLoading(true);
     try {
-      console.log("Iniciando busca de produtos...");
+      console.log("Buscando produtos para usuário:", user.id);
       
       const { data, error } = await supabase
         .from('products')
@@ -52,11 +55,12 @@ export const useProductsData = () => {
         .order('name');
 
       if (error) {
-        console.error("Erro na consulta:", error);
+        console.error("Erro na consulta de produtos:", error);
         throw error;
       }
 
       console.log("Produtos encontrados:", data?.length || 0);
+      console.log("Lista de produtos:", data?.map(p => ({ id: p.id, name: p.name })));
       
       const productsData = data || [];
       setProducts(productsData);
@@ -72,8 +76,10 @@ export const useProductsData = () => {
 
   // Função para remover produto da lista local (otimistic update)
   const removeProductFromList = (productId: string) => {
+    console.log("Removendo produto da lista local:", productId);
     setProducts(prevProducts => {
       const updatedProducts = prevProducts.filter(p => p.id !== productId);
+      console.log("Lista atualizada, produtos restantes:", updatedProducts.length);
       setStats(calculateStats(updatedProducts));
       return updatedProducts;
     });
@@ -81,6 +87,7 @@ export const useProductsData = () => {
 
   // Função para adicionar produto à lista local
   const addProductToList = (newProduct: Product) => {
+    console.log("Adicionando produto à lista local:", newProduct.name);
     setProducts(prevProducts => {
       const updatedProducts = [...prevProducts, newProduct];
       setStats(calculateStats(updatedProducts));
@@ -90,6 +97,7 @@ export const useProductsData = () => {
 
   // Função para atualizar produto na lista local
   const updateProductInList = (updatedProduct: Product) => {
+    console.log("Atualizando produto na lista local:", updatedProduct.name);
     setProducts(prevProducts => {
       const updatedProducts = prevProducts.map(p => 
         p.id === updatedProduct.id ? updatedProduct : p
