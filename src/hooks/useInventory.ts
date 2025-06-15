@@ -39,8 +39,21 @@ export const useInventory = () => {
     setSearchTerm, 
     handleStockTransaction, 
     handleEditProduct,
-    selectedProduct
+    selectedProduct,
+    setSelectedProduct
   } = useProductActions(refetch);
+
+  // Enhanced handlers that also manage dialog state
+  const enhancedStockTransaction = (product: any, type: 'entrada' | 'saida') => {
+    setSelectedProduct(product);
+    setTransactionType(type);
+    setIsTransactionOpen(true);
+  };
+
+  const enhancedEditProduct = (product: any) => {
+    setSelectedProduct(product);
+    setIsEditProductOpen(true);
+  };
 
   return {
     // Product data
@@ -64,9 +77,10 @@ export const useInventory = () => {
     setSearchTerm,
     setSelectedProducts,
     setTransactionType,
+    setSelectedProduct,
     // Actions
-    handleStockTransaction,
-    handleEditProduct,
+    handleStockTransaction: enhancedStockTransaction,
+    handleEditProduct: enhancedEditProduct,
     toggleSelect,
     selectAll,
     clearSelection,

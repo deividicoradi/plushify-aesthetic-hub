@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Product } from "./useProductsData";
 import { toast } from "@/components/ui/sonner";
@@ -13,7 +14,7 @@ export const useProductActions = (refetch: () => void) => {
     }
     
     setSelectedProduct(product);
-    // Handle transaction logic here
+    // This will be handled by the parent component to open the transaction dialog
     console.log("Stock transaction:", product, type);
   };
   
@@ -24,12 +25,11 @@ export const useProductActions = (refetch: () => void) => {
     }
     
     setSelectedProduct(product);
-    // Handle edit product logic here
+    // This will be handled by the parent component to open the edit dialog
     console.log("Edit product:", product);
   };
 
   const sanitizeSearchTerm = (term: string) => {
-    // Remove caracteres potencialmente perigosos
     return term.replace(/[<>]/g, '');
   };
 
@@ -43,5 +43,6 @@ export const useProductActions = (refetch: () => void) => {
     handleStockTransaction,
     handleEditProduct,
     selectedProduct,
+    setSelectedProduct,
   };
 };

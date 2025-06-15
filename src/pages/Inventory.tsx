@@ -3,9 +3,10 @@ import React from 'react';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { FeatureGuard } from '@/components/FeatureGuard';
+import { InventoryHeader } from '@/components/inventory/InventoryHeader';
 import { InventoryContainer } from '@/components/inventory/InventoryContainer';
+import { InventoryDialogs } from '@/components/inventory/InventoryDialogs';
 import { useInventory } from '@/hooks/useInventory';
-import { useProductsData } from '@/hooks/inventory/useProductsData';
 
 const Inventory = () => {
   const {
@@ -14,13 +15,21 @@ const Inventory = () => {
     setSearchTerm,
     stats,
     selectedProducts,
+    selectedProduct,
     toggleSelect,
     selectAll,
+    setSelectedProducts,
     handleStockTransaction,
-    handleEditProduct
+    handleEditProduct,
+    isNewProductOpen,
+    setIsNewProductOpen,
+    isEditProductOpen,
+    setIsEditProductOpen,
+    isTransactionOpen,
+    setIsTransactionOpen,
+    transactionType,
+    refetch
   } = useInventory();
-
-  const { refetch } = useProductsData();
 
   return (
     <SidebarProvider>
@@ -31,9 +40,6 @@ const Inventory = () => {
             {/* Header */}
             <header className="flex items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
               <SidebarTrigger />
-              <div className="flex-1">
-                <h1 className="text-xl font-semibold">Estoque</h1>
-              </div>
             </header>
 
             {/* Main content */}
@@ -43,16 +49,44 @@ const Inventory = () => {
                 requiredPlan="professional"
                 showUpgradePrompt={true}
               >
-                <InventoryContainer
-                  products={products}
-                  stats={stats}
-                  searchTerm={searchTerm}
-                  setSearchTerm={setSearchTerm}
-                  onTransaction={handleStockTransaction}
-                  onEditProduct={handleEditProduct}
-                  selectedProducts={selectedProducts}
-                  onToggleSelect={toggleSelect}
-                  onSelectAll={selectAll}
+                <div className="p-6 space-y-6">
+                  <InventoryHeader
+                    onAddProduct={() => setIsNewProductOpen(true)}
+                    selectedProducts={selectedProducts}
+                    setSelectedProducts={setSelectedProducts}
+                    allProducts={products}
+                    fetchProducts={refetch}
+                  />
+                  
+                  <InventoryContainer
+                    products={products}
+                    stats={stats}
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    onTransaction={handleStockTransaction}
+                    onEditProduct={handleEditProduct}
+                    selectedProducts={selectedProducts}
+                    onToggleSelect={toggleSelect}
+                    onSelectAll={selectAll}
+                  />
+                </div>
+
+                <InventoryDialogs
+                  isNewProductOpen={isNewProductOpen}
+                  setIsNewProductOpen={setIsNewProductOpen}
+                  isEditProductOpen={isEditProductOpen}
+                  setIsEditProductOpen={setIsEditProductOpen}
+                  isTransactionOpen={isTransactionOpen}
+                  setIsTransactionOpen={setIsTransactionOpen}
+                  isHistoryOpen={false}
+                  setIsHistoryOpen={() => {}}
+                  isCategoriesOpen={false}
+                  setIsCategoriesOpen={() => {}}
+                  isReportsOpen={false}
+                  setIsReportsOpen={() => {}}
+                  selectedProduct={selectedProduct}
+                  transactionType={transactionType}
+                  onSuccess={refetch}
                 />
               </FeatureGuard>
             </main>
