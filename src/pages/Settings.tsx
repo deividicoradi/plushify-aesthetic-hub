@@ -77,15 +77,15 @@ const Settings = () => {
                 </TabsList>
                 
                 <TabsContent value="profile" className="space-y-6">
-                  <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+                  <Card className="border shadow-sm">
                     <CardHeader className="pb-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-200 dark:bg-blue-800 rounded-lg">
-                          <User className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <User className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <CardTitle className="text-blue-900 dark:text-blue-100">Informações do Perfil</CardTitle>
-                          <CardDescription className="text-blue-700 dark:text-blue-300">
+                          <CardTitle>Informações do Perfil</CardTitle>
+                          <CardDescription>
                             Atualize suas informações pessoais e profissionais
                           </CardDescription>
                         </div>
@@ -99,7 +99,7 @@ const Settings = () => {
                             <Input 
                               id="name" 
                               placeholder="Seu nome completo"
-                              className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800"
+                              className="bg-background"
                             />
                           </div>
                           <div className="space-y-2">
@@ -109,16 +109,16 @@ const Settings = () => {
                               type="email" 
                               value={user?.email || ''} 
                               disabled 
-                              className="bg-gray-100 dark:bg-gray-700 border-blue-200 dark:border-blue-800"
+                              className="bg-muted"
                             />
-                            <p className="text-xs text-blue-600 dark:text-blue-400">O e-mail não pode ser alterado</p>
+                            <p className="text-xs text-muted-foreground">O e-mail não pode ser alterado</p>
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="phone" className="text-sm font-medium">Telefone</Label>
                             <Input 
                               id="phone" 
                               placeholder="(00) 00000-0000"
-                              className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800"
+                              className="bg-background"
                             />
                           </div>
                           <div className="space-y-2">
@@ -126,7 +126,7 @@ const Settings = () => {
                             <Input 
                               id="profession" 
                               placeholder="Sua profissão"
-                              className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800"
+                              className="bg-background"
                             />
                           </div>
                         </div>
@@ -135,7 +135,7 @@ const Settings = () => {
                             <X className="w-4 h-4" />
                             Cancelar
                           </Button>
-                          <Button type="submit" className="gap-2 bg-blue-600 hover:bg-blue-700">
+                          <Button type="submit" className="gap-2 bg-primary hover:bg-primary/90">
                             <Save className="w-4 h-4" />
                             Salvar alterações
                           </Button>
@@ -146,15 +146,15 @@ const Settings = () => {
                 </TabsContent>
                 
                 <TabsContent value="account" className="space-y-6">
-                  <Card className="border-0 shadow-sm bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+                  <Card className="border shadow-sm">
                     <CardHeader className="pb-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-200 dark:bg-purple-800 rounded-lg">
-                          <Shield className="w-5 h-5 text-purple-600 dark:text-purple-300" />
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Shield className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <CardTitle className="text-purple-900 dark:text-purple-100">Segurança da Conta</CardTitle>
-                          <CardDescription className="text-purple-700 dark:text-purple-300">
+                          <CardTitle>Segurança da Conta</CardTitle>
+                          <CardDescription>
                             Gerencie suas preferências de conta e segurança
                           </CardDescription>
                         </div>
@@ -162,7 +162,7 @@ const Settings = () => {
                     </CardHeader>
                     <CardContent className="pt-0 space-y-6">
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">Alterar Senha</h3>
+                        <h3 className="text-lg font-semibold">Alterar Senha</h3>
                         <form onSubmit={handleSavePassword} className="space-y-4">
                           <div className="grid grid-cols-1 gap-4">
                             <div className="space-y-2">
@@ -170,7 +170,7 @@ const Settings = () => {
                               <Input 
                                 id="current-password" 
                                 type="password"
-                                className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800"
+                                className="bg-background"
                               />
                             </div>
                             <div className="space-y-2">
@@ -178,7 +178,7 @@ const Settings = () => {
                               <Input 
                                 id="new-password" 
                                 type="password"
-                                className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800"
+                                className="bg-background"
                               />
                             </div>
                             <div className="space-y-2">
@@ -186,21 +186,21 @@ const Settings = () => {
                               <Input 
                                 id="confirm-password" 
                                 type="password"
-                                className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800"
+                                className="bg-background"
                               />
                             </div>
                           </div>
-                          <Button type="submit" className="bg-purple-600 hover:bg-purple-700 gap-2">
+                          <Button type="submit" className="bg-primary hover:bg-primary/90 gap-2">
                             <Save className="w-4 h-4" />
                             Alterar Senha
                           </Button>
                         </form>
                       </div>
                       
-                      <div className="border-t border-purple-200 dark:border-purple-800 pt-6">
+                      <div className="border-t pt-6">
                         <div className="space-y-4">
                           <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">Zona de Perigo</h3>
-                          <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
+                          <div className="p-4 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800">
                             <p className="text-sm text-red-700 dark:text-red-300 mb-3">
                               A exclusão da sua conta é permanente e não pode ser desfeita.
                               Todos os seus dados serão excluídos permanentemente.
@@ -217,15 +217,15 @@ const Settings = () => {
                 </TabsContent>
                 
                 <TabsContent value="notifications" className="space-y-6">
-                  <Card className="border-0 shadow-sm bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
+                  <Card className="border shadow-sm">
                     <CardHeader className="pb-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-200 dark:bg-green-800 rounded-lg">
-                          <Bell className="w-5 h-5 text-green-600 dark:text-green-300" />
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Bell className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <CardTitle className="text-green-900 dark:text-green-100">Preferências de Notificação</CardTitle>
-                          <CardDescription className="text-green-700 dark:text-green-300">
+                          <CardTitle>Preferências de Notificação</CardTitle>
+                          <CardDescription>
                             Gerencie como você quer receber notificações
                           </CardDescription>
                         </div>
@@ -235,23 +235,23 @@ const Settings = () => {
                       <form id="notifications-form" onSubmit={handleSaveNotifications} className="space-y-6">
                         <div className="space-y-6">
                           <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">Notificações por E-mail</h3>
+                            <h3 className="text-lg font-semibold">Notificações por E-mail</h3>
                             <div className="space-y-4">
-                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
                                 <div className="space-y-1">
                                   <Label htmlFor="email-marketing" className="font-medium">Marketing</Label>
                                   <p className="text-sm text-muted-foreground">Receba novidades e ofertas exclusivas</p>
                                 </div>
                                 <Switch id="email-marketing" />
                               </div>
-                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
                                 <div className="space-y-1">
                                   <Label htmlFor="email-appointments" className="font-medium">Agendamentos</Label>
                                   <p className="text-sm text-muted-foreground">Receba notificações sobre seus agendamentos</p>
                                 </div>
                                 <Switch id="email-appointments" defaultChecked />
                               </div>
-                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
                                 <div className="space-y-1">
                                   <Label htmlFor="email-updates" className="font-medium">Atualizações da Plataforma</Label>
                                   <p className="text-sm text-muted-foreground">Saiba quando novos recursos são lançados</p>
@@ -262,16 +262,16 @@ const Settings = () => {
                           </div>
                           
                           <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">Notificações Push</h3>
+                            <h3 className="text-lg font-semibold">Notificações Push</h3>
                             <div className="space-y-4">
-                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
                                 <div className="space-y-1">
                                   <Label htmlFor="push-appointments" className="font-medium">Agendamentos</Label>
                                   <p className="text-sm text-muted-foreground">Receba alertas sobre novos agendamentos</p>
                                 </div>
                                 <Switch id="push-appointments" defaultChecked />
                               </div>
-                              <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+                              <div className="flex items-center justify-between p-3 bg-card rounded-lg border">
                                 <div className="space-y-1">
                                   <Label htmlFor="push-messages" className="font-medium">Mensagens</Label>
                                   <p className="text-sm text-muted-foreground">Seja notificado sobre novas mensagens</p>
@@ -282,7 +282,7 @@ const Settings = () => {
                           </div>
                         </div>
                         <div className="flex justify-end pt-4">
-                          <Button type="submit" className="bg-green-600 hover:bg-green-700 gap-2">
+                          <Button type="submit" className="bg-primary hover:bg-primary/90 gap-2">
                             <Save className="w-4 h-4" />
                             Salvar Preferências
                           </Button>
