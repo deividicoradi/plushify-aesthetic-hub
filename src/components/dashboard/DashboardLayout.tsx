@@ -3,7 +3,6 @@ import React from 'react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { PlanInfoBanner } from '@/components/dashboard/PlanInfoBanner';
 import { DashboardContent } from '@/components/dashboard/DashboardContent';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -12,9 +11,8 @@ interface DashboardLayoutProps {
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
-      {/* Header with sidebar trigger - mais compacto */}
+      {/* Header - mais compacto */}
       <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-2">
-        <SidebarTrigger />
         <div className="flex-1">
           <DashboardHeader />
         </div>

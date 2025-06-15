@@ -3,7 +3,6 @@ import React from 'react';
 import { BarChart3, Activity } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from '@/components/ui/sidebar';
 
 interface ReportsHeaderProps {
   onRefresh: () => void;
@@ -12,7 +11,6 @@ interface ReportsHeaderProps {
 export const ReportsHeader = ({ onRefresh }: ReportsHeaderProps) => {
   return (
     <header className="flex items-center gap-4 border-b bg-background px-6 py-4">
-      <SidebarTrigger />
       <div className="flex items-center justify-between flex-1">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">

@@ -2,7 +2,6 @@
 import React from 'react';
 import { Users, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from '@/components/ui/sidebar';
 
 interface ClientsHeaderProps {
   onNewClientClick: () => void;
@@ -12,7 +11,6 @@ const ClientsHeader: React.FC<ClientsHeaderProps> = ({ onNewClientClick }) => {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
       <div className="flex items-center gap-4 px-6 py-4">
-        <SidebarTrigger className="hover:bg-accent/50 transition-colors" />
         <div className="flex items-center justify-between flex-1">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
