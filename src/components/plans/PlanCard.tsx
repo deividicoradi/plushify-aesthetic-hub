@@ -77,9 +77,9 @@ export const PlanCard: React.FC<PlanCardProps> = ({
       </div>
 
       <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
-        <div className={`w-28 h-28 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center p-6 ${plan.mostComplete ? 'animate-pulse' : ''}`}>
+        <div className={`w-16 h-16 mx-auto rounded-xl bg-primary/10 flex items-center justify-center p-4 ${plan.mostComplete ? 'animate-pulse' : ''}`}>
           <IconComponent 
-            className={`${plan.mostComplete ? 'w-16 h-16' : 'w-14 h-14'} text-primary`} 
+            className={`${plan.mostComplete ? 'w-8 h-8' : 'w-7 h-7'} text-primary`} 
             strokeWidth={1.5}
           />
         </div>
