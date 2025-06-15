@@ -27,6 +27,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [categories, setCategories] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   
   const form = useForm<ProductFormData>({
     defaultValues: {
@@ -43,6 +44,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
         const { data, error } = await supabase
           .from('products')
           .select('category')
+          .eq('user_id', user?.id)
           .order('category');
         
         if (error) throw error;
@@ -57,18 +59,25 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
       }
     };
     
-    fetchCategories();
-  }, []);
+    if (user?.id) {
+      fetchCategories();
+    }
+  }, [user?.id]);
 
   const onSubmit = async (data: ProductFormData) => {
-    if (isSubmitting) {
-      console.log("Form already being submitted, ignoring duplicate submission");
+    if (isSubmitting || hasSubmitted) {
+      console.log("Form already being submitted or has been submitted, ignoring duplicate submission");
       return;
     }
     
     setIsSubmitting(true);
+    setHasSubmitted(true);
     
     try {
+      if (!user?.id) {
+        throw new Error("Usuário não autenticado");
+      }
+
       const finalCategory = customCategory || data.category;
       
       if (!finalCategory) {
@@ -76,29 +85,63 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
         return;
       }
 
-      console.log("Submitting product:", { name: data.name, category: finalCategory, minStock: data.minStock });
+      console.log("=== CRIANDO PRODUTO ===");
+      console.log("Dados:", { name: data.name, category: finalCategory, minStock: data.minStock, userId: user.id });
 
-      const { error } = await supabase
+      // Verificar se já existe um produto com o mesmo nome para este usuário
+      const { data: existingProduct, error: checkError } = await supabase
+        .from('products')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .eq('name', data.name.trim())
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error("Erro ao verificar produto existente:", checkError);
+        throw checkError;
+      }
+
+      if (existingProduct) {
+        console.log("Produto já existe:", existingProduct);
+        toast.error(`Já existe um produto com o nome "${data.name}"`);
+        return;
+      }
+
+      // Inserir o produto
+      const { data: newProduct, error: insertError } = await supabase
         .from('products')
         .insert({
-          name: data.name,
-          category: finalCategory,
+          name: data.name.trim(),
+          category: finalCategory.trim(),
           min_stock: data.minStock,
-          user_id: user?.id
-        });
+          user_id: user.id,
+          stock: 0
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (insertError) {
+        console.error("Erro ao inserir produto:", insertError);
+        throw insertError;
+      }
 
-      console.log("Product created successfully");
+      console.log("Produto criado com sucesso:", newProduct);
       toast.success("Produto adicionado com sucesso!");
+      
+      // Reset form
       form.reset();
       setCustomCategory("");
+      
+      // Call success callback
       onSuccess();
+      
     } catch (error: any) {
-      console.error("Error creating product:", error);
-      toast.error("Erro ao adicionar produto: " + error.message);
+      console.error("=== ERRO AO CRIAR PRODUTO ===", error);
+      toast.error("Erro ao adicionar produto: " + (error.message || "Erro desconhecido"));
     } finally {
       setIsSubmitting(false);
+      // Reset hasSubmitted after a delay to allow form reuse
+      setTimeout(() => setHasSubmitted(false), 2000);
     }
   };
 
@@ -119,7 +162,10 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
           <FormField
             control={form.control}
             name="name"
-            rules={{ required: "Nome do produto é obrigatório" }}
+            rules={{ 
+              required: "Nome do produto é obrigatório",
+              minLength: { value: 2, message: "Nome deve ter pelo menos 2 caracteres" }
+            }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
@@ -132,6 +178,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
                     placeholder="Ex: Esmalte Rosa"
                     className="h-11"
                     disabled={isSubmitting}
+                    onChange={(e) => field.onChange(e.target.value.trim())}
                   />
                 </FormControl>
                 <FormMessage />
@@ -142,6 +189,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
           <FormField
             control={form.control}
             name="category"
+            rules={{ required: !customCategory ? "Categoria é obrigatória" : false }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
@@ -176,8 +224,8 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
                       placeholder="Ou digite uma nova categoria"
                       value={customCategory}
                       onChange={(e) => {
-                        setCustomCategory(e.target.value);
-                        if (e.target.value) {
+                        setCustomCategory(e.target.value.trim());
+                        if (e.target.value.trim()) {
                           field.onChange("");
                         }
                       }}
@@ -226,9 +274,9 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
             <Button 
               type="submit" 
               className="w-full h-11 font-medium" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || hasSubmitted}
             >
-              {isSubmitting ? "Adicionando..." : "Adicionar Produto"}
+              {isSubmitting ? "Adicionando..." : hasSubmitted ? "Adicionado!" : "Adicionar Produto"}
             </Button>
           </div>
         </form>

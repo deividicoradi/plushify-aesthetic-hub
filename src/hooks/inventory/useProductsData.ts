@@ -38,6 +38,73 @@ export const useProductsData = () => {
     };
   };
 
+  // Função para limpar duplicatas
+  const cleanDuplicates = async () => {
+    if (!user) return;
+
+    try {
+      console.log("=== LIMPANDO DUPLICATAS ===");
+      
+      // Buscar todos os produtos do usuário
+      const { data: allProducts, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true }); // Manter o mais antigo
+
+      if (error) throw error;
+
+      if (!allProducts || allProducts.length === 0) return;
+
+      // Agrupar por nome (ignorando case)
+      const groupedByName = allProducts.reduce((acc, product) => {
+        const normalizedName = product.name.toLowerCase().trim();
+        if (!acc[normalizedName]) {
+          acc[normalizedName] = [];
+        }
+        acc[normalizedName].push(product);
+        return acc;
+      }, {} as Record<string, any[]>);
+
+      // Identificar duplicatas
+      const duplicateIds: string[] = [];
+      Object.values(groupedByName).forEach(group => {
+        if (group.length > 1) {
+          // Manter o primeiro (mais antigo) e marcar os outros para exclusão
+          const toDelete = group.slice(1);
+          duplicateIds.push(...toDelete.map(p => p.id));
+          console.log(`Duplicatas encontradas para "${group[0].name}":`, toDelete.map(p => p.id));
+        }
+      });
+
+      if (duplicateIds.length > 0) {
+        console.log("Removendo duplicatas:", duplicateIds);
+        
+        // Remover transações das duplicatas primeiro
+        await supabase
+          .from('inventory_transactions')
+          .delete()
+          .in('product_id', duplicateIds)
+          .eq('user_id', user.id);
+
+        // Remover as duplicatas
+        const { error: deleteError } = await supabase
+          .from('products')
+          .delete()
+          .in('id', duplicateIds)
+          .eq('user_id', user.id);
+
+        if (deleteError) throw deleteError;
+
+        console.log(`${duplicateIds.length} duplicatas removidas com sucesso`);
+        toast.success(`${duplicateIds.length} produto(s) duplicado(s) removido(s)`);
+      }
+    } catch (error: any) {
+      console.error("Erro ao limpar duplicatas:", error);
+      toast.error("Erro ao limpar duplicatas: " + error.message);
+    }
+  };
+
   const refetch = async () => {
     if (!user) {
       console.log("Usuário não autenticado, limpando produtos");
@@ -50,6 +117,9 @@ export const useProductsData = () => {
     try {
       console.log("=== RECARREGANDO PRODUTOS ===");
       console.log("Usuário:", user.id);
+
+      // Primeiro, limpar duplicatas
+      await cleanDuplicates();
       
       const { data, error } = await supabase
         .from('products')
