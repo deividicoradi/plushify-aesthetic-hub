@@ -48,7 +48,8 @@ export const useProductsData = () => {
     
     setIsLoading(true);
     try {
-      console.log("Buscando produtos para usuário:", user.id);
+      console.log("=== CARREGANDO PRODUTOS ===");
+      console.log("Usuário:", user.id);
       
       const { data, error } = await supabase
         .from('products')
@@ -62,6 +63,9 @@ export const useProductsData = () => {
       }
 
       console.log("Produtos carregados:", data?.length || 0);
+      if (data && data.length > 0) {
+        console.log("Lista de produtos:", data.map(p => ({ id: p.id, name: p.name })));
+      }
       
       const productsData = data || [];
       setProducts(productsData);
@@ -79,10 +83,11 @@ export const useProductsData = () => {
 
   // Função para remover produto da lista local (otimistic update)
   const removeProductFromList = (productId: string) => {
+    console.log("=== UPDATE OTIMÍSTICO ===");
     console.log("Removendo produto da lista local:", productId);
     setProducts(prevProducts => {
       const updatedProducts = prevProducts.filter(p => p.id !== productId);
-      console.log("Lista atualizada, produtos restantes:", updatedProducts.length);
+      console.log("Produtos restantes:", updatedProducts.length);
       setStats(calculateStats(updatedProducts));
       return updatedProducts;
     });
