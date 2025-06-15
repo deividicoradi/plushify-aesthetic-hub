@@ -5,7 +5,6 @@ import { PlanFeature } from '@/utils/plans/plansData';
 import { PlanCardHeader } from './PlanCardHeader';
 import { PlanCardFeatures } from './PlanCardFeatures';
 import { PlanCardBonuses } from './PlanCardBonuses';
-import { PlanCardLimitations } from './PlanCardLimitations';
 import { PlanCardFooter } from './PlanCardFooter';
 
 interface PlanCardProps {
@@ -55,7 +54,6 @@ export const PlanCard: React.FC<PlanCardProps> = ({
       <CardContent className="space-y-4 px-6 flex-1">
         <PlanCardFeatures plan={plan} />
         <PlanCardBonuses plan={plan} />
-        <PlanCardLimitations plan={plan} />
       </CardContent>
 
       <PlanCardFooter
