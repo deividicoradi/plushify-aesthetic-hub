@@ -44,9 +44,9 @@ const Services = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col min-h-screen w-full">
+      <div className="ml-64 min-h-screen flex flex-col">
         {/* Header */}
         <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
           <div className="flex items-center justify-between flex-1">

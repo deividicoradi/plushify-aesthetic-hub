@@ -42,9 +42,9 @@ const AdvancedAnalytics = () => {
                    seasonalAnalysis.isLoading || clientROI.isLoading || revenueForecasting.isLoading;
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col min-h-screen bg-background">
+      <div className="ml-64 min-h-screen flex flex-col">
         {/* Header */}
         <header className="flex items-center gap-4 border-b border-border bg-background px-6 py-4">
           <div className="flex-1">

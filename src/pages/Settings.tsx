@@ -30,24 +30,24 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex-1">
-        <div className="p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <SettingsIcon className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
-                <p className="text-muted-foreground">Gerencie suas preferências e configurações da conta</p>
-              </div>
+      <div className="ml-64 min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <SettingsIcon className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
+              <p className="text-muted-foreground">Gerencie suas preferências e configurações da conta</p>
             </div>
           </div>
+        </header>
 
-          {/* Settings Content */}
+        {/* Main content */}
+        <main className="flex-1 p-6">
           <div className="max-w-4xl">
             <Tabs defaultValue="profile" className="space-y-6">
               <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
@@ -178,7 +178,7 @@ const Settings = () => {
               </TabsContent>
             </Tabs>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
