@@ -7,12 +7,15 @@ export const useStripeCheckout = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const createCheckout = async (planType: 'professional' | 'premium') => {
+  const createCheckout = async (planType: 'professional' | 'premium', billingPeriod: 'monthly' | 'annual' = 'monthly') => {
     try {
       setLoading(true);
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { plan_type: planType }
+        body: { 
+          plan_type: planType,
+          billing_period: billingPeriod
+        }
       });
 
       if (error) {

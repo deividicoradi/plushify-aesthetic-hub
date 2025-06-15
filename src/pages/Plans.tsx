@@ -22,11 +22,13 @@ const Plans = () => {
     const success = urlParams.get('success');
     const canceled = urlParams.get('canceled');
     const plan = urlParams.get('plan');
+    const billing = urlParams.get('billing');
 
     if (success === 'true') {
+      const billingText = billing === 'annual' ? 'anual' : 'mensal';
       toast({
         title: "Pagamento realizado com sucesso!",
-        description: `Bem-vindo ao plano ${plan}! Verificando sua assinatura...`,
+        description: `Bem-vindo ao plano ${plan} ${billingText}! Verificando sua assinatura...`,
       });
       // Check subscription status after successful payment
       checkSubscriptionStatus();
@@ -47,7 +49,8 @@ const Plans = () => {
     if (planId === 'trial') return;
     
     if (planId === 'professional' || planId === 'premium') {
-      await createCheckout(planId as 'professional' | 'premium');
+      const billingPeriod = isAnnual ? 'annual' : 'monthly';
+      await createCheckout(planId as 'professional' | 'premium', billingPeriod);
     }
   };
 

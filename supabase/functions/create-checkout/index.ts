@@ -42,11 +42,14 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { plan_type } = await req.json();
+    const { plan_type, billing_period = 'monthly' } = await req.json();
     if (!plan_type || !['professional', 'premium'].includes(plan_type)) {
       throw new Error("Invalid plan type");
     }
-    logStep("Plan type validated", { plan_type });
+    if (!['monthly', 'annual'].includes(billing_period)) {
+      throw new Error("Invalid billing period");
+    }
+    logStep("Plan type and billing period validated", { plan_type, billing_period });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
@@ -60,14 +63,20 @@ serve(async (req) => {
       logStep("No existing customer found");
     }
 
-    // Define Price IDs for each plan
+    // Define Price IDs for each plan and billing period
     const planPriceIds = {
-      professional: "price_1Ra7djRkF2Xmse9MXUe17UqD", // R$ 89/mês
-      premium: "price_1Ra7etRkF2Xmse9MDJYsrTz4" // R$ 179/mês
+      professional: {
+        monthly: "price_1Ra7djRkF2Xmse9MXUe17UqD", // R$ 89/mês
+        annual: "price_1Ra7gNRkF2Xmse9MFXmQXDE2" // R$ 890/ano (30% desconto)
+      },
+      premium: {
+        monthly: "price_1Ra7etRkF2Xmse9MDJYsrTz4", // R$ 179/mês
+        annual: "price_1Ra7gnRkF2Xmse9MLZyq6N79" // R$ 1790/ano (30% desconto)
+      }
     };
 
-    const priceId = planPriceIds[plan_type as keyof typeof planPriceIds];
-    logStep("Price ID determined", { plan_type, priceId });
+    const priceId = planPriceIds[plan_type as keyof typeof planPriceIds][billing_period as 'monthly' | 'annual'];
+    logStep("Price ID determined", { plan_type, billing_period, priceId });
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
     
@@ -82,11 +91,12 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/planos?success=true&plan=${plan_type}`,
+      success_url: `${origin}/planos?success=true&plan=${plan_type}&billing=${billing_period}`,
       cancel_url: `${origin}/planos?canceled=true`,
       metadata: {
         user_id: user.id,
-        plan_type: plan_type
+        plan_type: plan_type,
+        billing_period: billing_period
       }
     });
 
