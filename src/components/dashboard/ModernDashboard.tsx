@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Users, Calendar, DollarSign, Package } from 'lucide-react';
 import { FeatureGuard } from '@/components/FeatureGuard';
@@ -25,7 +24,7 @@ export const ModernDashboard = () => {
   const weeklyOverviewHook = useWeeklyOverviewData();
   const appointmentsHook = useAppointments();
   const { metrics } = useFinancialData();
-  const { currentPlan, limits } = usePlanLimits();
+  const { limits } = usePlanLimits();
 
   // Filtrar próximos agendamentos
   const upcomingAppointments = appointmentsHook.appointments?.filter(apt => 
