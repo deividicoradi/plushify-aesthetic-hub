@@ -1,0 +1,121 @@
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+export type PlanType = 'trial' | 'professional' | 'premium';
+
+export interface UserSubscription {
+  id: string;
+  user_id: string;
+  plan_type: PlanType;
+  status: string;
+  started_at: string;
+  expires_at?: string;
+  trial_ends_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const useSubscription = () => {
+  const { user } = useAuth();
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentPlan, setCurrentPlan] = useState<PlanType>('trial');
+
+  const fetchSubscription = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao buscar assinatura:', error);
+        // Se não encontrar assinatura, criar uma trial
+        await createTrialSubscription();
+        return;
+      }
+
+      if (data) {
+        setSubscription(data);
+        setCurrentPlan(data.plan_type);
+      } else {
+        // Criar assinatura trial se não existir
+        await createTrialSubscription();
+      }
+    } catch (error) {
+      console.error('Erro ao buscar assinatura:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createTrialSubscription = async () => {
+    if (!user) return;
+
+    try {
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 3);
+
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .insert({
+          user_id: user.id,
+          plan_type: 'trial',
+          trial_ends_at: trialEndDate.toISOString(),
+          status: 'active'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao criar assinatura trial:', error);
+        return;
+      }
+
+      setSubscription(data);
+      setCurrentPlan('trial');
+    } catch (error) {
+      console.error('Erro ao criar assinatura trial:', error);
+    }
+  };
+
+  const hasFeatureAccess = async (featureName: string): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const { data, error } = await supabase.rpc('has_feature_access', {
+        feature_name: featureName
+      });
+
+      if (error) {
+        console.error('Erro ao verificar acesso:', error);
+        return false;
+      }
+
+      return data || false;
+    } catch (error) {
+      console.error('Erro ao verificar acesso:', error);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [user]);
+
+  return {
+    subscription,
+    currentPlan,
+    loading,
+    hasFeatureAccess,
+    refetch: fetchSubscription
+  };
+};

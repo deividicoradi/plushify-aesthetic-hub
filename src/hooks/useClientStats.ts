@@ -2,12 +2,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePlanLimits } from './usePlanLimits';
 
 interface ClientStats {
   totalClients: number;
   activeClients: number;
   newThisMonth: number;
   loading: boolean;
+  canAddMore: boolean;
 }
 
 export const useClientStats = () => {
@@ -15,9 +17,11 @@ export const useClientStats = () => {
     totalClients: 0,
     activeClients: 0,
     newThisMonth: 0,
-    loading: true
+    loading: true,
+    canAddMore: true
   });
   const { user } = useAuth();
+  const { hasReachedLimit } = usePlanLimits();
 
   const fetchClientStats = async () => {
     if (!user) return;
@@ -55,11 +59,15 @@ export const useClientStats = () => {
 
       if (newError) throw newError;
 
+      const total = totalClients || 0;
+      const canAddMore = !hasReachedLimit('clients', total);
+
       setStats({
-        totalClients: totalClients || 0,
+        totalClients: total,
         activeClients: activeClients || 0,
         newThisMonth: newThisMonth || 0,
-        loading: false
+        loading: false,
+        canAddMore
       });
     } catch (error) {
       console.error('Erro ao buscar estatísticas de clientes:', error);

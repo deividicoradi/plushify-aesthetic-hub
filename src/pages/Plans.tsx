@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Check, Crown, Zap, Star, ArrowRight, Sparkles, Clock, AlertTriangle } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -7,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const Plans = () => {
   const [isAnnual, setIsAnnual] = useState(false);
+  const { currentPlan, subscription, loading } = useSubscription();
 
   const plans = [
     {
@@ -45,7 +46,7 @@ const Plans = () => {
         'Marca d\'água no sistema'
       ],
       trial: true,
-      current: true
+      current: currentPlan === 'trial'
     },
     {
       id: 'professional',
@@ -76,7 +77,8 @@ const Plans = () => {
         'Histórico completo',
         'Suporte prioritário'
       ],
-      limitations: []
+      limitations: [],
+      current: currentPlan === 'professional'
     },
     {
       id: 'premium',
@@ -105,7 +107,8 @@ const Plans = () => {
         'Integrações futuras',
         'API personalizada'
       ],
-      limitations: []
+      limitations: [],
+      current: currentPlan === 'premium'
     }
   ];
 
@@ -135,6 +138,21 @@ const Plans = () => {
       answer: 'Sim! Oferecemos 30% de desconto para pagamentos anuais em todos os planos pagos, com opção de parcelamento em até 10x.'
     }
   ];
+
+  if (loading) {
+    return (
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <SidebarInset className="flex-1">
+            <div className="flex items-center justify-center h-screen">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -171,18 +189,20 @@ const Plans = () => {
                   </div>
                 </div>
 
-                {/* Trial Alert */}
-                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                    <div className="flex-1">
-                      <h3 className="font-medium text-orange-800 dark:text-orange-200">Trial Gratuito Ativo</h3>
-                      <p className="text-sm text-orange-700 dark:text-orange-300">
-                        Você está no trial gratuito. Restam 2 dias para escolher um plano e manter seus dados.
-                      </p>
+                {/* Current Plan Alert */}
+                {currentPlan === 'trial' && (
+                  <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                      <div className="flex-1">
+                        <h3 className="font-medium text-orange-800 dark:text-orange-200">Trial Gratuito Ativo</h3>
+                        <p className="text-sm text-orange-700 dark:text-orange-300">
+                          Você está no trial gratuito. Escolha um plano para continuar usando todas as funcionalidades.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Billing Toggle */}
                 <div className="flex items-center justify-center gap-4 py-4">
@@ -251,10 +271,10 @@ const Plans = () => {
                           <div className="space-y-2">
                             <h3 className="text-2xl font-bold text-foreground">{plan.name}</h3>
                             <p className="text-muted-foreground">{plan.description}</p>
-                            {plan.trial && (
+                            {plan.trial && plan.current && (
                               <div className="flex items-center justify-center gap-2 text-orange-600 dark:text-orange-400 text-sm font-medium">
                                 <Clock className="w-4 h-4" />
-                                Expira em 2 dias
+                                Plano atual
                               </div>
                             )}
                           </div>
