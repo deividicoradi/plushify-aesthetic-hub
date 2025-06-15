@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Check, Crown, Zap, Star, ArrowRight, Sparkles, Clock, AlertTriangle, TrendingUp, Shield, Users, Rocket, Gift, BadgePercent } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -470,54 +469,56 @@ const Plans = () => {
                         </CardContent>
 
                         <CardFooter className="pt-4 px-6 pb-6 flex-shrink-0">
-                          <Button 
-                            className={`w-full h-14 text-base font-semibold transition-all duration-300 transform hover:scale-105 ${
-                              plan.current 
-                                ? plan.trial
-                                  ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' 
-                                  : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white'
-                                : plan.mostComplete 
-                                  ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg animate-pulse' 
-                                  : 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                            }`}
-                            disabled={(plan.current && !plan.trial) || stripeLoading}
-                            onClick={() => handlePlanSelection(plan.id)}
-                          >
-                            {stripeLoading ? (
-                              "Processando..."
-                            ) : plan.current ? (
-                              plan.trial ? (
+                          <div className="w-full space-y-3">
+                            <Button 
+                              className={`w-full h-14 text-base font-semibold transition-all duration-300 transform hover:scale-105 ${
+                                plan.current 
+                                  ? plan.trial
+                                    ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' 
+                                    : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white'
+                                  : plan.mostComplete 
+                                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg animate-pulse' 
+                                    : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                              }`}
+                              disabled={(plan.current && !plan.trial) || stripeLoading}
+                              onClick={() => handlePlanSelection(plan.id)}
+                            >
+                              {stripeLoading ? (
+                                "Processando..."
+                              ) : plan.current ? (
+                                plan.trial ? (
+                                  <div className="flex items-center justify-center gap-3">
+                                    <Rocket className="w-5 h-5 flex-shrink-0" />
+                                    <span>FAZER UPGRADE AGORA!</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-center gap-3">
+                                    <Check className="w-5 h-5 flex-shrink-0" />
+                                    <span>Plano Atual</span>
+                                  </div>
+                                )
+                              ) : plan.mostComplete ? (
                                 <div className="flex items-center justify-center gap-3">
-                                  <Rocket className="w-5 h-5 flex-shrink-0" />
-                                  <span>FAZER UPGRADE AGORA!</span>
+                                  <Crown className="w-6 h-6 flex-shrink-0" />
+                                  <span>ESCOLHER O MELHOR!</span>
+                                  <ArrowRight className="w-5 h-5 flex-shrink-0" />
                                 </div>
                               ) : (
                                 <div className="flex items-center justify-center gap-3">
-                                  <Check className="w-5 h-5 flex-shrink-0" />
-                                  <span>Plano Atual</span>
+                                  <span>Escolher {plan.name}</span>
+                                  <ArrowRight className="w-5 h-5 flex-shrink-0" />
                                 </div>
-                              )
-                            ) : plan.mostComplete ? (
-                              <div className="flex items-center justify-center gap-3">
-                                <Crown className="w-6 h-6 flex-shrink-0" />
-                                <span>ESCOLHER O MELHOR!</span>
-                                <ArrowRight className="w-5 h-5 flex-shrink-0" />
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-center gap-3">
-                                <span>Escolher {plan.name}</span>
-                                <ArrowRight className="w-5 h-5 flex-shrink-0" />
+                              )}
+                            </Button>
+                            
+                            {plan.mostComplete && (
+                              <div className="text-center">
+                                <p className="text-xs text-primary font-medium animate-pulse">
+                                  Escolha de 89% dos nossos clientes de sucesso!
+                                </p>
                               </div>
                             )}
-                          </Button>
-                          
-                          {plan.mostComplete && (
-                            <div className="text-center mt-2">
-                              <p className="text-xs text-primary font-medium animate-pulse">
-                                Escolha de 89% dos nossos clientes de sucesso!
-                              </p>
-                            </div>
-                          )}
+                          </div>
                         </CardFooter>
                       </Card>
                     );
