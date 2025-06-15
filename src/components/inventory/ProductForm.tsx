@@ -26,6 +26,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const { user } = useAuth();
   const [categories, setCategories] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<ProductFormData>({
     defaultValues: {
@@ -60,6 +61,13 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
   }, []);
 
   const onSubmit = async (data: ProductFormData) => {
+    if (isSubmitting) {
+      console.log("Form already being submitted, ignoring duplicate submission");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
     try {
       const finalCategory = customCategory || data.category;
       
@@ -67,6 +75,8 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
         toast.error("Por favor, selecione ou digite uma categoria");
         return;
       }
+
+      console.log("Submitting product:", { name: data.name, category: finalCategory, minStock: data.minStock });
 
       const { error } = await supabase
         .from('products')
@@ -79,12 +89,16 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
       if (error) throw error;
 
+      console.log("Product created successfully");
       toast.success("Produto adicionado com sucesso!");
       form.reset();
       setCustomCategory("");
       onSuccess();
     } catch (error: any) {
+      console.error("Error creating product:", error);
       toast.error("Erro ao adicionar produto: " + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -117,6 +131,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
                     {...field} 
                     placeholder="Ex: Esmalte Rosa"
                     className="h-11"
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -140,6 +155,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
                       field.onChange(value);
                       setCustomCategory("");
                     }}
+                    disabled={isSubmitting}
                   >
                     <FormControl>
                       <SelectTrigger className="h-11">
@@ -166,6 +182,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
                         }
                       }}
                       className="h-11"
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -193,6 +210,7 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
                     type="number" 
                     min="0"
                     className="h-11"
+                    disabled={isSubmitting}
                     onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                   />
                 </FormControl>
@@ -205,8 +223,12 @@ export const ProductForm = ({ onSuccess }: { onSuccess: () => void }) => {
           />
 
           <div className="pt-4">
-            <Button type="submit" className="w-full h-11 font-medium">
-              Adicionar Produto
+            <Button 
+              type="submit" 
+              className="w-full h-11 font-medium" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Adicionando..." : "Adicionar Produto"}
             </Button>
           </div>
         </form>
