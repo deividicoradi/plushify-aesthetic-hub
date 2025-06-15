@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, BarChart3, Box, CreditCard } from 'lucide-react';
+import { Calendar, Users, BarChart3, Box, CreditCard, MessageSquare } from 'lucide-react';
 
 const Feature = ({ icon, title, description, path }: { icon: React.ReactNode, title: string, description: string, path?: string }) => {
   const navigate = useNavigate();
@@ -68,6 +68,13 @@ const Features = () => {
             title="Relatórios e Dashboard"
             description="Acompanhe o desempenho do seu negócio com relatórios detalhados e métricas importantes."
             path="/dashboard"
+          />
+
+          <Feature 
+            icon={<MessageSquare className="w-4 h-4 text-white" />}
+            title="Campanhas de Marketing"
+            description="Crie e gerencie campanhas personalizadas para fidelizar clientes e aumentar seu faturamento."
+            path="/campanhas"
           />
         </div>
         
