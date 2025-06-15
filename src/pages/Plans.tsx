@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Clock, Zap, Crown } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -78,9 +77,7 @@ const Plans = () => {
         'Até 5 clientes',
         'Até 3 agendamentos',
         'Até 2 serviços',
-        'Estoque básico (10 produtos)',
-        'Sem relatórios avançados',
-        'Sem backup automático'
+        'Estoque básico (10 produtos)'
       ],
       limitations: [
         'Acesso limitado a 3 dias',
@@ -104,15 +101,16 @@ const Plans = () => {
       subtitle: 'Ideal para freelancers e pequenos negócios',
       icon: Zap,
       features: [
-        'Acesso completo e ilimitado',
         'Clientes ilimitados',
-        'Dashboard avançado',
-        'Gestão financeira completa',
-        'Sistema de parcelas',
+        'Agendamentos ilimitados',
+        'Gestão de serviços completa',
+        'Gestão de estoque ilimitada',
+        'Dashboard com métricas',
+        'Gestão financeira (pagamentos e parcelas)',
+        'Gestão de despesas',
+        'Controle de caixa',
         'Relatórios detalhados',
-        'Gestão de estoque',
-        'Alertas inteligentes',
-        'Suporte prioritário'
+        'Sistema de notas'
       ],
       limitations: [],
       current: currentPlan === 'professional'
@@ -133,22 +131,19 @@ const Plans = () => {
       mostComplete: true,
       features: [
         'TUDO do plano Professional',
-        'Analytics avançados e IA',
-        'Dashboard executivo premium',
-        'Auditoria e logs de segurança',
-        'Backup automático na nuvem',
+        'Dashboard executivo avançado',
+        'Relatórios avançados com gráficos',
+        'Exportação de relatórios (PDF)',
+        'Analytics detalhados',
+        'Histórico de auditoria',
+        'Sistema de backup automático',
         'Múltiplos usuários (até 10)',
-        'Relatórios personalizados',
-        'Exportação PDF/Excel',
-        'Suporte VIP 24/7',
-        'Consultoria mensal GRATUITA',
-        'Integrações exclusivas',
-        'API personalizada'
+        'Suporte VIP prioritário'
       ],
       bonuses: [
         'Setup personalizado GRÁTIS',
         'Treinamento VIP incluso',
-        'Acesso a funcionalidades BETA',
+        'Suporte técnico exclusivo',
         'Selo de cliente Premium'
       ],
       limitations: [],
