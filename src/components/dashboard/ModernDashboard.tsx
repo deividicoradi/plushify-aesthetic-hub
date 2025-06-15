@@ -1,251 +1,333 @@
 
 import React from 'react';
-import { Users, Calendar, DollarSign, Package, TrendingUp, Bell, Target, Zap } from 'lucide-react';
-import { FeatureGuard } from '@/components/FeatureGuard';
-import { DashboardHeader } from './DashboardHeader';
-import { ModernMetricCard } from './ModernMetricCard';
-import { InteractiveChart } from './InteractiveChart';
-import { WeeklyOverview } from './WeeklyOverview';
-import { UpcomingAppointments } from './UpcomingAppointments';
-import { ModernActivityFeed } from './ModernActivityFeed';
-import { PlanInfoBanner } from './PlanInfoBanner';
-import { AlertsPanel } from './AlertsPanel';
-import { QuickHelp } from './QuickHelp';
-import { FloatingActionButtons } from './FloatingActionButtons';
+import { TrendingUp, Users, Calendar, DollarSign, Package, BarChart3, PieChart, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useInteractiveChartData } from '@/hooks/useInteractiveChartData';
 import { useWeeklyOverviewData } from '@/hooks/useWeeklyOverviewData';
-import { useAppointments } from '@/hooks/useAppointments';
 import { useFinancialData } from '@/hooks/useFinancialData';
-import { usePlanLimits } from '@/hooks/usePlanLimits';
-import { useNavigate } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart as RechartsPieChart, Cell } from 'recharts';
 
 export const ModernDashboard = () => {
-  const navigate = useNavigate();
   const dashboardStats = useDashboardStats();
   const chartDataHook = useInteractiveChartData();
   const weeklyOverviewHook = useWeeklyOverviewData();
-  const appointmentsHook = useAppointments();
   const { metrics } = useFinancialData();
-  const { limits } = usePlanLimits();
 
-  // Filtrar próximos agendamentos
-  const upcomingAppointments = appointmentsHook.appointments?.filter(apt => 
-    new Date(apt.appointment_date) >= new Date() && apt.status === 'agendado'
-  )?.slice(0, 5) || [];
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
 
-  const quickActions = [
-    {
-      title: 'Novo Agendamento',
-      description: 'Agende um cliente rapidamente',
-      icon: Calendar,
-      color: 'from-blue-500 to-blue-600',
-      onClick: () => navigate('/appointments'),
-      feature: 'appointments'
-    },
-    {
-      title: 'Cadastrar Cliente',
-      description: 'Adicione um novo cliente',
-      icon: Users,
-      color: 'from-green-500 to-green-600',
-      onClick: () => navigate('/clients'),
-      feature: 'clients'
-    },
-    {
-      title: 'Controle Financeiro',
-      description: 'Gerencie pagamentos e receitas',
-      icon: DollarSign,
-      color: 'from-purple-500 to-purple-600',
-      onClick: () => navigate('/financial'),
-      feature: 'financial'
-    },
-    {
-      title: 'Relatórios',
-      description: 'Analise seu desempenho',
-      icon: TrendingUp,
-      color: 'from-orange-500 to-orange-600',
-      onClick: () => navigate('/reports'),
-      feature: 'reports'
-    }
+  // Dados para gráfico de pizza - categorias de receita
+  const pieData = [
+    { name: 'Serviços', value: metrics?.receitasMesAtual || 0, color: '#8B5CF6' },
+    { name: 'Produtos', value: (metrics?.receitasMesAtual || 0) * 0.3, color: '#06B6D4' },
+    { name: 'Outros', value: (metrics?.receitasMesAtual || 0) * 0.1, color: '#10B981' },
+  ];
+
+  // Dados para gráfico de evolução mensal
+  const monthlyData = [
+    { month: 'Jan', receitas: 3200, despesas: 1800, clientes: 45 },
+    { month: 'Fev', receitas: 4100, despesas: 2200, clientes: 52 },
+    { month: 'Mar', receitas: 3800, despesas: 1900, clientes: 48 },
+    { month: 'Abr', receitas: 5200, despesas: 2800, clientes: 61 },
+    { month: 'Mai', receitas: 4800, despesas: 2500, clientes: 58 },
+    { month: 'Jun', receitas: metrics?.receitasMesAtual || 5500, despesas: 2900, clientes: dashboardStats.totalClients || 65 },
   ];
 
   return (
-    <div className="space-y-6 pb-20">
-      <DashboardHeader />
-      
-      <PlanInfoBanner />
-
-      {/* Hero Section com estatísticas principais */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/10 p-8">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="relative">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-3xl font-bold text-foreground mb-2">
-                Bem-vindo ao seu Dashboard
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Gerencie seu negócio de forma inteligente e eficiente
-              </p>
+    <div className="space-y-6">
+      {/* KPIs Principais */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-950/50 border-blue-200 dark:border-blue-800">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-600 dark:text-blue-400 text-sm font-medium">Receita Total</p>
+                <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                  {formatCurrency(metrics?.totalReceitas || 0)}
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                  +{metrics?.crescimentoReceitas?.toFixed(1) || '0'}% vs mês anterior
+                </p>
+              </div>
+              <div className="bg-blue-500 p-3 rounded-full">
+                <DollarSign className="w-6 h-6 text-white" />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="px-3 py-1">
-                <Zap className="w-4 h-4 mr-1" />
-                Sistema Ativo
-              </Badge>
-            </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <ModernMetricCard
-              title="Clientes Totais"
-              value={String(dashboardStats.totalClients || 0)}
-              change={String(dashboardStats.newThisMonth || 0)}
-              icon={Users}
-              loading={dashboardStats.loading}
-              limit={limits.clients}
-              currentCount={dashboardStats.totalClients || 0}
-              feature="clients"
-            />
-            
-            <ModernMetricCard
-              title="Agendamentos"
-              value={String(dashboardStats.totalAppointments || 0)}
-              change={String(dashboardStats.weeklyAppointments || 0)}
-              icon={Calendar}
-              loading={dashboardStats.loading}
-              limit={limits.appointments}
-              currentCount={dashboardStats.totalAppointments || 0}
-              feature="appointments"
-            />
-            
-            <FeatureGuard planFeature="hasFinancialManagement" showUpgradePrompt={false}>
-              <ModernMetricCard
-                title="Receita Mensal"
-                value={String(metrics?.receitasMesAtual || 0)}
-                change={String(metrics?.crescimentoReceitas || 0)}
-                icon={DollarSign}
-                loading={dashboardStats.loading}
-                isCurrency
-                feature="revenue"
-              />
-            </FeatureGuard>
-            
-            <FeatureGuard planFeature="hasInventoryAdvanced" showUpgradePrompt={false}>
-              <ModernMetricCard
-                title="Produtos"
-                value={String(dashboardStats.totalClients || 0)}
-                change={String(0)}
-                icon={Package}
-                loading={dashboardStats.loading}
-                limit={limits.products}
-                currentCount={dashboardStats.totalClients || 0}
-                feature="products"
-              />
-            </FeatureGuard>
-          </div>
-        </div>
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-950/50 border-green-200 dark:border-green-800">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-600 dark:text-green-400 text-sm font-medium">Total Clientes</p>
+                <p className="text-2xl font-bold text-green-900 dark:text-green-100">
+                  {dashboardStats.totalClients || 0}
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  +{dashboardStats.newThisMonth || 0} este mês
+                </p>
+              </div>
+              <div className="bg-green-500 p-3 rounded-full">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-950/50 border-purple-200 dark:border-purple-800">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Agendamentos</p>
+                <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                  {dashboardStats.totalAppointments || 0}
+                </p>
+                <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                  {dashboardStats.weeklyAppointments || 0} esta semana
+                </p>
+              </div>
+              <div className="bg-purple-500 p-3 rounded-full">
+                <Calendar className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-950/50 border-orange-200 dark:border-orange-800">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-orange-600 dark:text-orange-400 text-sm font-medium">Saldo Líquido</p>
+                <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
+                  {formatCurrency(metrics?.saldoLiquido || 0)}
+                </p>
+                <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                  Receitas - Despesas
+                </p>
+              </div>
+              <div className="bg-orange-500 p-3 rounded-full">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Ações Rápidas */}
-      <Card className="border-0 shadow-lg bg-gradient-to-r from-card to-card/80">
+      {/* Gráficos Principais */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Gráfico de Receitas vs Despesas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+              Evolução Financeira - Últimos 6 Meses
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => formatCurrency(value)} />
+                  <Tooltip 
+                    formatter={(value, name) => [
+                      formatCurrency(Number(value)), 
+                      name === 'receitas' ? 'Receitas' : 'Despesas'
+                    ]}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="receitas" 
+                    stackId="1"
+                    stroke="#10B981" 
+                    fill="#10B981" 
+                    fillOpacity={0.6}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="despesas" 
+                    stackId="2"
+                    stroke="#EF4444" 
+                    fill="#EF4444" 
+                    fillOpacity={0.6}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Gráfico de Pizza - Distribuição de Receitas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PieChart className="w-5 h-5 text-purple-600" />
+              Distribuição de Receitas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <RechartsPieChart.Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </RechartsPieChart.Pie>
+                  <Tooltip 
+                    formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos da Semana */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Agendamentos da Semana */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-indigo-600" />
+              Agendamentos da Semana
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartDataHook.data}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="agendamentos" 
+                    stroke="#6366F1" 
+                    strokeWidth={3}
+                    dot={{ fill: '#6366F1', strokeWidth: 2, r: 6 }}
+                    activeDot={{ r: 8 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Faturamento da Semana */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-600" />
+              Faturamento Semanal
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartDataHook.data}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => formatCurrency(value)} />
+                  <Tooltip 
+                    formatter={(value) => [formatCurrency(Number(value)), 'Faturamento']}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="faturamento" 
+                    fill="#10B981" 
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráfico de Crescimento de Clientes */}
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            Ações Rápidas
+            <Users className="w-5 h-5 text-cyan-600" />
+            Crescimento de Clientes e Performance
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {quickActions.map((action, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className={`h-auto p-4 flex flex-col items-start gap-3 hover:shadow-md transition-all duration-200 border-2 hover:border-primary/20 group`}
-                onClick={action.onClick}
-              >
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
-                  <action.icon className="w-5 h-5 text-white" />
-                </div>
-                <div className="text-left">
-                  <h3 className="font-semibold text-sm">{action.title}</h3>
-                  <p className="text-xs text-muted-foreground">{action.description}</p>
-                </div>
-              </Button>
-            ))}
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip 
+                  formatter={(value, name) => [
+                    name === 'clientes' ? `${value} clientes` : formatCurrency(Number(value)),
+                    name === 'clientes' ? 'Total de Clientes' : 'Receitas'
+                  ]}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="clientes" 
+                  stroke="#06B6D4" 
+                  fill="#06B6D4" 
+                  fillOpacity={0.3}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="receitas" 
+                  stroke="#8B5CF6" 
+                  strokeWidth={2}
+                  dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 4 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
-
-      {/* Gráficos e Visão Geral */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
-          <FeatureGuard 
-            planFeature="hasAdvancedAnalytics" 
-            showUpgradePrompt={false}
-            fallback={
-              <Card className="border-dashed border-2 border-primary/20">
-                <CardContent className="p-8 text-center">
-                  <TrendingUp className="w-12 h-12 text-primary/40 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Gráficos Avançados</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Disponível apenas no plano Premium
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate('/planos')}
-                    className="border-primary text-primary hover:bg-primary hover:text-white"
-                  >
-                    Fazer Upgrade
-                  </Button>
-                </CardContent>
-              </Card>
-            }
-          >
-            <InteractiveChart />
-          </FeatureGuard>
-        </div>
-        
-        <div className="space-y-6">
-          <WeeklyOverview />
-          <AlertsPanel />
-        </div>
-      </div>
-
-      {/* Agendamentos e Atividades */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <UpcomingAppointments />
-        <FeatureGuard 
-          planFeature="hasAdvancedAnalytics" 
-          showUpgradePrompt={false}
-          fallback={
-            <Card className="border-dashed border-2 border-primary/20">
-              <CardContent className="p-8 text-center">
-                <Bell className="w-12 h-12 text-primary/40 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Feed de Atividades</h3>
-                <p className="text-muted-foreground mb-4">
-                  Disponível apenas no plano Premium
-                </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/planos')}
-                  className="border-primary text-primary hover:bg-primary hover:text-white"
-                >
-                  Fazer Upgrade
-                </Button>
-              </CardContent>
-            </Card>
-          }
-        >
-          <ModernActivityFeed />
-        </FeatureGuard>
-      </div>
-
-      <QuickHelp />
-      <FloatingActionButtons />
     </div>
   );
 };
