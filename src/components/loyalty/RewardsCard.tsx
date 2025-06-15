@@ -4,60 +4,7 @@ import { Gift, Zap, Crown, Heart, Sparkles } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-interface Reward {
-  id: string;
-  title: string;
-  description: string;
-  pointsCost: number;
-  type: 'discount' | 'service' | 'product' | 'experience';
-  tier: 'Bronze' | 'Prata' | 'Ouro' | 'Diamante';
-  available: boolean;
-  popular: boolean;
-}
-
-const mockRewards: Reward[] = [
-  {
-    id: '1',
-    title: 'Desconto 10%',
-    description: 'Em qualquer serviço',
-    pointsCost: 100,
-    type: 'discount',
-    tier: 'Bronze',
-    available: true,
-    popular: true
-  },
-  {
-    id: '2',
-    title: 'Limpeza de Pele Grátis',
-    description: 'Serviço completo',
-    pointsCost: 250,
-    type: 'service',
-    tier: 'Prata',
-    available: true,
-    popular: false
-  },
-  {
-    id: '3',
-    title: 'Kit Cuidados Premium',
-    description: 'Produtos exclusivos',
-    pointsCost: 400,
-    type: 'product',
-    tier: 'Ouro',
-    available: true,
-    popular: true
-  },
-  {
-    id: '4',
-    title: 'Day Spa Completo',
-    description: 'Experiência exclusiva VIP',
-    pointsCost: 800,
-    type: 'experience',
-    tier: 'Diamante',
-    available: false,
-    popular: false
-  }
-];
+import { useRewards } from '@/hooks/useRewards';
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -79,6 +26,29 @@ const getTierColor = (tier: string) => {
 };
 
 export const RewardsCard: React.FC = () => {
+  const { rewards, loading } = useRewards();
+
+  if (loading) {
+    return (
+      <Card className="bg-card/80 backdrop-blur-sm border-border/50">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Gift className="w-5 h-5 text-primary" />
+            Catálogo de Recompensas
+          </CardTitle>
+          <CardDescription>Troque seus pontos por recompensas incríveis</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="animate-pulse space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 bg-muted/30 rounded-lg"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-card/80 backdrop-blur-sm border-border/50">
       <CardHeader className="pb-4">
@@ -90,7 +60,7 @@ export const RewardsCard: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 gap-3">
-          {mockRewards.map((reward) => (
+          {rewards.map((reward) => (
             <div key={reward.id} className={`p-4 rounded-lg border border-border/50 transition-all hover:shadow-md ${!reward.available ? 'opacity-60' : ''} bg-card/30 dark:bg-card/20`}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">

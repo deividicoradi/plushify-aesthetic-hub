@@ -4,58 +4,7 @@ import { Target, Users, Calendar, DollarSign, CheckCircle, Clock, Star } from 'l
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-
-interface Challenge {
-  id: string;
-  title: string;
-  description: string;
-  target: number;
-  current: number;
-  reward: string;
-  type: 'visits' | 'spending' | 'referral' | 'frequency';
-  difficulty: 'easy' | 'medium' | 'hard';
-  expiresAt: string;
-  completed: boolean;
-}
-
-const mockChallenges: Challenge[] = [
-  {
-    id: '1',
-    title: 'Cliente Frequente',
-    description: 'Realize 5 agendamentos este mês',
-    target: 5,
-    current: 3,
-    reward: '50 pontos bônus',
-    type: 'visits',
-    difficulty: 'easy',
-    expiresAt: '2025-01-31',
-    completed: false
-  },
-  {
-    id: '2',
-    title: 'Grande Investidor',
-    description: 'Gaste R$ 500 em serviços',
-    target: 500,
-    current: 350,
-    reward: '100 pontos + desconto 10%',
-    type: 'spending',
-    difficulty: 'medium',
-    expiresAt: '2025-01-31',
-    completed: false
-  },
-  {
-    id: '3',
-    title: 'Embaixador VIP',
-    description: 'Indique 3 novos clientes',
-    target: 3,
-    current: 3,
-    reward: '200 pontos + brinde especial',
-    type: 'referral',
-    difficulty: 'hard',
-    expiresAt: '2025-01-31',
-    completed: true
-  }
-];
+import { useChallenges } from '@/hooks/useChallenges';
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -76,6 +25,29 @@ const getDifficultyColor = (difficulty: string) => {
 };
 
 export const ChallengesCard: React.FC = () => {
+  const { challenges, loading } = useChallenges();
+
+  if (loading) {
+    return (
+      <Card className="bg-card/80 backdrop-blur-sm border-border/50">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Target className="w-5 h-5 text-primary" />
+            Desafios e Metas
+          </CardTitle>
+          <CardDescription>Complete desafios para ganhar pontos extras e recompensas especiais</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="animate-pulse space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 bg-muted/30 rounded-lg"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-card/80 backdrop-blur-sm border-border/50">
       <CardHeader className="pb-4">
@@ -86,7 +58,7 @@ export const ChallengesCard: React.FC = () => {
         <CardDescription>Complete desafios para ganhar pontos extras e recompensas especiais</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {mockChallenges.map((challenge) => (
+        {challenges.map((challenge) => (
           <div key={challenge.id} className={`p-4 rounded-lg border border-border/50 ${challenge.completed ? 'bg-green-50/80 dark:bg-green-950/30 border-green-200/50 dark:border-green-800/30' : 'bg-muted/30 dark:bg-muted/20'}`}>
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
