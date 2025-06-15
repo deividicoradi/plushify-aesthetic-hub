@@ -16,10 +16,10 @@ export const CTASection: React.FC<CTASectionProps> = ({
   isAnnual
 }) => {
   return (
-    <Card className="text-center bg-gradient-to-br from-muted to-accent border-border">
+    <Card className="text-center bg-gradient-to-br from-card to-muted border-border">
       <CardContent className="p-10 space-y-6">
-        <div className="w-16 h-16 mx-auto rounded-full bg-primary/20 flex items-center justify-center">
-          <Crown className="w-8 h-8 text-primary" />
+        <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center border">
+          <Crown className="w-8 h-8 text-foreground" />
         </div>
         <div className="space-y-3">
           <h2 className="text-3xl font-bold text-foreground">
@@ -35,7 +35,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
             size="lg" 
             onClick={() => onPlanSelection('premium')}
             disabled={isLoading('premium_' + (isAnnual ? 'annual' : 'monthly'))}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-lg px-6 py-3 shadow-lg transform hover:scale-105 transition-all h-14"
+            className="bg-foreground text-background hover:bg-foreground/90 font-semibold text-lg px-6 py-3 shadow-lg transform hover:scale-105 transition-all h-14"
           >
             <div className="flex items-center justify-center gap-3">
               <Crown className="w-6 h-6 flex-shrink-0" />
