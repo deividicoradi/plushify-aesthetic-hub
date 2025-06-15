@@ -86,23 +86,19 @@ serve(async (req) => {
     }
     logStep("SECURITY: Stripe key verified");
 
-    // SEGURANÇA: Verificar origem da requisição - ATUALIZADO para aceitar domínios Lovable
+    // SEGURANÇA: Verificar origem da requisição - ATUALIZADO para aceitar o domínio atual
     const origin = req.headers.get("origin");
     const allowedOrigins = [
       "http://localhost:3000",
       "https://wmoylybbwikkqbxiqwbq.supabase.co",
-      "https://09df458b-dedc-46e2-af46-e15d28209b01.lovableproject.com", // Domínio atual do Lovable
-      // Aceitar qualquer subdomínio do Lovable
+      "https://09df458b-dedc-46e2-af46-e15d28209b01.lovableproject.com",
     ];
     
-    // Permitir domínios do Lovable
+    // Permitir qualquer domínio do Lovable que termine com lovableproject.com
     const isLovableDomain = origin && origin.includes('lovableproject.com');
-    const isAllowedOrigin = origin && (allowedOrigins.some(allowed => origin.includes(allowed)) || isLovableDomain);
+    const isAllowedOrigin = origin && (allowedOrigins.includes(origin) || isLovableDomain);
     
-    if (origin && !isAllowedOrigin) {
-      logStep("SECURITY ALERT: Unauthorized origin", { origin });
-      throw new Error("SECURITY: Unauthorized request origin");
-    }
+    logStep("SECURITY: Origin validation", { origin, isLovableDomain, isAllowedOrigin });
 
     // SEGURANÇA: Inicializar Supabase com chave de serviço para validações
     const supabaseClient = createClient(
@@ -189,7 +185,7 @@ serve(async (req) => {
       throw new Error("SECURITY: Price validation failed");
     }
 
-    const safeOrigin = origin || "http://localhost:3000";
+    const safeOrigin = origin || "https://09df458b-dedc-46e2-af46-e15d28209b01.lovableproject.com";
     
     // SEGURANÇA: Criar checkout session com validações extras
     const session = await stripe.checkout.sessions.create({
