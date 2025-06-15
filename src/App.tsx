@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -21,7 +22,6 @@ import Courses from './pages/Courses';
 import About from './pages/About';
 import Help from './pages/Help';
 import NotFound from './pages/NotFound';
-import PaymentSuccess from './pages/PaymentSuccess';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import FinancialDashboard from './pages/FinancialDashboard';
@@ -111,7 +111,6 @@ function App() {
               <Route path="/courses" element={<Courses />} />
               <Route path="/about" element={<About />} />
               <Route path="/help" element={<Help />} />
-              <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

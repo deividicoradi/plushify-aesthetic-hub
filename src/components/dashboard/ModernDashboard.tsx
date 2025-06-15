@@ -14,11 +14,9 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { useSubscription } from '@/hooks/useSubscription';
 
 export const ModernDashboard = () => {
   const navigate = useNavigate();
-  const { hasFeature } = useSubscription();
   const { 
     totalClients, 
     newThisMonth, 
@@ -54,8 +52,7 @@ export const ModernDashboard = () => {
       description: 'Análises detalhadas',
       icon: TrendingUp,
       color: 'bg-orange-500 hover:bg-orange-600',
-      onClick: () => hasFeature('pro') ? navigate('/reports') : navigate('/planos'),
-      premium: !hasFeature('pro')
+      onClick: () => navigate('/reports')
     }
   ];
 
@@ -163,12 +160,6 @@ export const ModernDashboard = () => {
                 onClick={action.onClick}
                 className="relative group p-4 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-primary/50 cursor-pointer transition-all duration-200 hover:shadow-md"
               >
-                {action.premium && (
-                  <div className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">
-                    Pro
-                  </div>
-                )}
-                
                 <div className="flex flex-col items-center text-center space-y-3">
                   <div className={`p-3 rounded-full ${action.color} text-white group-hover:scale-110 transition-transform duration-200`}>
                     <action.icon className="w-6 h-6" />

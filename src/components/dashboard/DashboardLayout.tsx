@@ -3,7 +3,6 @@ import React from 'react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { PlanInfoBanner } from '@/components/dashboard/PlanInfoBanner';
 import { DashboardContent } from '@/components/dashboard/DashboardContent';
-import { useSubscription } from '@/hooks/useSubscription';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 
 interface DashboardLayoutProps {
@@ -11,9 +10,6 @@ interface DashboardLayoutProps {
 }
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const { isSubscribed, getCurrentPlanInfo } = useSubscription();
-  const currentPlan = getCurrentPlanInfo();
-
   return (
     <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
       {/* Header with sidebar trigger - mais compacto */}
@@ -26,7 +22,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
       {/* Main content com espaçamento reduzido */}
       <main className="flex-1 p-4 space-y-4 bg-background">
-        <PlanInfoBanner currentPlan={currentPlan} isSubscribed={isSubscribed} />
+        <PlanInfoBanner />
         <DashboardContent />
         {children}
       </main>
