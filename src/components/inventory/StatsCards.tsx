@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, AlertTriangle, TrendingUp, DollarSign } from "lucide-react";
+import { Package, AlertTriangle, TrendingDown, DollarSign } from "lucide-react";
 import { Product } from "@/hooks/inventory/useProductsData";
 
 interface StatsCardsProps {
@@ -16,8 +16,8 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ products }) => {
   ).length;
   const outOfStockProducts = products.filter(p => p.stock_quantity === 0).length;
   
-  const totalStockValue = products.reduce((total, product) => {
-    return total + (product.price * product.stock_quantity);
+  const totalInventoryValue = products.reduce((total, product) => {
+    return total + ((product.cost_price || 0) * product.stock_quantity);
   }, 0);
 
   const formatCurrency = (value: number) => {
@@ -58,7 +58,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ products }) => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Sem Estoque</CardTitle>
-          <TrendingUp className="h-4 w-4 text-red-500" />
+          <TrendingDown className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-600">{outOfStockProducts}</div>
@@ -70,12 +70,12 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ products }) => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Valor do Estoque</CardTitle>
+          <CardTitle className="text-sm font-medium">Valor do Inventário</CardTitle>
           <DollarSign className="h-4 w-4 text-green-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600">
-            {formatCurrency(totalStockValue)}
+            {formatCurrency(totalInventoryValue)}
           </div>
           <p className="text-xs text-muted-foreground">
             Valor total em estoque

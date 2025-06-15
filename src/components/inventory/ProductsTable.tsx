@@ -38,9 +38,9 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
       return { status: 'out', label: 'Sem estoque', color: 'destructive' };
     }
     if (product.min_stock_level && product.stock_quantity <= product.min_stock_level) {
-      return { status: 'low', label: 'Estoque baixo', color: 'warning' };
+      return { status: 'low', label: 'Estoque baixo', color: 'secondary' };
     }
-    return { status: 'ok', label: 'Em estoque', color: 'success' };
+    return { status: 'ok', label: 'Em estoque', color: 'default' };
   };
 
   if (isLoading) {
@@ -69,7 +69,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
             <TableHead>SKU</TableHead>
             <TableHead>Categoria</TableHead>
             <TableHead>Estoque</TableHead>
-            <TableHead>Preço</TableHead>
+            <TableHead>Custo</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -114,13 +114,11 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
                 <TableCell>
                   <div className="space-y-1">
                     <div className="font-medium">
-                      {formatCurrency(product.price)}
+                      {formatCurrency(product.cost_price || 0)}
                     </div>
-                    {product.cost_price && (
-                      <div className="text-xs text-gray-500">
-                        Custo: {formatCurrency(product.cost_price)}
-                      </div>
-                    )}
+                    <div className="text-xs text-gray-500">
+                      Total: {formatCurrency((product.cost_price || 0) * product.stock_quantity)}
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -133,7 +131,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
                     </Badge>
                     <div>
                       <Badge
-                        variant={product.active ? "success" : "secondary"}
+                        variant={product.active ? "default" : "secondary"}
                         className="text-xs"
                       >
                         {product.active ? "Ativo" : "Inativo"}

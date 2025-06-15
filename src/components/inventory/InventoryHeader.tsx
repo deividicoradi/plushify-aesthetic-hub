@@ -20,7 +20,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Package className="h-6 w-6 text-pink-600" />
-          <h1 className="text-2xl font-bold">Estoque de Produtos</h1>
+          <h1 className="text-2xl font-bold">Controle de Produtos</h1>
         </div>
         <Button onClick={onCreateProduct} className="bg-pink-600 hover:bg-pink-700">
           <Plus className="h-4 w-4 mr-2" />

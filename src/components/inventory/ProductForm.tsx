@@ -70,35 +70,35 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="price">Preço de Venda *</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            {...register("price", { 
-              required: "Preço é obrigatório",
-              min: { value: 0, message: "Preço deve ser positivo" }
-            })}
-            placeholder="0.00"
-          />
-          {errors.price && (
-            <p className="text-sm text-red-500">{errors.price.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="cost_price">Preço de Custo</Label>
+          <Label htmlFor="cost_price">Custo por Unidade *</Label>
           <Input
             id="cost_price"
             type="number"
             step="0.01"
             {...register("cost_price", {
+              required: "Custo é obrigatório",
               min: { value: 0, message: "Custo deve ser positivo" }
             })}
             placeholder="0.00"
           />
           {errors.cost_price && (
             <p className="text-sm text-red-500">{errors.cost_price.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="price">Valor de Referência</Label>
+          <Input
+            id="price"
+            type="number"
+            step="0.01"
+            {...register("price", {
+              min: { value: 0, message: "Valor deve ser positivo" }
+            })}
+            placeholder="0.00"
+          />
+          {errors.price && (
+            <p className="text-sm text-red-500">{errors.price.message}</p>
           )}
         </div>
 
