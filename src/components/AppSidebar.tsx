@@ -15,7 +15,8 @@ import {
   HelpCircle,
   LucideIcon,
   LogOut,
-  Crown
+  Crown,
+  Star
 } from 'lucide-react';
 import {
   Sidebar,
@@ -65,6 +66,7 @@ export const AppSidebar = () => {
     { icon: Calendar, label: 'Agendamentos', href: '/appointments' },
     { icon: Briefcase, label: 'Serviços', href: '/services' },
     { icon: Package, label: 'Estoque', href: '/inventory' },
+    { icon: Star, label: 'Fidelidade', href: '/loyalty' },
   ];
 
   const financialItems = [
