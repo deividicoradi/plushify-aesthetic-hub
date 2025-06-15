@@ -52,7 +52,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
 
   return (
     <Card 
-      className={`relative transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] h-full flex flex-col ${
+      className={`relative transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] h-full flex flex-col min-h-[800px] ${
         plan.mostComplete
           ? 'border-2 border-primary shadow-xl bg-gradient-to-br from-background to-primary/5 scale-105 z-10' 
           : plan.current 
@@ -127,7 +127,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             {plan.trial ? 'Limitações do Trial:' : 'Recursos inclusos:'}
           </h4>
           <ul className="space-y-2">
-            {plan.features.slice(0, 6).map((feature, index) => (
+            {plan.features.map((feature, index) => (
               <li key={index} className="flex items-start gap-2">
                 <div className={`w-4 h-4 rounded-full ${plan.mostComplete ? 'bg-primary' : 'bg-green-500'} flex items-center justify-center flex-shrink-0 mt-0.5`}>
                   <Check className="w-2.5 h-2.5 text-white" />
@@ -137,11 +137,6 @@ export const PlanCard: React.FC<PlanCardProps> = ({
                 </span>
               </li>
             ))}
-            {plan.features.length > 6 && (
-              <li className="text-xs text-muted-foreground italic">
-                + {plan.features.length - 6} recursos adicionais
-              </li>
-            )}
           </ul>
         </div>
 
@@ -153,7 +148,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
               Bônus Exclusivos:
             </h4>
             <ul className="space-y-2">
-              {plan.bonuses.slice(0, 3).map((bonus, index) => (
+              {plan.bonuses.map((bonus, index) => (
                 <li key={index} className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0">
                     <Gift className="w-2.5 h-2.5 text-white" />
@@ -173,7 +168,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
               Limitações:
             </h4>
             <ul className="space-y-2">
-              {plan.limitations.slice(0, 3).map((limitation, index) => (
+              {plan.limitations.map((limitation, index) => (
                 <li key={index} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
                     <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
