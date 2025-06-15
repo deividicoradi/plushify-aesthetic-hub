@@ -2,6 +2,7 @@
 import React from 'react';
 import { Users, CalendarDays, Receipt, Package } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import { FeatureGuard } from '@/components/FeatureGuard';
 import { ReportsMetrics } from '@/hooks/useReportsData';
 
 interface MetricCardProps {
@@ -13,10 +14,11 @@ interface MetricCardProps {
   colorClass: string;
   loading: boolean;
   onClick: () => void;
+  requiresFeature?: string;
 }
 
-const MetricCard = ({ title, value, growth, icon: Icon, description, colorClass, loading, onClick }: MetricCardProps) => {
-  return (
+const MetricCard = ({ title, value, growth, icon: Icon, description, colorClass, loading, onClick, requiresFeature }: MetricCardProps) => {
+  const cardContent = (
     <Card 
       className="cursor-pointer hover:shadow-lg transition-shadow duration-200 bg-card border-border"
       onClick={onClick}
@@ -42,6 +44,35 @@ const MetricCard = ({ title, value, growth, icon: Icon, description, colorClass,
       </CardContent>
     </Card>
   );
+
+  if (requiresFeature) {
+    return (
+      <FeatureGuard 
+        planFeature={requiresFeature as any}
+        showUpgradePrompt={false}
+        fallback={
+          <Card className="opacity-50 cursor-not-allowed bg-card border-border">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">{title}</p>
+                  <p className="text-2xl font-bold text-foreground">---</p>
+                  <p className="text-xs text-muted-foreground">Requer upgrade</p>
+                </div>
+                <div className={`p-3 rounded-full ${colorClass} text-white opacity-50`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        }
+      >
+        {cardContent}
+      </FeatureGuard>
+    );
+  }
+
+  return cardContent;
 };
 
 interface MetricsGridProps {
@@ -73,6 +104,7 @@ export const MetricsGrid = ({ metrics, loading, onCardClick }: MetricsGridProps)
         colorClass="bg-blue-600"
         loading={loading}
         onClick={() => onCardClick('/financial')}
+        requiresFeature="hasFinancialManagement"
       />
 
       <MetricCard
@@ -94,6 +126,7 @@ export const MetricsGrid = ({ metrics, loading, onCardClick }: MetricsGridProps)
         colorClass="bg-orange-600"
         loading={loading}
         onClick={() => onCardClick('/inventory')}
+        requiresFeature="hasInventoryAdvanced"
       />
     </div>
   );

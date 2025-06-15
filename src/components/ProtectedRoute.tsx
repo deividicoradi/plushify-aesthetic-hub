@@ -71,6 +71,28 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     />;
   }
 
+  // SEGURANÇA: Verificar acesso a funcionalidades premium para usuários trial
+  const restrictedRoutes = ['/inventory', '/reports'];
+  const financialAdvancedFeatures = ['/financial/installments', '/financial/reports'];
+  
+  if (currentPlan === 'trial') {
+    if (restrictedRoutes.some(route => location.pathname.startsWith(route))) {
+      console.log('SECURITY: Trial user blocked from premium features');
+      return <Navigate to="/planos" replace state={{ 
+        message: 'Esta funcionalidade requer um plano pago. Faça upgrade para continuar.',
+        from: location 
+      }} />;
+    }
+    
+    if (financialAdvancedFeatures.some(route => location.pathname === route)) {
+      console.log('SECURITY: Trial user blocked from advanced financial features');
+      return <Navigate to="/financial" replace state={{ 
+        message: 'Funcionalidade avançada requer upgrade de plano.',
+        from: location 
+      }} />;
+    }
+  }
+
   // SEGURANÇA: Verificar se é uma rota que requer assinatura paga
   const paidRoutes = ['/dashboard', '/clients', '/appointments', '/financial', '/inventory', '/reports'];
   const requiresPaidPlan = paidRoutes.some(route => location.pathname.startsWith(route));

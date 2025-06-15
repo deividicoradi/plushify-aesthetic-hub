@@ -2,6 +2,7 @@
 import React from 'react';
 import { TrendingUp, PieChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FeatureGuard } from '@/components/FeatureGuard';
 import { MonthlyChart } from '@/components/reports/MonthlyChart';
 import { CategoryChart } from '@/components/reports/CategoryChart';
 import { MonthlyData, CategoryData } from '@/hooks/useReportsData';
@@ -25,7 +26,20 @@ export const ChartsSection = ({ monthlyData, revenueByCategory, loading }: Chart
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <MonthlyChart data={monthlyData} loading={loading} />
+          <FeatureGuard 
+            planFeature="hasAdvancedAnalytics"
+            showUpgradePrompt={false}
+            fallback={
+              <div className="h-80 flex items-center justify-center border border-dashed rounded-lg">
+                <div className="text-center">
+                  <p className="text-muted-foreground">Gráficos avançados</p>
+                  <p className="text-sm text-muted-foreground">Disponível no plano Enterprise</p>
+                </div>
+              </div>
+            }
+          >
+            <MonthlyChart data={monthlyData} loading={loading} />
+          </FeatureGuard>
         </CardContent>
       </Card>
 
@@ -39,7 +53,20 @@ export const ChartsSection = ({ monthlyData, revenueByCategory, loading }: Chart
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <CategoryChart data={revenueByCategory} loading={loading} />
+          <FeatureGuard 
+            planFeature="hasFinancialManagement"
+            showUpgradePrompt={false}
+            fallback={
+              <div className="h-80 flex items-center justify-center border border-dashed rounded-lg">
+                <div className="text-center">
+                  <p className="text-muted-foreground">Análise de receita</p>
+                  <p className="text-sm text-muted-foreground">Disponível a partir do plano Professional</p>
+                </div>
+              </div>
+            }
+          >
+            <CategoryChart data={revenueByCategory} loading={loading} />
+          </FeatureGuard>
         </CardContent>
       </Card>
     </div>
