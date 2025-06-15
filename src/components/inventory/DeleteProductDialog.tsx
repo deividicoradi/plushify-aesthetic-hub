@@ -49,11 +49,18 @@ export const DeleteProductDialog = ({
 
       console.log("Produto excluído com sucesso");
       toast.success("Produto excluído com sucesso!");
+      
+      // Fechar o dialog primeiro
       onOpenChange(false);
-      // Aguardar um pouco antes de chamar onSuccess para garantir que a exclusão foi processada
+      
+      // Forçar atualização da lista
+      onSuccess();
+      
+      // Força uma nova busca após um pequeno delay para garantir que a exclusão foi processada
       setTimeout(() => {
         onSuccess();
-      }, 100);
+      }, 500);
+      
     } catch (error: any) {
       console.error("Erro ao excluir produto:", error);
       toast.error("Erro ao excluir produto: " + error.message);

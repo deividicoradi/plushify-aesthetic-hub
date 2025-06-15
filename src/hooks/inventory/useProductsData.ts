@@ -30,13 +30,19 @@ export const useProductsData = () => {
 
   const refetch = async () => {
     try {
+      console.log("Buscando produtos...");
+      
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .order('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao buscar produtos:", error);
+        throw error;
+      }
 
+      console.log("Produtos encontrados:", data?.length || 0);
       setProducts(data || []);
       
       const uniqueCategories = new Set(data?.map(p => p.category));
@@ -46,6 +52,7 @@ export const useProductsData = () => {
         categories: uniqueCategories.size
       });
     } catch (error: any) {
+      console.error("Erro completo:", error);
       toast.error("Erro ao carregar produtos: " + error.message);
     }
   };
