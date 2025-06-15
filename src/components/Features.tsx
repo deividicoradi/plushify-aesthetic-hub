@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, BarChart3, Box, CreditCard, MessageSquare } from 'lucide-react';
+import { Calendar, Users, BarChart3, Box, CreditCard, Star } from 'lucide-react';
 
 const Feature = ({ icon, title, description, path }: { icon: React.ReactNode, title: string, description: string, path?: string }) => {
   const navigate = useNavigate();
@@ -71,10 +70,10 @@ const Features = () => {
           />
 
           <Feature 
-            icon={<MessageSquare className="w-4 h-4 text-white" />}
-            title="Campanhas de Marketing"
-            description="Crie e gerencie campanhas personalizadas para fidelizar clientes e aumentar seu faturamento."
-            path="/campanhas"
+            icon={<Star className="w-4 h-4 text-white" />}
+            title="Programa de Fidelidade"
+            description="Sistema completo de pontuação e recompensas para fidelizar clientes e aumentar a retenção."
+            path="/loyalty"
           />
         </div>
         
