@@ -10,6 +10,19 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleInicioClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Se estamos na página inicial, fazer scroll para o topo
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Se não estamos na página inicial, navegar para ela
+      navigate('/', { replace: true });
+    }
+    setIsOpen(false);
+  };
+
   const handlePlanosClick = (e: React.MouseEvent) => {
     e.preventDefault();
     
@@ -100,9 +113,12 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+            <button 
+              onClick={handleInicioClick}
+              className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+            >
               Início
-            </Link>
+            </button>
             <button 
               onClick={handleFuncionalidadesClick}
               className="text-muted-foreground hover:text-foreground transition-colors font-medium"
@@ -158,13 +174,12 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t border-border/40">
-              <Link
-                to="/"
-                className="block px-3 py-2 text-muted-foreground hover:text-foreground transition-colors font-medium"
-                onClick={() => setIsOpen(false)}
+              <button
+                onClick={handleInicioClick}
+                className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground transition-colors font-medium"
               >
                 Início
-              </Link>
+              </button>
               <button
                 onClick={handleFuncionalidadesClick}
                 className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground transition-colors font-medium"
