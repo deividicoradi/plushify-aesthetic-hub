@@ -10,6 +10,7 @@ import {
 import { ProductForm } from "./ProductForm";
 import { EditProductForm } from "./EditProductForm";
 import { StockTransaction } from "./StockTransaction";
+import { DeleteProductDialog } from "./DeleteProductDialog";
 
 type Product = {
   id: string;
@@ -26,6 +27,8 @@ type InventoryDialogsProps = {
   setIsEditProductOpen: (value: boolean) => void;
   isTransactionOpen: boolean;
   setIsTransactionOpen: (value: boolean) => void;
+  isDeleteDialogOpen: boolean;
+  setIsDeleteDialogOpen: (value: boolean) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (value: boolean) => void;
   isCategoriesOpen: boolean;
@@ -44,6 +47,8 @@ export const InventoryDialogs = ({
   setIsEditProductOpen,
   isTransactionOpen,
   setIsTransactionOpen,
+  isDeleteDialogOpen,
+  setIsDeleteDialogOpen,
   selectedProduct,
   transactionType,
   onSuccess
@@ -109,6 +114,13 @@ export const InventoryDialogs = ({
           </div>
         </SheetContent>
       </Sheet>
+
+      <DeleteProductDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        product={selectedProduct}
+        onSuccess={onSuccess}
+      />
     </>
   );
 };

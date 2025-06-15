@@ -16,6 +16,7 @@ type InventoryContainerProps = {
   setSearchTerm: (term: string) => void;
   onTransaction: (product: Product, type: 'entrada' | 'saida') => void;
   onEditProduct: (product: Product) => void;
+  onDeleteProduct: (product: Product) => void;
   selectedProducts: Product[];
   onToggleSelect: (product: Product) => void;
   onSelectAll: () => void;
@@ -28,6 +29,7 @@ export const InventoryContainer = ({
   setSearchTerm,
   onTransaction,
   onEditProduct,
+  onDeleteProduct,
   selectedProducts,
   onToggleSelect,
   onSelectAll
@@ -52,6 +54,7 @@ export const InventoryContainer = ({
           setSearchTerm={setSearchTerm}
           onTransaction={onTransaction}
           onEditProduct={onEditProduct}
+          onDeleteProduct={onDeleteProduct}
           selectedProducts={selectedProducts}
           onToggleSelect={onToggleSelect}
           onSelectAll={onSelectAll}

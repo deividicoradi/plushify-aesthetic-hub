@@ -39,8 +39,11 @@ export const useInventory = () => {
     setSearchTerm, 
     handleStockTransaction, 
     handleEditProduct,
+    handleDeleteProduct,
     selectedProduct,
-    setSelectedProduct
+    setSelectedProduct,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen
   } = useProductActions(refetch);
 
   // Enhanced handlers that also manage dialog state
@@ -55,6 +58,11 @@ export const useInventory = () => {
     setIsEditProductOpen(true);
   };
 
+  const enhancedDeleteProduct = (product: any) => {
+    setSelectedProduct(product);
+    setIsDeleteDialogOpen(true);
+  };
+
   return {
     // Product data
     products,
@@ -67,6 +75,7 @@ export const useInventory = () => {
     isNewProductOpen,
     isEditProductOpen,
     isTransactionOpen,
+    isDeleteDialogOpen,
     transactionType,
     // Search state
     searchTerm,
@@ -74,6 +83,7 @@ export const useInventory = () => {
     setIsNewProductOpen,
     setIsEditProductOpen,
     setIsTransactionOpen,
+    setIsDeleteDialogOpen,
     setSearchTerm,
     setSelectedProducts,
     setTransactionType,
@@ -81,6 +91,7 @@ export const useInventory = () => {
     // Actions
     handleStockTransaction: enhancedStockTransaction,
     handleEditProduct: enhancedEditProduct,
+    handleDeleteProduct: enhancedDeleteProduct,
     toggleSelect,
     selectAll,
     clearSelection,

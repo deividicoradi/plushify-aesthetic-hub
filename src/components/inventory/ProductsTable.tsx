@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ArrowDownCircle, ArrowUpCircle, Search, Pencil, Package2 } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Search, Pencil, Package2, Trash2 } from "lucide-react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ type ProductsTableProps = {
   setSearchTerm: (term: string) => void;
   onTransaction: (product: Product, type: 'entrada' | 'saida') => void;
   onEditProduct: (product: Product) => void;
+  onDeleteProduct: (product: Product) => void;
   selectedProducts: Product[];
   onToggleSelect: (product: Product) => void;
   onSelectAll: () => void;
@@ -41,6 +42,7 @@ export const ProductsTable = ({
   setSearchTerm,
   onTransaction,
   onEditProduct,
+  onDeleteProduct,
   selectedProducts,
   onToggleSelect,
   onSelectAll
@@ -183,6 +185,14 @@ export const ProductsTable = ({
                           className="h-9 w-9 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300"
                         >
                           <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onDeleteProduct(product)}
+                          className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"

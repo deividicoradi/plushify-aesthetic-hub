@@ -21,12 +21,15 @@ const Inventory = () => {
     setSelectedProducts,
     handleStockTransaction,
     handleEditProduct,
+    handleDeleteProduct,
     isNewProductOpen,
     setIsNewProductOpen,
     isEditProductOpen,
     setIsEditProductOpen,
     isTransactionOpen,
     setIsTransactionOpen,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
     transactionType,
     refetch
   } = useInventory();
@@ -65,6 +68,7 @@ const Inventory = () => {
                     setSearchTerm={setSearchTerm}
                     onTransaction={handleStockTransaction}
                     onEditProduct={handleEditProduct}
+                    onDeleteProduct={handleDeleteProduct}
                     selectedProducts={selectedProducts}
                     onToggleSelect={toggleSelect}
                     onSelectAll={selectAll}
@@ -78,6 +82,8 @@ const Inventory = () => {
                   setIsEditProductOpen={setIsEditProductOpen}
                   isTransactionOpen={isTransactionOpen}
                   setIsTransactionOpen={setIsTransactionOpen}
+                  isDeleteDialogOpen={isDeleteDialogOpen}
+                  setIsDeleteDialogOpen={setIsDeleteDialogOpen}
                   isHistoryOpen={false}
                   setIsHistoryOpen={() => {}}
                   isCategoriesOpen={false}
