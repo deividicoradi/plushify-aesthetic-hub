@@ -1,7 +1,4 @@
 
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,82 +6,57 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-
-    --primary: 346 77% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 346 77% 49.8%;
-
-    --radius: 0.75rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 10% 3.9%;
-    --sidebar-primary: 346 77% 49.8%;
-    --sidebar-primary-foreground: 355.7 100% 97.3%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 240 5.9% 90%;
-    --sidebar-ring: 346 77% 49.8%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 346 77% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 346 77% 49.8%;
-
-    --sidebar-background: 222.2 84% 3.9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 346 77% 49.8%;
-    --sidebar-primary-foreground: 355.7 100% 97.3%;
-    --sidebar-accent: 217.2 32.6% 15.5%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 346 77% 49.8%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -92,120 +64,14 @@
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground font-sans;
-    transition: background-color 0.15s ease, color 0.15s ease;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer components {
-  .gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/70;
-  }
-  
-  .gradient-bg {
-    @apply bg-gradient-to-r from-primary to-primary/80;
-  }
-
-  .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
-  }
-
-  .button-primary {
-    @apply px-6 py-3 bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90 transition-all duration-300;
-  }
-
-  .button-secondary {
-    @apply px-6 py-3 bg-background text-foreground border border-border rounded-full shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300;
-  }
-  
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  /* Modern sidebar styles - usando as variáveis CSS diretamente */
-  [data-sidebar="sidebar"] {
-    background-color: hsl(var(--sidebar-background));
-    color: hsl(var(--sidebar-foreground));
-  }
-
-  [data-sidebar="menu-button"][data-active="true"] {
-    @apply bg-sidebar-accent/80 text-sidebar-accent-foreground font-medium;
-    @apply border-l-2 border-primary ml-0 pl-3;
-  }
-
-  [data-sidebar="menu-button"]:hover:not([data-active="true"]) {
-    @apply bg-sidebar-accent/50 text-sidebar-accent-foreground;
-  }
-
-  /* Background gradients that adapt to theme */
-  .bg-gradient-soft {
-    @apply bg-gradient-to-br from-muted to-accent;
-  }
-
-  /* Grid pattern for modern cards */
-  .bg-grid-white\/10 {
-    background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+@layer utilities {
+  .bg-grid-pattern {
+    background-image: radial-gradient(circle, rgba(0,0,0,0.1) 1px, transparent 1px);
     background-size: 20px 20px;
   }
-
-  .bg-grid-purple-500\/10 {
-    background-image: 
-      linear-gradient(to right, rgba(139, 92, 246, 0.1) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
-    background-size: 30px 30px;
-  }
-
-  /* Glass morphism effect */
-  .glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .dark .glass {
-    background: rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
 }
-
-/* Custom keyframes for modern animations */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
-  50% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.6); }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-
-/* Smooth and fast transitions for theme switching */
-* {
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-}
-
-/* Specific optimizations for better theme transition performance */
-[data-sidebar="sidebar"], 
-.bg-background, 
-.bg-card,
-.bg-muted,
-.bg-accent {
-  transition: background-color 0.1s ease, color 0.1s ease;
-}
-
