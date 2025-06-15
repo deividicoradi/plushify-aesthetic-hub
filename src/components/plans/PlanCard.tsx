@@ -39,7 +39,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
           : plan.current 
             ? plan.trial
               ? 'border-2 border-orange-400 bg-gradient-to-br from-background to-orange-50/20 dark:to-orange-950/20' 
-              : 'border-2 border-green-400 bg-gradient-to-br from-background to-green-50/20 dark:to-green-950/20'
+              : 'border-2 border-emerald-400 bg-gradient-to-br from-background to-emerald-50/20 dark:to-emerald-950/20'
             : 'border hover:border-primary/50'
       }`}
     >

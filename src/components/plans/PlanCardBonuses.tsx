@@ -19,10 +19,10 @@ export const PlanCardBonuses: React.FC<PlanCardBonusesProps> = ({ plan }) => {
       <ul className="space-y-2">
         {plan.bonuses.map((bonus, index) => (
           <li key={index} className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-4 h-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
               <Gift className="w-2.5 h-2.5 text-white" />
             </div>
-            <span className="text-xs font-medium text-primary">{bonus}</span>
+            <span className="text-xs font-medium text-foreground">{bonus}</span>
           </li>
         ))}
       </ul>
