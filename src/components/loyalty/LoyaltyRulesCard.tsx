@@ -50,7 +50,7 @@ export const LoyaltyRulesCard: React.FC = () => {
           <h4 className="font-medium text-sm">Níveis de Fidelidade:</h4>
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs">
-              <Badge variant="secondary" className="text-xs bg-secondary/80">Bronze</Badge>
+              <Badge className="bg-amber-600 text-white text-xs">Bronze</Badge>
               <span className="text-muted-foreground">R$ 0+</span>
             </div>
             <div className="flex items-center justify-between text-xs">
