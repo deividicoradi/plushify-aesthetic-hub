@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Clock, Zap, Crown } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -101,19 +102,17 @@ const Plans = () => {
       annualPrice: 'R$ 890',
       annualPeriod: '/ano',
       annualOriginalPrice: 'R$ 1.270',
-      description: 'Para profissionais em crescimento',
+      description: 'Para profissionais independentes',
       subtitle: 'Ideal para freelancers e pequenos negócios',
       icon: Zap,
       features: [
         'Clientes ilimitados',
         'Agendamentos ilimitados',
         'Gestão de serviços completa',
-        'Gestão de estoque ilimitada',
-        'Dashboard com métricas avançadas',
-        'Gestão financeira completa',
-        'Controle de caixa',
-        'Relatórios financeiros detalhados',
-        'Exportação básica de dados'
+        'Gestão de estoque básica',
+        'Dashboard com métricas básicas',
+        'Controle de caixa simples',
+        'Relatórios básicos'
       ],
       limitations: [],
       current: currentPlan === 'professional'
@@ -134,10 +133,14 @@ const Plans = () => {
       mostComplete: true,
       features: [
         'TUDO do plano Professional',
+        'Gestão financeira completa avançada',
         'Dashboard executivo com analytics',
         'Relatórios avançados com gráficos',
         'Exportação de relatórios (PDF completo)',
         'Analytics detalhados de performance',
+        'Gestão de estoque avançada',
+        'Controle de caixa com múltiplos métodos',
+        'Parcelamentos e recorrências',
         'Suporte VIP prioritário',
         'Análises preditivas de faturamento'
       ],
@@ -253,3 +256,4 @@ const Plans = () => {
 };
 
 export default Plans;
+
