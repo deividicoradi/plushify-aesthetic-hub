@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import FooterNewsletterForm from './FooterNewsletterForm';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -9,6 +9,11 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Newsletter Form */}
+        <div className="mb-12">
+          <FooterNewsletterForm />
+        </div>
+        {/* Seções do rodapé */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div>
             <Link to="/" className="inline-block mb-8">
