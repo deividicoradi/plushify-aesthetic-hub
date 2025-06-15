@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Trophy, Crown, Award, BadgeCheck, Flame, Star, TrendingUp } from 'lucide-react';
+import { Trophy, Crown, Award, BadgeCheck, Flame, Star, TrendingUp, Sparkles } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
