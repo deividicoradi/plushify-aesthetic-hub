@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -14,7 +13,8 @@ import {
   HelpCircle,
   CreditCard,
   TrendingUp,
-  Crown
+  Crown,
+  PieChart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,7 +31,8 @@ const DashboardSidebar = () => {
     { icon: Users, label: 'Clientes', path: '/clients' },
     { icon: Wrench, label: 'Serviços', path: '/servicos' },
     { icon: Package, label: 'Estoque', path: '/inventory' },
-    { icon: CreditCard, label: 'Financeiro', path: '/financial' },
+    { icon: CreditCard, label: 'Financeiro', path: '/payments' },
+    { icon: PieChart, label: 'Painel Financeiro', path: '/financial' },
     { icon: BarChart3, label: 'Relatórios', path: '/reports' },
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics' },
     { icon: StickyNote, label: 'Anotações', path: '/anotacoes' },
