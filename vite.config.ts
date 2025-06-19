@@ -59,7 +59,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: 'Plushify - Plataforma para Profissionais de Estética',
         short_name: 'Plushify',
-        description: 'Software completo para profissionais de estética, agendamentos inteligentes e fidelização de clientes',
+        description: 'Gerencie agendamentos, clientes, pagamentos, serviços, relatórios financeiros e programa de fidelidade',
         theme_color: '#D65E9A',
         background_color: '#ffffff',
         display: 'standalone',
