@@ -8,7 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 // PWA Components
-import { InstallPrompt } from '@/components/pwa/InstallPrompt';
+import { PWAInstallPopup } from '@/components/pwa/PWAInstallPopup';
 import { OfflineIndicator } from '@/components/pwa/OfflineIndicator';
 import { CacheStatus } from '@/components/pwa/CacheStatus';
 
@@ -147,7 +147,7 @@ function App() {
               </Routes>
               
               {/* PWA Components */}
-              <InstallPrompt />
+              <PWAInstallPopup />
               <OfflineIndicator />
               <CacheStatus />
               
