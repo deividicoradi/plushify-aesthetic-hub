@@ -7,6 +7,11 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
+// PWA Components
+import { InstallPrompt } from '@/components/pwa/InstallPrompt';
+import { OfflineIndicator } from '@/components/pwa/OfflineIndicator';
+import { CacheStatus } from '@/components/pwa/CacheStatus';
+
 // Pages
 import Landing from '@/pages/Index';
 import Auth from '@/pages/Auth';
@@ -24,6 +29,7 @@ import Notes from '@/pages/Notes';
 import Loyalty from '@/pages/Loyalty';
 import Plans from '@/pages/Plans';
 import Help from '@/pages/Help';
+import Terms from '@/pages/Terms';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,6 +58,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/terms" element={<Terms />} />
                 
                 {/* Protected Routes */}
                 <Route path="/dashboard" element={
@@ -138,6 +145,12 @@ function App() {
                   </ProtectedRoute>
                 } />
               </Routes>
+              
+              {/* PWA Components */}
+              <InstallPrompt />
+              <OfflineIndicator />
+              <CacheStatus />
+              
               <Toaster />
             </div>
           </ThemeProvider>
