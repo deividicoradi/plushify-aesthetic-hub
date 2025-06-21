@@ -28,8 +28,17 @@ export const InstallPrompt: React.FC = () => {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">P</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <img 
+                src="/favicon.svg" 
+                alt="Plushify Logo" 
+                className="w-5 h-5"
+                onError={(e) => {
+                  // Fallback para texto se a imagem não carregar
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = '<span class="text-white font-bold text-sm">P</span>';
+                }}
+              />
             </div>
             <CardTitle className="text-lg">Instalar Plushify</CardTitle>
           </div>

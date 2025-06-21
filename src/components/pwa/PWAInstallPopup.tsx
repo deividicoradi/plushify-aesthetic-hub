@@ -61,8 +61,17 @@ export const PWAInstallPopup: React.FC = () => {
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-primary-foreground font-bold text-lg">P</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <img 
+                  src="/favicon.svg" 
+                  alt="Plushify Logo" 
+                  className="w-6 h-6"
+                  onError={(e) => {
+                    // Fallback para texto se a imagem não carregar
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerHTML = '<span class="text-white font-bold text-lg">P</span>';
+                  }}
+                />
               </div>
               <div>
                 <CardTitle className="text-lg text-foreground">Instalar Plushify</CardTitle>
