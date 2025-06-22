@@ -23,12 +23,12 @@ const FooterNewsletterForm: React.FC = () => {
   };
 
   return (
-    <form className="rounded-lg p-4 bg-muted/20 space-y-3 border border-border/50 max-w-md mx-auto"
+    <form className="rounded-lg p-4 bg-muted/50 space-y-3 border border-border max-w-md mx-auto"
       onSubmit={handleSubmit}
     >
       <div>
-        <h4 className="font-semibold text-base text-white mb-1">Receba novidades</h4>
-        <p className="text-sm text-gray-400 mb-2">
+        <h4 className="font-semibold text-base text-foreground mb-1">Receba novidades</h4>
+        <p className="text-sm text-muted-foreground mb-2">
           Cadastre-se para receber dicas, novidades e promoções.
         </p>
       </div>
@@ -39,6 +39,7 @@ const FooterNewsletterForm: React.FC = () => {
           value={nome}
           onChange={e => setNome(e.target.value)}
           required
+          className="bg-background"
         />
         <Input
           type="email"
@@ -46,6 +47,7 @@ const FooterNewsletterForm: React.FC = () => {
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
+          className="bg-background"
         />
       </div>
       <div className="flex items-center gap-2 mt-1">
@@ -55,7 +57,7 @@ const FooterNewsletterForm: React.FC = () => {
           onCheckedChange={v => setAgree(!!v)}
           required
         />
-        <Label htmlFor="footer-newsletter-term" className="text-xs text-gray-400">
+        <Label htmlFor="footer-newsletter-term" className="text-xs text-muted-foreground">
           Concordo com os <Link to="/terms" target="_blank" className="underline hover:text-primary">Termos de Serviço</Link>
         </Label>
       </div>
@@ -67,7 +69,7 @@ const FooterNewsletterForm: React.FC = () => {
         {enviado ? 'Enviado!' : 'Cadastrar'}
       </Button>
       {enviado && (
-        <div className="text-green-400 text-center text-xs mt-2">
+        <div className="text-green-500 text-center text-xs mt-2">
           Inscrição realizada com sucesso!
         </div>
       )}
