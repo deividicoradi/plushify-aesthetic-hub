@@ -14,6 +14,7 @@ const Footer = () => {
         <div className="mb-12">
           <FooterNewsletterForm />
         </div>
+        
         {/* Seções do rodapé */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div>
@@ -26,8 +27,8 @@ const Footer = () => {
               </div>
             </Link>
             <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed">
-              Sistema completo para gestão de salões de beleza e clínicas de estética com 
-              agendamentos, controle financeiro, fidelidade e relatórios inteligentes.
+              Plataforma completa para gestão de salões de beleza e clínicas de estética. 
+              Modernize seu negócio com tecnologia e segurança.
             </p>
             <div className="flex space-x-4">
               <a href="https://instagram.com/plushify" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
@@ -45,20 +46,20 @@ const Footer = () => {
           <div>
             <h3 className="font-bold text-foreground text-lg mb-6">Empresa</h3>
             <ul className="space-y-4">
-              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Ajuda & FAQ</Link></li>
-              <li><Link to="/plans" className="text-muted-foreground hover:text-foreground transition-colors">Planos</Link></li>
-              <li><Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contato</Link></li>
+              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Sobre Nós</Link></li>
+              <li><Link to="/plans" className="text-muted-foreground hover:text-foreground transition-colors">Planos e Preços</Link></li>
+              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
+              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Carreiras</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-bold text-foreground text-lg mb-6">Produto</h3>
             <ul className="space-y-4">
-              <li><Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link></li>
-              <li><Link to="/appointments" className="text-muted-foreground hover:text-foreground transition-colors">Agendamentos</Link></li>
-              <li><Link to="/clients" className="text-muted-foreground hover:text-foreground transition-colors">Clientes</Link></li>
-              <li><Link to="/financial" className="text-muted-foreground hover:text-foreground transition-colors">Financeiro</Link></li>
-              <li><Link to="/reports" className="text-muted-foreground hover:text-foreground transition-colors">Relatórios</Link></li>
+              <li><Link to="/product" className="text-muted-foreground hover:text-foreground transition-colors">Funcionalidades</Link></li>
+              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Integrações</Link></li>
+              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">API</Link></li>
+              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Atualizações</Link></li>
             </ul>
           </div>
           
@@ -68,10 +69,10 @@ const Footer = () => {
               <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Central de Ajuda</Link></li>
               <li>
                 <a 
-                  href="mailto:suporte@plushify.com" 
+                  href="mailto:suporte@plushify.com.br" 
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Email Suporte
+                  Contato
                 </a>
               </li>
               <li>
@@ -84,6 +85,7 @@ const Footer = () => {
                   WhatsApp
                 </a>
               </li>
+              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Status do Sistema</Link></li>
             </ul>
           </div>
         </div>
@@ -92,22 +94,37 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row md:justify-between items-center">
             <div className="mb-4 md:mb-0">
               <p className="text-muted-foreground text-sm">
-                &copy; {currentYear} Plushify. Todos os direitos reservados.
+                &copy; {currentYear} Plushify Tecnologia Ltda. Todos os direitos reservados.
+              </p>
+              <p className="text-muted-foreground text-xs mt-1">
+                CNPJ: 00.000.000/0001-00 • Responsável técnico: Equipe Plushify
               </p>
             </div>
             
             <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-              <Link to="/terms" className="hover:text-foreground transition-colors">Termos de Serviço</Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacidade</Link>
-              <Link to="/cookies" className="hover:text-foreground transition-colors">Cookies</Link>
-              <Link to="/accessibility" className="hover:text-foreground transition-colors">Acessibilidade</Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">Termos de Uso</Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">Política de Privacidade</Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">LGPD</Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">Cookies</Link>
             </div>
           </div>
           
-          <div className="mt-8 text-center text-muted-foreground text-sm">
-            <p className="flex items-center justify-center">
-              Feito com <Heart className="w-4 h-4 mx-1 text-primary fill-primary" /> no Brasil
-            </p>
+          <div className="mt-8 pt-6 border-t border-border">
+            <div className="text-center text-muted-foreground text-xs space-y-2">
+              <p className="flex items-center justify-center">
+                Desenvolvido com <Heart className="w-4 h-4 mx-1 text-primary fill-primary" /> no Brasil
+              </p>
+              <p>
+                Em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
+                Seus dados pessoais são tratados com segurança e transparência.
+              </p>
+              <p>
+                Para exercer seus direitos sobre dados pessoais, entre em contato: 
+                <a href="mailto:privacidade@plushify.com.br" className="text-primary hover:underline ml-1">
+                  privacidade@plushify.com.br
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>
