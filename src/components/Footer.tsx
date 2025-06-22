@@ -26,8 +26,8 @@ const Footer = () => {
               </div>
             </Link>
             <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed">
-              Plushify é uma plataforma completa para profissionais de estética gerenciarem agendamentos, 
-              clientes, cursos e marketing com ferramentas inteligentes de IA.
+              Sistema completo para gestão de salões de beleza e clínicas de estética com 
+              agendamentos, controle financeiro, fidelidade e relatórios inteligentes.
             </p>
             <div className="flex space-x-4">
               <a href="https://instagram.com/plushify" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
@@ -45,33 +45,45 @@ const Footer = () => {
           <div>
             <h3 className="font-bold text-foreground text-lg mb-6">Empresa</h3>
             <ul className="space-y-4">
-              <li><Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">Sobre nós</Link></li>
-              <li><Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
-              <li><Link to="/careers" className="text-muted-foreground hover:text-foreground transition-colors">Carreiras</Link></li>
-              <li><Link to="/press" className="text-muted-foreground hover:text-foreground transition-colors">Imprensa</Link></li>
-              <li><Link to="/partners" className="text-muted-foreground hover:text-foreground transition-colors">Parceiros</Link></li>
+              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Ajuda & FAQ</Link></li>
+              <li><Link to="/plans" className="text-muted-foreground hover:text-foreground transition-colors">Planos</Link></li>
+              <li><Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contato</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-bold text-foreground text-lg mb-6">Produto</h3>
             <ul className="space-y-4">
-              <li><button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors bg-transparent text-left">Funcionalidades</button></li>
-              <li><button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors bg-transparent text-left">Preços</button></li>
-              <li><Link to="/integrations" className="text-muted-foreground hover:text-foreground transition-colors">Integrações</Link></li>
-              <li><Link to="/roadmap" className="text-muted-foreground hover:text-foreground transition-colors">Roteiro</Link></li>
-              <li><Link to="/updates" className="text-muted-foreground hover:text-foreground transition-colors">Atualizações</Link></li>
+              <li><Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link></li>
+              <li><Link to="/appointments" className="text-muted-foreground hover:text-foreground transition-colors">Agendamentos</Link></li>
+              <li><Link to="/clients" className="text-muted-foreground hover:text-foreground transition-colors">Clientes</Link></li>
+              <li><Link to="/financial" className="text-muted-foreground hover:text-foreground transition-colors">Financeiro</Link></li>
+              <li><Link to="/reports" className="text-muted-foreground hover:text-foreground transition-colors">Relatórios</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-bold text-foreground text-lg mb-6">Suporte</h3>
             <ul className="space-y-4">
-              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Ajuda & FAQ</Link></li>
-              <li><Link to="/docs" className="text-muted-foreground hover:text-foreground transition-colors">Documentação</Link></li>
-              <li><Link to="/community" className="text-muted-foreground hover:text-foreground transition-colors">Comunidade</Link></li>
-              <li><Link to="/status" className="text-muted-foreground hover:text-foreground transition-colors">Status</Link></li>
-              <li><Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contato</Link></li>
+              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Central de Ajuda</Link></li>
+              <li>
+                <a 
+                  href="mailto:suporte@plushify.com" 
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Email Suporte
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://wa.me/5511999999999" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  WhatsApp
+                </a>
+              </li>
             </ul>
           </div>
         </div>
