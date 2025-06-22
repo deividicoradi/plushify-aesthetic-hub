@@ -13,6 +13,17 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
+// Simple in-memory cache for Stripe results
+type CacheEntry = {
+  subscribed: boolean;
+  plan_type: 'trial' | 'professional' | 'premium';
+  subscription_end: string | null;
+  timestamp: number;
+};
+
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const subscriptionCache = new Map<string, CacheEntry>();
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -42,6 +53,20 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
+
+    // Return cached data if available and fresh
+    const cached = subscriptionCache.get(user.email);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      logStep("Returning cached subscription data", { email: user.email });
+      return new Response(JSON.stringify({
+        subscribed: cached.subscribed,
+        plan_type: cached.plan_type,
+        subscription_end: cached.subscription_end,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -111,6 +136,14 @@ serve(async (req) => {
     }, { onConflict: 'user_id' });
 
     logStep("Updated database with subscription info", { subscribed: hasActiveSub, planType });
+
+    // Store result in cache
+    subscriptionCache.set(user.email, {
+      subscribed: hasActiveSub,
+      plan_type: planType as 'trial' | 'professional' | 'premium',
+      subscription_end: subscriptionEnd,
+      timestamp: Date.now(),
+    });
     
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
