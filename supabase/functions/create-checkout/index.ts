@@ -17,6 +17,16 @@ const logStep = (step: string, details?: any) => {
 const RATE_LIMIT_WINDOW_MS = 30 * 1000; // 30 seconds
 const userRequestTimestamps = new Map<string, number>();
 
+// Remove outdated entries from the rate limit map
+const cleanupRateLimit = () => {
+  const now = Date.now();
+  for (const [userId, timestamp] of userRequestTimestamps.entries()) {
+    if (now - timestamp > RATE_LIMIT_WINDOW_MS) {
+      userRequestTimestamps.delete(userId);
+    }
+  }
+};
+
 
 // SEGURANÇA: Validação rigorosa de entrada
 const validateInput = (plan_type: string, billing_period: string) => {
@@ -111,6 +121,7 @@ serve(async (req) => {
     logStep("SECURITY: User authenticated successfully", { userId: user.id, email: user.email });
 
     // Rate limiting: prevent repeated checkouts
+    cleanupRateLimit();
     const lastRequest = userRequestTimestamps.get(user.id) || 0;
     if (Date.now() - lastRequest < RATE_LIMIT_WINDOW_MS) {
       logStep("Rate limit triggered", { userId: user.id });

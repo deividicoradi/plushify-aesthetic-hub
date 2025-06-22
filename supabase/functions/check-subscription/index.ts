@@ -24,6 +24,16 @@ type CacheEntry = {
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const subscriptionCache = new Map<string, CacheEntry>();
 
+// Clean up old cache entries periodically to avoid unbounded growth
+const cleanupCache = () => {
+  const now = Date.now();
+  for (const [email, entry] of subscriptionCache.entries()) {
+    if (now - entry.timestamp > CACHE_TTL_MS) {
+      subscriptionCache.delete(email);
+    }
+  }
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -53,6 +63,9 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
+
+    // Clear expired cache entries
+    cleanupCache();
 
     // Return cached data if available and fresh
     const cached = subscriptionCache.get(user.email);
