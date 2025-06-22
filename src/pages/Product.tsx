@@ -1,7 +1,6 @@
 
 import React from 'react';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import { Calendar, Users, CreditCard, BarChart3, Package, Award, FileText, Shield } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -143,8 +142,6 @@ const Product = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };
