@@ -13,17 +13,10 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
 };
 
-// SEGURANÇA: Price IDs oficiais - Vamos criar preços de teste que funcionem
-const OFFICIAL_PRICE_IDS = {
-  professional: {
-    monthly: "price_professional_monthly",
-    annual: "price_professional_annual"
-  },
-  premium: {
-    monthly: "price_premium_monthly", 
-    annual: "price_premium_annual"
-  }
-} as const;
+// Simple per-user rate limiting
+const RATE_LIMIT_WINDOW_MS = 30 * 1000; // 30 seconds
+const userRequestTimestamps = new Map<string, number>();
+
 
 // SEGURANÇA: Validação rigorosa de entrada
 const validateInput = (plan_type: string, billing_period: string) => {
@@ -116,6 +109,17 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const user = await validateUserAuth(token, supabaseClient);
     logStep("SECURITY: User authenticated successfully", { userId: user.id, email: user.email });
+
+    // Rate limiting: prevent repeated checkouts
+    const lastRequest = userRequestTimestamps.get(user.id) || 0;
+    if (Date.now() - lastRequest < RATE_LIMIT_WINDOW_MS) {
+      logStep("Rate limit triggered", { userId: user.id });
+      return new Response(JSON.stringify({ error: "Too many requests" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 429,
+      });
+    }
+    userRequestTimestamps.set(user.id, Date.now());
 
     // SEGURANÇA: Parsing e validação de entrada
     let requestBody;
