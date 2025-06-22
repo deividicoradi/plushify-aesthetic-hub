@@ -7,23 +7,24 @@ import DashboardSidebar from '@/components/layout/DashboardSidebar';
 
 const Help = () => {
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex-1">
-        <div className="p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <HelpCircle className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">Central de Ajuda</h1>
-                <p className="text-muted-foreground">Encontre respostas e suporte para suas dúvidas</p>
-              </div>
+      <div className="ml-64 min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="flex items-center gap-4 border-b bg-background px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <HelpCircle className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Central de Ajuda</h1>
+              <p className="text-muted-foreground">Encontre respostas e suporte para suas dúvidas</p>
             </div>
           </div>
-          
+        </header>
+        
+        {/* Main Content */}
+        <main className="flex-1 p-6">
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Support Cards Grid */}
             <div className="grid gap-6 md:grid-cols-2">
@@ -191,7 +192,7 @@ const Help = () => {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
