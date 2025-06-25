@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -46,7 +45,7 @@ const Footer = () => {
           <div>
             <h3 className="font-bold text-foreground text-lg mb-6">Empresa</h3>
             <ul className="space-y-4">
-              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Sobre Nós</Link></li>
+              <li><Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">Sobre Nós</Link></li>
               <li><Link to="/plans" className="text-muted-foreground hover:text-foreground transition-colors">Planos e Preços</Link></li>
               <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
               <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Carreiras</Link></li>

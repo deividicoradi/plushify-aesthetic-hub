@@ -25,6 +25,7 @@ import FinancialDashboard from "./pages/FinancialDashboard";
 import Help from "./pages/Help";
 import Terms from "./pages/Terms";
 import Product from "./pages/Product";
+import About from "./pages/About";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -41,6 +42,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/product" element={<Product />} />
+              <Route path="/about" element={<About />} />
               <Route path="/plans" element={<Plans />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/signup" element={<Signup />} />
