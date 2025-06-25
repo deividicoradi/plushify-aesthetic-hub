@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -102,9 +103,9 @@ const Footer = () => {
             
             <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
               <Link to="/terms" className="hover:text-foreground transition-colors">Termos de Uso</Link>
-              <Link to="/terms" className="hover:text-foreground transition-colors">Política de Privacidade</Link>
-              <Link to="/terms" className="hover:text-foreground transition-colors">LGPD</Link>
-              <Link to="/terms" className="hover:text-foreground transition-colors">Cookies</Link>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">Política de Privacidade</Link>
+              <Link to="/lgpd" className="hover:text-foreground transition-colors">LGPD</Link>
+              <Link to="/cookies" className="hover:text-foreground transition-colors">Cookies</Link>
             </div>
           </div>
           

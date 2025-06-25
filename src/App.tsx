@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +23,9 @@ import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Help from "./pages/Help";
 import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import LGPD from "./pages/LGPD";
+import Cookies from "./pages/Cookies";
 import Product from "./pages/Product";
 import About from "./pages/About";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -47,6 +49,9 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/lgpd" element={<LGPD />} />
+              <Route path="/cookies" element={<Cookies />} />
               <Route path="/help" element={<Help />} />
               <Route
                 path="/dashboard"
