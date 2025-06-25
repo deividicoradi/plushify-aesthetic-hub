@@ -8,41 +8,23 @@ const About = () => {
   const values = [
     {
       icon: Heart,
-      title: "Paixão pelo que fazemos",
-      description: "Acreditamos que a tecnologia deve facilitar a vida dos profissionais de estética e beleza, permitindo que foquem no que realmente importa: cuidar dos seus clientes."
+      title: "Paixão pela Excelência",
+      description: "Desenvolvemos cada funcionalidade com dedicação, buscando sempre superar as expectativas dos nossos usuários e oferecer soluções que realmente fazem a diferença."
     },
     {
       icon: Shield,
-      title: "Segurança e Confiabilidade",
-      description: "Desenvolvemos nossa plataforma com os mais altos padrões de segurança, garantindo que os dados dos nossos usuários estejam sempre protegidos."
+      title: "Segurança e Confiança",
+      description: "Protegemos os dados dos nossos clientes com os mais rigorosos padrões de segurança digital, garantindo total conformidade com a LGPD e melhores práticas do mercado."
     },
     {
       icon: Target,
-      title: "Foco no Cliente",
-      description: "Cada funcionalidade é pensada para resolver problemas reais dos nossos usuários, baseada em feedback direto e necessidades do mercado."
+      title: "Resultados Reais",
+      description: "Nosso foco está em entregar resultados mensuráveis que impactem positivamente o crescimento e a eficiência dos negócios dos nossos parceiros."
     },
     {
       icon: Lightbulb,
-      title: "Inovação Constante",
-      description: "Estamos sempre buscando novas formas de melhorar a experiência dos nossos usuários através de tecnologia de ponta."
-    }
-  ];
-
-  const timeline = [
-    {
-      year: "2023",
-      title: "Início da Jornada",
-      description: "Identificamos a necessidade de modernizar a gestão de salões no Brasil"
-    },
-    {
-      year: "2024",
-      title: "Primeiro MVP",
-      description: "Lançamento da primeira versão com funcionalidades essenciais"
-    },
-    {
-      year: "2025",
-      title: "Expansão Nacional",
-      description: "Crescimento para centenas de estabelecimentos em todo o país"
+      title: "Inovação Inteligente",
+      description: "Utilizamos tecnologia de ponta para criar soluções intuitivas que simplificam processos complexos e maximizam a produtividade dos profissionais."
     }
   ];
 
@@ -64,14 +46,14 @@ const About = () => {
           <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent mb-6">
             Sobre o Plushify
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed">
-            Somos uma empresa brasileira dedicada a transformar a gestão de salões de beleza 
-            e clínicas de estética através da inovação e tecnologia de ponta.
+          <p className="text-xl text-muted-foreground max-w-4xl mx-auto mb-8 leading-relaxed">
+            Somos a plataforma líder em gestão digital para salões de beleza e clínicas de estética no Brasil. 
+            Nossa missão é capacitar empreendedores do setor a alcançarem novos patamares de sucesso através da tecnologia.
           </p>
           <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Globe className="w-4 h-4 text-primary" />
-              <span>100% Brasileiro</span>
+              <span>Orgulhosamente Brasileiro</span>
             </div>
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-primary" />
@@ -79,7 +61,7 @@ const About = () => {
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" />
-              <span>Suporte 24/7</span>
+              <span>Suporte Especializado</span>
             </div>
           </div>
         </div>
@@ -91,25 +73,27 @@ const About = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="order-2 lg:order-1">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-6">
-                Nossa Jornada
+                Nossa Origem
               </div>
               <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8">
-                Nossa História
+                Como Tudo Começou
               </h2>
               <div className="space-y-6 text-muted-foreground leading-relaxed text-lg">
                 <p>
-                  O Plushify nasceu da necessidade real observada no mercado de estética e beleza brasileiro. 
-                  Percebemos que muitos profissionais ainda dependiam de métodos manuais e sistemas 
-                  desatualizados para gerenciar seus negócios.
+                  O Plushify nasceu da observação de uma lacuna real no mercado brasileiro de beleza e estética. 
+                  Percebemos que profissionais talentosos estavam limitados por ferramentas obsoletas e processos 
+                  manuais que consumiam tempo precioso que poderia ser dedicado ao que realmente importa: seus clientes.
                 </p>
                 <p>
-                  Nossa equipe, formada por desenvolvedores e especialistas em negócios, decidiu criar 
-                  uma solução completa que pudesse atender desde pequenos salões até grandes clínicas, 
-                  sempre com foco na simplicidade e eficiência.
+                  Nossa equipe multidisciplinar, composta por desenvolvedores experientes, designers especializados 
+                  em UX e consultores de negócios do setor de beleza, uniu forças para criar uma solução verdadeiramente 
+                  transformadora. Não queríamos apenas mais um software, mas sim uma plataforma que revolucionasse 
+                  a forma como o setor opera.
                 </p>
                 <p>
-                  Hoje, orgulhosamente brasileiro, o Plushify atende centenas de estabelecimentos 
-                  em todo o país, ajudando empreendedores a digitalizarem e otimizarem seus processos.
+                  Hoje, o Plushify é reconhecido como a solução mais completa e confiável do mercado, atendendo 
+                  desde profissionais autônomos até grandes redes de franquias, sempre mantendo nosso compromisso 
+                  com a qualidade, inovação e suporte excepcional.
                 </p>
               </div>
             </div>
@@ -125,48 +109,19 @@ const About = () => {
         </div>
       </section>
 
-      {/* Timeline */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-6">
-              Nossa Evolução
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Linha do Tempo
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {timeline.map((item, index) => (
-              <div key={index} className="relative">
-                <div className="bg-background border border-border rounded-2xl p-8 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="text-4xl font-bold text-primary mb-4">{item.year}</div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{item.description}</p>
-                </div>
-                {index < timeline.length - 1 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-primary/30"></div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Nossa Missão com design renovado */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-6">
-            Nossa Missão
+            Nossa Proposta de Valor
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8">
             Nossa Missão
           </h2>
           <p className="text-xl text-muted-foreground max-w-4xl mx-auto mb-16 leading-relaxed">
-            Democratizar o acesso à tecnologia de gestão para profissionais de estética e beleza, 
-            oferecendo ferramentas intuitivas que aumentem a produtividade e melhorem a experiência 
-            dos clientes.
+            Transformar a gestão de salões e clínicas através de tecnologia inteligente e acessível, 
+            capacitando empreendedores a focar no que fazem de melhor: criar experiências excepcionais 
+            para seus clientes e fazer seus negócios prosperarem.
           </p>
 
           {/* Nossos Valores com cards modernos */}
@@ -197,10 +152,10 @@ const About = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-6">
-              Nossos Compromissos
+              Nossos Diferenciais
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Nosso Compromisso
+              O Que Nos Move
             </h2>
           </div>
 
@@ -209,10 +164,11 @@ const About = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent2-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Award className="w-10 h-10 text-primary" />
               </div>
-              <h3 className="text-2xl font-semibold text-foreground mb-4">Qualidade</h3>
+              <h3 className="text-2xl font-semibold text-foreground mb-4">Excelência Técnica</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Desenvolvemos cada funcionalidade com rigor técnico e atenção aos detalhes, 
-                garantindo uma experiência de qualidade superior.
+                Desenvolvemos cada linha de código com precisão e rigor técnico, garantindo 
+                uma plataforma robusta, confiável e sempre atualizada com as últimas 
+                tendências tecnológicas do mercado.
               </p>
             </div>
 
@@ -220,10 +176,11 @@ const About = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent2-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Users className="w-10 h-10 text-primary" />
               </div>
-              <h3 className="text-2xl font-semibold text-foreground mb-4">Suporte</h3>
+              <h3 className="text-2xl font-semibold text-foreground mb-4">Parceria Verdadeira</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Nossa equipe de suporte está sempre disponível para ajudar nossos usuários 
-                a tirarem o máximo proveito da plataforma.
+                Não somos apenas um fornecedor de software, somos parceiros no seu sucesso. 
+                Nossa equipe especializada oferece suporte contínuo, treinamentos personalizados 
+                e consultoria estratégica para maximizar seus resultados.
               </p>
             </div>
 
@@ -231,10 +188,11 @@ const About = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent2-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Shield className="w-10 h-10 text-primary" />
               </div>
-              <h3 className="text-2xl font-semibold text-foreground mb-4">Segurança</h3>
+              <h3 className="text-2xl font-semibold text-foreground mb-4">Segurança Total</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Cumprimos rigorosamente a LGPD e utilizamos as melhores práticas de segurança 
-                para proteger os dados dos nossos usuários.
+                Seus dados e os de seus clientes estão protegidos pelos mais altos padrões 
+                de segurança digital. Somos 100% compatíveis com a LGPD e utilizamos 
+                criptografia de ponta para garantir a privacidade e integridade das informações.
               </p>
             </div>
           </div>
