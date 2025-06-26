@@ -3,9 +3,9 @@
   <!-- Background decorative elements -->
   <defs>
     <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F9A8D4" />
-      <stop offset="50%" stop-color="#EC4899" />
-      <stop offset="100%" stop-color="#BE185D" />
+      <stop offset="0%" stop-color="#EC4899" />
+      <stop offset="50%" stop-color="#BE185D" />
+      <stop offset="100%" stop-color="#9D174D" />
     </linearGradient>
     
     <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -42,12 +42,12 @@
   </g>
   
   <!-- Modern typography for "Plushify" -->
-  <text x="45" y="16" font-family="'Poppins', Arial, sans-serif" font-size="16" font-weight="700" fill="url(#mainGradient)">
+  <text x="45" y="16" font-family="'Inter', 'Poppins', Arial, sans-serif" font-size="16" font-weight="700" fill="url(#mainGradient)">
     Plushify
   </text>
   
   <!-- Subtitle with elegant styling -->
-  <text x="45" y="28" font-family="'Poppins', Arial, sans-serif" font-size="8" font-weight="400" fill="#94A3B8" opacity="0.8">
+  <text x="45" y="28" font-family="'Inter', 'Poppins', Arial, sans-serif" font-size="8" font-weight="400" fill="#64748B" opacity="0.8">
     Beauty Management
   </text>
   

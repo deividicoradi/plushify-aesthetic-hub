@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -29,15 +30,15 @@ const DashboardSidebar = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Calendar, label: 'Agendamentos', path: '/appointments' },
     { icon: Users, label: 'Clientes', path: '/clients' },
-    { icon: Wrench, label: 'Serviços', path: '/servicos' },
+    { icon: Wrench, label: 'Serviços', path: '/services' },
     { icon: Package, label: 'Estoque', path: '/inventory' },
-    { icon: CreditCard, label: 'Financeiro', path: '/payments' },
-    { icon: PieChart, label: 'Painel Financeiro', path: '/financial' },
+    { icon: CreditCard, label: 'Financeiro', path: '/financial' },
+    { icon: PieChart, label: 'Painel Financeiro', path: '/financial-dashboard' },
     { icon: BarChart3, label: 'Relatórios', path: '/reports' },
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics' },
-    { icon: StickyNote, label: 'Anotações', path: '/anotacoes' },
-    { icon: Heart, label: 'Fidelidade', path: '/fidelidade' },
-    { icon: Crown, label: 'Planos', path: '/planos' },
+    { icon: StickyNote, label: 'Anotações', path: '/notes' },
+    { icon: Heart, label: 'Fidelidade', path: '/loyalty' },
+    { icon: Crown, label: 'Planos', path: '/plans' },
     { icon: HelpCircle, label: 'Ajuda', path: '/help' },
     { icon: Settings, label: 'Configurações', path: '/settings' },
   ];
@@ -46,11 +47,12 @@ const DashboardSidebar = () => {
     <aside className="fixed top-0 left-0 z-30 w-64 h-screen bg-background border-r border-border shadow-sm">
       {/* Logo */}
       <div className="flex items-center justify-start p-6 border-b border-border bg-background">
-        <Link to="/dashboard" className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">P</span>
-          </div>
-          <span className="text-xl font-bold text-foreground">Plushify</span>
+        <Link to="/dashboard" className="flex items-center">
+          <img 
+            src="/logo-modern.svg" 
+            alt="Plushify - Beauty Management Platform" 
+            className="h-8 w-auto"
+          />
         </Link>
       </div>
 

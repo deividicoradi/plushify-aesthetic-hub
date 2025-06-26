@@ -1,6 +1,6 @@
-
 import React from 'react';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { Calendar, Users, CreditCard, BarChart3, Package, Award, FileText, Shield } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -55,6 +55,13 @@ const Product = () => {
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
+          <div className="flex justify-center mb-8">
+            <img 
+              src="/logo-modern.svg" 
+              alt="Plushify - Beauty Management Platform" 
+              className="h-16 w-auto"
+            />
+          </div>
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
             Conheça o <span className="text-primary">Plushify</span>
           </h1>
@@ -142,6 +149,8 @@ const Product = () => {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 };
