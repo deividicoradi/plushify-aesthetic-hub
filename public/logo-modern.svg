@@ -1,0 +1,56 @@
+
+<svg width="160" height="40" viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background decorative elements -->
+  <defs>
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F9A8D4" />
+      <stop offset="50%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#BE185D" />
+    </linearGradient>
+    
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDF2F8" />
+      <stop offset="100%" stop-color="#F9A8D4" />
+    </linearGradient>
+    
+    <!-- Sparkle pattern -->
+    <pattern id="sparkles" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.5" fill="#FBBF24" opacity="0.6"/>
+      <circle cx="6" cy="6" r="0.3" fill="#F59E0B" opacity="0.4"/>
+    </pattern>
+  </defs>
+  
+  <!-- Main circular frame with decorative border -->
+  <circle cx="20" cy="20" r="18" fill="url(#accentGradient)" stroke="url(#mainGradient)" stroke-width="1.5"/>
+  
+  <!-- Decorative outer ring -->
+  <circle cx="20" cy="20" r="16" fill="none" stroke="url(#mainGradient)" stroke-width="0.5" opacity="0.3"/>
+  
+  <!-- Central stylized 'P' with modern twist -->
+  <path d="M12 12 Q12 8 16 8 L24 8 Q28 8 28 12 Q28 16 24 16 L16 16 L16 28 Q16 30 14 30 Q12 30 12 28 Z" fill="url(#mainGradient)"/>
+  
+  <!-- Inner decorative element -->
+  <circle cx="20" cy="14" r="3" fill="white" opacity="0.9"/>
+  <circle cx="20" cy="14" r="1.5" fill="url(#mainGradient)"/>
+  
+  <!-- Sparkle effects around the logo -->
+  <g opacity="0.7">
+    <path d="M8 10 L9 11 L8 12 L7 11 Z" fill="#FBBF24"/>
+    <path d="M32 8 L33.5 9.5 L32 11 L30.5 9.5 Z" fill="#F59E0B"/>
+    <path d="M6 26 L7 27 L6 28 L5 27 Z" fill="#FBBF24"/>
+    <path d="M34 24 L35 25 L34 26 L33 25 Z" fill="#F59E0B"/>
+  </g>
+  
+  <!-- Modern typography for "Plushify" -->
+  <text x="45" y="16" font-family="'Poppins', Arial, sans-serif" font-size="16" font-weight="700" fill="url(#mainGradient)">
+    Plushify
+  </text>
+  
+  <!-- Subtitle with elegant styling -->
+  <text x="45" y="28" font-family="'Poppins', Arial, sans-serif" font-size="8" font-weight="400" fill="#94A3B8" opacity="0.8">
+    Beauty Management
+  </text>
+  
+  <!-- Decorative flourish under the text -->
+  <path d="M45 30 Q55 32 65 30 Q75 28 85 30" stroke="url(#mainGradient)" stroke-width="1" fill="none" opacity="0.5"/>
+</svg>
