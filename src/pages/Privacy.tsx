@@ -28,7 +28,8 @@ const Privacy = () => {
           </div>
 
           {/* Content */}
-          <div className="prose prose-lg max-w-none">
+          <div className="space-y-8">
+            
             <div className="bg-muted/30 rounded-lg p-8 space-y-8">
               
               <section>
@@ -125,20 +126,34 @@ const Privacy = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-foreground mb-4">6. Contato</h2>
-                <div className="text-muted-foreground">
-                  <p className="mb-4">
-                    Para exercer seus direitos ou esclarecer dúvidas sobre esta política, entre em contato:
+                <h2 className="text-2xl font-semibold text-foreground mb-4">6. Retenção de Dados</h2>
+                <div className="text-muted-foreground space-y-4">
+                  <p>
+                    Mantemos seus dados pessoais apenas pelo tempo necessário para os fins para os quais foram coletados, 
+                    ou conforme exigido por lei.
                   </p>
-                  <div className="bg-background rounded-lg p-4 border">
-                    <p><strong>E-mail:</strong> privacidade@plushify.com.br</p>
-                    <p><strong>Encarregado de Dados:</strong> Equipe Plushify</p>
-                    <p><strong>Endereço:</strong> São Paulo, Brasil</p>
-                  </div>
+                  <p>
+                    Após o encerramento da conta, os dados são anonimizados ou eliminados de forma segura, 
+                    exceto quando a retenção for necessária para cumprimento de obrigações legais.
+                  </p>
                 </div>
               </section>
 
             </div>
+
+            {/* Contato */}
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Contato para Proteção de Dados</h2>
+              <p className="text-muted-foreground mb-4">
+                Para exercer seus direitos ou esclarecer dúvidas sobre esta política, entre em contato:
+              </p>
+              <div className="bg-background rounded-lg p-4 border border-primary/20">
+                <p><strong>E-mail:</strong> privacidade@plushify.com.br</p>
+                <p><strong>Encarregado de Dados:</strong> Equipe Plushify</p>
+                <p><strong>Endereço:</strong> São Paulo, Brasil</p>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

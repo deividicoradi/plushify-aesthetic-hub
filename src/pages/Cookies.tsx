@@ -15,7 +15,7 @@ const Cookies = () => {
         
         <div className="relative max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Cookie className="w-4 h-4" />
               Transparência total
             </div>
@@ -114,7 +114,7 @@ const Cookies = () => {
               </h2>
               
               <div className="space-y-4">
-                <div className="bg-background rounded-lg p-4 border">
+                <div className="bg-background rounded-lg p-4 border border-primary/20">
                   <h3 className="font-semibold text-foreground mb-2">Pelo Navegador</h3>
                   <p className="text-muted-foreground text-sm mb-2">
                     Você pode controlar e excluir cookies através das configurações do seu navegador:
@@ -127,7 +127,7 @@ const Cookies = () => {
                   </ul>
                 </div>
                 
-                <div className="bg-background rounded-lg p-4 border">
+                <div className="bg-background rounded-lg p-4 border border-primary/20">
                   <h3 className="font-semibold text-foreground mb-2">Na Nossa Plataforma</h3>
                   <p className="text-muted-foreground text-sm">
                     Acesse suas configurações de privacidade no painel de controle da sua conta para 
@@ -150,12 +150,12 @@ const Cookies = () => {
             </div>
 
             {/* Contato */}
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-              <h2 className="text-2xl font-semibold text-orange-800 mb-4">Dúvidas sobre Cookies?</h2>
-              <p className="text-orange-700 mb-4">
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Dúvidas sobre Cookies?</h2>
+              <p className="text-muted-foreground mb-4">
                 Se você tiver alguma dúvida sobre nossa política de cookies, entre em contato conosco:
               </p>
-              <div className="bg-white rounded-lg p-4 border border-orange-200">
+              <div className="bg-background rounded-lg p-4 border border-primary/20">
                 <p><strong>E-mail:</strong> privacidade@plushify.com.br</p>
                 <p><strong>Assunto:</strong> "Dúvidas sobre Cookies"</p>
               </div>

@@ -15,7 +15,7 @@ const Terms = () => {
         
         <div className="relative max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Scale className="w-4 h-4" />
               Transparência e clareza
             </div>
@@ -28,7 +28,8 @@ const Terms = () => {
           </div>
 
           {/* Content */}
-          <div className="prose prose-lg max-w-none">
+          <div className="space-y-8">
+            
             <div className="bg-muted/30 rounded-lg p-8 space-y-8">
               
               <section>
@@ -165,26 +166,23 @@ const Terms = () => {
               </section>
 
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Contato */}
-      <section className="pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h2 className="text-2xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
-              <AlertCircle className="w-6 h-6" />
-              Dúvidas sobre os Termos?
-            </h2>
-            <p className="text-blue-700 mb-4">
-              Se você tiver alguma dúvida sobre estes Termos de Serviço, entre em contato conosco:
-            </p>
-            <div className="bg-white rounded-lg p-4 border border-blue-200">
-              <p><strong>E-mail:</strong> atendimento@plushify.com.br</p>
-              <p><strong>Assunto:</strong> "Dúvidas sobre Termos de Serviço"</p>
-              <p><strong>Horário de Atendimento:</strong> Segunda a Sexta, 9h às 18h</p>
+            {/* Contato */}
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
+              <h2 className="text-2xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                <AlertCircle className="w-6 h-6 text-primary" />
+                Dúvidas sobre os Termos?
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                Se você tiver alguma dúvida sobre estes Termos de Serviço, entre em contato conosco:
+              </p>
+              <div className="bg-background rounded-lg p-4 border border-primary/20">
+                <p><strong>E-mail:</strong> atendimento@plushify.com.br</p>
+                <p><strong>Assunto:</strong> "Dúvidas sobre Termos de Serviço"</p>
+                <p><strong>Horário de Atendimento:</strong> Segunda a Sexta, 9h às 18h</p>
+              </div>
             </div>
+
           </div>
         </div>
       </section>

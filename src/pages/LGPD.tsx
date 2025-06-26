@@ -15,7 +15,7 @@ const LGPD = () => {
         
         <div className="relative max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
               <CheckCircle className="w-4 h-4" />
               100% Conforme com a LGPD
             </div>
@@ -31,12 +31,12 @@ const LGPD = () => {
           <div className="space-y-8">
             
             {/* Resumo Executivo */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h2 className="text-2xl font-semibold text-green-800 mb-4 flex items-center gap-2">
-                <Shield className="w-6 h-6" />
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
+              <h2 className="text-2xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Shield className="w-6 h-6 text-primary" />
                 Nosso Compromisso
               </h2>
-              <p className="text-green-700 leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed">
                 O Plushify está em total conformidade com a Lei Geral de Proteção de Dados (LGPD). 
                 Implementamos todas as medidas técnicas e organizacionais necessárias para garantir 
                 a proteção dos dados pessoais de nossos usuários e clientes.
@@ -167,7 +167,7 @@ const LGPD = () => {
               <p className="text-muted-foreground mb-4">
                 Para exercer seus direitos ou esclarecer dúvidas sobre o tratamento de dados:
               </p>
-              <div className="bg-background rounded-lg p-4 border">
+              <div className="bg-background rounded-lg p-4 border border-primary/20">
                 <p><strong>E-mail:</strong> dpo@plushify.com.br</p>
                 <p><strong>Encarregado:</strong> Equipe de Proteção de Dados Plushify</p>
                 <p><strong>Horário de Atendimento:</strong> Segunda a Sexta, 9h às 18h</p>
