@@ -1,10 +1,13 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Cookie, Settings, Shield, Info } from 'lucide-react';
 
 const Cookies = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
