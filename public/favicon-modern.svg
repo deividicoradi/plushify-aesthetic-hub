@@ -1,32 +1,20 @@
 
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="faviconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#EC4899" />
-      <stop offset="50%" stop-color="#BE185D" />
-      <stop offset="100%" stop-color="#9D174D" />
-    </linearGradient>
-    
-    <linearGradient id="faviconBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FDF2F8" />
-      <stop offset="100%" stop-color="#F9A8D4" />
+    <!-- Gradient for the circular element -->
+    <linearGradient id="faviconCircleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="50%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#3B82F6" />
     </linearGradient>
   </defs>
   
-  <!-- Background with rounded corners -->
-  <rect width="32" height="32" rx="8" fill="url(#faviconBg)"/>
+  <!-- Main circular element with gradient -->
+  <circle cx="16" cy="16" r="14" fill="url(#faviconCircleGradient)"/>
   
-  <!-- Main circle -->
-  <circle cx="16" cy="16" r="12" fill="url(#faviconGradient)"/>
+  <!-- Inner white circle -->
+  <circle cx="16" cy="16" r="7" fill="white"/>
   
-  <!-- Stylized 'P' -->
-  <path d="M10 10 Q10 8 12 8 L18 8 Q20 8 20 10 Q20 12 18 12 L12 12 L12 20 Q12 21 11 21 Q10 21 10 20 Z" fill="white"/>
-  
-  <!-- Central decoration -->
-  <circle cx="16" cy="11" r="2" fill="white" opacity="0.9"/>
-  <circle cx="16" cy="11" r="1" fill="url(#faviconGradient)"/>
-  
-  <!-- Small sparkles -->
-  <circle cx="8" cy="8" r="1" fill="#FBBF24" opacity="0.8"/>
-  <circle cx="24" cy="24" r="0.8" fill="#F59E0B" opacity="0.6"/>
+  <!-- Inner gradient circle -->
+  <circle cx="16" cy="16" r="4" fill="url(#faviconCircleGradient)"/>
 </svg>
