@@ -1,5 +1,5 @@
 
-<svg width="200" height="50" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="280" height="70" viewBox="0 0 280 70" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Background decorative elements -->
   <defs>
     <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -21,28 +21,28 @@
   </defs>
   
   <!-- Main circular frame with decorative border -->
-  <circle cx="25" cy="25" r="22" fill="url(#accentGradient)" stroke="url(#mainGradient)" stroke-width="2"/>
+  <circle cx="35" cy="35" r="30" fill="url(#accentGradient)" stroke="url(#mainGradient)" stroke-width="2.5"/>
   
   <!-- Decorative outer ring -->
-  <circle cx="25" cy="25" r="19" fill="none" stroke="url(#mainGradient)" stroke-width="0.8" opacity="0.3"/>
+  <circle cx="35" cy="35" r="26" fill="none" stroke="url(#mainGradient)" stroke-width="1" opacity="0.3"/>
   
   <!-- Central stylized 'P' with modern twist -->
-  <path d="M15 15 Q15 10 20 10 L30 10 Q35 10 35 15 Q35 20 30 20 L20 20 L20 35 Q20 38 17 38 Q15 38 15 35 Z" fill="url(#mainGradient)"/>
+  <path d="M20 20 Q20 14 26 14 L42 14 Q48 14 48 20 Q48 26 42 26 L26 26 L26 46 Q26 50 22 50 Q20 50 20 46 Z" fill="url(#mainGradient)"/>
   
   <!-- Inner decorative element -->
-  <circle cx="25" cy="17" r="4" fill="white" opacity="0.9"/>
-  <circle cx="25" cy="17" r="2" fill="url(#mainGradient)"/>
+  <circle cx="35" cy="22" r="5" fill="white" opacity="0.9"/>
+  <circle cx="35" cy="22" r="2.5" fill="url(#mainGradient)"/>
   
   <!-- Sparkle effects around the logo -->
   <g opacity="0.7">
-    <path d="M10 12 L11.5 13.5 L10 15 L8.5 13.5 Z" fill="#FBBF24"/>
-    <path d="M40 10 L42 12 L40 14 L38 12 Z" fill="#F59E0B"/>
-    <path d="M8 32 L9.5 33.5 L8 35 L6.5 33.5 Z" fill="#FBBF24"/>
-    <path d="M42 30 L43.5 31.5 L42 33 L40.5 31.5 Z" fill="#F59E0B"/>
+    <path d="M14 16 L16 18 L14 20 L12 18 Z" fill="#FBBF24"/>
+    <path d="M56 14 L59 17 L56 20 L53 17 Z" fill="#F59E0B"/>
+    <path d="M11 44 L13.5 46.5 L11 49 L8.5 46.5 Z" fill="#FBBF24"/>
+    <path d="M59 42 L61.5 44.5 L59 47 L56.5 44.5 Z" fill="#F59E0B"/>
   </g>
   
   <!-- Modern typography for "Plushify" -->
-  <text x="60" y="32" font-family="'Inter', 'Poppins', Arial, sans-serif" font-size="24" font-weight="700" fill="url(#mainGradient)">
+  <text x="80" y="45" font-family="'Inter', 'Poppins', Arial, sans-serif" font-size="32" font-weight="700" fill="url(#mainGradient)">
     Plushify
   </text>
 </svg>
