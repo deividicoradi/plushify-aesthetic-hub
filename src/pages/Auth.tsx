@@ -31,9 +31,10 @@ const Auth = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    // Verificar se o usuário já está logado
+    // Verificar se o usuário já está logado ao carregar a página
     if (user) {
-      navigate('/dashboard');
+      console.log('User already logged in, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
     }
   }, [user, navigate]);
 
@@ -114,7 +115,10 @@ const Auth = () => {
 
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      navigate('/dashboard');
+      
+      console.log('Login successful, auth context will handle redirect');
+      toast.success("Login realizado com sucesso!");
+      // Removido redirecionamento manual - o useEffect acima irá lidar com isso
     } catch (error: any) {
       toast.error(error.message || "Falha no login. Verifique suas credenciais.");
     } finally {

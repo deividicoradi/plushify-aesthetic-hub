@@ -34,12 +34,13 @@ export const useSubscription = () => {
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle ao invés de single
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Erro ao buscar assinatura:', error);
-        // Se não encontrar assinatura, criar uma trial
-        await createTrialSubscription();
+        // Em caso de erro, definir como trial sem tentar criar
+        setCurrentPlan('trial');
+        setLoading(false);
         return;
       }
 
@@ -47,11 +48,14 @@ export const useSubscription = () => {
         setSubscription(data);
         setCurrentPlan(data.plan_type);
       } else {
-        // Criar assinatura trial se não existir
-        await createTrialSubscription();
+        // Se não encontrar assinatura, apenas definir como trial
+        // Não tentar criar automaticamente para evitar erros de RLS
+        setCurrentPlan('trial');
+        console.log('Nenhuma assinatura encontrada, usando trial');
       }
     } catch (error) {
       console.error('Erro ao buscar assinatura:', error);
+      setCurrentPlan('trial');
     } finally {
       setLoading(false);
     }

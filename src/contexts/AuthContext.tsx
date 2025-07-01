@@ -19,62 +19,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Interval handler used to refresh the token periodically
-  let tokenRefreshInterval: ReturnType<typeof setInterval> | undefined;
-
-  // Função para atualizar a sessão
+  // Função para atualizar a sessão (removida para evitar refresh desnecessário)
   const refreshSession = async () => {
-    try {
-      const { data, error } = await supabase.auth.refreshSession();
-      if (error) throw error;
-      
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-    } catch (error: any) {
-      console.error('Erro ao atualizar sessão:', error.message);
-      // Se não for possível atualizar a sessão, faça logout
-      if (error.message.includes('Token expired') || error.message.includes('Invalid token')) {
-        await signOut();
-        toast.error("Sua sessão expirou. Por favor, faça login novamente.");
-      }
-    }
+    console.log('Refresh session called - but skipping to avoid rate limits');
   };
 
   useEffect(() => {
     // Configura o listener para mudanças no estado de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('Auth state change:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Quando o evento é SIGNED_IN, verifica se houve atualização do usuário
-        if (event === 'SIGNED_IN') {
-          try {
-            // Atualiza informações do usuário se necessário
-            if (session?.user?.id) {
-              // Código para atualizar informações adicionais do usuário se necessário
-            }
-          } catch (error) {
-            console.error('Erro ao atualizar dados do usuário:', error);
-          }
-        }
       }
     );
 
     // Verifica se há uma sessão existente
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-
-      // Configura um intervalo para renovar o token periodicamente (a cada 55 minutos)
-      tokenRefreshInterval = setInterval(refreshSession, 55 * 60 * 1000);
     });
 
     return () => {
       subscription.unsubscribe();
-      if (tokenRefreshInterval) clearInterval(tokenRefreshInterval);
     };
   }, []);
 

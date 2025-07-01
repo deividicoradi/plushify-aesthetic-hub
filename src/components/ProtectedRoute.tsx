@@ -16,40 +16,25 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   useEffect(() => {
     if (!authLoading && !subLoading) {
-      // SEGURANÇA: Verificações adicionais de segurança
-      const performSecurityCheck = () => {
-        console.log('SECURITY: Performing route protection check', {
-          hasUser: !!user,
-          currentPlan,
-          pathname: location.pathname
-        });
-
-        // SEGURANÇA: Verificar integridade da sessão
-        if (user) {
-          const sessionAge = Date.now() - (user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : 0);
-          const maxSessionAge = 24 * 60 * 60 * 1000; // 24 horas
-          
-          if (sessionAge > maxSessionAge) {
-            console.log('SECURITY: Session too old, requiring re-authentication');
-            // Em produção, forçar logout aqui
-          }
-        }
-
-        setSecurityCheck(true);
-        setIsLoading(false);
-      };
-
-      // SEGURANÇA: Pequeno delay para verificações
-      setTimeout(performSecurityCheck, 100);
+      console.log('ProtectedRoute check:', {
+        hasUser: !!user,
+        currentPlan,
+        pathname: location.pathname,
+        authLoading,
+        subLoading
+      });
+      
+      setSecurityCheck(true);
+      setIsLoading(false);
     }
   }, [authLoading, subLoading, user, currentPlan, location.pathname]);
 
-  if (isLoading || !securityCheck) {
+  if (isLoading || authLoading || subLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
-          <p className="text-sm text-muted-foreground">Verificando segurança...</p>
+          <p className="text-sm text-muted-foreground">Carregando...</p>
         </div>
       </div>
     );
