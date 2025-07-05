@@ -22,8 +22,17 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   const currentPrice = isAnnual ? plan.annualPrice : plan.price;
   const currentPeriod = isAnnual ? plan.annualPeriod : plan.period;
   const currentOriginalPrice = isAnnual ? plan.annualOriginalPrice : plan.originalPrice;
+  
   const installmentPrice = isAnnual && plan.annualPrice !== 'Gratuito' 
-    ? `${Math.round(parseInt(plan.annualPrice.replace('R$ ', '').replace('.', '')) / 10)}`
+    ? (() => {
+        try {
+          const cleanPrice = plan.annualPrice.replace(/[R$\s\.]/g, '').replace(',', '.');
+          const numericPrice = parseFloat(cleanPrice);
+          return isNaN(numericPrice) ? null : Math.round(numericPrice / 10).toString();
+        } catch {
+          return null;
+        }
+      })()
     : null;
 
   const planLoadingKey = `${plan.id}_${isAnnual ? 'annual' : 'monthly'}`;

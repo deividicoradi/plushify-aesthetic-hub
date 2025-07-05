@@ -21,6 +21,21 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
   currentOriginalPrice,
   installmentPrice
 }) => {
+  // Verificação de segurança
+  if (!plan) {
+    return (
+      <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
+        <div className="animate-pulse">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-muted"></div>
+          <div className="space-y-2 mt-4">
+            <div className="h-6 bg-muted rounded mx-auto w-32"></div>
+            <div className="h-4 bg-muted rounded mx-auto w-48"></div>
+          </div>
+        </div>
+      </CardHeader>
+    );
+  }
+
   const IconComponent = plan.icon;
 
   return (
@@ -41,21 +56,23 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
 
       <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
         <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4 shadow-lg ${plan.mostComplete ? 'ring-2 ring-primary/30' : ''}`}>
-          <IconComponent 
-            className={`${plan.mostComplete ? 'w-8 h-8' : 'w-7 h-7'} text-primary`} 
-            strokeWidth={1.5}
-          />
+          {IconComponent && (
+            <IconComponent 
+              className={`${plan.mostComplete ? 'w-8 h-8' : 'w-7 h-7'} text-primary`} 
+              strokeWidth={1.5}
+            />
+          )}
         </div>
         
         <div className="space-y-2">
           <h3 className={`${plan.mostComplete ? 'text-2xl' : 'text-xl'} font-bold`}>
-            {plan.name}
+            {plan.name || 'Carregando...'}
           </h3>
           <p className={`text-sm ${plan.mostComplete ? 'font-medium text-primary' : 'text-muted-foreground'}`}>
-            {plan.description}
+            {plan.description || ''}
           </p>
           <p className="text-xs text-muted-foreground">
-            {plan.subtitle}
+            {plan.subtitle || ''}
           </p>
         </div>
         
@@ -65,13 +82,22 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
               <span className="text-lg text-muted-foreground line-through">{currentOriginalPrice}</span>
             )}
             <span className={`${plan.mostComplete ? 'text-4xl text-primary' : 'text-3xl'} font-bold`}>
-              {currentPrice}
+              {currentPrice || 'Indisponível'}
             </span>
             {currentPeriod && <span className="text-muted-foreground">{currentPeriod}</span>}
           </div>
           {currentOriginalPrice && (
             <div className={`text-sm font-semibold ${plan.mostComplete ? 'text-green-600 animate-pulse' : 'text-green-600'}`}>
-              Economize {Math.round((1 - parseInt(currentPrice.replace('R$ ', '').replace('.', '')) / parseInt(currentOriginalPrice.replace('R$ ', '').replace('.', ''))) * 100)}%
+              {(() => {
+                try {
+                  const current = parseFloat(currentPrice.replace(/[R$\s\.]/g, '').replace(',', '.'));
+                  const original = parseFloat(currentOriginalPrice.replace(/[R$\s\.]/g, '').replace(',', '.'));
+                  const discount = Math.round((1 - current / original) * 100);
+                  return `Economize ${isNaN(discount) ? 0 : discount}%`;
+                } catch {
+                  return 'Oferta especial!';
+                }
+              })()}
             </div>
           )}
           {installmentPrice && (

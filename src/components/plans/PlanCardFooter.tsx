@@ -16,6 +16,27 @@ export const PlanCardFooter: React.FC<PlanCardFooterProps> = ({
   isPlanLoading,
   onPlanSelection
 }) => {
+  // Verificação de segurança
+  if (!plan) {
+    return (
+      <CardFooter className="pt-4 px-6 pb-6 flex-shrink-0">
+        <div className="w-full">
+          <Button className="w-full h-14" disabled>
+            Carregando...
+          </Button>
+        </div>
+      </CardFooter>
+    );
+  }
+
+  const handlePlanClick = () => {
+    try {
+      onPlanSelection(plan.id);
+    } catch (error) {
+      console.error('Erro ao selecionar plano:', error);
+    }
+  };
+
   return (
     <CardFooter className="pt-4 px-6 pb-6 flex-shrink-0">
       <div className="w-full space-y-3">
@@ -30,10 +51,13 @@ export const PlanCardFooter: React.FC<PlanCardFooterProps> = ({
                 : 'bg-primary hover:bg-primary/90 text-primary-foreground'
           }`}
           disabled={(plan.current && !plan.trial) || isPlanLoading}
-          onClick={() => onPlanSelection(plan.id)}
+          onClick={handlePlanClick}
         >
           {isPlanLoading ? (
-            "Processando..."
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+              <span>Processando...</span>
+            </div>
           ) : plan.current ? (
             plan.trial ? (
               <div className="flex items-center justify-center gap-3">
