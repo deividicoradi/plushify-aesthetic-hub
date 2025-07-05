@@ -37,6 +37,7 @@ import Status from "./pages/Status";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
+import ScrollToTop from "./components/ScrollToTop";
 
 
 const queryClient = new QueryClient();
@@ -178,9 +179,10 @@ const App = () => (
             <AuthProvider>
               <Toaster />
               <Sonner />
-              <BrowserRouter>
-                <AppContent />
-              </BrowserRouter>
+               <BrowserRouter>
+                 <ScrollToTop />
+                 <AppContent />
+               </BrowserRouter>
               <CookieConsent />
             </AuthProvider>
           </SecurityProvider>
