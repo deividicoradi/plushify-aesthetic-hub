@@ -12,6 +12,20 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  
+  // Configurar source maps para produção (necessário para Sentry)
+  build: {
+    sourcemap: mode === 'production' ? 'hidden' : true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separar Sentry em chunk próprio para otimização
+          sentry: ['@sentry/react'],
+        },
+      },
+    },
+  },
+  
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
@@ -114,5 +128,10 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  
+  // Configurar variáveis de ambiente para diferentes modos
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version || 'dev'),
   },
 }));

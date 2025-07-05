@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
 import { SessionWarningDialog } from '@/components/SessionWarningDialog';
+import { useSentry } from '@/lib/sentry';
 
 
 type AuthContextType = {
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { setUserContext, addBreadcrumb, captureMessage } = useSentry();
 
   // Função para atualizar a sessão (removida para evitar refresh desnecessário)
   const refreshSession = async () => {
@@ -35,6 +37,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Adicionar contexto do usuário para Sentry
+        if (session?.user) {
+          setUserContext({
+            id: session.user.id,
+            email: session.user.email,
+          });
+          addBreadcrumb(`User ${event}`, 'auth', 'info');
+        } else {
+          setUserContext({ id: '' });
+          addBreadcrumb('User logged out', 'auth', 'info');
+        }
       }
     );
 

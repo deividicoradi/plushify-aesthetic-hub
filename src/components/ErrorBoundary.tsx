@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSentry } from '@/lib/sentry';
 
 interface Props {
   children: ReactNode;
@@ -55,10 +56,27 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('Stack Trace:', error.stack);
     console.groupEnd();
 
-    // Em produção, enviar para serviço de monitoramento
-    if (process.env.NODE_ENV === 'production') {
-      // Implementar integração com Sentry aqui
-      // Sentry.captureException(error, { contexts: { react: { componentStack: errorInfo.componentStack } } });
+    // Enviar para Sentry se configurado
+    try {
+      import('@/lib/sentry').then(({ useSentry }) => {
+        // Não podemos usar hooks em class components, então usamos diretamente
+        if (import.meta.env.VITE_SENTRY_DSN) {
+          import('@sentry/react').then((Sentry) => {
+            Sentry.captureException(error, {
+              contexts: { 
+                react: { 
+                  componentStack: errorInfo.componentStack 
+                } 
+              },
+              tags: {
+                errorBoundary: true,
+              }
+            });
+          });
+        }
+      });
+    } catch (sentryError) {
+      console.error('Failed to send error to Sentry:', sentryError);
     }
   };
 
