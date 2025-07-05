@@ -1,9 +1,8 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import { toast } from "@/components/ui/sonner";
-import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 import { SessionWarningDialog } from '@/components/SessionWarningDialog';
 
 type AuthContextType = {
@@ -60,32 +59,97 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Sistema de timeout de sessão - configuração para produção
-  const sessionTimeout = useSessionTimeout({
-    timeoutMinutes: 30,     // 30 minutos de inatividade
-    warningMinutes: 5,      // Aviso 5 minutos antes
-    checkIntervalSeconds: 30 // Verificar a cada 30 segundos
+  // Sistema de timeout de sessão integrado
+  const [sessionState, setSessionState] = useState({
+    timeRemaining: 30 * 60, // 30 minutos em segundos
+    showWarning: false,
+    lastActivity: new Date()
   });
-
   const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout>();
 
-  // Controlar exibição do diálogo de aviso
-  useEffect(() => {
-    if (sessionTimeout.showWarning && user) {
+  // Atualizar última atividade
+  const updateActivity = useCallback(() => {
+    if (!user) return;
+    
+    const now = new Date();
+    setSessionState(prev => ({
+      ...prev,
+      lastActivity: now,
+      timeRemaining: 30 * 60,
+      showWarning: false
+    }));
+  }, [user]);
+
+  // Auto logout por inatividade
+  const handleAutoLogout = useCallback(async () => {
+    toast.error("Sessão expirou por inatividade");
+    await signOut();
+  }, []);
+
+  // Verificar tempo de sessão
+  const checkSessionTime = useCallback(() => {
+    if (!user) return;
+
+    const now = new Date();
+    const timeSinceActivity = Math.floor((now.getTime() - sessionState.lastActivity.getTime()) / 1000);
+    const remainingTime = (30 * 60) - timeSinceActivity;
+
+    setSessionState(prev => ({
+      ...prev,
+      timeRemaining: Math.max(0, remainingTime)
+    }));
+
+    // Mostrar aviso com 5 minutos restantes
+    if (remainingTime <= 300 && remainingTime > 0 && !sessionState.showWarning) {
+      setSessionState(prev => ({ ...prev, showWarning: true }));
       setShowWarningDialog(true);
-    } else {
-      setShowWarningDialog(false);
     }
-  }, [sessionTimeout.showWarning, user]);
+
+    // Logout se tempo esgotou
+    if (remainingTime <= 0) {
+      handleAutoLogout();
+    }
+  }, [user, sessionState.lastActivity, sessionState.showWarning, handleAutoLogout]);
+
+  // Configurar listeners de atividade
+  useEffect(() => {
+    if (!user) return;
+
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    
+    activityEvents.forEach(event => {
+      document.addEventListener(event, updateActivity, { passive: true });
+    });
+
+    intervalRef.current = setInterval(checkSessionTime, 30000); // Verificar a cada 30s
+
+    return () => {
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, updateActivity);
+      });
+      
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [user, updateActivity, checkSessionTime]);
 
   const handleExtendSession = () => {
-    sessionTimeout.extendSession();
+    updateActivity();
     setShowWarningDialog(false);
+    toast.success("Sessão renovada");
   };
 
   const handleSessionLogout = async () => {
     setShowWarningDialog(false);
     await signOut();
+  };
+
+  const formatTimeRemaining = () => {
+    const minutes = Math.floor(sessionState.timeRemaining / 60);
+    const seconds = sessionState.timeRemaining % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const value = {
@@ -103,7 +167,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         open={showWarningDialog}
         onExtend={handleExtendSession}
         onLogout={handleSessionLogout}
-        timeRemaining={sessionTimeout.formatTimeRemaining()}
+        timeRemaining={formatTimeRemaining()}
       />
     </AuthContext.Provider>
   );
