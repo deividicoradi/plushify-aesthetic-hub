@@ -1,10 +1,12 @@
 
+// Integrar no AuthContext
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
 import { SessionWarningDialog } from '@/components/SessionWarningDialog';
 import { useSentry } from '@/lib/sentry';
+import { analytics } from '@/lib/analytics';
 
 
 type AuthContextType = {
@@ -45,9 +47,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             email: session.user.email,
           });
           addBreadcrumb(`User ${event}`, 'auth', 'info');
+          
+          // Analytics: Rastrear login
+          if (event === 'SIGNED_IN') {
+            analytics.login();
+          }
         } else {
           setUserContext({ id: '' });
           addBreadcrumb('User logged out', 'auth', 'info');
+          
+          // Analytics: Rastrear logout
+          if (event === 'SIGNED_OUT') {
+            analytics.logout();
+          }
         }
       }
     );
