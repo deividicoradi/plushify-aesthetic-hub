@@ -88,16 +88,7 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
           </div>
           {currentOriginalPrice && (
             <div className={`text-sm font-semibold ${plan.mostComplete ? 'text-green-600 animate-pulse' : 'text-green-600'}`}>
-              {(() => {
-                try {
-                  const current = parseFloat(currentPrice.replace(/[R$\s\.]/g, '').replace(',', '.'));
-                  const original = parseFloat(currentOriginalPrice.replace(/[R$\s\.]/g, '').replace(',', '.'));
-                  const discount = Math.round((1 - current / original) * 100);
-                  return `Economize ${isNaN(discount) ? 0 : discount}%`;
-                } catch {
-                  return 'Oferta especial!';
-                }
-              })()}
+              Economize 17%
             </div>
           )}
           {installmentPrice && (
