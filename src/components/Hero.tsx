@@ -79,9 +79,31 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 mb-12">
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2">
-                  {[1,2,3,4,5].map((i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-background"></div>
-                  ))}
+                  <img 
+                    src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" 
+                    alt="Profissional da beleza" 
+                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
+                  />
+                  <img 
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=32&h=32&fit=crop&crop=face" 
+                    alt="Profissional da beleza" 
+                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
+                  />
+                  <img 
+                    src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=32&h=32&fit=crop&crop=face" 
+                    alt="Profissional da beleza" 
+                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
+                  />
+                  <img 
+                    src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=32&h=32&fit=crop&crop=face" 
+                    alt="Profissional da beleza" 
+                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
+                  />
+                  <img 
+                    src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=32&h=32&fit=crop&crop=face" 
+                    alt="Profissional da beleza" 
+                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
+                  />
                 </div>
                 <span className="text-sm text-muted-foreground">+1.200 profissionais</span>
               </div>
