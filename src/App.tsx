@@ -38,9 +38,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
 import ScrollToTop from "./components/ScrollToTop";
-import { AuthenticatedLayout } from "./components/layout/AuthenticatedLayout";
-import { NotificationProvider } from "./components/notifications/NotificationSystem";
-import { SkipToContent } from "./components/accessibility/SkipToContent";
 
 
 const queryClient = new QueryClient();
@@ -181,16 +178,13 @@ const App = () => (
         <TooltipProvider>
           <SecurityProvider>
             <AuthProvider>
-              <NotificationProvider>
-                <SkipToContent />
-                <Toaster />
-                <Sonner />
-                 <BrowserRouter>
-                   <ScrollToTop />
-                   <AppContent />
-                 </BrowserRouter>
-                <CookieConsent />
-              </NotificationProvider>
+              <Toaster />
+              <Sonner />
+               <BrowserRouter>
+                 <ScrollToTop />
+                 <AppContent />
+               </BrowserRouter>
+              <CookieConsent />
             </AuthProvider>
           </SecurityProvider>
         </TooltipProvider>

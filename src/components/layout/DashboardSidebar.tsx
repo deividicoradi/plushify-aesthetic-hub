@@ -21,13 +21,8 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { NotificationCenter } from '@/components/notifications/NotificationSystem';
 
-interface DashboardSidebarProps {
-  onClose?: () => void;
-}
-
-const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
+const DashboardSidebar = () => {
   const location = useLocation();
   const { signOut } = useAuth();
 
@@ -76,7 +71,6 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  onClick={onClose}
                   className={cn(
                     "flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
                     isActive
@@ -99,14 +93,11 @@ const DashboardSidebar = ({ onClose }: DashboardSidebarProps) => {
         </ul>
       </nav>
 
-      {/* Footer with Theme Toggle, Notifications and Sign Out */}
+      {/* Footer with Theme Toggle and Sign Out */}
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Configurações</span>
-          <div className="flex items-center gap-1">
-            <NotificationCenter />
-            <ThemeToggle />
-          </div>
+          <span className="text-xs text-muted-foreground">Tema</span>
+          <ThemeToggle />
         </div>
         <Button 
           onClick={signOut}
