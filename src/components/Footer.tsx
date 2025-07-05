@@ -48,8 +48,8 @@ const Footer = () => {
             <ul className="space-y-4">
               <li><Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">Sobre Nós</Link></li>
               <li><Link to="/plans" className="text-muted-foreground hover:text-foreground transition-colors">Planos e Preços</Link></li>
-              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
-              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Carreiras</Link></li>
+              <li><Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
+              <li><Link to="/careers" className="text-muted-foreground hover:text-foreground transition-colors">Carreiras</Link></li>
             </ul>
           </div>
           
@@ -85,7 +85,7 @@ const Footer = () => {
                   WhatsApp
                 </a>
               </li>
-              <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Status do Sistema</Link></li>
+              <li><Link to="/status" className="text-muted-foreground hover:text-foreground transition-colors">Status do Sistema</Link></li>
             </ul>
           </div>
         </div>

@@ -31,6 +31,9 @@ import LGPD from "./pages/LGPD";
 import Cookies from "./pages/Cookies";
 import Product from "./pages/Product";
 import About from "./pages/About";
+import Blog from "./pages/Blog";
+import Careers from "./pages/Careers";
+import Status from "./pages/Status";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
@@ -62,6 +65,9 @@ const AppContent = () => {
       <Route path="/lgpd" element={<LGPD />} />
       <Route path="/cookies" element={<Cookies />} />
       <Route path="/help" element={<Help />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/careers" element={<Careers />} />
+      <Route path="/status" element={<Status />} />
       <Route
         path="/dashboard"
         element={
