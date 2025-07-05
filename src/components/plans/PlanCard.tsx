@@ -40,7 +40,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
 
   return (
     <Card 
-      className={`relative transition-all duration-300 hover:shadow-2xl transform hover:scale-[1.03] h-full flex flex-col min-h-[600px] rounded-2xl overflow-hidden ${
+      className={`relative transition-all duration-300 hover:shadow-2xl transform hover:scale-[1.03] h-full flex flex-col min-h-[600px] rounded-2xl overflow-visible ${
         plan.mostComplete
           ? 'border-2 border-primary shadow-2xl bg-gradient-to-br from-background via-primary/5 to-secondary/5 scale-105 z-10 ring-2 ring-primary/20' 
           : plan.current 

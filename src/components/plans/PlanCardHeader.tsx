@@ -41,20 +41,20 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
   return (
     <>
       {/* Top Badges */}
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20">
+      <div className="absolute -top-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-20 w-full max-w-[280px]">
         {plan.mostComplete && (
-          <Badge className="bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl text-xs px-3 py-1.5 rounded-full font-bold border-2 border-background whitespace-nowrap">
+          <Badge className="bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl text-[10px] px-2 py-1 rounded-full font-bold border border-background whitespace-nowrap min-w-fit">
             🏆 MAIS COMPLETO
           </Badge>
         )}
         {plan.current && (
-          <Badge className={`${plan.trial ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 'bg-gradient-to-r from-emerald-500 to-green-600'} text-white shadow-xl rounded-full px-3 py-1.5 font-bold border-2 border-background text-xs whitespace-nowrap`}>
+          <Badge className={`${plan.trial ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 'bg-gradient-to-r from-emerald-500 to-green-600'} text-white shadow-xl rounded-full px-2 py-1 font-bold border border-background text-[10px] whitespace-nowrap min-w-fit`}>
             {plan.trial ? '⚡ SEU PLANO ATUAL' : '✓ PLANO ATIVO'}
           </Badge>
         )}
       </div>
 
-      <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
+      <CardHeader className="text-center space-y-4 pt-12 flex-shrink-0 relative overflow-visible">
         <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4 shadow-lg ${plan.mostComplete ? 'ring-2 ring-primary/30' : ''}`}>
           {IconComponent && (
             <IconComponent 
