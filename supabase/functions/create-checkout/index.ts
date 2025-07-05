@@ -218,10 +218,19 @@ serve(async (req) => {
       cancel_url: `${safeOrigin}/planos?canceled=true`,
       metadata: {
         user_id: user.id,
+        user_email: user.email,
         plan_type: validatedInput.plan_type,
         billing_period: validatedInput.billing_period,
         security_check: "validated",
         created_at: new Date().toISOString()
+      },
+      subscription_data: {
+        metadata: {
+          user_id: user.id,
+          user_email: user.email,
+          plan_type: validatedInput.plan_type,
+          billing_period: validatedInput.billing_period
+        }
       },
       // SEGURANÇA: Configurações adicionais
       allow_promotion_codes: false, // Evitar códigos de desconto não autorizados

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Appointments from "./pages/Appointments";
@@ -34,128 +35,130 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/product" element={<Product />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/plans" element={<Plans />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/lgpd" element={<LGPD />} />
-              <Route path="/cookies" element={<Cookies />} />
-              <Route path="/help" element={<Help />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/appointments"
-                element={
-                  <ProtectedRoute>
-                    <Appointments />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/clients"
-                element={
-                  <ProtectedRoute>
-                    <Clients />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/financial"
-                element={
-                  <ProtectedRoute>
-                    <Financial />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/financial-dashboard"
-                element={
-                  <ProtectedRoute>
-                    <FinancialDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/services"
-                element={
-                  <ProtectedRoute>
-                    <Services />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports"
-                element={
-                  <ProtectedRoute>
-                    <Reports />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/notes"
-                element={
-                  <ProtectedRoute>
-                    <Notes />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/loyalty"
-                element={
-                  <ProtectedRoute>
-                    <Loyalty />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory"
-                element={
-                  <ProtectedRoute>
-                    <Inventory />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/analytics"
-                element={
-                  <ProtectedRoute>
-                    <AdvancedAnalytics />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <TooltipProvider>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/product" element={<Product />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/plans" element={<Plans />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/lgpd" element={<LGPD />} />
+                <Route path="/cookies" element={<Cookies />} />
+                <Route path="/help" element={<Help />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/appointments"
+                  element={
+                    <ProtectedRoute>
+                      <Appointments />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/clients"
+                  element={
+                    <ProtectedRoute>
+                      <Clients />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/financial"
+                  element={
+                    <ProtectedRoute>
+                      <Financial />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/financial-dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <FinancialDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/services"
+                  element={
+                    <ProtectedRoute>
+                      <Services />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/reports"
+                  element={
+                    <ProtectedRoute>
+                      <Reports />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/notes"
+                  element={
+                    <ProtectedRoute>
+                      <Notes />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/loyalty"
+                  element={
+                    <ProtectedRoute>
+                      <Loyalty />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory"
+                  element={
+                    <ProtectedRoute>
+                      <Inventory />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/analytics"
+                  element={
+                    <ProtectedRoute>
+                      <AdvancedAnalytics />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
