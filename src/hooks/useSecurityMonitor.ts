@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuditLog } from '@/hooks/useAuditLog';
+
 
 interface SecurityEvent {
   type: 'suspicious_activity' | 'rate_limit_exceeded' | 'xss_attempt' | 'unauthorized_access';
@@ -13,7 +13,6 @@ interface SecurityEvent {
 
 export const useSecurityMonitor = () => {
   const { toast } = useToast();
-  const { createAuditLog } = useAuditLog();
 
   // Detectar tentativas de manipulação do DevTools
   const detectDevToolsUsage = useCallback(() => {
@@ -25,14 +24,7 @@ export const useSecurityMonitor = () => {
       if (window.outerHeight - window.innerHeight > threshold || window.outerWidth - window.innerWidth > threshold) {
         if (!devtools.open) {
           devtools.open = true;
-          logSecurityEvent({
-            type: 'suspicious_activity',
-            details: 'DevTools aberto detectado',
-            severity: 'low',
-            userAgent: navigator.userAgent,
-            url: window.location.href,
-            timestamp: new Date()
-          });
+          console.warn('[SECURITY] DevTools detectado');
         }
       } else {
         devtools.open = false;
@@ -49,32 +41,16 @@ export const useSecurityMonitor = () => {
       const originalWarn = console.warn;
 
       console.log = function(...args) {
-        logSecurityEvent({
-          type: 'suspicious_activity',
-          details: `Console.log executado: ${args.join(' ')}`,
-          severity: 'low',
-          timestamp: new Date()
-        });
+        console.warn('[SECURITY] Console.log interceptado');
         return originalLog.apply(console, args);
       };
 
       console.error = function(...args) {
-        logSecurityEvent({
-          type: 'suspicious_activity',
-          details: `Console.error executado: ${args.join(' ')}`,
-          severity: 'medium',
-          timestamp: new Date()
-        });
+        console.warn('[SECURITY] Console.error interceptado');
         return originalError.apply(console, args);
       };
 
       console.warn = function(...args) {
-        logSecurityEvent({
-          type: 'suspicious_activity',
-          details: `Console.warn executado: ${args.join(' ')}`,
-          severity: 'low',
-          timestamp: new Date()
-        });
         return originalWarn.apply(console, args);
       };
     }
@@ -100,31 +76,21 @@ export const useSecurityMonitor = () => {
     const isInjection = maliciousPatterns.some(pattern => pattern.test(input));
     
     if (isInjection) {
-      logSecurityEvent({
-        type: 'xss_attempt',
-        details: `Tentativa de injeção de código detectada: ${input.substring(0, 100)}...`,
-        severity: 'high',
-        userAgent: navigator.userAgent,
-        url: window.location.href,
-        timestamp: new Date()
+      console.warn('[SECURITY] Tentativa de injeção de código detectada:', input.substring(0, 100));
+      toast({
+        title: "Tentativa de Injeção Detectada",
+        description: "Código malicioso bloqueado",
+        variant: "destructive"
       });
     }
 
     return isInjection;
-  }, []);
+  }, [toast]);
 
   // Detectar múltiplas tentativas de login falharam
   const detectBruteForce = useCallback((failedAttempts: number) => {
     if (failedAttempts >= 5) {
-      logSecurityEvent({
-        type: 'suspicious_activity',
-        details: `Múltiplas tentativas de login falharam: ${failedAttempts}`,
-        severity: 'high',
-        userAgent: navigator.userAgent,
-        url: window.location.href,
-        timestamp: new Date()
-      });
-
+      console.warn('[SECURITY] Múltiplas tentativas de login detectadas:', failedAttempts);
       toast({
         title: "Atividade Suspeita",
         description: "Múltiplas tentativas de login detectadas. Conta temporariamente bloqueada.",
@@ -151,15 +117,7 @@ export const useSecurityMonitor = () => {
       const isSuspicious = suspiciousDomains.some(domain => url.includes(domain));
       
       if (isSuspicious) {
-        logSecurityEvent({
-          type: 'suspicious_activity',
-          details: `Requisição para domínio suspeito: ${url}`,
-          severity: 'critical',
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-          timestamp: new Date()
-        });
-        
+        console.warn('[SECURITY] Requisição bloqueada para domínio suspeito:', url);
         throw new Error('Requisição bloqueada por motivos de segurança');
       }
       
@@ -171,23 +129,14 @@ export const useSecurityMonitor = () => {
   const logSecurityEvent = useCallback(async (event: SecurityEvent) => {
     console.warn('[SECURITY EVENT]', event);
     
-    // Registrar no sistema de auditoria
-    try {
-      await createAuditLog({
-        action: 'UPDATE',
-        tableName: 'security_monitor',
-        recordId: 'security-event-' + Date.now(),
-        newData: {
-          type: event.type,
-          details: event.details,
-          severity: event.severity,
-          userAgent: event.userAgent,
-          url: event.url,
-          timestamp: event.timestamp.toISOString()
-        }
+    // Log detalhado para desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.table({
+        Type: event.type,
+        Severity: event.severity,
+        Details: event.details,
+        Timestamp: event.timestamp.toISOString()
       });
-    } catch (error) {
-      console.error('Erro ao registrar evento de segurança:', error);
     }
 
     // Mostrar alerta para eventos críticos
@@ -198,7 +147,7 @@ export const useSecurityMonitor = () => {
         variant: "destructive"
       });
     }
-  }, [createAuditLog, toast]);
+  }, [toast]);
 
   // Inicializar monitoramento
   useEffect(() => {
