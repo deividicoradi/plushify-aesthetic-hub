@@ -51,7 +51,7 @@ const DashboardSidebar = () => {
           <img 
             src="/logo-modern.svg" 
             alt="Plushify - Beauty Management Platform" 
-            className="h-8 w-auto"
+            className="h-10 w-auto"
           />
         </Link>
       </div>
@@ -87,8 +87,9 @@ const DashboardSidebar = () => {
       </nav>
 
       {/* Footer with Theme Toggle and Sign Out */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background space-y-3">
-        <div className="flex justify-center">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Tema</span>
           <ThemeToggle />
         </div>
         <Button 
