@@ -14,7 +14,9 @@ export const PlansHero: React.FC = () => {
       {/* Main Title */}
       <div className="space-y-4">
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold max-w-5xl mx-auto leading-tight bg-gradient-to-r from-foreground via-primary to-secondary bg-clip-text text-transparent">
-          Transforme Seu Negócio de{' '}
+          Transforme Seu Negócio{' '}
+          <br />
+          de{' '}
           <span className="relative">
             Estética
             <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
