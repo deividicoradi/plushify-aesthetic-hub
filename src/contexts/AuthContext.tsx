@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
-import { toast } from "@/components/ui/sonner";
+import { useToast } from "@/hooks/use-toast";
 import { SessionWarningDialog } from '@/components/SessionWarningDialog';
 
 type AuthContextType = {
@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   // Função para atualizar a sessão (removida para evitar refresh desnecessário)
   const refreshSession = async () => {
@@ -52,10 +53,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast.success("Você saiu da sua conta com sucesso");
+      toast({
+        title: "Logout realizado",
+        description: "Você saiu da sua conta com sucesso"
+      });
     } catch (error: any) {
       console.error('Erro ao fazer logout:', error.message);
-      toast.error("Ocorreu um erro ao fazer logout");
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao fazer logout",
+        variant: "destructive"
+      });
     }
   };
 
@@ -83,9 +91,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Auto logout por inatividade
   const handleAutoLogout = useCallback(async () => {
-    toast.error("Sessão expirou por inatividade");
+    toast({
+      title: "Sessão Expirada",
+      description: "Sessão expirou por inatividade",
+      variant: "destructive"
+    });
     await signOut();
-  }, []);
+  }, [toast]);
 
   // Verificar tempo de sessão
   const checkSessionTime = useCallback(() => {
@@ -138,7 +150,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const handleExtendSession = () => {
     updateActivity();
     setShowWarningDialog(false);
-    toast.success("Sessão renovada");
+    toast({
+      title: "Sessão Renovada",
+      description: "Sessão renovada com sucesso"
+    });
   };
 
   const handleSessionLogout = async () => {

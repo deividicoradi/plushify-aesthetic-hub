@@ -1,7 +1,8 @@
 
+import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export type AuditAction = 
   | 'CREATE' | 'UPDATE' | 'DELETE' | 'VIEW' | 'LOGIN' | 'LOGOUT' 
@@ -19,6 +20,7 @@ interface AuditLogData {
 
 export const useAuditLog = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const createAuditLog = async (data: AuditLogData) => {
     if (!user?.id) return;
