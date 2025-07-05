@@ -31,6 +31,7 @@ import Product from "./pages/Product";
 import About from "./pages/About";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { SecurityStatusIndicator } from "./components/SecurityStatusIndicator";
 
 const queryClient = new QueryClient();
 

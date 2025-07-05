@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
 import { SessionWarningDialog } from '@/components/SessionWarningDialog';
+import { SecurityProvider } from '@/components/SecurityProvider';
 
 type AuthContextType = {
   user: User | null;
@@ -176,15 +177,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={value}>
-      {children}
-      <SessionWarningDialog
-        open={showWarningDialog}
-        onExtend={handleExtendSession}
-        onLogout={handleSessionLogout}
-        timeRemaining={formatTimeRemaining()}
-      />
-    </AuthContext.Provider>
+    <SecurityProvider>
+      <AuthContext.Provider value={value}>
+        {children}
+        <SessionWarningDialog
+          open={showWarningDialog}
+          onExtend={handleExtendSession}
+          onLogout={handleSessionLogout}
+          timeRemaining={formatTimeRemaining()}
+        />
+      </AuthContext.Provider>
+    </SecurityProvider>
   );
 };
 
