@@ -54,7 +54,7 @@ const Hero = () => {
             </p>
             
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start mb-12">
+            <div className="flex justify-center lg:justify-start mb-12">
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground h-14 px-10 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-lg font-semibold"
@@ -63,15 +63,6 @@ const Hero = () => {
                 <Sparkles className="mr-3 w-5 h-5" />
                 Começar Grátis Agora
                 <ArrowRight className="ml-3 w-5 h-5" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="border-2 border-primary/30 hover:border-primary/60 text-foreground hover:bg-primary/5 h-14 px-10 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg font-semibold backdrop-blur-sm"
-                onClick={handleShowDemo}
-              >
-                <Award className="mr-3 w-5 h-5" />
-                Ver Demonstração
               </Button>
             </div>
             
