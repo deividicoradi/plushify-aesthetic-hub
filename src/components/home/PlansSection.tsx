@@ -60,7 +60,7 @@ export const PlansSection = () => {
               }`}
             >
               Anual
-              <Badge className="ml-2 bg-green-500 text-white text-xs">30% OFF</Badge>
+              <Badge className="ml-2 bg-green-500 text-white text-xs">17% OFF</Badge>
             </button>
           </div>
         </div>
@@ -118,7 +118,7 @@ export const PlansSection = () => {
                     </div>
                     {originalPrice && (
                       <div className="text-sm font-semibold text-green-600">
-                        Economize 30%
+                        Economize 17%
                       </div>
                     )}
                   </div>

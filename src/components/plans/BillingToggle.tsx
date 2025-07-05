@@ -47,7 +47,7 @@ export const BillingToggle: React.FC<BillingToggleProps> = ({
             <div className="animate-fade-in">
               <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs px-2 py-1 font-semibold shadow-md">
                 <Sparkles className="w-3 h-3 mr-1" />
-                -30%
+                -17%
               </Badge>
             </div>
           )}
