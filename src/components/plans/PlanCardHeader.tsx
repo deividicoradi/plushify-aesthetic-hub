@@ -26,21 +26,21 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
   return (
     <>
       {/* Top Badges */}
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-20">
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-20">
         {plan.mostComplete && (
-          <Badge className="bg-primary text-primary-foreground shadow-lg text-sm px-3 py-1 animate-pulse">
-            🔥 MAIS COMPLETO
+          <Badge className="bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl text-sm px-4 py-2 rounded-full font-bold border-2 border-background">
+            🏆 MAIS COMPLETO
           </Badge>
         )}
         {plan.current && (
-          <Badge className={`${plan.trial ? 'bg-orange-500' : 'bg-green-500'} text-white shadow-lg`}>
-            {plan.trial ? 'Trial Ativo' : 'Plano Atual'}
+          <Badge className={`${plan.trial ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 'bg-gradient-to-r from-emerald-500 to-green-600'} text-white shadow-xl rounded-full px-4 py-2 font-bold border-2 border-background`}>
+            {plan.trial ? '⚡ SEU PLANO ATUAL' : '✓ PLANO ATIVO'}
           </Badge>
         )}
       </div>
 
       <CardHeader className="text-center space-y-4 pt-8 flex-shrink-0">
-        <div className={`w-16 h-16 mx-auto rounded-xl bg-primary/10 flex items-center justify-center p-4 ${plan.mostComplete ? 'animate-pulse' : ''}`}>
+        <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4 shadow-lg ${plan.mostComplete ? 'ring-2 ring-primary/30' : ''}`}>
           <IconComponent 
             className={`${plan.mostComplete ? 'w-8 h-8' : 'w-7 h-7'} text-primary`} 
             strokeWidth={1.5}

@@ -15,7 +15,6 @@ export interface PlanFeature {
   icon: React.ComponentType<any>;
   features: string[];
   limitations: string[];
-  bonuses?: string[];
   trial?: boolean;
   current: boolean;
   premium?: boolean;
@@ -114,14 +113,6 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'Gestão de estoque avançada',
       'Dashboard executivo completo',
       'Análises de performance detalhadas'
-    ],
-    bonuses: [
-      'Setup personalizado GRÁTIS',
-      'Treinamento VIP incluso',
-      'Suporte técnico exclusivo',
-      'Selo de cliente Premium',
-      'Acesso prioritário a novas funcionalidades',
-      'Consultoria de negócios inclusa'
     ],
     limitations: [],
     current: currentPlan === 'premium'

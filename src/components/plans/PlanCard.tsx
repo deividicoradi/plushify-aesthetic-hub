@@ -4,7 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PlanFeature } from '@/utils/plans/plansData';
 import { PlanCardHeader } from './PlanCardHeader';
 import { PlanCardFeatures } from './PlanCardFeatures';
-import { PlanCardBonuses } from './PlanCardBonuses';
 import { PlanCardFooter } from './PlanCardFooter';
 
 interface PlanCardProps {
@@ -32,14 +31,14 @@ export const PlanCard: React.FC<PlanCardProps> = ({
 
   return (
     <Card 
-      className={`relative transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] h-full flex flex-col min-h-[800px] ${
+      className={`relative transition-all duration-300 hover:shadow-2xl transform hover:scale-[1.03] h-full flex flex-col min-h-[600px] rounded-2xl overflow-hidden ${
         plan.mostComplete
-          ? 'border-2 border-primary shadow-xl bg-gradient-to-br from-background to-primary/5 scale-105 z-10' 
+          ? 'border-2 border-primary shadow-2xl bg-gradient-to-br from-background via-primary/5 to-secondary/5 scale-105 z-10 ring-2 ring-primary/20' 
           : plan.current 
             ? plan.trial
-              ? 'border-2 border-orange-400 bg-gradient-to-br from-background to-orange-50/20 dark:to-orange-950/20' 
-              : 'border-2 border-emerald-400 bg-gradient-to-br from-background to-emerald-50/20 dark:to-emerald-950/20'
-            : 'border hover:border-primary/50'
+              ? 'border-2 border-orange-500 bg-gradient-to-br from-background to-orange-50/30 dark:to-orange-950/30 shadow-lg' 
+              : 'border-2 border-emerald-500 bg-gradient-to-br from-background to-emerald-50/30 dark:to-emerald-950/30 shadow-lg'
+            : 'border-2 border-border/50 hover:border-primary/70 bg-gradient-to-br from-background to-muted/20 shadow-md hover:shadow-xl'
       }`}
     >
       <PlanCardHeader
@@ -51,9 +50,10 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         installmentPrice={installmentPrice}
       />
 
-      <CardContent className="space-y-4 px-6 flex-1">
-        <PlanCardFeatures plan={plan} />
-        <PlanCardBonuses plan={plan} />
+      <CardContent className="px-6 py-4 flex-1 flex flex-col">
+        <div className="flex-1">
+          <PlanCardFeatures plan={plan} />
+        </div>
       </CardContent>
 
       <PlanCardFooter
