@@ -45,7 +45,7 @@ const getPageName = (pathname: string): string => {
     '/analytics': 'Analytics Avançado',
     '/auth': 'Login',
     '/signup': 'Cadastro',
-    '/plans': 'Planos',
+    '/planos': 'Planos',
     '/help': 'Ajuda',
     '/about': 'Sobre',
     '/product': 'Produto',
@@ -63,7 +63,7 @@ const getPageSection = (pathname: string): string => {
   if (pathname.startsWith('/dashboard')) return 'Dashboard';
   if (pathname === '/' || pathname.startsWith('/about') || pathname.startsWith('/product')) return 'Marketing';
   if (pathname.startsWith('/auth') || pathname.startsWith('/signup')) return 'Autenticação';
-  if (pathname.startsWith('/plans')) return 'Planos';
+  if (pathname.startsWith('/planos')) return 'Planos';
   if (pathname.startsWith('/help') || pathname.includes('terms') || pathname.includes('privacy')) return 'Suporte';
   
   return 'Aplicação';

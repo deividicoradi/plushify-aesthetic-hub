@@ -38,7 +38,7 @@ const DashboardSidebar = () => {
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics' },
     { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty' },
-    { icon: Crown, label: 'Planos', path: '/plans' },
+    { icon: Crown, label: 'Planos', path: '/planos' },
     { icon: HelpCircle, label: 'Ajuda', path: '/help' },
     { icon: Settings, label: 'Configurações', path: '/settings' },
   ];
