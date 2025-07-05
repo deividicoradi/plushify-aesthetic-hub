@@ -11,6 +11,8 @@ import { TestimonialsSection } from './TestimonialsSection';
 import { FAQSection } from './FAQSection';
 import { CTASection } from './CTASection';
 import { createPlansData } from '@/utils/plans/plansData';
+import Navbar from '../Navbar';
+import Footer from '../Footer';
 
 export const PlansPage: React.FC = () => {
   const [isAnnual, setIsAnnual] = useState(false);
@@ -61,52 +63,86 @@ export const PlansPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Hero Section */}
-      <PlansHero />
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <main className="min-h-screen">
+        {/* Hero Section with Modern Background */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <PlansHero />
+          </div>
+        </section>
 
-      {/* Current Plan Alert */}
-      <PlanAlerts 
-        currentPlan={currentPlan}
-        onPlanSelection={handlePlanSelection}
-        onManageSubscription={handleManageSubscription}
-        isLoading={isLoading}
-        isAnnual={isAnnual}
-      />
+        {/* Main Content */}
+        <section className="py-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            {/* Current Plan Alert */}
+            <PlanAlerts 
+              currentPlan={currentPlan}
+              onPlanSelection={handlePlanSelection}
+              onManageSubscription={handleManageSubscription}
+              isLoading={isLoading}
+              isAnnual={isAnnual}
+            />
 
-      {/* Billing Toggle */}
-      <BillingToggle
-        isAnnual={isAnnual}
-        onToggle={setIsAnnual}
-      />
+            {/* Billing Toggle */}
+            <div className="flex justify-center">
+              <BillingToggle
+                isAnnual={isAnnual}
+                onToggle={setIsAnnual}
+              />
+            </div>
 
-      {/* Plans Grid */}
-      <PlansGrid
-        plans={plans}
-        isAnnual={isAnnual}
-        onPlanSelection={handlePlanSelection}
-        isLoading={isLoading}
-      />
+            {/* Plans Grid */}
+            <PlansGrid
+              plans={plans}
+              isAnnual={isAnnual}
+              onPlanSelection={handlePlanSelection}
+              isLoading={isLoading}
+            />
+          </div>
+        </section>
 
-      {/* Social Proof Section */}
-      <TestimonialsSection />
+        {/* Social Proof Section */}
+        <section className="bg-muted/30 py-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <TestimonialsSection />
+          </div>
+        </section>
 
-      {/* FAQ Section */}
-      <FAQSection />
+        {/* FAQ Section */}
+        <section className="py-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <FAQSection />
+          </div>
+        </section>
 
-      {/* Final CTA Section */}
-      <CTASection 
-        onPlanSelection={handlePlanSelection}
-        isLoading={isLoading}
-        isAnnual={isAnnual}
-      />
+        {/* Final CTA Section */}
+        <section className="bg-gradient-to-r from-primary/10 to-secondary/10 py-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <CTASection 
+              onPlanSelection={handlePlanSelection}
+              isLoading={isLoading}
+              isAnnual={isAnnual}
+            />
+          </div>
+        </section>
+      </main>
+
+      <Footer />
     </div>
   );
 };
