@@ -5,70 +5,21 @@ import { ArrowRight, Check, Crown, Zap, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { createPlansData } from '@/utils/plans/plansData';
 
 export const PlansSection = () => {
   const [isAnnual, setIsAnnual] = useState(false);
   const navigate = useNavigate();
 
-  const plans = [
-    {
-      id: 'trial',
-      name: 'Trial Gratuito',
-      price: 'Gratuito',
-      period: '',
-      annualPrice: 'Gratuito',
-      description: 'Para teste da plataforma',
-      icon: Clock,
-      features: [
-        'Apenas 3 dias de teste',
-        'Até 5 clientes',
-        'Até 3 agendamentos',
-        'Dashboard básico'
-      ],
-      buttonText: 'Começar Grátis',
-      popular: false
-    },
-    {
-      id: 'professional',
-      name: 'Professional',
-      price: 'R$ 89',
-      period: '/mês',
-      annualPrice: 'R$ 890',
-      annualPeriod: '/ano',
-      originalPrice: 'R$ 127',
-      description: 'Para profissionais independentes',
-      icon: Zap,
-      features: [
-        'Clientes ilimitados',
-        'Agendamentos ilimitados',
-        'Gestão financeira básica',
-        'Relatórios básicos',
-        'Suporte prioritário'
-      ],
-      buttonText: 'Escolher Professional',
-      popular: false
-    },
-    {
-      id: 'premium',
-      name: 'Enterprise',
-      price: 'R$ 179',
-      period: '/mês',
-      annualPrice: 'R$ 1.790',
-      annualPeriod: '/ano',
-      originalPrice: 'R$ 249',
-      description: 'Para crescimento acelerado',
-      icon: Crown,
-      features: [
-        'TUDO do plano Professional',
-        'Analytics avançados',
-        'Relatórios completos',
-        'Gestão de equipe',
-        'Suporte VIP 24/7'
-      ],
-      buttonText: 'Escolher Enterprise',
-      popular: true
-    }
-  ];
+  // Usar dados centralizados dos planos
+  const plansData = createPlansData('none'); // Não há plano atual na home
+  const plans = plansData.map(plan => ({
+    ...plan,
+    buttonText: plan.id === 'trial' ? 'Começar Grátis' : 
+                plan.id === 'professional' ? 'Escolher Professional' : 
+                'Escolher Enterprise',
+    popular: plan.mostComplete || false
+  }));
 
   const handlePlanClick = () => {
     navigate('/planos');
@@ -120,7 +71,7 @@ export const PlansSection = () => {
             const IconComponent = plan.icon;
             const currentPrice = isAnnual ? plan.annualPrice : plan.price;
             const currentPeriod = isAnnual ? plan.annualPeriod : plan.period;
-            const originalPrice = isAnnual ? (plan.originalPrice ? 'R$ 1.524' : '') : plan.originalPrice;
+            const originalPrice = isAnnual ? plan.annualOriginalPrice : plan.originalPrice;
 
             return (
               <Card
