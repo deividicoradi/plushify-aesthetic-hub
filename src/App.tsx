@@ -38,6 +38,9 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
 import ScrollToTop from "./components/ScrollToTop";
+import { AuthenticatedLayout } from "./components/layout/AuthenticatedLayout";
+import { NotificationProvider } from "./components/notifications/NotificationSystem";
+import { SkipToContent } from "./components/accessibility/SkipToContent";
 
 
 const queryClient = new QueryClient();
@@ -70,102 +73,30 @@ const AppContent = () => {
       <Route path="/blog" element={<Blog />} />
       <Route path="/careers" element={<Careers />} />
       <Route path="/status" element={<Status />} />
+      
+      {/* Protected Routes with Authenticated Layout */}
       <Route
-        path="/dashboard"
+        path="/*"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <AuthenticatedLayout />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/appointments"
-        element={
-          <ProtectedRoute>
-            <Appointments />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/clients"
-        element={
-          <ProtectedRoute>
-            <Clients />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/financial"
-        element={
-          <ProtectedRoute>
-            <Financial />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/financial-dashboard"
-        element={
-          <ProtectedRoute>
-            <FinancialDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/services"
-        element={
-          <ProtectedRoute>
-            <Services />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/reports"
-        element={
-          <ProtectedRoute>
-            <Reports />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/notes"
-        element={
-          <ProtectedRoute>
-            <Notes />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/loyalty"
-        element={
-          <ProtectedRoute>
-            <Loyalty />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/inventory"
-        element={
-          <ProtectedRoute>
-            <Inventory />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/analytics"
-        element={
-          <ProtectedRoute>
-            <AdvancedAnalytics />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="appointments" element={<Appointments />} />
+        <Route path="clients" element={<Clients />} />
+        <Route path="financial" element={<Financial />} />
+        <Route path="financial-dashboard" element={<FinancialDashboard />} />
+        <Route path="services" element={<Services />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="notes" element={<Notes />} />
+        <Route path="loyalty" element={<Loyalty />} />
+        <Route path="inventory" element={<Inventory />} />
+        <Route path="analytics" element={<AdvancedAnalytics />} />
+      </Route>
+      
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -178,13 +109,16 @@ const App = () => (
         <TooltipProvider>
           <SecurityProvider>
             <AuthProvider>
-              <Toaster />
-              <Sonner />
-               <BrowserRouter>
-                 <ScrollToTop />
-                 <AppContent />
-               </BrowserRouter>
-              <CookieConsent />
+              <NotificationProvider>
+                <SkipToContent />
+                <Toaster />
+                <Sonner />
+                 <BrowserRouter>
+                   <ScrollToTop />
+                   <AppContent />
+                 </BrowserRouter>
+                <CookieConsent />
+              </NotificationProvider>
             </AuthProvider>
           </SecurityProvider>
         </TooltipProvider>
