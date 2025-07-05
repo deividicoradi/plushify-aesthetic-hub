@@ -109,8 +109,8 @@ const Footer = () => {
               </p>
               <p>
                 Para exercer seus direitos sobre dados pessoais, entre em contato: 
-                <a href="mailto:privacidade@plushify.com.br" className="text-primary hover:underline ml-1">
-                  privacidade@plushify.com.br
+                <a href="mailto:suporte@plushify.com" className="text-primary hover:underline ml-1">
+                  suporte@plushify.com
                 </a>
               </p>
             </div>

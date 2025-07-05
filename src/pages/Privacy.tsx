@@ -151,7 +151,7 @@ const Privacy = () => {
                 Para exercer seus direitos ou esclarecer dúvidas sobre esta política, entre em contato:
               </p>
               <div className="bg-background rounded-lg p-4 border border-primary/20">
-                <p><strong>E-mail:</strong> privacidade@plushify.com.br</p>
+                <p><strong>E-mail:</strong> suporte@plushify.com</p>
                 <p><strong>Encarregado de Dados:</strong> Equipe Plushify</p>
                 <p><strong>Endereço:</strong> São Paulo, Brasil</p>
               </div>

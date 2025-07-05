@@ -175,10 +175,10 @@ export class ErrorBoundary extends Component<Props, State> {
                 <p className="text-xs text-muted-foreground text-center">
                   Se o problema persistir, entre em contato com o suporte em{' '}
                   <a 
-                    href="mailto:suporte@plushify.com.br" 
+                    href="mailto:suporte@plushify.com" 
                     className="text-primary hover:underline"
                   >
-                    suporte@plushify.com.br
+                    suporte@plushify.com
                   </a>
                 </p>
               </div>

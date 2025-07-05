@@ -171,7 +171,7 @@ const LGPD = () => {
                 Para exercer seus direitos ou esclarecer dúvidas sobre o tratamento de dados:
               </p>
               <div className="bg-background rounded-lg p-4 border border-primary/20">
-                <p><strong>E-mail:</strong> dpo@plushify.com.br</p>
+                <p><strong>E-mail:</strong> suporte@plushify.com</p>
                 <p><strong>Encarregado:</strong> Equipe de Proteção de Dados Plushify</p>
                 <p><strong>Horário de Atendimento:</strong> Segunda a Sexta, 9h às 18h</p>
               </div>
