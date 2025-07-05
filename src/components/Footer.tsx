@@ -66,14 +66,6 @@ const Footer = () => {
               <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Central de Ajuda</Link></li>
               <li>
                 <a 
-                  href="mailto:suporte@plushify.com.br" 
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Contato
-                </a>
-              </li>
-              <li>
-                <a 
                   href="https://wa.me/5511999999999" 
                   target="_blank" 
                   rel="noopener noreferrer"
