@@ -41,14 +41,14 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
   return (
     <>
       {/* Top Badges */}
-      <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-20">
+      <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20">
         {plan.mostComplete && (
-          <Badge className="bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl text-sm px-4 py-2 rounded-full font-bold border-2 border-background">
+          <Badge className="bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl text-xs px-3 py-1.5 rounded-full font-bold border-2 border-background whitespace-nowrap">
             🏆 MAIS COMPLETO
           </Badge>
         )}
         {plan.current && (
-          <Badge className={`${plan.trial ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 'bg-gradient-to-r from-emerald-500 to-green-600'} text-white shadow-xl rounded-full px-4 py-2 font-bold border-2 border-background`}>
+          <Badge className={`${plan.trial ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 'bg-gradient-to-r from-emerald-500 to-green-600'} text-white shadow-xl rounded-full px-3 py-1.5 font-bold border-2 border-background text-xs whitespace-nowrap`}>
             {plan.trial ? '⚡ SEU PLANO ATUAL' : '✓ PLANO ATIVO'}
           </Badge>
         )}
