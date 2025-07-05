@@ -31,16 +31,25 @@ import Product from "./pages/Product";
 import About from "./pages/About";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { SecurityStatusIndicator } from "./components/SecurityStatusIndicator";
+import { SecurityProvider } from "./components/SecurityProvider";
+
 
 const queryClient = new QueryClient();
+
+// Security: Remove Lovable token from URL
+if (typeof window !== 'undefined' && window.location.search.includes('__lovable_token')) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('__lovable_token');
+  window.history.replaceState({}, '', url.toString());
+}
 
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <TooltipProvider>
-          <AuthProvider>
+          <SecurityProvider>
+            <AuthProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -155,7 +164,8 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </AuthProvider>
+            </AuthProvider>
+          </SecurityProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
