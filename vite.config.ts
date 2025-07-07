@@ -59,6 +59,8 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'robots.txt'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,woff,ttf,eot}'],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
@@ -88,18 +90,6 @@ export default defineConfig(({ mode }) => ({
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-              }
-            }
-          },
-          // CDN Resources Cache
-          {
-            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'cdn-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
               }
             }
           },
@@ -137,78 +127,6 @@ export default defineConfig(({ mode }) => ({
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
               }
             }
-          },
-          // Documents and Files
-          {
-            urlPattern: /\.(?:pdf|doc|docx|xls|xlsx)$/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'documents-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
-              }
-            }
-          }
-        ]
-      },
-      manifest: {
-        name: 'Plushify - Plataforma para Profissionais de Estética',
-        short_name: 'Plushify',
-        description: 'Gerencie agendamentos, clientes, pagamentos, serviços, relatórios financeiros e programa de fidelidade',
-        theme_color: '#D65E9A',
-        background_color: '#ffffff',
-        display: 'standalone',
-        scope: './',
-        start_url: './',
-        icons: [
-          {
-            src: './pwa-icons/icon-72x72.png',
-            sizes: '72x72',
-            type: 'image/png',
-            purpose: 'maskable any'
-          },
-          {
-            src: './pwa-icons/icon-96x96.png',
-            sizes: '96x96',
-            type: 'image/png',
-            purpose: 'maskable any'
-          },
-          {
-            src: './pwa-icons/icon-128x128.png',
-            sizes: '128x128',
-            type: 'image/png',
-            purpose: 'maskable any'
-          },
-          {
-            src: './pwa-icons/icon-144x144.png',
-            sizes: '144x144',
-            type: 'image/png',
-            purpose: 'maskable any'
-          },
-          {
-            src: './pwa-icons/icon-152x152.png',
-            sizes: '152x152',
-            type: 'image/png',
-            purpose: 'maskable any'
-          },
-          {
-            src: './pwa-icons/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'maskable any'
-          },
-          {
-            src: './pwa-icons/icon-384x384.png',
-            sizes: '384x384',
-            type: 'image/png',
-            purpose: 'maskable any'
-          },
-          {
-            src: './pwa-icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable any'
           }
         ]
       },
