@@ -776,6 +776,27 @@ export type Database = {
         Args: { feature_name: string }
         Returns: boolean
       }
+      log_unauthorized_access: {
+        Args: {
+          table_name: string
+          attempted_user_id: string
+          actual_user_id: string
+        }
+        Returns: undefined
+      }
+      verify_data_integrity: {
+        Args: { check_user_id: string }
+        Returns: {
+          table_name: string
+          total_records: number
+          unauthorized_records: number
+          status: string
+        }[]
+      }
+      verify_user_access: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       plan_type: "trial" | "professional" | "premium"
