@@ -94,7 +94,10 @@ const Help = () => {
                 <CardContent className="pt-0">
                   <div className="space-y-3">
                     <p className="text-muted-foreground mb-4">Recursos para aprender e resolver dúvidas:</p>
-                    <a href="/dashboard" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    <div className="flex items-center justify-between p-3 bg-card rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors group" onClick={() => {
+                      const element = document.getElementById('dashboard-help');
+                      element?.scrollIntoView({ behavior: 'smooth' });
+                    }}>
                       <div className="flex items-center gap-3">
                         <div className="p-1 bg-blue-100 dark:bg-blue-900 rounded">
                           <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -102,8 +105,11 @@ const Help = () => {
                         <span className="font-medium">Como usar o Dashboard</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </a>
-                    <a href="/clients" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-card rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors group" onClick={() => {
+                      const element = document.getElementById('clients-help');
+                      element?.scrollIntoView({ behavior: 'smooth' });
+                    }}>
                       <div className="flex items-center gap-3">
                         <div className="p-1 bg-green-100 dark:bg-green-900 rounded">
                           <BookOpen className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -111,8 +117,11 @@ const Help = () => {
                         <span className="font-medium">Gestão de Clientes</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </a>
-                    <a href="/appointments" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-card rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors group" onClick={() => {
+                      const element = document.getElementById('appointments-help');
+                      element?.scrollIntoView({ behavior: 'smooth' });
+                    }}>
                       <div className="flex items-center gap-3">
                         <div className="p-1 bg-purple-100 dark:bg-purple-900 rounded">
                           <BookOpen className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -120,8 +129,11 @@ const Help = () => {
                         <span className="font-medium">Sistema de Agendamentos</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </a>
-                    <a href="/financial" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-card rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors group" onClick={() => {
+                      const element = document.getElementById('financial-help');
+                      element?.scrollIntoView({ behavior: 'smooth' });
+                    }}>
                       <div className="flex items-center gap-3">
                         <div className="p-1 bg-emerald-100 dark:bg-emerald-900 rounded">
                           <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -129,8 +141,11 @@ const Help = () => {
                         <span className="font-medium">Controle Financeiro</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </a>
-                    <a href="/services" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-card rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors group" onClick={() => {
+                      const element = document.getElementById('services-help');
+                      element?.scrollIntoView({ behavior: 'smooth' });
+                    }}>
                       <div className="flex items-center gap-3">
                         <div className="p-1 bg-orange-100 dark:bg-orange-900 rounded">
                           <BookOpen className="w-4 h-4 text-orange-600 dark:text-orange-400" />
@@ -138,8 +153,11 @@ const Help = () => {
                         <span className="font-medium">Cadastro de Serviços</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </a>
-                    <a href="/inventory" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-card rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors group" onClick={() => {
+                      const element = document.getElementById('inventory-help');
+                      element?.scrollIntoView({ behavior: 'smooth' });
+                    }}>
                       <div className="flex items-center gap-3">
                         <div className="p-1 bg-red-100 dark:bg-red-900 rounded">
                           <BookOpen className="w-4 h-4 text-red-600 dark:text-red-400" />
@@ -147,16 +165,7 @@ const Help = () => {
                         <span className="font-medium">Gestão de Estoque</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </a>
-                    <a href="/reports" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
-                      <div className="flex items-center gap-3">
-                        <div className="p-1 bg-indigo-100 dark:bg-indigo-900 rounded">
-                          <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                        <span className="font-medium">Relatórios e Analytics</span>
-                      </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </a>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -225,6 +234,114 @@ const Help = () => {
                 </Accordion>
               </CardContent>
             </Card>
+
+            {/* Guias de Ajuda Específicos */}
+            <div id="dashboard-help">
+              <Card className="border shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle>Como usar o Dashboard</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">O Dashboard é o centro de controle do Plushify onde você pode:</p>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li>• Ver métricas importantes do seu negócio</li>
+                    <li>• Acompanhar agendamentos do dia</li>
+                    <li>• Visualizar receitas e despesas</li>
+                    <li>• Acessar atalhos para funcionalidades principais</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div id="clients-help">
+              <Card className="border shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle>Gestão de Clientes</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">Na seção de Clientes você pode:</p>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li>• Cadastrar novos clientes com informações completas</li>
+                    <li>• Pesquisar e filtrar clientes</li>
+                    <li>• Visualizar histórico de visitas</li>
+                    <li>• Editar informações dos clientes</li>
+                    <li>• Acompanhar status de fidelidade</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div id="appointments-help">
+              <Card className="border shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle>Sistema de Agendamentos</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">O sistema de agendamentos permite:</p>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li>• Criar novos agendamentos facilmente</li>
+                    <li>• Visualizar agenda em formato calendário</li>
+                    <li>• Gerenciar status dos agendamentos</li>
+                    <li>• Enviar lembretes automáticos</li>
+                    <li>• Controlar horários e disponibilidade</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div id="financial-help">
+              <Card className="border shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle>Controle Financeiro</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">O módulo financeiro inclui:</p>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li>• Registro de pagamentos e recebimentos</li>
+                    <li>• Controle de despesas do salão</li>
+                    <li>• Relatórios financeiros detalhados</li>
+                    <li>• Gestão de parcelas e parcelamentos</li>
+                    <li>• Abertura e fechamento de caixa</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div id="services-help">
+              <Card className="border shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle>Cadastro de Serviços</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">Na gestão de serviços você pode:</p>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li>• Cadastrar todos os serviços oferecidos</li>
+                    <li>• Definir preços e duração de cada serviço</li>
+                    <li>• Organizar serviços por categorias</li>
+                    <li>• Ativar/desativar serviços conforme necessário</li>
+                    <li>• Acompanhar performance dos serviços</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div id="inventory-help">
+              <Card className="border shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle>Gestão de Estoque</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">O controle de estoque permite:</p>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li>• Cadastrar produtos utilizados no salão</li>
+                    <li>• Controlar quantidades em estoque</li>
+                    <li>• Definir níveis mínimos de estoque</li>
+                    <li>• Receber alertas de produtos em falta</li>
+                    <li>• Acompanhar custos e margens de lucro</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </main>
       </div>
