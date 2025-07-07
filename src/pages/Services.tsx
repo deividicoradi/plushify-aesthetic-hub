@@ -7,6 +7,7 @@ import DashboardSidebar from '@/components/layout/DashboardSidebar';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServicesList } from '@/components/services/ServicesList';
 import { useServices, Service } from '@/hooks/useServices';
+import { LimitAlert } from '@/components/LimitAlert';
 
 const Services = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -63,6 +64,9 @@ const Services = () => {
 
         {/* Main content */}
         <main className="flex-1 p-6 space-y-6">
+          {/* Limit Alert */}
+          <LimitAlert type="services" currentCount={services.length} action="criar" />
+          
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>

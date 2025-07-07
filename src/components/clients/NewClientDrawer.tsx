@@ -7,6 +7,8 @@ import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
+import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { useClientStats } from '@/hooks/useClientStats';
 
 type NewClientDrawerProps = {
   open: boolean;
@@ -16,6 +18,8 @@ type NewClientDrawerProps = {
 
 const NewClientDrawer: React.FC<NewClientDrawerProps> = ({ open, onOpenChange, onSuccess }) => {
   const { user } = useAuth();
+  const { hasReachedLimit } = usePlanLimits();
+  const { totalClients } = useClientStats();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -40,6 +44,12 @@ const NewClientDrawer: React.FC<NewClientDrawerProps> = ({ open, onOpenChange, o
     // Check if user is logged in
     if (!user) {
       toast.error("Você precisa estar logado para adicionar um cliente");
+      return;
+    }
+
+    // Check plan limits
+    if (hasReachedLimit('clients', totalClients)) {
+      toast.error("Limite de clientes atingido para seu plano atual");
       return;
     }
 

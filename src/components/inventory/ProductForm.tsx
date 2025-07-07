@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ProductFormData, Product } from "@/hooks/inventory/useProductsData";
+import { ProductFormData, Product, useProductsData } from "@/hooks/inventory/useProductsData";
+import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { toast } from 'sonner';
 
 interface ProductFormProps {
   onSubmit: (data: ProductFormData) => void;
@@ -21,6 +23,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   isLoading,
   onCancel,
 }) => {
+  const { hasReachedLimit } = usePlanLimits();
+  const { products } = useProductsData();
   const {
     register,
     handleSubmit,
@@ -43,9 +47,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const activeValue = watch("active");
 
+  const handleFormSubmit = (data: ProductFormData) => {
+    // Check limits only for new products
+    if (!initialData && hasReachedLimit('products', products.length)) {
+      toast.error('Limite de produtos atingido para seu plano atual');
+      return;
+    }
+    onSubmit(data);
+  };
+
   return (
     <div className="bg-card text-card-foreground p-6 rounded-lg border">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="name">Nome do Produto *</Label>

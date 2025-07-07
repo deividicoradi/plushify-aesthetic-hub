@@ -7,6 +7,7 @@ import ClientsHeader from '@/components/clients/ClientsHeader';
 import ClientsSearchAndFilters from '@/components/clients/ClientsSearchAndFilters';
 import ClientsStatsCards from '@/components/clients/ClientsStatsCards';
 import { useClientStats } from '@/hooks/useClientStats';
+import { LimitAlert } from '@/components/LimitAlert';
 
 const Clients = () => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
@@ -29,6 +30,9 @@ const Clients = () => {
 
         {/* Main Content with Modern Layout */}
         <main className="flex-1 p-6 space-y-8">
+          {/* Limit Alert */}
+          <LimitAlert type="clients" currentCount={totalClients} action="adicionar" />
+          
           {/* Search and Filters Section */}
           <ClientsSearchAndFilters
             searchTerm={searchTerm}

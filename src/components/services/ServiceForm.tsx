@@ -11,7 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Service } from '@/hooks/useServices';
+import { Service, useServices } from '@/hooks/useServices';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { toast } from 'sonner';
 
 interface ServiceFormProps {
   isOpen: boolean;
@@ -22,6 +24,8 @@ interface ServiceFormProps {
 }
 
 export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: ServiceFormProps) => {
+  const { hasReachedLimit } = usePlanLimits();
+  const { services } = useServices();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -56,8 +60,19 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     
+    if (!formData.name.trim()) {
+      toast.error('Nome do serviço é obrigatório');
+      return;
+    }
+
+    // Check limits only for new services  
+    if (!service && hasReachedLimit('services', services.length)) {
+      toast.error('Limite de serviços atingido para seu plano atual');
+      return;
+    }
+    
+    setLoading(true);
     const success = await onSubmit(formData);
     if (success) {
       onClose();

@@ -33,6 +33,7 @@ import Product from "./pages/Product";
 import About from "./pages/About";
 import Status from "./pages/Status";
 import Updates from "./pages/Updates";
+import TeamManagement from "./pages/TeamManagement";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
@@ -160,6 +161,14 @@ const AppContent = () => {
         element={
           <ProtectedRoute>
             <AdvancedAnalytics />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/team"
+        element={
+          <ProtectedRoute>
+            <TeamManagement />
           </ProtectedRoute>
         }
       />

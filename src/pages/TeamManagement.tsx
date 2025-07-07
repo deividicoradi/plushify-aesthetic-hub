@@ -1,10 +1,10 @@
 import React from 'react';
 import DashboardSidebar from '@/components/layout/DashboardSidebar';
 import { FeatureGuard } from '@/components/FeatureGuard';
-import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
-import { TrendingUp, AlertCircle } from 'lucide-react';
+import { TeamManagement as TeamManagementComponent } from '@/components/premium/TeamManagement';
+import { Users, AlertCircle } from 'lucide-react';
 
-const AdvancedAnalytics = () => {
+const TeamManagement = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardSidebar />
@@ -12,20 +12,20 @@ const AdvancedAnalytics = () => {
         {/* Header */}
         <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Analytics Avançados</h1>
+            <Users className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">Gestão de Equipe</h1>
           </div>
         </header>
 
         {/* Main Content */}
         <main className="flex-1 p-6">
           <FeatureGuard 
-            planFeature="hasAdvancedAnalytics"
+            planFeature="hasTeamManagement"
             fallback={
               <div className="text-center py-12">
                 <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                 <h2 className="text-xl font-semibold text-foreground mb-2">
-                  Analytics Avançados
+                  Gestão de Equipe
                 </h2>
                 <p className="text-muted-foreground">
                   Esta funcionalidade está disponível apenas para assinantes Premium.
@@ -33,7 +33,7 @@ const AdvancedAnalytics = () => {
               </div>
             }
           >
-            <AnalyticsDashboard />
+            <TeamManagementComponent />
           </FeatureGuard>
         </main>
       </div>
@@ -41,4 +41,4 @@ const AdvancedAnalytics = () => {
   );
 };
 
-export default AdvancedAnalytics;
+export default TeamManagement;

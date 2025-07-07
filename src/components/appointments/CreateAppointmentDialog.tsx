@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAppointments } from '@/hooks/useAppointments';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { toast } from 'sonner';
 
 interface CreateAppointmentDialogProps {
   open: boolean;
@@ -14,7 +16,8 @@ interface CreateAppointmentDialogProps {
 }
 
 export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmentDialogProps) => {
-  const { createAppointment } = useAppointments();
+  const { createAppointment, appointments } = useAppointments();
+  const { hasReachedLimit } = usePlanLimits();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -36,6 +39,13 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
     
     if (!formData.client_name || !formData.service_name || !formData.appointment_date || !formData.appointment_time) {
       console.log('Missing required fields');
+      toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
+
+    // Check plan limits
+    if (hasReachedLimit('appointments', appointments.length)) {
+      toast.error('Limite de agendamentos atingido para seu plano atual');
       return;
     }
 

@@ -7,11 +7,14 @@ import { Input } from '@/components/ui/input';
 import { AppointmentsList } from '@/components/appointments/AppointmentsList';
 import { CreateAppointmentDialog } from '@/components/appointments/CreateAppointmentDialog';
 import { AppointmentFilters } from '@/components/appointments/AppointmentFilters';
+import { LimitAlert } from '@/components/LimitAlert';
+import { useAppointments } from '@/hooks/useAppointments';
 
 const Appointments = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { appointments } = useAppointments();
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,7 +56,10 @@ const Appointments = () => {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 space-y-6">
+          {/* Limit Alert */}
+          <LimitAlert type="appointments" currentCount={appointments.length} action="criar" />
+          
           <AppointmentsList searchQuery={searchQuery} />
         </main>
       </div>

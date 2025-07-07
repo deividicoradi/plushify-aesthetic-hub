@@ -92,6 +92,8 @@ export const usePlanLimits = () => {
   // Verificar se é o usuário de teste
   const isTestUser = user?.email === TEST_USER_EMAIL;
   
+  console.log('Current plan:', currentPlan, 'Is test user:', isTestUser);
+  
   // Se for usuário de teste, usar limites do plano premium
   const limits = isTestUser ? PLAN_LIMITS.premium : PLAN_LIMITS[currentPlan];
   

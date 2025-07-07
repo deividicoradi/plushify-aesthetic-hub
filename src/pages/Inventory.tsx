@@ -4,6 +4,7 @@ import DashboardSidebar from '@/components/layout/DashboardSidebar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useProductsData, Product } from '@/hooks/inventory/useProductsData';
+import { LimitAlert } from '@/components/LimitAlert';
 import { InventoryHeader } from '@/components/inventory/InventoryHeader';
 import { StatsCards } from '@/components/inventory/StatsCards';
 import { ProductsTable } from '@/components/inventory/ProductsTable';
@@ -88,6 +89,9 @@ const Inventory = () => {
 
         <main className="flex-1 bg-background p-6">
           <div className="space-y-6">
+            {/* Limit Alert */}
+            <LimitAlert type="products" currentCount={products.length} action="adicionar" />
+            
             <InventoryHeader
               onCreateProduct={handleCreateProduct}
               searchTerm={searchTerm}
