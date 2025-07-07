@@ -94,39 +94,66 @@ const Help = () => {
                 <CardContent className="pt-0">
                   <div className="space-y-3">
                     <p className="text-muted-foreground mb-4">Recursos para aprender e resolver dúvidas:</p>
-                    <a href="#" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    <a href="/dashboard" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <div className="p-1 bg-blue-100 dark:bg-blue-900 rounded">
+                          <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className="font-medium">Como usar o Dashboard</span>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </a>
+                    <a href="/clients" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
                       <div className="flex items-center gap-3">
                         <div className="p-1 bg-green-100 dark:bg-green-900 rounded">
                           <BookOpen className="w-4 h-4 text-green-600 dark:text-green-400" />
                         </div>
-                        <span className="font-medium">Guia de Introdução</span>
+                        <span className="font-medium">Gestão de Clientes</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </a>
-                    <a href="#" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    <a href="/appointments" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
                       <div className="flex items-center gap-3">
-                        <div className="p-1 bg-red-100 dark:bg-red-900 rounded">
-                          <Video className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        <div className="p-1 bg-purple-100 dark:bg-purple-900 rounded">
+                          <BookOpen className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                         </div>
-                        <span className="font-medium">Tutoriais em Vídeo</span>
+                        <span className="font-medium">Sistema de Agendamentos</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </a>
-                    <a href="#" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    <a href="/financial" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
                       <div className="flex items-center gap-3">
-                        <div className="p-1 bg-blue-100 dark:bg-blue-900 rounded">
-                          <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <div className="p-1 bg-emerald-100 dark:bg-emerald-900 rounded">
+                          <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <span className="font-medium">FAQs</span>
+                        <span className="font-medium">Controle Financeiro</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </a>
-                    <a href="#" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                    <a href="/services" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
                       <div className="flex items-center gap-3">
                         <div className="p-1 bg-orange-100 dark:bg-orange-900 rounded">
-                          <Rss className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                          <BookOpen className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                         </div>
-                        <span className="font-medium">Blog</span>
+                        <span className="font-medium">Cadastro de Serviços</span>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </a>
+                    <a href="/inventory" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <div className="p-1 bg-red-100 dark:bg-red-900 rounded">
+                          <BookOpen className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        </div>
+                        <span className="font-medium">Gestão de Estoque</span>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </a>
+                    <a href="/reports" className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-muted/50 transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <div className="p-1 bg-indigo-100 dark:bg-indigo-900 rounded">
+                          <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <span className="font-medium">Relatórios e Analytics</span>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </a>
