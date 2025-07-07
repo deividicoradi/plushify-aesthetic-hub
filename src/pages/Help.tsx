@@ -52,15 +52,22 @@ const Help = () => {
                           </a>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 bg-card rounded-lg border">
-                        <div className="p-1 bg-green-100 dark:bg-green-900 rounded">
-                          <MessageCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div>
-                          <span className="font-semibold">WhatsApp:</span>
-                          <span className="ml-2 text-muted-foreground">(00) 0000-0000</span>
-                        </div>
-                      </div>
+                       <div className="flex items-center gap-3 p-3 bg-card rounded-lg border">
+                         <div className="p-1 bg-green-100 dark:bg-green-900 rounded">
+                           <MessageCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                         </div>
+                         <div>
+                           <span className="font-semibold">WhatsApp:</span>
+                           <a 
+                             href="https://wa.me/5549999150421?text=Ol%C3%A1!%20Vi%20sobre%20o%20Plushify%20e%20tenho%20interesse%20em%20conhecer%20melhor%20o%20sistema.%20Poderia%20me%20passar%20mais%20informa%C3%A7%C3%B5es%3F"
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="ml-2 text-green-600 dark:text-green-400 hover:underline"
+                           >
+                             (49) 99915-0421
+                           </a>
+                         </div>
+                       </div>
                       <div className="flex items-center gap-3 p-3 bg-card rounded-lg border">
                         <div className="p-1 bg-orange-100 dark:bg-orange-900 rounded">
                           <Clock className="w-4 h-4 text-orange-600 dark:text-orange-400" />
