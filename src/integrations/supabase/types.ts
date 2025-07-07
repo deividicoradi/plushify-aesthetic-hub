@@ -785,6 +785,16 @@ export type Database = {
         Args: { input_text: string }
         Returns: boolean
       }
+      get_dashboard_summary: {
+        Args: { target_user_id: string }
+        Returns: {
+          total_clients: number
+          total_payments: number
+          pending_payments: number
+          total_expenses: number
+          active_services: number
+        }[]
+      }
       get_user_plan: {
         Args: { user_uuid?: string }
         Returns: Database["public"]["Enums"]["plan_type"]
@@ -804,6 +814,17 @@ export type Database = {
       sanitize_input: {
         Args: { input_text: string }
         Returns: string
+      }
+      search_clients: {
+        Args: { target_user_id: string; search_term?: string }
+        Returns: {
+          id: string
+          name: string
+          email: string
+          phone: string
+          status: string
+          last_visit: string
+        }[]
       }
       validate_email: {
         Args: { email: string }
