@@ -768,6 +768,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_audit_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      comprehensive_security_check: {
+        Args: { check_user_id: string }
+        Returns: {
+          table_name: string
+          check_type: string
+          status: string
+          details: string
+        }[]
+      }
+      detect_sql_injection: {
+        Args: { input_text: string }
+        Returns: boolean
+      }
       get_user_plan: {
         Args: { user_uuid?: string }
         Returns: Database["public"]["Enums"]["plan_type"]
@@ -783,6 +800,18 @@ export type Database = {
           actual_user_id: string
         }
         Returns: undefined
+      }
+      sanitize_input: {
+        Args: { input_text: string }
+        Returns: string
+      }
+      validate_email: {
+        Args: { email: string }
+        Returns: boolean
+      }
+      validate_phone: {
+        Args: { phone: string }
+        Returns: boolean
       }
       verify_data_integrity: {
         Args: { check_user_id: string }
