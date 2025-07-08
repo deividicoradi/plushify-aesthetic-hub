@@ -6,14 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AppointmentsList } from '@/components/appointments/AppointmentsList';
 import { CreateAppointmentDialog } from '@/components/appointments/CreateAppointmentDialog';
-import { AppointmentFilters } from '@/components/appointments/AppointmentFilters';
+import { AppointmentFiltersAdvanced, type AppointmentFilters } from '@/components/appointments/AppointmentFiltersAdvanced';
+import { OnlineScheduling } from '@/components/appointments/OnlineScheduling';
+import { WorkingHoursSetup } from '@/components/appointments/WorkingHoursSetup';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LimitAlert } from '@/components/LimitAlert';
 import { useAppointments } from '@/hooks/useAppointments';
 
 const Appointments = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<AppointmentFilters>({});
   const { appointments } = useAppointments();
 
   return (
@@ -34,33 +37,52 @@ const Appointments = () => {
           </div>
         </header>
 
-        {/* Search and Filters Bar */}
-        <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900 border-b">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Buscar por cliente, serviço..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => setIsFiltersOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Filter className="w-4 h-4" />
-            Filtros
-          </Button>
-        </div>
-
         {/* Main Content */}
-        <main className="flex-1 p-6 space-y-6">
+        <main className="flex-1 p-6">
           {/* Limit Alert */}
           <LimitAlert type="appointments" currentCount={appointments.length} action="criar" />
           
-          <AppointmentsList searchQuery={searchQuery} />
+          <Tabs defaultValue="agenda" className="mt-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="agenda">Agenda</TabsTrigger>
+              <TabsTrigger value="online">Agendamento Online</TabsTrigger>
+              <TabsTrigger value="config">Configurações</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="agenda" className="space-y-6">
+              {/* Search and Filters Bar */}
+              <div className="flex items-center gap-4">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Buscar por cliente, serviço..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <AppointmentFiltersAdvanced
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  onClearFilters={() => setFilters({})}
+                />
+                <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-plush-600 hover:bg-plush-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Novo Agendamento
+                </Button>
+              </div>
+              
+              <AppointmentsList searchQuery={searchQuery} filters={filters} />
+            </TabsContent>
+            
+            <TabsContent value="online" className="space-y-6">
+              <OnlineScheduling />
+            </TabsContent>
+            
+            <TabsContent value="config" className="space-y-6">
+              <WorkingHoursSetup />
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
 
@@ -68,11 +90,6 @@ const Appointments = () => {
       <CreateAppointmentDialog 
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
-      />
-      
-      <AppointmentFilters
-        open={isFiltersOpen}
-        onOpenChange={setIsFiltersOpen}
       />
     </div>
   );

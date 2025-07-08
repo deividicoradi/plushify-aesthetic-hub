@@ -4,27 +4,74 @@ import { Calendar, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppointmentCard } from './AppointmentCard';
 import { useAppointments } from '@/hooks/useAppointments';
-import { format, isToday, isTomorrow, parseISO } from 'date-fns';
+import { format, isToday, isTomorrow, parseISO, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { AppointmentFilters } from './AppointmentFiltersAdvanced';
 
 interface AppointmentsListProps {
   searchQuery: string;
+  filters?: AppointmentFilters;
 }
 
-export const AppointmentsList = ({ searchQuery }: AppointmentsListProps) => {
+export const AppointmentsList = ({ searchQuery, filters = {} }: AppointmentsListProps) => {
   const [activeTab, setActiveTab] = useState('hoje');
   const { appointments, isLoading } = useAppointments();
 
   console.log('AppointmentsList render - Total appointments:', appointments.length);
 
   const filteredAppointments = useMemo(() => {
-    const filtered = appointments.filter(appointment =>
-      appointment.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      appointment.service_name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    let filtered = appointments.filter(appointment => {
+      // Search query filter
+      const matchesSearch = !searchQuery || (
+        appointment.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        appointment.service_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      // Status filter
+      const matchesStatus = !filters.status || appointment.status === filters.status;
+
+      // Client name filter
+      const matchesClientName = !filters.clientName || 
+        appointment.client_name.toLowerCase().includes(filters.clientName.toLowerCase());
+
+      // Service name filter
+      const matchesServiceName = !filters.serviceName || 
+        appointment.service_name.toLowerCase().includes(filters.serviceName.toLowerCase());
+
+      // Date range filter
+      const appointmentDate = parseISO(appointment.appointment_date);
+      let matchesDateRange = true;
+      
+      if (filters.dateFrom && filters.dateTo) {
+        matchesDateRange = isWithinInterval(appointmentDate, {
+          start: parseISO(filters.dateFrom),
+          end: parseISO(filters.dateTo)
+        });
+      } else if (filters.dateFrom) {
+        matchesDateRange = appointmentDate >= parseISO(filters.dateFrom);
+      } else if (filters.dateTo) {
+        matchesDateRange = appointmentDate <= parseISO(filters.dateTo);
+      }
+
+      // Time range filter
+      let matchesTimeRange = true;
+      if (filters.timeFrom || filters.timeTo) {
+        const appointmentTime = appointment.appointment_time;
+        if (filters.timeFrom) {
+          matchesTimeRange = matchesTimeRange && appointmentTime >= filters.timeFrom;
+        }
+        if (filters.timeTo) {
+          matchesTimeRange = matchesTimeRange && appointmentTime <= filters.timeTo;
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesClientName && 
+             matchesServiceName && matchesDateRange && matchesTimeRange;
+    });
+
     console.log('Filtered appointments:', filtered.length);
     return filtered;
-  }, [appointments, searchQuery]);
+  }, [appointments, searchQuery, filters]);
 
   const todayAppointments = useMemo(() => {
     return filteredAppointments.filter(apt => {

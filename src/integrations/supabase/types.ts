@@ -763,11 +763,54 @@ export type Database = {
         }
         Relationships: []
       }
+      working_hours: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          start_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          start_time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          start_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_appointment_availability: {
+        Args: {
+          p_user_id: string
+          p_appointment_date: string
+          p_appointment_time: string
+          p_duration: number
+          p_exclude_appointment_id?: string
+        }
+        Returns: boolean
+      }
       cleanup_old_audit_logs: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -784,6 +827,18 @@ export type Database = {
       detect_sql_injection: {
         Args: { input_text: string }
         Returns: boolean
+      }
+      get_available_slots: {
+        Args: {
+          p_user_id: string
+          p_date: string
+          p_service_duration?: number
+          p_slot_interval?: number
+        }
+        Returns: {
+          slot_time: string
+          is_available: boolean
+        }[]
       }
       get_dashboard_summary: {
         Args: { target_user_id: string }
