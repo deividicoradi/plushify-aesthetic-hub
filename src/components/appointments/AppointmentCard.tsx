@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Clock, User, Package, MoreVertical } from 'lucide-react';
+import { Clock, User, Package, MoreVertical, MessageCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -76,6 +76,24 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
     setShowDeleteDialog(false);
   };
 
+  const sendWhatsAppMessage = () => {
+    const message = `Olá ${appointment.client_name}! 
+
+Confirmo seu agendamento:
+📅 Data: ${formatDate(appointment.appointment_date)}
+⏰ Horário: ${appointment.appointment_time}
+✂️ Serviço: ${appointment.service_name}
+⏱️ Duração: ${appointment.duration} minutos
+💰 Valor: ${formatPrice(appointment.price)}
+
+Nos vemos em breve!`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <>
       <Card className="hover:shadow-md transition-shadow duration-200">
@@ -129,6 +147,15 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
 
             {/* Actions */}
             <div className="flex items-center gap-2 ml-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={sendWhatsAppMessage}
+                className="text-green-600 border-green-200 hover:bg-green-50"
+              >
+                <MessageCircle className="w-4 h-4 mr-1" />
+                WhatsApp
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm">
