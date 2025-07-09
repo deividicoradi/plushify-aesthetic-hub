@@ -727,6 +727,54 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          hire_date: string | null
+          id: string
+          name: string
+          permissions: Json | null
+          phone: string | null
+          role: string
+          salary: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          hire_date?: string | null
+          id?: string
+          name: string
+          permissions?: Json | null
+          phone?: string | null
+          role: string
+          salary?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          hire_date?: string | null
+          id?: string
+          name?: string
+          permissions?: Json | null
+          phone?: string | null
+          role?: string
+          salary?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           created_at: string
