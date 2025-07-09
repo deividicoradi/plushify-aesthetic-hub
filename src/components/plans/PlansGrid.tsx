@@ -60,7 +60,13 @@ export const PlansGrid: React.FC<PlansGridProps> = ({
         <p className="text-muted-foreground mb-4">
           Entre em contato para planos corporativos personalizados
         </p>
-        <button className="px-6 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105">
+        <button 
+          onClick={() => {
+            const whatsappMessage = encodeURIComponent("Olá! Gostaria de saber mais sobre planos corporativos personalizados do Plushify.");
+            window.open(`https://wa.me/5511999999999?text=${whatsappMessage}`, '_blank');
+          }}
+          className="px-6 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105"
+        >
           Falar com Especialista
         </button>
       </div>
