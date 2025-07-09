@@ -41,7 +41,7 @@ export const PlanCardFooter: React.FC<PlanCardFooterProps> = ({
     <CardFooter className="pt-4 px-6 pb-6 flex-shrink-0">
       <div className="w-full space-y-3">
         <Button 
-          className={`w-full h-14 text-base font-semibold transition-all duration-300 transform hover:scale-105 ${
+          className={`w-full h-12 text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
             plan.current 
               ? plan.trial
                 ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' 
