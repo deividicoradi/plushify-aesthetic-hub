@@ -12,9 +12,9 @@ import AnalyticsInsights from './AnalyticsInsights';
 export const AnalyticsDashboard: React.FC = () => {
   const dashboardStats = useDashboardStats();
   const reportsData = useReportsData();
-  const chartData = useAnalyticsChartData();
+  const { pipelineByAmountData, pipelineByCountData, quarterlyData, monthlyRevenueData, loading: chartLoading } = useAnalyticsChartData();
 
-  if (dashboardStats.loading || reportsData.loading) {
+  if (dashboardStats.loading || reportsData.loading || chartLoading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -28,6 +28,11 @@ export const AnalyticsDashboard: React.FC = () => {
           weeklyAppointments={0}
           newThisMonth={0}
         />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-80 bg-muted rounded animate-pulse" />
+          <div className="h-80 bg-muted rounded animate-pulse" />
+        </div>
       </div>
     );
   }
@@ -61,14 +66,14 @@ export const AnalyticsDashboard: React.FC = () => {
 
       {/* Gráficos Principais */}
       <AnalyticsPipelineCharts
-        pipelineByAmountData={chartData.pipelineByAmountData}
-        pipelineByCountData={chartData.pipelineByCountData}
+        pipelineByAmountData={pipelineByAmountData}
+        pipelineByCountData={pipelineByCountData}
       />
 
       {/* Gráficos de Performance */}
       <AnalyticsPerformanceCharts
-        quarterlyData={chartData.quarterlyData}
-        monthlyRevenueData={chartData.monthlyRevenueData}
+        quarterlyData={quarterlyData}
+        monthlyRevenueData={monthlyRevenueData}
       />
 
       {/* Resumo de Insights */}

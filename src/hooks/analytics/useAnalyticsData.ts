@@ -1,47 +1,162 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface PipelineData {
+  name: string;
+  value: number;
+  fill: string;
+}
+
+interface QuarterlyData {
+  quarter: string;
+  revenue: number;
+}
+
+interface MonthlyData {
+  month: string;
+  revenue: number;
+}
+
 export const useAnalyticsChartData = () => {
-  const pipelineByAmountData = [
-    { name: 'Corte', value: 35000, fill: '#8884d8' },
-    { name: 'Coloração', value: 25000, fill: '#82ca9d' },
-    { name: 'Tratamento', value: 18000, fill: '#ffc658' },
-    { name: 'Manicure', value: 12000, fill: '#ff7c7c' },
-    { name: 'Outros', value: 8000, fill: '#8dd1e1' }
-  ];
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [pipelineByAmountData, setPipelineByAmountData] = useState<PipelineData[]>([]);
+  const [pipelineByCountData, setPipelineByCountData] = useState<PipelineData[]>([]);
+  const [quarterlyData, setQuarterlyData] = useState<QuarterlyData[]>([]);
+  const [monthlyRevenueData, setMonthlyRevenueData] = useState<MonthlyData[]>([]);
 
-  const pipelineByCountData = [
-    { name: 'Corte', value: 145, fill: '#8884d8' },
-    { name: 'Coloração', value: 89, fill: '#82ca9d' },
-    { name: 'Tratamento', value: 67, fill: '#ffc658' },
-    { name: 'Manicure', value: 156, fill: '#ff7c7c' },
-    { name: 'Outros', value: 43, fill: '#8dd1e1' }
-  ];
+  const serviceColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#ffb347', '#87ceeb', '#dda0dd'];
 
-  const quarterlyData = [
-    { quarter: 'Q4 2023', revenue: 89500 },
-    { quarter: 'Q1 2024', revenue: 95200 },
-    { quarter: 'Q2 2024', revenue: 108300 },
-    { quarter: 'Q3 2024', revenue: 125600 }
-  ];
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchAnalyticsData = async () => {
+      try {
+        setLoading(true);
 
-  const monthlyRevenueData = [
-    { month: 'Set 2023', revenue: 28500 },
-    { month: 'Out 2023', revenue: 31200 },
-    { month: 'Nov 2023', revenue: 29800 },
-    { month: 'Dez 2023', revenue: 35600 },
-    { month: 'Jan 2024', revenue: 32100 },
-    { month: 'Fev 2024', revenue: 28900 },
-    { month: 'Mar 2024', revenue: 34200 },
-    { month: 'Abr 2024', revenue: 35800 },
-    { month: 'Mai 2024', revenue: 38500 },
-    { month: 'Jun 2024', revenue: 34000 },
-    { month: 'Jul 2024', revenue: 41200 },
-    { month: 'Ago 2024', revenue: 43100 },
-    { month: 'Set 2024', revenue: 41300 }
-  ];
+        // Buscar dados de pipeline por valor (receita por serviço)
+        const { data: revenueByService, error: revenueError } = await supabase
+          .from('appointments')
+          .select('service_name, price')
+          .eq('user_id', user.id)
+          .eq('status', 'concluido');
+
+        if (revenueError) throw revenueError;
+
+        // Agrupar receita por serviço
+        const revenueMap = new Map<string, number>();
+        revenueByService?.forEach(appointment => {
+          const serviceName = appointment.service_name || 'Outros';
+          const currentAmount = revenueMap.get(serviceName) || 0;
+          revenueMap.set(serviceName, currentAmount + (appointment.price || 0));
+        });
+
+        const pipelineAmount = Array.from(revenueMap.entries()).map(([name, value], index) => ({
+          name,
+          value: Number(value),
+          fill: serviceColors[index % serviceColors.length]
+        }));
+
+        // Buscar dados de pipeline por quantidade (agendamentos por serviço)
+        const { data: countByService, error: countError } = await supabase
+          .from('appointments')
+          .select('service_name')
+          .eq('user_id', user.id);
+
+        if (countError) throw countError;
+
+        // Agrupar contagem por serviço
+        const countMap = new Map<string, number>();
+        countByService?.forEach(appointment => {
+          const serviceName = appointment.service_name || 'Outros';
+          const currentCount = countMap.get(serviceName) || 0;
+          countMap.set(serviceName, currentCount + 1);
+        });
+
+        const pipelineCount = Array.from(countMap.entries()).map(([name, value], index) => ({
+          name,
+          value,
+          fill: serviceColors[index % serviceColors.length]
+        }));
+
+        // Buscar dados trimestrais dos últimos 4 trimestres
+        const currentDate = new Date();
+        const quarterlyRevenue: QuarterlyData[] = [];
+        
+        for (let i = 3; i >= 0; i--) {
+          const quarterDate = new Date(currentDate);
+          quarterDate.setMonth(quarterDate.getMonth() - (i * 3));
+          const startQuarter = new Date(quarterDate.getFullYear(), Math.floor(quarterDate.getMonth() / 3) * 3, 1);
+          const endQuarter = new Date(startQuarter.getFullYear(), startQuarter.getMonth() + 3, 0);
+          
+          const { data: quarterData, error: quarterError } = await supabase
+            .from('payments')
+            .select('amount')
+            .eq('user_id', user.id)
+            .eq('status', 'pago')
+            .gte('payment_date', startQuarter.toISOString())
+            .lte('payment_date', endQuarter.toISOString());
+
+          if (quarterError) throw quarterError;
+
+          const totalRevenue = quarterData?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+          const quarterName = `Q${Math.floor(startQuarter.getMonth() / 3) + 1} ${startQuarter.getFullYear()}`;
+          
+          quarterlyRevenue.push({
+            quarter: quarterName,
+            revenue: Number(totalRevenue)
+          });
+        }
+
+        // Buscar dados mensais dos últimos 13 meses
+        const monthlyRevenue: MonthlyData[] = [];
+        
+        for (let i = 12; i >= 0; i--) {
+          const monthDate = new Date(currentDate);
+          monthDate.setMonth(monthDate.getMonth() - i);
+          const startMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+          const endMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+          
+          const { data: monthData, error: monthError } = await supabase
+            .from('payments')
+            .select('amount')
+            .eq('user_id', user.id)
+            .eq('status', 'pago')
+            .gte('payment_date', startMonth.toISOString())
+            .lte('payment_date', endMonth.toISOString());
+
+          if (monthError) throw monthError;
+
+          const totalRevenue = monthData?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+          const monthName = startMonth.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+          
+          monthlyRevenue.push({
+            month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+            revenue: Number(totalRevenue)
+          });
+        }
+
+        setPipelineByAmountData(pipelineAmount);
+        setPipelineByCountData(pipelineCount);
+        setQuarterlyData(quarterlyRevenue);
+        setMonthlyRevenueData(monthlyRevenue);
+
+      } catch (error) {
+        console.error('Erro ao buscar dados de analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalyticsData();
+  }, [user]);
 
   return {
     pipelineByAmountData,
     pipelineByCountData,
     quarterlyData,
-    monthlyRevenueData
+    monthlyRevenueData,
+    loading
   };
 };
