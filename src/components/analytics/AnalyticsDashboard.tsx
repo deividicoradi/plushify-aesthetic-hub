@@ -11,11 +11,7 @@ import {
   Award,
   Activity
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClientROITable } from './ClientROITable';
-import { RevenueForecastChart } from './RevenueForecastChart';
-import { ServicePerformanceChart } from './ServicePerformanceChart';
-import { TimeAnalysisCharts } from './TimeAnalysisCharts';
+import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useReportsData } from '@/hooks/useReportsData';
 
@@ -36,117 +32,44 @@ export const AnalyticsDashboard: React.FC = () => {
     return `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
   };
 
-  // Dados mockados para os novos componentes de analytics avançados
-  const clientROIData = [
-    {
-      client_id: '1',
-      client_name: 'Maria Silva',
-      total_spent: 2500,
-      total_appointments: 12,
-      average_per_visit: 208.33,
-      last_visit: '2024-01-15',
-      loyalty_score: 8.5,
-      roi_category: 'VIP',
-      lifetime_value: 3000,
-      roi_score: 9.2,
-      frequency_score: 8.8
-    },
-    {
-      client_id: '2', 
-      client_name: 'João Santos',
-      total_spent: 1800,
-      total_appointments: 8,
-      average_per_visit: 225.00,
-      last_visit: '2024-01-10',
-      loyalty_score: 7.2,
-      roi_category: 'Premium',
-      lifetime_value: 2200,
-      roi_score: 7.8,
-      frequency_score: 6.5
-    }
+  // Dados para o dashboard principal
+  const pipelineByAmountData = [
+    { name: 'Corte', value: 35000, fill: '#8884d8' },
+    { name: 'Coloração', value: 25000, fill: '#82ca9d' },
+    { name: 'Tratamento', value: 18000, fill: '#ffc658' },
+    { name: 'Manicure', value: 12000, fill: '#ff7c7c' },
+    { name: 'Outros', value: 8000, fill: '#8dd1e1' }
   ];
 
-  const forecastData = [
-    { 
-      period: 'Jan 2024', 
-      actual_revenue: 15000, 
-      predicted_revenue: 15200, 
-      confidence_interval: { lower: 14500, upper: 15900 },
-      trend: 'up' as const
-    },
-    { 
-      period: 'Fev 2024', 
-      actual_revenue: 18000, 
-      predicted_revenue: 17800, 
-      confidence_interval: { lower: 17200, upper: 18400 },
-      trend: 'up' as const
-    },
-    { 
-      period: 'Mar 2024', 
-      actual_revenue: null, 
-      predicted_revenue: 19500, 
-      confidence_interval: { lower: 18800, upper: 20200 },
-      trend: 'up' as const
-    },
-    { 
-      period: 'Abr 2024', 
-      actual_revenue: null, 
-      predicted_revenue: 21000, 
-      confidence_interval: { lower: 20100, upper: 21900 },
-      trend: 'up' as const
-    }
+  const pipelineByCountData = [
+    { name: 'Corte', value: 145, fill: '#8884d8' },
+    { name: 'Coloração', value: 89, fill: '#82ca9d' },
+    { name: 'Tratamento', value: 67, fill: '#ffc658' },
+    { name: 'Manicure', value: 156, fill: '#ff7c7c' },
+    { name: 'Outros', value: 43, fill: '#8dd1e1' }
   ];
 
-  const servicePerformanceData = [
-    { 
-      service_name: 'Corte Feminino', 
-      total_appointments: 45,
-      total_revenue: 12000, 
-      average_price: 266.67,
-      average_duration: 90, 
-      satisfaction_rating: 4.8,
-      growth_rate: 15.2,
-      popularity_rank: 1
-    },
-    { 
-      service_name: 'Coloração', 
-      total_appointments: 20,
-      total_revenue: 8500, 
-      average_price: 425.00,
-      average_duration: 180, 
-      satisfaction_rating: 4.9,
-      growth_rate: 8.7,
-      popularity_rank: 2
-    },
-    { 
-      service_name: 'Manicure', 
-      total_appointments: 35,
-      total_revenue: 3500, 
-      average_price: 100.00,
-      average_duration: 45, 
-      satisfaction_rating: 4.7,
-      growth_rate: 5.3,
-      popularity_rank: 3
-    }
+  const quarterlyData = [
+    { quarter: 'Q4 2023', revenue: 89500 },
+    { quarter: 'Q1 2024', revenue: 95200 },
+    { quarter: 'Q2 2024', revenue: 108300 },
+    { quarter: 'Q3 2024', revenue: 125600 }
   ];
 
-  const hourlyData = [
-    { hour: 8, appointments_count: 2, revenue: 280 },
-    { hour: 9, appointments_count: 4, revenue: 520 },
-    { hour: 10, appointments_count: 6, revenue: 780 },
-    { hour: 11, appointments_count: 5, revenue: 650 },
-    { hour: 14, appointments_count: 7, revenue: 910 },
-    { hour: 15, appointments_count: 8, revenue: 1040 },
-    { hour: 16, appointments_count: 6, revenue: 780 },
-    { hour: 17, appointments_count: 4, revenue: 520 }
-  ];
-
-  const seasonalData = [
-    { month: 'Jan 2023', revenue: 45000, appointments: 180, growth_rate: 5.2 },
-    { month: 'Abr 2023', revenue: 52000, appointments: 210, growth_rate: 15.6 },
-    { month: 'Jul 2023', revenue: 48000, appointments: 195, growth_rate: -7.7 },
-    { month: 'Out 2023', revenue: 58000, appointments: 240, growth_rate: 20.8 },
-    { month: 'Jan 2024', revenue: 62000, appointments: 265, growth_rate: 6.9 }
+  const monthlyRevenueData = [
+    { month: 'Set 2023', revenue: 28500 },
+    { month: 'Out 2023', revenue: 31200 },
+    { month: 'Nov 2023', revenue: 29800 },
+    { month: 'Dez 2023', revenue: 35600 },
+    { month: 'Jan 2024', revenue: 32100 },
+    { month: 'Fev 2024', revenue: 28900 },
+    { month: 'Mar 2024', revenue: 34200 },
+    { month: 'Abr 2024', revenue: 35800 },
+    { month: 'Mai 2024', revenue: 38500 },
+    { month: 'Jun 2024', revenue: 34000 },
+    { month: 'Jul 2024', revenue: 41200 },
+    { month: 'Ago 2024', revenue: 43100 },
+    { month: 'Set 2024', revenue: 41300 }
   ];
 
   if (dashboardStats.loading || reportsData.loading) {
@@ -253,35 +176,111 @@ export const AnalyticsDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Analytics Detalhados */}
-      <Tabs defaultValue="clientes" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="clientes">ROI por Cliente</TabsTrigger>
-          <TabsTrigger value="previsao">Previsão de Receita</TabsTrigger>
-          <TabsTrigger value="servicos">Performance de Serviços</TabsTrigger>
-          <TabsTrigger value="tempo">Análise Temporal</TabsTrigger>
-        </TabsList>
+      {/* Gráficos Principais */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Pipeline por Valor */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pipeline por Valor e Serviço</CardTitle>
+            <CardDescription>Distribuição da receita por tipo de serviço</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pipelineByAmountData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={120}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {pipelineByAmountData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="clientes" className="space-y-4">
-          <ClientROITable data={clientROIData} loading={false} />
-        </TabsContent>
+        {/* Pipeline por Quantidade */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pipeline por Quantidade e Serviço</CardTitle>
+            <CardDescription>Distribuição dos agendamentos por tipo de serviço</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pipelineByCountData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={120}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {pipelineByCountData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value="previsao" className="space-y-4">
-          <RevenueForecastChart data={forecastData} loading={false} />
-        </TabsContent>
+      {/* Gráficos de Performance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Comparação Trimestral */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Comparação Trimestre a Trimestre</CardTitle>
+            <CardDescription>Últimos 4 trimestres</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={quarterlyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="quarter" />
+                <YAxis tickFormatter={(value) => formatCurrency(value)} />
+                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                <Bar dataKey="revenue" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="servicos" className="space-y-4">
-          <ServicePerformanceChart data={servicePerformanceData} loading={false} />
-        </TabsContent>
-
-        <TabsContent value="tempo" className="space-y-4">
-          <TimeAnalysisCharts 
-            hourlyData={hourlyData} 
-            seasonalData={seasonalData} 
-            loading={false} 
-          />
-        </TabsContent>
-      </Tabs>
+        {/* Receita Últimos 13 Meses */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Receita Últimos 13 Meses</CardTitle>
+            <CardDescription>Tendência mensal de receita</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={monthlyRevenueData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis tickFormatter={(value) => formatCurrency(value)} />
+                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                <Line 
+                  type="monotone" 
+                  dataKey="revenue" 
+                  stroke="#8884d8" 
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Resumo de Insights */}
       <Card>
