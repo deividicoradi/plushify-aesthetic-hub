@@ -9,7 +9,7 @@ interface CategoryChartProps {
   loading?: boolean;
 }
 
-const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent-foreground))', 'hsl(var(--muted))', 'hsl(var(--secondary))', '#F97316', '#0EA5E9', '#D946EF'];
+const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', '#10b981', '#3b82f6'];
 
 export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => {
   if (loading) {
@@ -67,6 +67,7 @@ export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => 
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
+                style={{ fontSize: '12px', fill: 'hsl(var(--foreground))' }}
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -81,7 +82,11 @@ export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => 
                   color: 'hsl(var(--foreground))'
                 }}
               />
-              <Legend />
+              <Legend 
+                wrapperStyle={{
+                  color: 'hsl(var(--foreground))'
+                }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
