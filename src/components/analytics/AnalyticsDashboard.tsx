@@ -17,10 +17,6 @@ export const AnalyticsDashboard: React.FC = () => {
   if (dashboardStats.loading || reportsData.loading || chartLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Analytics de Negócio</h2>
-          <Badge variant="outline">Carregando...</Badge>
-        </div>
         
         <AnalyticsKPICards
           totalClients={0}
@@ -39,22 +35,6 @@ export const AnalyticsDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Analytics de Negócio</h2>
-          <p className="text-muted-foreground">
-            Insights avançados sobre o desempenho do seu negócio • Análises em tempo real
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="gap-1">
-            <Activity className="h-3 w-3" />
-            Analytics Avançados
-          </Badge>
-        </div>
-      </div>
-
       {/* Métricas Principais */}
       <AnalyticsKPICards
         totalClients={dashboardStats.totalClients}
