@@ -52,7 +52,7 @@ const AnalyticsPerformanceCharts: React.FC<AnalyticsPerformanceChartsProps> = ({
       {/* Receita Últimos 13 Meses */}
       <Card>
         <CardHeader>
-          <CardTitle>Receita Últimos 13 Meses</CardTitle>
+          <CardTitle>Receita Últimos 12 Meses</CardTitle>
           <CardDescription>Tendência mensal de receita</CardDescription>
         </CardHeader>
         <CardContent>

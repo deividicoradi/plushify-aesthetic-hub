@@ -163,7 +163,7 @@ export const useAnalyticsChartData = () => {
         // Buscar dados mensais dos últimos 13 meses
         const monthlyRevenue: MonthlyData[] = [];
         
-        for (let i = 12; i >= 0; i--) {
+        for (let i = 11; i >= 0; i--) {
           const monthDate = new Date(currentDate);
           monthDate.setMonth(monthDate.getMonth() - i);
           const startMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
