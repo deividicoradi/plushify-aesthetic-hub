@@ -14,6 +14,21 @@ interface RevenueByMethodChartProps {
 }
 
 export const RevenueByMethodChart = ({ revenueByMethod, formatCurrency }: RevenueByMethodChartProps) => {
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-popover text-popover-foreground p-3 rounded-lg border border-border shadow-lg">
+          <p className="font-medium">{`${payload[0].name}`}</p>
+          <p className="text-sm">
+            <span className="font-semibold">Valor: </span>
+            {formatCurrency(payload[0].value)}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -41,14 +56,7 @@ export const RevenueByMethodChart = ({ revenueByMethod, formatCurrency }: Revenu
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                />
+                <Tooltip content={<CustomTooltip />} />
               </RechartsPieChart>
             </ResponsiveContainer>
           ) : (
