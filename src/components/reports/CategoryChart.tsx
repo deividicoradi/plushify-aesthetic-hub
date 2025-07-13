@@ -49,6 +49,25 @@ export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => 
     return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   };
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-popover text-popover-foreground p-3 rounded-lg border border-border shadow-lg">
+          <p className="font-medium">{`${payload[0].name}`}</p>
+          <p className="text-sm">
+            <span className="font-semibold">Receita: </span>
+            {formatCurrency(payload[0].value)}
+          </p>
+          <p className="text-sm">
+            <span className="font-semibold">Porcentagem: </span>
+            {payload[0].payload.percentage.toFixed(1)}%
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card className="bg-card border-border">
       <CardHeader>
@@ -73,15 +92,7 @@ export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => 
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip 
-                formatter={(value) => [formatCurrency(Number(value)), 'Receita']}
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  color: 'hsl(var(--foreground))'
-                }}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Legend 
                 wrapperStyle={{
                   color: 'hsl(var(--foreground))'
