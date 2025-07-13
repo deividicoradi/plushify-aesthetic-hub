@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartTooltip } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { CategoryData } from '@/hooks/useFinancialData';
 
 interface CategoryPieChartProps {
@@ -12,6 +11,21 @@ interface CategoryPieChartProps {
 }
 
 export const CategoryPieChart = ({ data, title, formatCurrency }: CategoryPieChartProps) => {
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-popover text-popover-foreground p-3 rounded-lg border border-border shadow-lg">
+          <p className="font-medium">{`${payload[0].name}`}</p>
+          <p className="text-sm">
+            <span className="font-semibold">Valor: </span>
+            {formatCurrency(payload[0].value)}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card className="bg-card border-border">
       <CardHeader>
@@ -35,15 +49,7 @@ export const CategoryPieChart = ({ data, title, formatCurrency }: CategoryPieCha
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <ChartTooltip 
-                formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  color: 'hsl(var(--foreground))'
-                }}
-              />
+              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         </div>
