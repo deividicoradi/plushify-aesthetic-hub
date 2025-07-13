@@ -29,22 +29,24 @@ export default function Loyalty() {
   return (
     <div className="min-h-screen bg-background">
       <DashboardSidebar />
-      <main className="ml-64 min-h-screen">
-        <div className="p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  🎮 Sistema de Fidelidade Gamificado
-                </h1>
-                <p className="text-muted-foreground">Transforme seus clientes em verdadeiros fãs com pontos, desafios e recompensas!</p>
-              </div>
+      <div className="ml-64 min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 ring-1 ring-primary/10">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Sistema de Fidelidade</h1>
+              <p className="text-sm text-muted-foreground">
+                Transforme seus clientes em verdadeiros fãs com pontos, desafios e recompensas
+              </p>
             </div>
           </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 space-y-6">
 
           {/* Stats Cards */}
           <LoyaltyStatsCards stats={stats} />
@@ -65,8 +67,8 @@ export default function Loyalty() {
 
           {/* All Clients Table */}
           <LoyaltyClientsTable clients={clients} />
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
