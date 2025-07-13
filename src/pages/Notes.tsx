@@ -35,9 +35,17 @@ const Notes = () => {
       <DashboardSidebar />
       <div className="ml-64 min-h-screen flex flex-col">
         {/* Header */}
-        <header className="flex items-center gap-4 border-b border-border bg-background px-4 py-2">
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-foreground">Minhas Anotações</h1>
+        <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 ring-1 ring-primary/10">
+              <FileText className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Minhas Anotações</h1>
+              <p className="text-sm text-muted-foreground">
+                Organize suas ideias e lembretes
+              </p>
+            </div>
           </div>
         </header>
 

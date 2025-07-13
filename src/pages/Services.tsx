@@ -51,12 +51,19 @@ const Services = () => {
         {/* Header */}
         <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
           <div className="flex items-center justify-between flex-1">
-            <div className="flex items-center gap-2">
-              <Wrench className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">Serviços</h1>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 ring-1 ring-primary/10">
+                <Wrench className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Serviços</h1>
+                <p className="text-sm text-muted-foreground">
+                  Gerencie seus serviços oferecidos
+                </p>
+              </div>
             </div>
-            <Button onClick={() => setIsFormOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={() => setIsFormOpen(true)} className="gap-2">
+              <Plus className="w-4 h-4" />
               Novo Serviço
             </Button>
           </div>

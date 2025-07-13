@@ -36,12 +36,14 @@ const Settings = () => {
         {/* Header */}
         <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
+            <div className="p-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 ring-1 ring-primary/10">
               <SettingsIcon className="w-6 h-6 text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
-              <p className="text-muted-foreground">Gerencie suas preferências e configurações da conta</p>
+              <p className="text-sm text-muted-foreground">
+                Gerencie suas preferências e conta
+              </p>
             </div>
           </div>
         </header>

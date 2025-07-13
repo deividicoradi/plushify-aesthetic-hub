@@ -11,9 +11,16 @@ const AdvancedAnalytics = () => {
       <div className="ml-64 min-h-screen flex flex-col">
         {/* Header */}
         <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Analytics Avançados</h1>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 ring-1 ring-primary/10">
+              <TrendingUp className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Analytics Avançados</h1>
+              <p className="text-sm text-muted-foreground">
+                Análises detalhadas do seu negócio
+              </p>
+            </div>
           </div>
         </header>
 

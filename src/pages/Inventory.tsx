@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
+import { Package, Plus, Search } from 'lucide-react';
 import DashboardSidebar from '@/components/layout/DashboardSidebar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useProductsData, Product } from '@/hooks/inventory/useProductsData';
 import { LimitAlert } from '@/components/LimitAlert';
 import { InventoryHeader } from '@/components/inventory/InventoryHeader';
@@ -84,7 +86,25 @@ const Inventory = () => {
     <div className="min-h-screen bg-background">
       <DashboardSidebar />
       <div className="ml-64 min-h-screen flex flex-col">
-        <header className="flex items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
+        {/* Header */}
+        <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
+          <div className="flex items-center justify-between flex-1">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 ring-1 ring-primary/10">
+                <Package className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Controle de Produtos</h1>
+                <p className="text-sm text-muted-foreground">
+                  Gerencie seu estoque e produtos
+                </p>
+              </div>
+            </div>
+            <Button onClick={handleCreateProduct} className="gap-2">
+              <Plus className="w-4 h-4" />
+              Novo Produto
+            </Button>
+          </div>
         </header>
 
         <main className="flex-1 bg-background p-6">
@@ -92,11 +112,18 @@ const Inventory = () => {
             {/* Limit Alert */}
             <LimitAlert type="products" currentCount={products.length} action="adicionar" />
             
-            <InventoryHeader
-              onCreateProduct={handleCreateProduct}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
+            {/* Search */}
+            <div className="flex items-center space-x-4">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar produtos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
             
             <StatsCards products={products} />
             

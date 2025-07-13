@@ -26,12 +26,19 @@ const Appointments = () => {
         {/* Header */}
         <header className="flex items-center gap-4 border-b bg-background px-4 py-3">
           <div className="flex items-center justify-between flex-1">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-6 h-6 text-plush-600" />
-              <h1 className="text-2xl font-bold">Agendamentos</h1>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 ring-1 ring-primary/10">
+                <Calendar className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Agendamentos</h1>
+                <p className="text-sm text-muted-foreground">
+                  Gerencie agendamentos e configurações
+                </p>
+              </div>
             </div>
-            <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-plush-600 hover:bg-plush-700">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+              <Plus className="w-4 h-4" />
               Novo Agendamento
             </Button>
           </div>
