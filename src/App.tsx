@@ -6,8 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
-import { PWAInstallPopup } from "@/components/pwa/PWAInstallPopup";
-import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
+import { PWAProvider } from "@/components/pwa/PWAProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -186,15 +185,15 @@ const App = () => (
         <TooltipProvider>
           <SecurityProvider>
             <AuthProvider>
-              <Toaster />
-              <Sonner />
-               <BrowserRouter>
-                 <ScrollToTop />
-                 <AppContent />
-               </BrowserRouter>
-               <CookieConsent />
-               <PWAInstallPopup />
-               <PWAUpdatePrompt />
+              <PWAProvider>
+                <Toaster />
+                <Sonner />
+                 <BrowserRouter>
+                   <ScrollToTop />
+                   <AppContent />
+                 </BrowserRouter>
+                 <CookieConsent />
+              </PWAProvider>
             </AuthProvider>
           </SecurityProvider>
         </TooltipProvider>

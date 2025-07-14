@@ -20,8 +20,20 @@ export const InstallPrompt: React.FC = () => {
 
   const handleDismiss = () => {
     setDismissed(true);
-    localStorage.setItem('pwa-install-dismissed', 'true');
+    localStorage.setItem('pwa-install-dismissed', Date.now().toString());
   };
+
+  // Verificar se foi dispensado recentemente (menos de 7 dias)
+  React.useEffect(() => {
+    const dismissed = localStorage.getItem('pwa-install-dismissed');
+    if (dismissed) {
+      const dismissedTime = parseInt(dismissed);
+      const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+      if (dismissedTime > sevenDaysAgo) {
+        setDismissed(true);
+      }
+    }
+  }, []);
 
   return (
     <Card className="fixed bottom-4 right-4 z-50 w-80 bg-card/95 backdrop-blur-sm border-border/50 shadow-lg">
@@ -30,7 +42,7 @@ export const InstallPrompt: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
               <img 
-                src="/favicon.svg" 
+                src="/lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png" 
                 alt="Plushify Logo" 
                 className="w-5 h-5"
                 onError={(e) => {

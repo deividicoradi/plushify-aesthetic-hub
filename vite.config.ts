@@ -60,14 +60,64 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'robots.txt'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'robots.txt', 'lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png'],
+      manifest: {
+        name: 'Plushify - Plataforma para Profissionais de Estética',
+        short_name: 'Plushify',
+        description: 'Gerencie agendamentos, clientes, pagamentos, serviços, relatórios financeiros e programa de fidelidade',
+        theme_color: '#D65E9A',
+        background_color: '#ffffff',
+        display: 'standalone',
+        orientation: 'portrait-primary',
+        start_url: '/',
+        scope: '/',
+        lang: 'pt-BR',
+        categories: ['business', 'productivity', 'medical'],
+        icons: [
+          {
+            src: '/lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
+      },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,woff,ttf,eot}'],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
         runtimeCaching: [
+          // Bloquear domínios do Lovable
+          {
+            urlPattern: /^https:\/\/.*\.lovable\.dev\/.*/i,
+            handler: 'NetworkOnly',
+            options: {
+              networkTimeoutSeconds: 0.1,
+              cacheableResponse: {
+                statuses: [0] // Nunca cachear
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.lovableproject\.com\/.*/i,
+            handler: 'NetworkOnly',
+            options: {
+              networkTimeoutSeconds: 0.1,
+              cacheableResponse: {
+                statuses: [0] // Nunca cachear
+              }
+            }
+          },
           // API Cache Strategy
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
