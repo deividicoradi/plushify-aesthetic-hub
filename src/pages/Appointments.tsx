@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { AppointmentsList } from '@/components/appointments/AppointmentsList';
 import { CreateAppointmentDialog } from '@/components/appointments/CreateAppointmentDialog';
 import { AppointmentFiltersAdvanced, type AppointmentFilters } from '@/components/appointments/AppointmentFiltersAdvanced';
-import { OnlineScheduling } from '@/components/appointments/OnlineScheduling';
+
 import { WorkingHoursSetup } from '@/components/appointments/WorkingHoursSetup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LimitAlert } from '@/components/LimitAlert';
@@ -50,9 +50,8 @@ const Appointments = () => {
           <LimitAlert type="appointments" currentCount={appointments.length} action="criar" />
           
           <Tabs defaultValue="agenda" className="mt-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="agenda">Agenda</TabsTrigger>
-              <TabsTrigger value="online">Agendamento Online</TabsTrigger>
               <TabsTrigger value="config">Configurações</TabsTrigger>
             </TabsList>
             
@@ -80,10 +79,6 @@ const Appointments = () => {
               </div>
               
               <AppointmentsList searchQuery={searchQuery} filters={filters} />
-            </TabsContent>
-            
-            <TabsContent value="online" className="space-y-6">
-              <OnlineScheduling />
             </TabsContent>
             
             <TabsContent value="config" className="space-y-6">

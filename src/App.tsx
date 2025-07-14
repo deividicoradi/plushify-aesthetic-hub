@@ -35,6 +35,7 @@ import About from "./pages/About";
 import Status from "./pages/Status";
 import Updates from "./pages/Updates";
 import TeamManagement from "./pages/TeamManagement";
+import PublicBooking from "./pages/PublicBooking";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
@@ -69,6 +70,7 @@ const AppContent = () => {
       <Route path="/help" element={<Help />} />
       <Route path="/status" element={<Status />} />
       <Route path="/updates" element={<Updates />} />
+      <Route path="/agendar" element={<PublicBooking />} />
       <Route
         path="/dashboard"
         element={
