@@ -97,27 +97,6 @@ export default defineConfig(({ mode }) => ({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
         runtimeCaching: [
-          // Bloquear domínios do Lovable
-          {
-            urlPattern: /^https:\/\/.*\.lovable\.dev\/.*/i,
-            handler: 'NetworkOnly',
-            options: {
-              networkTimeoutSeconds: 0.1,
-              cacheableResponse: {
-                statuses: [0] // Nunca cachear
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/.*\.lovableproject\.com\/.*/i,
-            handler: 'NetworkOnly',
-            options: {
-              networkTimeoutSeconds: 0.1,
-              cacheableResponse: {
-                statuses: [0] // Nunca cachear
-              }
-            }
-          },
           // API Cache Strategy
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
