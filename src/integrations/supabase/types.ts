@@ -872,6 +872,18 @@ export type Database = {
           details: string
         }[]
       }
+      create_public_booking: {
+        Args: {
+          p_client_name: string
+          p_client_email: string
+          p_client_phone: string
+          p_service_id: string
+          p_appointment_date: string
+          p_appointment_time: string
+          p_notes?: string
+        }
+        Returns: string
+      }
       detect_sql_injection: {
         Args: { input_text: string }
         Returns: boolean
@@ -896,6 +908,24 @@ export type Database = {
           pending_payments: number
           total_expenses: number
           active_services: number
+        }[]
+      }
+      get_public_available_slots: {
+        Args: { p_service_id: string; p_date: string }
+        Returns: {
+          slot_time: string
+          is_available: boolean
+        }[]
+      }
+      get_public_services: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          description: string
+          price: number
+          duration: number
+          category: string
         }[]
       }
       get_user_plan: {
