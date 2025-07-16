@@ -5,11 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, User, CheckCircle, ArrowLeft, ArrowRight, Star, Heart } from "lucide-react";
+import { Calendar, Clock, User, CheckCircle, ArrowLeft, ArrowRight, Star, Heart, Sparkles, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format, addDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Link } from "react-router-dom";
 
 interface Service {
   id: string;
@@ -209,37 +211,94 @@ export default function PublicBooking() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      {/* Header Moderno */}
+      <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
+            {/* Logo e Brand */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
                 <Heart className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-primary">Plushify</h1>
-                <p className="text-xs text-muted-foreground">Agendamento Online</p>
+              <div className="flex flex-col">
+                <div className="flex items-center space-x-2">
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                    Plushify
+                  </h1>
+                  <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                </div>
+                <p className="text-xs text-muted-foreground font-medium">
+                  Agendamento Online
+                </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="flex space-x-1">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      step >= i ? 'bg-primary' : 'bg-muted'
-                    }`}
-                  />
-                ))}
+
+            {/* Ações do Header */}
+            <div className="flex items-center space-x-4">
+              {/* Progresso do Agendamento */}
+              <div className="hidden sm:flex items-center space-x-3">
+                <div className="flex space-x-1.5">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                        step >= i 
+                          ? 'bg-primary shadow-sm' 
+                          : step === i - 1 
+                            ? 'bg-primary/40 animate-pulse' 
+                            : 'bg-muted'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">
+                  {step}/4
+                </span>
               </div>
-              <span className="text-sm text-muted-foreground ml-2">
-                {step}/4
-              </span>
+
+              {/* Botões de Ação */}
+              <div className="flex items-center space-x-2">
+                {/* Botão Home */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="h-9 w-9 p-0 hover:bg-accent hidden sm:flex"
+                >
+                  <Link to="/">
+                    <Home className="h-4 w-4" />
+                    <span className="sr-only">Início</span>
+                  </Link>
+                </Button>
+
+                {/* Toggle de Tema */}
+                <ThemeToggle />
+              </div>
             </div>
           </div>
+
+          {/* Progresso Mobile */}
+          <div className="sm:hidden mt-3 flex items-center justify-center space-x-2">
+            <div className="flex space-x-1.5">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    step >= i 
+                      ? 'bg-primary shadow-sm' 
+                      : step === i - 1 
+                        ? 'bg-primary/40 animate-pulse' 
+                        : 'bg-muted'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-sm font-medium text-muted-foreground ml-3">
+              Etapa {step} de 4
+            </span>
+          </div>
         </div>
-      </div>
+      </header>
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto">
