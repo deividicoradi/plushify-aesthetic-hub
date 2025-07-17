@@ -36,6 +36,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
     icon: Clock,
     features: [
       'Apenas 3 dias de teste',
+      '1 usuário',
       'Até 5 clientes',
       'Até 3 agendamentos',
       'Até 2 serviços',
@@ -67,11 +68,13 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
     subtitle: 'Ideal para freelancers e pequenos negócios',
     icon: Zap,
     features: [
+      'Até 2 usuários ativos',
       'Clientes ilimitados',
       'Agendamentos ilimitados',
       'Até 20 serviços',
       'Estoque até 100 produtos',
       'Gestão financeira básica',
+      'Gestão de equipe simples',
       'Controle de caixa',
       'Relatórios básicos',
       'Métodos de pagamento múltiplos',
@@ -82,7 +85,6 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'SEM analytics avançados',
       'SEM exportação de relatórios',
       'SEM pagamentos recorrentes',
-      'SEM gestão de equipe',
       'SEM backup automático'
     ],
     current: currentPlan === 'professional'
@@ -102,6 +104,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
     premium: true,
     mostComplete: true,
     features: [
+      'Até 5 usuários com acesso simultâneo',
       'TUDO do plano Professional',
       'Serviços e produtos ilimitados',
       'Analytics avançados e preditivos',

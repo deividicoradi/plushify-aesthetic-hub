@@ -7,6 +7,7 @@ interface PlanLimits {
   appointments: number;
   products: number;
   services: number;
+  activeUsers: number; // Novo limite de usuários ativos
   hasFinancialManagement: boolean;
   hasAdvancedReports: boolean;
   hasAdvancedAnalytics: boolean;
@@ -28,6 +29,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     appointments: 3,
     products: 10,
     services: 2,
+    activeUsers: 1, // Trial permite apenas 1 usuário
     hasFinancialManagement: false,
     hasAdvancedReports: false,
     hasAdvancedAnalytics: false,
@@ -47,10 +49,11 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     appointments: -1, // unlimited
     products: 100, // limited to 100
     services: 20, // limited to 20
+    activeUsers: 2, // Professional permite até 2 usuários
     hasFinancialManagement: true,
     hasAdvancedReports: false,
     hasAdvancedAnalytics: false,
-    hasTeamManagement: false,
+    hasTeamManagement: true, // Habilitar gestão de equipe para Professional
     hasAutomaticBackup: false,
     hasPrioritySupport: true,
     has24_7Support: false,
@@ -66,6 +69,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     appointments: -1, // unlimited
     products: -1, // unlimited
     services: -1, // unlimited
+    activeUsers: 5, // Enterprise permite até 5 usuários
     hasFinancialManagement: true,
     hasAdvancedReports: true,
     hasAdvancedAnalytics: true,
@@ -97,20 +101,29 @@ export const usePlanLimits = () => {
   // Se for usuário de teste, usar limites do plano premium
   const limits = isTestUser ? PLAN_LIMITS.premium : PLAN_LIMITS[currentPlan];
   
-  const isLimited = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>) => {
+  const isLimited = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services' | 'activeUsers'>) => {
     if (isTestUser) return false; // Usuário de teste não tem limites
     return limits[type] !== -1;
   };
   
-  const getLimit = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>) => {
+  const getLimit = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services' | 'activeUsers'>) => {
     if (isTestUser) return -1; // Usuário de teste tem limite infinito
     return limits[type];
   };
   
-  const hasReachedLimit = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>, currentCount: number) => {
+  const hasReachedLimit = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services' | 'activeUsers'>, currentCount: number) => {
     if (isTestUser) return false; // Usuário de teste nunca atinge limite
     const limit = limits[type];
     return limit !== -1 && currentCount >= limit;
+  };
+
+  const getUserLimitsInfo = () => {
+    const activeUsersLimit = getLimit('activeUsers');
+    return {
+      activeUsersLimit,
+      canAddUsers: activeUsersLimit === -1 || !isLimited('activeUsers'),
+      upgradeMessage: `Você atingiu o número máximo de usuários permitidos pelo seu plano. Faça upgrade para adicionar mais usuários.`
+    };
   };
 
   const hasFeature = (feature: keyof Omit<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>) => {
@@ -125,6 +138,7 @@ export const usePlanLimits = () => {
     getLimit,
     hasReachedLimit,
     hasFeature,
+    getUserLimitsInfo,
     isTestUser, // Expor se é usuário de teste
   };
 };

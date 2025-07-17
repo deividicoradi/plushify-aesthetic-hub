@@ -61,7 +61,7 @@ export const FeatureGuard = ({
       }
       // Check by plan feature
       else if (planFeature) {
-        access = hasFeature(planFeature as any);
+        access = Boolean(hasFeature(planFeature as any));
       }
       // Check by Supabase feature
       else if (feature) {

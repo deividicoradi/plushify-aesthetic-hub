@@ -4,18 +4,31 @@ import { Users, UserPlus, Shield } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTeamMembers, TeamMember } from '@/hooks/useTeamMembers';
+import { useTeamLimits } from '@/hooks/useTeamLimits';
 import { TeamMemberCard } from '@/components/team/TeamMemberCard';
 import { TeamMemberForm } from '@/components/team/TeamMemberForm';
+import { UserLimitDisplay } from '@/components/team/UserLimitDisplay';
+import { UserLimitModal } from '@/components/team/UserLimitModal';
 import { useToast } from '@/hooks/use-toast';
 
 export const TeamManagement = () => {
   const { teamMembers, loading, createTeamMember, updateTeamMember, deleteTeamMember } = useTeamMembers();
+  const { checkUserLimit, getUserLimitInfo } = useTeamLimits();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const { toast } = useToast();
+  
+  const limitInfo = getUserLimitInfo();
 
   const handleAddMember = () => {
+    // Verificar se pode adicionar mais usuários
+    if (!limitInfo.canAdd) {
+      setShowLimitModal(true);
+      return;
+    }
+    
     setEditingMember(null);
     setIsFormOpen(true);
   };
@@ -36,11 +49,21 @@ export const TeamManagement = () => {
   const handleFormSubmit = async (data: any) => {
     try {
       setFormLoading(true);
+      
+      // Se está criando um novo membro, verificar limites novamente
+      if (!editingMember && !checkUserLimit()) {
+        setIsFormOpen(false);
+        setShowLimitModal(true);
+        return;
+      }
+      
       if (editingMember) {
         await updateTeamMember(editingMember.id, data);
       } else {
         await createTeamMember(data);
       }
+      
+      setIsFormOpen(false);
     } catch (error) {
       console.error('Erro ao salvar membro:', error);
       throw error;
@@ -62,6 +85,9 @@ export const TeamManagement = () => {
 
   return (
     <div className="space-y-6">
+      {/* Display de limite de usuários */}
+      <UserLimitDisplay variant="inline" />
+      
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -69,7 +95,10 @@ export const TeamManagement = () => {
               <Users className="w-5 h-5" />
               Gestão de Equipe
             </CardTitle>
-            <Button onClick={handleAddMember}>
+            <Button 
+              onClick={handleAddMember}
+              disabled={!limitInfo.canAdd}
+            >
               <UserPlus className="w-4 h-4 mr-2" />
               Adicionar Membro
             </Button>
@@ -109,6 +138,12 @@ export const TeamManagement = () => {
         member={editingMember}
         onSubmit={handleFormSubmit}
         loading={formLoading}
+      />
+
+      <UserLimitModal
+        open={showLimitModal}
+        onOpenChange={setShowLimitModal}
+        onCancel={() => setShowLimitModal(false)}
       />
     </div>
   );

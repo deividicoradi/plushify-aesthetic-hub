@@ -58,11 +58,12 @@ export const useTeamMembers = () => {
     }
   };
 
-  const createTeamMember = async (memberData: TeamMemberInput) => {
+  const createTeamMember = async (memberData: TeamMemberInput, skipLimitCheck = false) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
+      // Verificação de limite será feita no componente usando useTeamLimits
       const { data, error } = await supabase
         .from('team_members')
         .insert({
