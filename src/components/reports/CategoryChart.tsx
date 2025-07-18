@@ -8,7 +8,18 @@ interface CategoryChartProps {
   loading?: boolean;
 }
 
-const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', '#10b981', '#3b82f6'];
+const COLORS = [
+  'hsl(var(--chart-1))', 
+  'hsl(var(--chart-2))', 
+  'hsl(var(--chart-3))', 
+  'hsl(var(--chart-4))', 
+  'hsl(var(--chart-5))',
+  'hsl(142 71% 45%)', // green
+  'hsl(217 91% 60%)', // blue
+  'hsl(32 95% 44%)',  // orange
+  'hsl(47 96% 53%)',  // yellow
+  'hsl(288 84% 56%)'  // purple
+];
 
 export const CategoryChart = ({ data, loading = false }: CategoryChartProps) => {
   if (loading) {
