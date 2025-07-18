@@ -849,6 +849,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_add_team_member: {
+        Args: { user_uuid?: string }
+        Returns: boolean
+      }
       check_appointment_availability: {
         Args: {
           p_user_id: string
@@ -910,6 +914,13 @@ export type Database = {
           active_services: number
         }[]
       }
+      get_plan_limits: {
+        Args: { user_uuid?: string }
+        Returns: {
+          active_users_limit: number
+          plan_name: string
+        }[]
+      }
       get_public_available_slots: {
         Args: { p_service_id: string; p_date: string }
         Returns: {
@@ -931,6 +942,15 @@ export type Database = {
       get_user_plan: {
         Args: { user_uuid?: string }
         Returns: Database["public"]["Enums"]["plan_type"]
+      }
+      get_user_usage_stats: {
+        Args: { user_uuid?: string }
+        Returns: {
+          current_active_users: number
+          max_users_allowed: number
+          can_add_more: boolean
+          plan_name: string
+        }[]
       }
       has_feature_access: {
         Args: { feature_name: string }
