@@ -74,4 +74,19 @@
     background-image: radial-gradient(circle, rgba(0,0,0,0.1) 1px, transparent 1px);
     background-size: 20px 20px;
   }
+  
+  /* Prevent horizontal overflow on mobile */
+  .overflow-x-hidden {
+    overflow-x: hidden;
+  }
+  
+  /* Mobile-first responsive containers */
+  .mobile-container {
+    @apply w-full px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Touch-friendly buttons */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
 }

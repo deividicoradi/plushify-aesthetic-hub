@@ -46,7 +46,7 @@ const DashboardSidebar = () => {
 
   return (
     <aside 
-      className="fixed top-0 left-0 z-30 w-64 h-screen bg-background border-r border-border shadow-sm"
+      className="fixed top-0 left-0 z-30 w-64 h-screen bg-background border-r border-border shadow-sm hidden md:block"
       role="navigation"
       aria-label="Menu principal"
     >

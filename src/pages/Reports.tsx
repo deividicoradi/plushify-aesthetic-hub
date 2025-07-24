@@ -1,6 +1,7 @@
 
 import React from 'react';
-import DashboardSidebar from '@/components/layout/DashboardSidebar';
+import { BarChart3 } from 'lucide-react';
+import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { FeatureGuard } from '@/components/FeatureGuard';
 import { useReportsData } from '@/hooks/useReportsData';
 import { useNavigate } from 'react-router-dom';
@@ -24,18 +25,11 @@ const Reports = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardSidebar />
-      <div className="ml-64 min-h-screen flex flex-col">
-        {/* Header */}
-        <header className="flex items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 sticky top-0 z-50">
-          <div className="flex-1">
-            <ReportsHeader onRefresh={refetch} />
-          </div>
-        </header>
-
-        {/* Main content */}
-        <main className="flex-1 p-6 bg-background space-y-8 overflow-y-auto">
+    <ResponsiveLayout
+      title="Relatórios"
+      subtitle="Análise detalhada do seu negócio"
+      icon={BarChart3}
+    >
           <FeatureGuard 
             planFeature="hasReportsDetailed"
             showUpgradePrompt={true}
@@ -72,9 +66,7 @@ const Reports = () => {
               </FeatureGuard>
             </div>
           </FeatureGuard>
-        </main>
-      </div>
-    </div>
+    </ResponsiveLayout>
   );
 };
 
