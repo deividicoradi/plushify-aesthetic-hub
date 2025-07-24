@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirme sua Reautenticação - Plushify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 0 0% 0%;
+            --card: 0 0% 100%;
+            --card-foreground: 0 0% 0%;
+            --primary: 330 81% 60%;
+            --primary-foreground: 0 0% 100%;
+            --secondary: 330 20% 96%;
+            --secondary-foreground: 0 0% 0%;
+            --muted: 330 20% 96%;
+            --muted-foreground: 0 0% 45%;
+            --border: 330 20% 91%;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: 0 0% 0%;
+                --foreground: 0 0% 100%;
+                --card: 0 0% 5%;
+                --card-foreground: 0 0% 100%;
+                --secondary: 0 0% 10%;
+                --secondary-foreground: 0 0% 100%;
+                --muted: 0 0% 10%;
+                --muted-foreground: 0 0% 65%;
+                --border: 0 0% 15%;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid hsl(var(--border));
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        .logo svg {
+            width: 200px;
+            height: 60px;
+        }
+
+        .content {
+            flex: 1;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            color: hsl(var(--primary));
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .email {
+            color: hsl(var(--primary));
+            font-weight: 600;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(320 65% 55%));
+            color: hsl(var(--primary-foreground));
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
+            margin-bottom: 32px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px hsl(var(--primary) / 0.4);
+        }
+
+        .security-note {
+            background-color: hsl(var(--secondary));
+            border: 1px solid hsl(var(--border));
+            border-radius: 12px;
+            padding: 20px;
+            margin: 32px 0;
+            font-size: 14px;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .security-note strong {
+            color: hsl(var(--foreground));
+        }
+
+        .security-tips {
+            text-align: left;
+            margin: 24px 0;
+        }
+
+        .security-tips ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .security-tips li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .security-tips li::before {
+            content: '🔒';
+            position: absolute;
+            left: 0;
+            top: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px 20px;
+            border-top: 1px solid hsl(var(--border));
+            margin-top: 40px;
+            color: hsl(var(--muted-foreground));
+            font-size: 14px;
+        }
+
+        .footer-brand {
+            font-weight: 600;
+            color: hsl(var(--primary));
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .title {
+                font-size: 28px;
+            }
+            
+            .subtitle {
+                font-size: 16px;
+            }
+            
+            .logo svg {
+                width: 160px;
+                height: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#8B5CF6" />
+                            <stop offset="50%" stop-color="#EC4899" />
+                            <stop offset="100%" stop-color="#3B82F6" />
+                        </linearGradient>
+                        <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#EC4899" />
+                            <stop offset="100%" stop-color="#BE185D" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="30" cy="30" r="25" fill="url(#circleGradient)"/>
+                    <circle cx="30" cy="30" r="12" fill="white"/>
+                    <circle cx="30" cy="30" r="8" fill="url(#circleGradient)"/>
+                    <text x="70" y="38" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-size="28" font-weight="600" fill="url(#textGradient)">
+                        Plushify
+                    </text>
+                </svg>
+            </div>
+        </header>
+
+        <main class="content">
+            <h1 class="title">Confirme sua Reautenticação</h1>
+            <p class="subtitle">Segurança em primeiro lugar</p>
+            <p class="description">
+                Para manter sua conta segura, precisamos confirmar sua identidade. 
+                Clique no botão abaixo para confirmar sua reautenticação e continuar usando a plataforma Plushify.
+            </p>
+
+            <a href="{{ .ConfirmationURL }}" class="cta-button">
+                Confirmar Reautenticação
+            </a>
+
+            <div class="security-note">
+                <strong>🔐 Por que precisamos disso?</strong>
+                <div class="security-tips">
+                    <ul>
+                        <li>Protegemos seus dados pessoais e de clientes</li>
+                        <li>Garantimos acesso seguro ao sistema financeiro</li>
+                        <li>Prevenimos acessos não autorizados</li>
+                        <li>Mantemos a conformidade com padrões de segurança</li>
+                        <li>Asseguramos a integridade dos seus relatórios</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p class="description">
+                Caso o botão não funcione, copie e cole o seguinte link no seu navegador:<br>
+                <a href="{{ .ConfirmationURL }}" style="color: hsl(var(--primary)); word-break: break-all;">{{ .ConfirmationURL }}</a>
+            </p>
+
+            <p class="description" style="font-size: 14px; margin-top: 32px;">
+                Se você não solicitou esta reautenticação, entre em contato conosco imediatamente. 
+                Este link expirará em breve por motivos de segurança.
+            </p>
+        </main>
+
+        <footer class="footer">
+            <p>© 2024 <span class="footer-brand">Plushify</span>. Todos os direitos reservados.</p>
+            <p>Este é um e-mail automático, não é necessário responder.</p>
+        </footer>
+    </div>
+</body>
+</html>
