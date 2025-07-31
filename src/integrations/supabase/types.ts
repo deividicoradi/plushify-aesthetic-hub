@@ -811,6 +811,128 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_contatos: {
+        Row: {
+          atualizado_em: string
+          cliente_id: string | null
+          criado_em: string
+          id: string
+          nome: string
+          telefone: string
+          ultima_interacao: string | null
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          cliente_id?: string | null
+          criado_em?: string
+          id?: string
+          nome: string
+          telefone: string
+          ultima_interacao?: string | null
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          cliente_id?: string | null
+          criado_em?: string
+          id?: string
+          nome?: string
+          telefone?: string
+          ultima_interacao?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_whatsapp_contatos_cliente_id"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_mensagens: {
+        Row: {
+          contato_id: string
+          conteudo: string
+          criado_em: string
+          direcao: string
+          horario: string
+          id: string
+          sessao_id: string
+          status: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          contato_id: string
+          conteudo: string
+          criado_em?: string
+          direcao: string
+          horario?: string
+          id?: string
+          sessao_id: string
+          status?: string
+          tipo?: string
+          user_id: string
+        }
+        Update: {
+          contato_id?: string
+          conteudo?: string
+          criado_em?: string
+          direcao?: string
+          horario?: string
+          id?: string
+          sessao_id?: string
+          status?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_whatsapp_mensagens_contato_id"
+            columns: ["contato_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_contatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_whatsapp_mensagens_sessao_id"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_sessoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_sessoes: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          id: string
+          sessao_serializada: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          sessao_serializada?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          sessao_serializada?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       working_hours: {
         Row: {
           created_at: string

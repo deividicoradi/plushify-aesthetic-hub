@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
 import DashboardSidebar from '@/components/layout/DashboardSidebar';
+import { WhatsAppSettings } from '@/components/whatsapp/WhatsAppSettings';
 
 const Settings = () => {
   const { user } = useAuth();
@@ -52,7 +53,7 @@ const Settings = () => {
         <main className="flex-1 p-6">
           <div className="max-w-4xl">
             <Tabs defaultValue="profile" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+              <TabsList className="grid w-full grid-cols-3 lg:w-[600px]">
                 <TabsTrigger value="profile" className="flex items-center gap-2">
                   <User className="w-4 h-4" />
                   Perfil
@@ -60,6 +61,10 @@ const Settings = () => {
                 <TabsTrigger value="account" className="flex items-center gap-2">
                   <Shield className="w-4 h-4" />
                   Conta
+                </TabsTrigger>
+                <TabsTrigger value="whatsapp" className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" />
+                  WhatsApp
                 </TabsTrigger>
               </TabsList>
               
@@ -177,6 +182,10 @@ const Settings = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="whatsapp" className="space-y-6">
+                <WhatsAppSettings />
               </TabsContent>
             </Tabs>
           </div>

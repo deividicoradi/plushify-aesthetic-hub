@@ -1,0 +1,274 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface WhatsAppSession {
+  id: string;
+  status: string;
+  qrCode?: string;
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase environment variables not found');
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Verificar autenticação
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response('Authorization header missing', { status: 401, headers: corsHeaders });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response('Invalid authentication', { status: 401, headers: corsHeaders });
+    }
+
+    const { pathname } = new URL(req.url);
+    const method = req.method;
+
+    // Rotas da API
+    switch (true) {
+      case pathname === '/whatsapp-manager' && method === 'GET':
+        return await getSessionStatus(supabase, user.id);
+        
+      case pathname === '/whatsapp-manager/connect' && method === 'POST':
+        return await initiateConnection(supabase, user.id);
+        
+      case pathname === '/whatsapp-manager/disconnect' && method === 'POST':
+        return await disconnectSession(supabase, user.id);
+        
+      case pathname === '/whatsapp-manager/send-message' && method === 'POST':
+        return await sendMessage(supabase, user.id, req);
+        
+      case pathname === '/whatsapp-manager/messages' && method === 'GET':
+        return await getMessages(supabase, user.id, req);
+        
+      default:
+        return new Response('Not found', { status: 404, headers: corsHeaders });
+    }
+  } catch (error) {
+    console.error('WhatsApp Manager Error:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
+
+async function getSessionStatus(supabase: any, userId: string) {
+  const { data: session } = await supabase
+    .from('whatsapp_sessoes')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  return new Response(
+    JSON.stringify({ 
+      status: session?.status || 'desconectado',
+      sessionId: session?.id || null 
+    }), 
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+async function initiateConnection(supabase: any, userId: string) {
+  // Verificar se já existe uma sessão ativa
+  const { data: existingSession } = await supabase
+    .from('whatsapp_sessoes')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', 'conectado')
+    .single();
+
+  if (existingSession) {
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: 'Sessão já conectada',
+        sessionId: existingSession.id 
+      }), 
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Criar nova sessão
+  const { data: newSession, error } = await supabase
+    .from('whatsapp_sessoes')
+    .insert({
+      user_id: userId,
+      status: 'conectando'
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  // Simular geração de QR Code (em implementação real seria com whatsapp-web.js)
+  const qrCode = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`;
+  
+  return new Response(
+    JSON.stringify({ 
+      success: true, 
+      qrCode,
+      sessionId: newSession.id,
+      message: 'QR Code gerado, escaneie com seu WhatsApp' 
+    }), 
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+async function disconnectSession(supabase: any, userId: string) {
+  const { error } = await supabase
+    .from('whatsapp_sessoes')
+    .update({ status: 'desconectado' })
+    .eq('user_id', userId);
+
+  if (error) {
+    throw error;
+  }
+
+  return new Response(
+    JSON.stringify({ success: true, message: 'Sessão desconectada' }), 
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+async function sendMessage(supabase: any, userId: string, req: Request) {
+  const { phone, message, contactName } = await req.json();
+
+  if (!phone || !message) {
+    return new Response(
+      JSON.stringify({ error: 'Telefone e mensagem são obrigatórios' }), 
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Buscar ou criar contato
+  let { data: contact } = await supabase
+    .from('whatsapp_contatos')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('telefone', phone)
+    .single();
+
+  if (!contact) {
+    const { data: newContact, error: contactError } = await supabase
+      .from('whatsapp_contatos')
+      .insert({
+        user_id: userId,
+        nome: contactName || phone,
+        telefone: phone,
+        ultima_interacao: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (contactError) {
+      throw contactError;
+    }
+    contact = newContact;
+  }
+
+  // Buscar sessão ativa
+  const { data: session } = await supabase
+    .from('whatsapp_sessoes')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', 'conectado')
+    .single();
+
+  if (!session) {
+    return new Response(
+      JSON.stringify({ error: 'WhatsApp não conectado' }), 
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Salvar mensagem no banco
+  const { data: savedMessage, error: messageError } = await supabase
+    .from('whatsapp_mensagens')
+    .insert({
+      user_id: userId,
+      contato_id: contact.id,
+      sessao_id: session.id,
+      direcao: 'enviada',
+      conteudo: message,
+      tipo: 'texto',
+      status: 'enviada'
+    })
+    .select()
+    .single();
+
+  if (messageError) {
+    throw messageError;
+  }
+
+  // Atualizar última interação do contato
+  await supabase
+    .from('whatsapp_contatos')
+    .update({ ultima_interacao: new Date().toISOString() })
+    .eq('id', contact.id);
+
+  return new Response(
+    JSON.stringify({ 
+      success: true, 
+      message: 'Mensagem enviada com sucesso',
+      messageId: savedMessage.id 
+    }), 
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+async function getMessages(supabase: any, userId: string, req: Request) {
+  const url = new URL(req.url);
+  const contactId = url.searchParams.get('contactId');
+  const limit = parseInt(url.searchParams.get('limit') || '50');
+
+  let query = supabase
+    .from('whatsapp_mensagens')
+    .select(`
+      *,
+      whatsapp_contatos (
+        id,
+        nome,
+        telefone
+      )
+    `)
+    .eq('user_id', userId)
+    .order('horario', { ascending: false })
+    .limit(limit);
+
+  if (contactId) {
+    query = query.eq('contato_id', contactId);
+  }
+
+  const { data: messages, error } = await query;
+
+  if (error) {
+    throw error;
+  }
+
+  return new Response(
+    JSON.stringify({ messages: messages || [] }), 
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
