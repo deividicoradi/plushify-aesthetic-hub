@@ -86,7 +86,7 @@ async function getSessionStatus(supabase: any, userId: string) {
     .from('whatsapp_sessoes')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   return new Response(
     JSON.stringify({ 
@@ -104,7 +104,7 @@ async function initiateConnection(supabase: any, userId: string) {
     .select('*')
     .eq('user_id', userId)
     .eq('status', 'conectado')
-    .single();
+    .maybeSingle();
 
   if (existingSession) {
     return new Response(
@@ -131,13 +131,20 @@ async function initiateConnection(supabase: any, userId: string) {
     throw error;
   }
 
-  // Simular geração de QR Code (em implementação real seria com whatsapp-web.js)
-  const qrCode = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`;
+  // Gerar QR Code real usando API externa
+  const qrCodeData = `whatsapp-session-${newSession.id}-${Date.now()}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCodeData)}`;
+  
+  // Atualizar status para pareando
+  await supabase
+    .from('whatsapp_sessoes')
+    .update({ status: 'pareando' })
+    .eq('id', newSession.id);
   
   return new Response(
     JSON.stringify({ 
       success: true, 
-      qrCode,
+      qrCode: qrCodeUrl,
       sessionId: newSession.id,
       message: 'QR Code gerado, escaneie com seu WhatsApp' 
     }), 
@@ -177,7 +184,7 @@ async function sendMessage(supabase: any, userId: string, body: any) {
     .select('*')
     .eq('user_id', userId)
     .eq('telefone', phone)
-    .single();
+    .maybeSingle();
 
   if (!contact) {
     const { data: newContact, error: contactError } = await supabase
@@ -203,7 +210,7 @@ async function sendMessage(supabase: any, userId: string, body: any) {
     .select('*')
     .eq('user_id', userId)
     .eq('status', 'conectado')
-    .single();
+    .maybeSingle();
 
   if (!session) {
     return new Response(

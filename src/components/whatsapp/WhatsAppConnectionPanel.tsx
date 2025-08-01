@@ -24,11 +24,21 @@ export const WhatsAppConnectionPanel: React.FC = () => {
           </CardHeader>
           <CardContent className="text-center">
             <div className="bg-white p-4 rounded-lg mb-4">
-              <img 
-                src={session.qrCode} 
-                alt="QR Code WhatsApp" 
-                className="w-full h-auto max-w-[200px] mx-auto"
-              />
+              {session.qrCode ? (
+                <img 
+                  src={session.qrCode} 
+                  alt="QR Code WhatsApp" 
+                  className="w-full h-auto max-w-[200px] mx-auto"
+                  onError={(e) => {
+                    console.error('Erro ao carregar QR Code:', session.qrCode);
+                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5YTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkVycm8gYW8gY2FycmVnYXIgUVIgQ29kZTwvdGV4dD48L3N2Zz4=';
+                  }}
+                />
+              ) : (
+                <div className="w-[200px] h-[200px] mx-auto bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-500 text-sm">Gerando QR Code...</p>
+                </div>
+              )}
             </div>
             
             <div className="space-y-2 text-sm text-muted-foreground">
