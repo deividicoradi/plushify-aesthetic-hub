@@ -39,9 +39,7 @@ export const useWhatsApp = () => {
 
   const getSessionStatus = useCallback(async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        method: 'GET'
-      });
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager');
 
       if (error) throw error;
 
@@ -58,8 +56,8 @@ export const useWhatsApp = () => {
   const connectWhatsApp = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager/connect', {
-        method: 'POST'
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+        body: { action: 'connect' }
       });
 
       if (error) throw error;
@@ -101,8 +99,8 @@ export const useWhatsApp = () => {
   const disconnectWhatsApp = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager/disconnect', {
-        method: 'POST'
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+        body: { action: 'disconnect' }
       });
 
       if (error) throw error;
@@ -131,9 +129,9 @@ export const useWhatsApp = () => {
 
   const sendMessage = useCallback(async (phone: string, message: string, contactName?: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager/send-message', {
-        method: 'POST',
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
         body: {
+          action: 'send-message',
           phone,
           message,
           contactName
@@ -168,9 +166,7 @@ export const useWhatsApp = () => {
       if (contactId) params.append('contactId', contactId);
       params.append('limit', '50');
 
-      const { data, error } = await supabase.functions.invoke(`whatsapp-manager/messages?${params}`, {
-        method: 'GET'
-      });
+      const { data, error } = await supabase.functions.invoke(`whatsapp-manager/messages?${params}`);
 
       if (error) throw error;
 

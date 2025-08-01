@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// WhatsApp Web.js seria usado em um ambiente Node.js real
+// Para demonstração, vamos simular a funcionalidade
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -43,26 +46,32 @@ serve(async (req) => {
     const { pathname } = new URL(req.url);
     const method = req.method;
 
-    // Rotas da API
-    switch (true) {
-      case pathname === '/whatsapp-manager' && method === 'GET':
-        return await getSessionStatus(supabase, user.id);
-        
-      case pathname === '/whatsapp-manager/connect' && method === 'POST':
-        return await initiateConnection(supabase, user.id);
-        
-      case pathname === '/whatsapp-manager/disconnect' && method === 'POST':
-        return await disconnectSession(supabase, user.id);
-        
-      case pathname === '/whatsapp-manager/send-message' && method === 'POST':
-        return await sendMessage(supabase, user.id, req);
-        
-      case pathname === '/whatsapp-manager/messages' && method === 'GET':
-        return await getMessages(supabase, user.id, req);
-        
-      default:
-        return new Response('Not found', { status: 404, headers: corsHeaders });
+    // Rotas da API baseadas no método e parâmetros
+    if (method === 'GET' && pathname === '/whatsapp-manager') {
+      return await getSessionStatus(supabase, user.id);
     }
+    
+    if (method === 'POST' && pathname === '/whatsapp-manager') {
+      const body = await req.json();
+      const { action } = body;
+      
+      switch (action) {
+        case 'connect':
+          return await initiateConnection(supabase, user.id);
+        case 'disconnect':
+          return await disconnectSession(supabase, user.id);
+        case 'send-message':
+          return await sendMessage(supabase, user.id, body);
+        default:
+          return new Response('Invalid action', { status: 400, headers: corsHeaders });
+      }
+    }
+    
+    if (method === 'GET' && pathname.startsWith('/whatsapp-manager/messages')) {
+      return await getMessages(supabase, user.id, req);
+    }
+    
+    return new Response('Not found', { status: 404, headers: corsHeaders });
   } catch (error) {
     console.error('WhatsApp Manager Error:', error);
     return new Response(
@@ -152,8 +161,8 @@ async function disconnectSession(supabase: any, userId: string) {
   );
 }
 
-async function sendMessage(supabase: any, userId: string, req: Request) {
-  const { phone, message, contactName } = await req.json();
+async function sendMessage(supabase: any, userId: string, body: any) {
+  const { phone, message, contactName } = body;
 
   if (!phone || !message) {
     return new Response(
