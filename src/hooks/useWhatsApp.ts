@@ -39,7 +39,9 @@ export const useWhatsApp = () => {
 
   const getSessionStatus = useCallback(async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager');
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+        method: 'GET'
+      });
 
       if (error) throw error;
 
@@ -62,39 +64,53 @@ export const useWhatsApp = () => {
 
       if (error) throw error;
 
-      if (data.qrCode) {
-        setSession({
-          id: data.sessionId,
-          status: 'pareando',
-          qrCode: data.qrCode
-        });
-        
-        toast({
-          title: "QR Code Gerado",
-          description: "Escaneie o QR Code com seu WhatsApp para conectar"
-        });
+      if (data?.success) {
+        if (data.qrCode) {
+          setSession({
+            id: data.sessionId,
+            status: 'pareando',
+            qrCode: data.qrCode
+          });
+          
+          toast({
+            title: "QR Code Gerado",
+            description: data.message || "Escaneie o QR Code com seu WhatsApp para conectar"
+          });
+          
+          // Verificar status periodicamente até conectar
+          const checkStatus = setInterval(async () => {
+            await getSessionStatus();
+          }, 5000);
+          
+          // Limpar interval após 2 minutos
+          setTimeout(() => {
+            clearInterval(checkStatus);
+          }, 120000);
+        } else {
+          setSession({
+            id: data.sessionId,
+            status: 'conectado'
+          });
+          
+          toast({
+            title: "WhatsApp Conectado",
+            description: data.message || "Sessão já estava ativa"
+          });
+        }
       } else {
-        setSession({
-          id: data.sessionId,
-          status: 'conectado'
-        });
-        
-        toast({
-          title: "WhatsApp Conectado",
-          description: "Sessão já estava ativa"
-        });
+        throw new Error(data?.error || 'Falha ao conectar');
       }
     } catch (error) {
       console.error('Erro ao conectar WhatsApp:', error);
       toast({
         title: "Erro",
-        description: "Falha ao conectar com WhatsApp",
+        description: "Falha ao conectar com WhatsApp: " + (error as Error).message,
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, getSessionStatus]);
 
   const disconnectWhatsApp = useCallback(async () => {
     setLoading(true);

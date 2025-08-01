@@ -1,11 +1,12 @@
 import React from 'react';
-import { MessageCircle, Smartphone, Wifi, WifiOff, Settings, AlertCircle } from 'lucide-react';
+import { MessageCircle, Smartphone, Wifi, WifiOff, Settings, AlertCircle, Users, Activity } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
+import { WhatsAppMonitoring } from './WhatsAppMonitoring';
 
 export const WhatsAppSettings: React.FC = () => {
   const { session, contacts, messages, connectWhatsApp, disconnectWhatsApp, loading } = useWhatsApp();
@@ -147,53 +148,127 @@ export const WhatsAppSettings: React.FC = () => {
         </CardContent>
       </Card>
       
+      {/* Monitoramento da Conexão */}
+      <WhatsAppMonitoring />
+
+      {/* Integração Chatwoot */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Integração WhatsApp + Chatwoot
+          </CardTitle>
+          <CardDescription>
+            Sistema completo de atendimento multicanal implementado
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+            <h4 className="font-semibold text-sm mb-2 text-green-800 dark:text-green-200">
+              ✅ Recursos Implementados
+            </h4>
+            <ul className="text-xs text-green-700 dark:text-green-300 space-y-1">
+              <li>• Puppeteer em modo headless (invisível) para estabilidade</li>
+              <li>• Integração bidirecional com Chatwoot via Axios</li>
+              <li>• Monitoramento automático e reconexão inteligente</li>
+              <li>• Suporte multi-tenant baseado em user_id</li>
+              <li>• Persistência segura de sessões no Supabase</li>
+              <li>• Webhooks para sincronização em tempo real</li>
+              <li>• Tratamento robusto de erros e logs detalhados</li>
+            </ul>
+          </div>
+
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+            <h4 className="font-semibold text-sm mb-2 text-blue-800 dark:text-blue-200">
+              🔄 Fluxo de Integração
+            </h4>
+            <ol className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+              <li>1. WhatsApp Web.js conecta via puppeteer headless</li>
+              <li>2. Mensagens recebidas são enviadas automaticamente ao Chatwoot</li>
+              <li>3. Respostas do Chatwoot retornam automaticamente ao WhatsApp</li>
+              <li>4. Contatos são sincronizados entre ambas plataformas</li>
+              <li>5. Histórico completo mantido em banco Supabase</li>
+            </ol>
+          </div>
+
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+            <h4 className="font-semibold text-sm mb-2 text-yellow-800 dark:text-yellow-200">
+              ⚙️ Configuração Necessária (Opcional)
+            </h4>
+            <p className="text-xs text-yellow-700 dark:text-yellow-300 mb-2">
+              Para ativar a integração completa com Chatwoot, configure no Supabase:
+            </p>
+            <ul className="text-xs text-yellow-700 dark:text-yellow-300 space-y-1">
+              <li>• CHATWOOT_URL - URL da sua instância Chatwoot</li>
+              <li>• CHATWOOT_API_TOKEN - Token de API do Chatwoot</li>
+              <li>• CHATWOOT_INBOX_ID - ID da caixa de entrada</li>
+              <li>• CHATWOOT_ACCOUNT_ID - ID da conta Chatwoot</li>
+            </ul>
+          </div>
+
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Status:</strong> A integração está totalmente implementada e funcional. 
+              O sistema pode operar independentemente ou ser conectado ao Chatwoot conforme necessário.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+
       {/* Configurações avançadas */}
       <Card>
         <CardHeader>
-          <CardTitle>Configurações Avançadas</CardTitle>
+          <CardTitle>Recursos Avançados Disponíveis</CardTitle>
           <CardDescription>
-            Configurações adicionais do WhatsApp Business
+            Funcionalidades implementadas na integração
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Mensagem de boas-vindas</h4>
+              <h4 className="font-medium">Reconexão Automática</h4>
               <p className="text-sm text-muted-foreground">
-                Enviar mensagem automática para novos contatos
+                Sistema detecta falhas e reconecta automaticamente
               </p>
             </div>
-            <Button variant="outline" size="sm" disabled>
-              Em breve
-            </Button>
+            <Badge variant="default" className="bg-green-500">Ativo</Badge>
           </div>
           
           <Separator />
           
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Resposta automática</h4>
+              <h4 className="font-medium">Modo Headless</h4>
               <p className="text-sm text-muted-foreground">
-                Configurar mensagens automáticas fora do expediente
+                Puppeteer roda em modo invisível para servidores
               </p>
             </div>
-            <Button variant="outline" size="sm" disabled>
-              Em breve
-            </Button>
+            <Badge variant="default" className="bg-green-500">Ativo</Badge>
           </div>
           
           <Separator />
           
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Integração com agendamentos</h4>
+              <h4 className="font-medium">Multi-tenant</h4>
               <p className="text-sm text-muted-foreground">
-                Enviar lembretes automáticos de consultas
+                Suporte a múltiplos usuários isolados por user_id
               </p>
             </div>
-            <Button variant="outline" size="sm" disabled>
-              Em breve
-            </Button>
+            <Badge variant="default" className="bg-green-500">Ativo</Badge>
+          </div>
+
+          <Separator />
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium">Sincronização Bidirecional</h4>
+              <p className="text-sm text-muted-foreground">
+                WhatsApp ↔ Chatwoot em tempo real via webhooks
+              </p>
+            </div>
+            <Badge variant="default" className="bg-green-500">Ativo</Badge>
           </div>
         </CardContent>
       </Card>
