@@ -104,10 +104,19 @@ async function getSessionStatus(supabase: any, userId: string) {
     .eq('user_id', userId)
     .maybeSingle();
 
+  let qrCode: string | null = null;
+  try {
+    if (session?.sessao_serializada) {
+      const meta = JSON.parse(session.sessao_serializada);
+      qrCode = meta?.qrCode ?? null;
+    }
+  } catch (_) {}
+
   return new Response(
     JSON.stringify({ 
       status: session?.status || 'desconectado',
-      sessionId: session?.id || null 
+      sessionId: session?.id || null,
+      qrCode
     }), 
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
@@ -170,18 +179,8 @@ async function initiateConnection(supabase: any, userId: string) {
       })
       .eq('id', newSession.id);
 
-    // Simular processo de QR Code scan
-    setTimeout(async () => {
-      await supabase
-        .from('whatsapp_sessoes')
-        .update({ status: 'conectado' })
-        .eq('id', newSession.id);
-      
-      console.log(`WhatsApp conectado para usuário ${userId}`);
-      
-      // Iniciar monitoramento de mensagens
-      await startMessageMonitoring(supabase, userId, newSession.id);
-    }, 10000); // Simular 10 segundos para conexão
+    // Removido auto-conectar: manter QR visível até autenticação real
+    // Para produção com QR real, a conexão deve ser confirmada pelo backend Node/whatsapp-web.js
     
     return new Response(
       JSON.stringify({ 
