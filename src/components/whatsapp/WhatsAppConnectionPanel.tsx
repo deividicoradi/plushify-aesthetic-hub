@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { QrCode, Smartphone, Wifi, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,16 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
   const session = sessionProp ?? hook.session;
   const connectWhatsApp = connectProp ?? hook.connectWhatsApp;
   const loading = loadingProp ?? hook.loading;
+
+  // Manter o QR Code e status atualizados durante o pareamento
+  useEffect(() => {
+    if (session.status === 'pareando' || session.status === 'conectando') {
+      const id = setInterval(() => {
+        hook.getSessionStatus();
+      }, 5000);
+      return () => clearInterval(id);
+    }
+  }, [session.status, hook]);
 
   if (session.status === 'pareando' && session.qrCode) {
     return (

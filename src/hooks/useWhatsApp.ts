@@ -58,7 +58,8 @@ export const useWhatsApp = () => {
       setSession(prev => ({
         ...prev,
         status: data.status,
-        id: data.sessionId
+        id: data.sessionId,
+        qrCode: data.qrCode ?? prev.qrCode
       }));
     } catch (error) {
       console.error('Erro ao verificar status da sessão:', error);

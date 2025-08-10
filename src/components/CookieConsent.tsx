@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Cookie, Shield, BarChart3, Settings, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { setAnalyticsConsent } from '@/lib/analytics';
+import { Link } from 'react-router-dom';
 
 interface CookieConsentProps {
   onConsentChange?: (consent: boolean) => void;
@@ -77,13 +78,13 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ onConsentChange })
                 <CardDescription className="text-sm">
                   Utilizamos cookies para melhorar sua experiência, analisar o tráfego do site e personalizar conteúdo. 
                   Você pode escolher quais cookies aceitar. Seus dados são tratados conforme nossa{' '}
-                  <a href="/privacy" className="text-primary hover:underline">
+                  <Link to="/privacy" className="text-primary hover:underline">
                     Política de Privacidade
-                  </a>{' '}
+                  </Link>{' '}
                   e a{' '}
-                  <a href="/lgpd" className="text-primary hover:underline">
+                  <Link to="/lgpd" className="text-primary hover:underline">
                     LGPD
-                  </a>.
+                  </Link>.
                 </CardDescription>
               </div>
             </div>
@@ -198,18 +199,18 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ onConsentChange })
             <div className="border-t pt-4 space-y-2">
               <h4 className="font-medium text-sm">Documentos Legais</h4>
               <div className="flex flex-wrap gap-4 text-sm">
-                <a href="/privacy" className="text-primary hover:underline">
+                <Link to="/privacy" className="text-primary hover:underline">
                   Política de Privacidade
-                </a>
-                <a href="/lgpd" className="text-primary hover:underline">
+                </Link>
+                <Link to="/lgpd" className="text-primary hover:underline">
                   LGPD
-                </a>
-                <a href="/cookies" className="text-primary hover:underline">
+                </Link>
+                <Link to="/cookies" className="text-primary hover:underline">
                   Política de Cookies
-                </a>
-                <a href="/terms" className="text-primary hover:underline">
+                </Link>
+                <Link to="/terms" className="text-primary hover:underline">
                   Termos de Uso
-                </a>
+                </Link>
               </div>
             </div>
           </div>
