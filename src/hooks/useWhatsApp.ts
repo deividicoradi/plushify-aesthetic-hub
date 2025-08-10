@@ -178,15 +178,27 @@ export const useWhatsApp = () => {
 
   const loadMessages = useCallback(async (contactId?: string) => {
     try {
-      const params = new URLSearchParams();
-      if (contactId) params.append('contactId', contactId);
-      params.append('limit', '50');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
 
-      const { data, error } = await supabase.functions.invoke(`whatsapp-manager/messages?${params}`);
+      const url = new URL(`https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager/messages`);
+      if (contactId) url.searchParams.set('contactId', contactId);
+      url.searchParams.set('limit', '50');
 
-      if (error) throw error;
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-      setMessages(data.messages || []);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setMessages(result.messages || []);
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error);
     }

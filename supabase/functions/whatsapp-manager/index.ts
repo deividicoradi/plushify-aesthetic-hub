@@ -10,16 +10,18 @@ interface WhatsAppSession {
   id: string;
   status: string;
   qrCode?: string;
+  client?: any;
 }
 
-interface ChatwootConfig {
-  url: string;
-  token: string;
-  inboxId: string;
+interface MessageData {
+  phone: string;
+  message: string;
+  contactName?: string;
 }
 
-// Cache global para sessões ativas
-const activeSessions = new Map<string, any>();
+// Cache global para sessões ativas e clientes WhatsApp
+const activeSessions = new Map<string, WhatsAppSession>();
+const messageQueue = new Map<string, MessageData[]>();
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -68,8 +70,10 @@ serve(async (req) => {
           return await disconnectSession(supabase, user.id);
         case 'send-message':
           return await sendMessage(supabase, user.id, body);
-        case 'chatwoot-webhook':
-          return await handleChatwootWebhook(supabase, body);
+        case 'get-contacts':
+          return await getContacts(supabase, user.id);
+        case 'simulate-message':
+          return await simulateIncomingMessage(supabase, user.id, body.sessionId || 'default-session');
         default:
           return new Response('Invalid action', { status: 400, headers: corsHeaders });
       }
@@ -146,8 +150,8 @@ async function initiateConnection(supabase: any, userId: string) {
     // Simular inicialização do cliente WhatsApp
     console.log(`Inicializando WhatsApp Web.js para usuário ${userId}`);
     
-    // Configurar webhook do Chatwoot
-    await setupChatwootIntegration(supabase, userId, newSession.id);
+    // Inicializar cliente WhatsApp (simulado)
+    console.log(`Configurando cliente WhatsApp para usuário ${userId}`);
     
     // Gerar QR Code
     const qrCodeData = `whatsapp-session-${newSession.id}-${Date.now()}`;
@@ -293,8 +297,7 @@ async function sendMessage(supabase: any, userId: string, body: any) {
       .update({ ultima_interacao: new Date().toISOString() })
       .eq('id', contact.id);
 
-    // Enviar para Chatwoot
-    await sendToChatwoot(supabase, userId, contact, message, 'outgoing');
+    console.log(`Mensagem enviada e salva no banco de dados`);
 
     return new Response(
       JSON.stringify({ 
@@ -348,64 +351,70 @@ async function getMessages(supabase: any, userId: string, req: Request) {
   );
 }
 
-// ==================== FUNÇÕES DE INTEGRAÇÃO CHATWOOT ====================
+// ==================== FUNÇÕES AUXILIARES ====================
 
-async function setupChatwootIntegration(supabase: any, userId: string, sessionId: string) {
-  console.log(`Configurando integração Chatwoot para usuário ${userId}`);
-  
-  // Aqui você pode buscar configurações do Chatwoot do usuário no banco
-  // Por ora, vamos usar configurações padrão (seria configurável pelo usuário)
-  
-  return true;
+async function getContacts(supabase: any, userId: string) {
+  const { data: contacts, error } = await supabase
+    .from('whatsapp_contatos')
+    .select('*')
+    .eq('user_id', userId)
+    .order('ultima_interacao', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return new Response(
+    JSON.stringify({ contacts: contacts || [] }), 
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
 }
 
-async function sendToChatwoot(supabase: any, userId: string, contact: any, message: string, direction: 'incoming' | 'outgoing') {
-  try {
-    // Buscar configurações do Chatwoot do usuário
-    // Por ora, vamos simular o envio
-    console.log(`Enviando para Chatwoot - Usuário: ${userId}, Contato: ${contact.nome}, Mensagem: ${message}, Direção: ${direction}`);
-    
-    // Aqui seria a integração real com Chatwoot via Axios
-    // const chatwootResponse = await axios.post(`${chatwootUrl}/api/v1/accounts/${accountId}/conversations`, {...});
-    
-    return true;
-  } catch (error) {
-    console.error('Erro ao enviar para Chatwoot:', error);
-    return false;
-  }
-}
+async function simulateIncomingMessage(supabase: any, userId: string, sessionId: string) {
+  // Simular mensagem recebida (para teste)
+  const mockMessages = [
+    { phone: '5511999999999', message: 'Olá, gostaria de informações sobre seus serviços!' },
+    { phone: '5511888888888', message: 'Bom dia! Posso agendar um horário?' }
+  ];
 
-async function handleChatwootWebhook(supabase: any, body: any) {
-  try {
-    const { message_type, conversation, content } = body;
-    
-    // Ignorar mensagens que não são de saída (outgoing)
-    if (message_type !== 'outgoing') {
-      return new Response('OK', { status: 200, headers: corsHeaders });
-    }
-    
-    // Extrair número do WhatsApp da conversa
-    const whatsappNumber = conversation?.meta?.sender?.phone_number || 
-                          conversation?.meta?.sender?.identifier;
-    
-    if (!whatsappNumber || !content) {
-      return new Response('Invalid webhook data', { status: 400, headers: corsHeaders });
-    }
-    
-    // Buscar usuário pela configuração do Chatwoot
-    // Por ora, vamos usar um usuário padrão
-    const userId = conversation?.account_id; // Isso seria mapeado corretamente
-    
-    if (userId) {
-      // Enviar mensagem via WhatsApp
-      await sendWhatsAppMessage(userId, whatsappNumber, content);
-    }
-    
-    return new Response('OK', { status: 200, headers: corsHeaders });
-  } catch (error) {
-    console.error('Erro no webhook Chatwoot:', error);
-    return new Response('Error', { status: 500, headers: corsHeaders });
+  const randomMessage = mockMessages[Math.floor(Math.random() * mockMessages.length)];
+  
+  // Buscar ou criar contato
+  let { data: contact } = await supabase
+    .from('whatsapp_contatos')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('telefone', randomMessage.phone)
+    .maybeSingle();
+
+  if (!contact) {
+    const { data: newContact } = await supabase
+      .from('whatsapp_contatos')
+      .insert({
+        user_id: userId,
+        nome: randomMessage.phone,
+        telefone: randomMessage.phone,
+        ultima_interacao: new Date().toISOString()
+      })
+      .select()
+      .single();
+    contact = newContact;
   }
+
+  // Salvar mensagem recebida
+  await supabase
+    .from('whatsapp_mensagens')
+    .insert({
+      user_id: userId,
+      contato_id: contact.id,
+      sessao_id: sessionId,
+      direcao: 'recebida',
+      conteudo: randomMessage.message,
+      tipo: 'texto',
+      status: 'recebida'
+    });
+
+  console.log(`Mensagem simulada recebida de ${randomMessage.phone}: ${randomMessage.message}`);
 }
 
 async function startMessageMonitoring(supabase: any, userId: string, sessionId: string) {
