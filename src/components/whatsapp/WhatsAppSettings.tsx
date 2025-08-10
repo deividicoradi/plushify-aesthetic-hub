@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MessageCircle, Smartphone, Wifi, WifiOff, Settings, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,12 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
 import { WhatsAppMonitoring } from './WhatsAppMonitoring';
 import { WhatsAppChat } from './WhatsAppChat';
 
 export const WhatsAppSettings: React.FC = () => {
   const { session, contacts, messages, connectWhatsApp, disconnectWhatsApp, loading } = useWhatsApp();
+  const [serverUrl, setServerUrl] = useState<string>('');
+  useEffect(() => { setServerUrl(localStorage.getItem('WHATSAPP_SERVER_URL') || ''); }, []);
 
   const getStatusColor = () => {
     switch (session.status) {
@@ -167,6 +171,51 @@ export const WhatsAppSettings: React.FC = () => {
                     </AlertDescription>
                   </Alert>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Servidor WhatsApp (Node)</CardTitle>
+              <CardDescription>Configure a URL do seu microserviço com whatsapp-web.js</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Label htmlFor="wa-server-url">URL do servidor</Label>
+                <Input
+                  id="wa-server-url"
+                  placeholder="https://seu-dominio.com/whatsapp"
+                  value={serverUrl}
+                  onChange={(e) => setServerUrl(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">Exemplo: https://api.minhaempresa.com/whatsapp</p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      const v = serverUrl.trim();
+                      if (!v || !/^https?:\/\//i.test(v)) {
+                        alert('Informe uma URL válida iniciando com http(s)');
+                        return;
+                      }
+                      localStorage.setItem('WHATSAPP_SERVER_URL', v.replace(/\/$/, ''));
+                      alert('URL do servidor salva.');
+                    }}
+                  >
+                    Salvar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      localStorage.removeItem('WHATSAPP_SERVER_URL');
+                      setServerUrl('');
+                      alert('Voltando ao provedor padrão (Supabase Edge Function).');
+                    }}
+                  >
+                    Usar padrão (Supabase)
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

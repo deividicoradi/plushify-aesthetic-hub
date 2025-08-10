@@ -27,6 +27,11 @@ export interface WhatsAppSession {
   qrCode?: string;
 }
 
+const getWhatsAppBaseUrl = () => {
+  const url = localStorage.getItem('WHATSAPP_SERVER_URL')?.trim();
+  return url && /^https?:\/\//i.test(url) ? url.replace(/\/$/, '') : 'https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager';
+};
+
 export const useWhatsApp = () => {
   const [session, setSession] = useState<WhatsAppSession>({
     id: null,
@@ -42,7 +47,7 @@ export const useWhatsApp = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) return;
 
-      const response = await fetch('https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager', {
+      const response = await fetch(`${getWhatsAppBaseUrl()}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -72,7 +77,7 @@ export const useWhatsApp = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Não autenticado');
 
-      const response = await fetch('https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager', {
+      const response = await fetch(`${getWhatsAppBaseUrl()}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -141,7 +146,7 @@ export const useWhatsApp = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Não autenticado');
 
-      const response = await fetch('https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager', {
+      const response = await fetch(`${getWhatsAppBaseUrl()}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -181,7 +186,8 @@ export const useWhatsApp = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) return;
 
-      const url = new URL(`https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager/messages`);
+      const base = getWhatsAppBaseUrl();
+      const url = new URL(`${base}/messages`);
       if (contactId) url.searchParams.set('contactId', contactId);
       url.searchParams.set('limit', '50');
 
@@ -209,7 +215,7 @@ export const useWhatsApp = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Não autenticado');
 
-      const response = await fetch('https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager', {
+      const response = await fetch(`${getWhatsAppBaseUrl()}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
