@@ -4,10 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { useWhatsApp } from '@/hooks/useWhatsApp';
+import { useWhatsApp, WhatsAppSession } from '@/hooks/useWhatsApp';
 
-export const WhatsAppConnectionPanel: React.FC = () => {
-  const { session, connectWhatsApp, loading } = useWhatsApp();
+interface PanelProps {
+  session?: WhatsAppSession;
+  connectWhatsApp?: () => Promise<void>;
+  loading?: boolean;
+}
+
+export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: sessionProp, connectWhatsApp: connectProp, loading: loadingProp }) => {
+  const hook = useWhatsApp();
+  const session = sessionProp ?? hook.session;
+  const connectWhatsApp = connectProp ?? hook.connectWhatsApp;
+  const loading = loadingProp ?? hook.loading;
 
   if (session.status === 'pareando' && session.qrCode) {
     return (

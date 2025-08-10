@@ -103,7 +103,7 @@ export const WhatsAppFloatingChat: React.FC = () => {
             {session.status === 'conectado' ? (
               <WhatsAppChatInterface />
             ) : (
-              <WhatsAppConnectionPanel />
+              <WhatsAppConnectionPanel session={session} connectWhatsApp={connectWhatsApp} loading={loading} />
             )}
           </div>
         </SheetContent>
