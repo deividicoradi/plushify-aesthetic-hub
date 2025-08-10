@@ -88,73 +88,88 @@ export const WhatsAppConnectionPanel: React.FC = () => {
   }
 
   return (
-    <div className="min-h-[600px] flex flex-col justify-center p-8">
-      {/* Header com ícone e título principal */}
-      <div className="text-center mb-8">
-        <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <MessageCircle className="w-10 h-10 text-white" />
-        </div>
-        
-        <h1 className="text-3xl font-bold mb-3">WhatsApp Business</h1>
-        <p className="text-muted-foreground text-lg">
-          Conecte seu WhatsApp para começar a conversar com seus clientes
-        </p>
-      </div>
-
-      {/* Cards de recursos */}
-      <div className="grid gap-4 max-w-md mx-auto mb-8">
-        <div className="flex items-center gap-4 p-4 rounded-lg border bg-card">
-          <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
-            <Smartphone className="w-6 h-6 text-green-600 dark:text-green-400" />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-white" />
           </div>
-          <div>
-            <h3 className="font-semibold">Conecte seu celular</h3>
-            <p className="text-sm text-muted-foreground">
-              Use o WhatsApp do seu celular para se conectar
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 p-4 rounded-lg border bg-card">
-          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
-            <MessageCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <h3 className="font-semibold">Converse com clientes</h3>
-            <p className="text-sm text-muted-foreground">
-              Envie e receba mensagens diretamente do sistema
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 p-4 rounded-lg border bg-card">
-          <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
-            <QrCode className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-          </div>
-          <div>
-            <h3 className="font-semibold">Histórico integrado</h3>
-            <p className="text-sm text-muted-foreground">
-              Todas as conversas ficam salvas no sistema
-            </p>
+          <span className="text-lg font-semibold">WhatsApp</span>
+          <div className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+            WhatsApp Desconectado
           </div>
         </div>
       </div>
 
-      {/* Aviso importante */}
-      <Alert className="max-w-md mx-auto mb-6">
-        <Wifi className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Importante:</strong> Mantenha seu celular conectado à internet durante o uso.
-        </AlertDescription>
-      </Alert>
+      {/* Conteúdo principal */}
+      <div className="flex flex-col items-center justify-center p-8 space-y-8">
+        {/* Ícone grande do WhatsApp */}
+        <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center">
+          <MessageCircle className="w-12 h-12 text-white" />
+        </div>
 
-      {/* Botão de conectar */}
-      <div className="text-center">
+        {/* Título e descrição */}
+        <div className="text-center space-y-3">
+          <h1 className="text-3xl font-bold text-foreground">WhatsApp Business</h1>
+          <p className="text-muted-foreground text-center max-w-sm">
+            Conecte seu WhatsApp para começar a conversar com seus clientes
+          </p>
+        </div>
+
+        {/* Cards de recursos */}
+        <div className="w-full max-w-sm space-y-4">
+          <div className="flex items-center gap-4 p-4 rounded-lg border bg-card/50">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
+              <Smartphone className="w-6 h-6 text-green-600 dark:text-green-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">Conecte seu celular</h3>
+              <p className="text-sm text-muted-foreground">
+                Use o WhatsApp do seu celular para se conectar
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 rounded-lg border bg-card/50">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">Converse com clientes</h3>
+              <p className="text-sm text-muted-foreground">
+                Envie e receba mensagens diretamente do sistema
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 rounded-lg border bg-card/50">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+              <QrCode className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">Histórico integrado</h3>
+              <p className="text-sm text-muted-foreground">
+                Todas as conversas ficam salvas no sistema
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Aviso importante */}
+        <Alert className="max-w-sm">
+          <Wifi className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Importante:</strong> Mantenha seu celular conectado à internet durante o uso.
+          </AlertDescription>
+        </Alert>
+
+        {/* Botão de conectar */}
         <Button
           onClick={connectWhatsApp}
           disabled={loading}
           size="lg"
-          className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 text-lg font-semibold"
+          className="w-full max-w-sm bg-green-500 hover:bg-green-600 text-white font-semibold"
         >
           {loading ? (
             <>
