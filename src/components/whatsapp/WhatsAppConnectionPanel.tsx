@@ -88,20 +88,7 @@ export const WhatsAppConnectionPanel: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-lg font-semibold">WhatsApp</span>
-          <div className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-medium">
-            WhatsApp Desconectado
-          </div>
-        </div>
-      </div>
-
+    <div className="flex-1 bg-background">
       {/* Conteúdo principal */}
       <div className="flex flex-col items-center justify-center p-8 space-y-8">
         {/* Ícone grande do WhatsApp */}
