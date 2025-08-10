@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { MessageCircle, X, Wifi, WifiOff } from 'lucide-react';
+import { MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { WhatsAppConnectionPanel } from './WhatsAppConnectionPanel';
 import { WhatsAppChatInterface } from './WhatsAppChatInterface';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
@@ -48,13 +49,11 @@ export const WhatsAppFloatingChat: React.FC = () => {
             <MessageCircle className="h-6 w-6 text-white group-hover:scale-110 transition-transform duration-200" />
             
             {/* Indicador de status */}
-            <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full ${getStatusColor()} border-2 border-white`}>
-              {session.status === 'conectado' ? (
-                <Wifi className="w-2 h-2 text-white m-0.5" />
-              ) : (
-                <WifiOff className="w-2 h-2 text-white m-0.5" />
-              )}
-            </div>
+            <div
+              className={`absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 w-3.5 h-3.5 rounded-full ${getStatusColor()} ring-2 ring-background ${session.status === 'pareando' ? 'animate-pulse' : ''}`}
+              aria-live="polite"
+              aria-label={getStatusText()}
+            />
           </Button>
         </SheetTrigger>
 
