@@ -8,7 +8,7 @@ import { useWhatsApp } from '@/hooks/useWhatsApp';
 
 export const WhatsAppFloatingChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { session } = useWhatsApp();
+  const { session, connectWhatsApp, loading } = useWhatsApp();
 
   const getStatusColor = () => {
     switch (session.status) {
@@ -76,15 +76,26 @@ export const WhatsAppFloatingChat: React.FC = () => {
                 </div>
               </SheetTitle>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="h-8 w-8"
-                aria-label="Fechar"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                {session.status !== 'conectado' && (
+                  <Button
+                    onClick={connectWhatsApp}
+                    disabled={loading}
+                    className={`h-8 px-3 ${session.status === 'pareando' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white`}
+                  >
+                    {loading ? 'Conectando...' : session.status === 'pareando' ? 'Mostrar QR Code' : 'Conectar'}
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(false)}
+                  className="h-8 w-8"
+                  aria-label="Fechar"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </SheetHeader>
 
