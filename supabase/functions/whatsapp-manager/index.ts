@@ -48,7 +48,11 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
-      return new Response('Invalid authentication', { status: 401, headers: corsHeaders });
+      console.error('Auth error:', authError);
+      return new Response(JSON.stringify({ error: 'Invalid authentication', details: authError?.message }), { 
+        status: 401, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
     }
 
     const { pathname } = new URL(req.url);

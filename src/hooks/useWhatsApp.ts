@@ -39,12 +39,22 @@ export const useWhatsApp = () => {
 
   const getSessionStatus = useCallback(async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        method: 'GET'
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+
+      const response = await fetch('https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
+      const data = await response.json();
       setSession(prev => ({
         ...prev,
         status: data.status,
@@ -58,11 +68,23 @@ export const useWhatsApp = () => {
   const connectWhatsApp = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'connect' }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Não autenticado');
+
+      const response = await fetch('https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'connect' }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
 
       if (data?.success) {
         if (data.qrCode) {
@@ -115,11 +137,21 @@ export const useWhatsApp = () => {
   const disconnectWhatsApp = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'disconnect' }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Não autenticado');
+
+      const response = await fetch('https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'disconnect' }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       setSession({
         id: null,
@@ -140,39 +172,6 @@ export const useWhatsApp = () => {
       });
     } finally {
       setLoading(false);
-    }
-  }, [toast]);
-
-  const sendMessage = useCallback(async (phone: string, message: string, contactName?: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: {
-          action: 'send-message',
-          phone,
-          message,
-          contactName
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Mensagem Enviada",
-        description: "Mensagem enviada com sucesso"
-      });
-
-      // Recarregar mensagens
-      await loadMessages();
-      
-      return data.messageId;
-    } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
-      toast({
-        title: "Erro",
-        description: "Falha ao enviar mensagem",
-        variant: "destructive"
-      });
-      throw error;
     }
   }, [toast]);
 
@@ -203,6 +202,52 @@ export const useWhatsApp = () => {
       console.error('Erro ao carregar mensagens:', error);
     }
   }, []);
+
+  const sendMessage = useCallback(async (phone: string, message: string, contactName?: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Não autenticado');
+
+      const response = await fetch('https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'send-message',
+          phone,
+          message,
+          contactName
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      toast({
+        title: "Mensagem Enviada",
+        description: "Mensagem enviada com sucesso"
+      });
+
+      // Recarregar mensagens
+      await loadMessages();
+      
+      return data.messageId;
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao enviar mensagem",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, [toast, loadMessages]);
+
 
   const loadContacts = useCallback(async () => {
     try {
