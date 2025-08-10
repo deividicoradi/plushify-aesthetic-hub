@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { WhatsAppConnectionPanel } from './WhatsAppConnectionPanel';
 import { WhatsAppChatInterface } from './WhatsAppChatInterface';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
@@ -57,29 +55,33 @@ export const WhatsAppFloatingChat: React.FC = () => {
           </Button>
         </SheetTrigger>
 
-        <SheetContent side="right" className="w-full sm:w-[500px] p-0 flex flex-col h-full">
-          <SheetHeader className="p-6 pb-4 border-b">
-            <div className="flex items-center justify-between">
+        <SheetContent side="right" className="w-full sm:w-[460px] p-0 flex flex-col h-full bg-background">
+          <SheetHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-5 border-b">
+            <div className="flex items-center justify-between gap-4">
               <SheetTitle className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
                   <MessageCircle className="w-5 h-5 text-white" />
                 </div>
-                <div>
-                  <div className="text-lg font-semibold">WhatsApp</div>
-                  <Badge 
-                    variant="secondary" 
-                    className={`text-xs ${session.status === 'conectado' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'}`}
-                  >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold">WhatsApp</span>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                    session.status === 'conectado'
+                      ? 'bg-green-500 text-white'
+                      : session.status === 'pareando'
+                      ? 'bg-yellow-500 text-white'
+                      : 'bg-destructive text-destructive-foreground'
+                  }`}>
                     {getStatusText()}
-                  </Badge>
+                  </span>
                 </div>
               </SheetTitle>
-              
+
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
                 className="h-8 w-8"
+                aria-label="Fechar"
               >
                 <X className="h-4 w-4" />
               </Button>
