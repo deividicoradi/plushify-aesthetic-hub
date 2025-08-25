@@ -109,13 +109,23 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
 
     // Verificar status no servidor real
     try {
-      const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+      // Tenta primeiro /status, depois fallback para raiz /
+      let response = await fetch(`${WHATSAPP_SERVER_URL}/status`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         }
       });
+      if (!response.ok) {
+        response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+      }
 
       console.log('Server response status:', response.status);
 
@@ -209,16 +219,26 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
       );
     }
 
-    // Solicitar conexão ao servidor real
+    // Solicitar conexão ao servidor real (tenta /connect, fallback para raiz com action)
     console.log('Making connection request to WhatsApp server');
-    const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+    let response = await fetch(`${WHATSAPP_SERVER_URL}/connect`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ action: 'connect' })
+      }
     });
+
+    if (!response.ok) {
+      response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'connect' })
+      });
+    }
 
     console.log('Server connection response status:', response.status);
 
@@ -279,15 +299,25 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
 
 async function disconnectSession(supabase: any, userId: string, token: string) {
   try {
-    // Desconectar no servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+    // Desconectar no servidor real (tenta /disconnect, fallback para raiz)
+    let response = await fetch(`${WHATSAPP_SERVER_URL}/disconnect`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ action: 'disconnect' })
-    }).catch(() => null); // Ignorar erros de rede
+      }
+    }).catch(() => null);
+
+    if (!response || !response.ok) {
+      response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'disconnect' })
+      }).catch(() => null);
+    }
 
     // Atualizar status no banco independente da resposta do servidor
     const { error } = await supabase
@@ -350,19 +380,37 @@ async function sendMessage(supabase: any, userId: string, body: any, token: stri
       );
     }
 
-    // Enviar mensagem via servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+    // Enviar mensagem via servidor real (tenta /send, /send-message, depois raiz com action)
+    let response = await fetch(`${WHATSAPP_SERVER_URL}/send`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        action: 'send-message',
-        phone: phone,
-        message: message
-      })
+      body: JSON.stringify({ phone, message })
     });
+
+    if (!response.ok) {
+      response = await fetch(`${WHATSAPP_SERVER_URL}/send-message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ phone, message })
+      });
+    }
+
+    if (!response.ok) {
+      response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'send-message', phone, message })
+      });
+    }
 
     if (!response.ok) {
       throw new Error(`Servidor retornou erro: ${response.status}`);
@@ -562,14 +610,34 @@ async function getQRCode(supabase: any, userId: string, token: string) {
   try {
     console.log('Getting QR Code for user:', userId);
     
-    // O seu servidor expõe o QR no GET / (status)
-    const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+    // Tenta obter QR do GET /qr, senão tenta /status e depois /
+    let response = await fetch(`${WHATSAPP_SERVER_URL}/qr`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       }
     });
+
+    if (!response.ok) {
+      response = await fetch(`${WHATSAPP_SERVER_URL}/status`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+    }
+
+    if (!response.ok) {
+      response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+    }
 
     console.log('QR Code status response:', response.status);
 
