@@ -93,7 +93,9 @@ export const useWhatsApp = () => {
       const data = await response.json();
 
       if (data?.success) {
+        console.log('Resposta do servidor WhatsApp:', data);
         if (data.qrCode) {
+          console.log('QR Code recebido:', data.qrCode.substring(0, 50) + '...');
           setSession({
             id: data.sessionId,
             status: 'pareando',
