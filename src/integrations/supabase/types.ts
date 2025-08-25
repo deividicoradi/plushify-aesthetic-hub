@@ -906,6 +906,50 @@ export type Database = {
           },
         ]
       }
+      whatsapp_mensagens_temp: {
+        Row: {
+          contato_id: string
+          conteudo: string
+          created_at: string
+          direcao: string
+          horario: string
+          id: string
+          status: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          contato_id: string
+          conteudo: string
+          created_at?: string
+          direcao: string
+          horario?: string
+          id?: string
+          status?: string
+          tipo?: string
+          user_id: string
+        }
+        Update: {
+          contato_id?: string
+          conteudo?: string
+          created_at?: string
+          direcao?: string
+          horario?: string
+          id?: string
+          status?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_mensagens_temp_contato_id_fkey"
+            columns: ["contato_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_contatos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_sessoes: {
         Row: {
           atualizado_em: string

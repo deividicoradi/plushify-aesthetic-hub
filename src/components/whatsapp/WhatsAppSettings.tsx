@@ -14,8 +14,12 @@ import { WhatsAppChat } from './WhatsAppChat';
 
 export const WhatsAppSettings: React.FC = () => {
   const { session, contacts, messages, connectWhatsApp, disconnectWhatsApp, loading } = useWhatsApp();
-  const [serverUrl, setServerUrl] = useState<string>('');
-  useEffect(() => { setServerUrl(localStorage.getItem('WHATSAPP_SERVER_URL') || ''); }, []);
+  
+  console.log('WhatsApp Settings - Session:', session);
+  console.log('WhatsApp Settings - Status:', session.status);
+  if (session.qrCode) {
+    console.log('WhatsApp Settings - QR Code disponível:', session.qrCode.substring(0, 50) + '...');
+  }
 
   const getStatusColor = () => {
     switch (session.status) {

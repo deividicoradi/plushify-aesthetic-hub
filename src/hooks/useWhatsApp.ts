@@ -291,7 +291,9 @@ export const useWhatsApp = () => {
           table: 'whatsapp_mensagens'
         },
         () => {
+          console.log('Nova mensagem WhatsApp detectada, recarregando...');
           loadMessages();
+          loadContacts();
         }
       )
       .subscribe();
@@ -299,7 +301,7 @@ export const useWhatsApp = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [loadMessages]);
+  }, [loadMessages, loadContacts]);
 
   return {
     session,
