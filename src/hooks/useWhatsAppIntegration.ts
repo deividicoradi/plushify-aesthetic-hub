@@ -123,13 +123,19 @@ export const useWhatsAppIntegration = () => {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        method: 'GET'
+      const token = await getAccessToken();
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        signal
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`Status check failed: ${response.status}`);
       }
+
+      const data = await response.json();
 
       setSession(prev => ({
         ...prev,
@@ -164,15 +170,21 @@ export const useWhatsAppIntegration = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'get-qr' }
+      const token = await getAccessToken();
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/qr`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        signal
       });
 
-      if (error) {
+      if (!response.ok) {
         // QR might not be available if not pairing
-        console.log('QR code not available or error from proxy');
+        console.log('QR code not available');
         return null;
       }
+
+      const data = await response.json();
 
       if (signal?.aborted) return null;
 
@@ -217,13 +229,20 @@ export const useWhatsAppIntegration = () => {
     try {
       console.log('whatsapp_connect_clicked');
       
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'connect' }
+      const token = await getAccessToken();
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/connect`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`Connection failed: ${response.status}`);
       }
+
+      const data = await response.json();
 
       if (data?.success) {
         setSession({
@@ -295,12 +314,16 @@ export const useWhatsAppIntegration = () => {
     clearIntervals();
     
     try {
-      const { error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'disconnect' }
+      const token = await getAccessToken();
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
-      if (error) {
-        console.warn('Disconnect error (non-critical):', error.message);
+      if (!response.ok) {
+        console.warn('Disconnect error (non-critical):', response.status);
       }
 
       setSession({
@@ -331,18 +354,20 @@ export const useWhatsAppIntegration = () => {
     if (!user) return;
     
     try {
+      const token = await getAccessToken();
       const path = contactId ? `messages?contactId=${contactId}&limit=${limit}` : `messages?limit=${limit}`;
       
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        method: 'GET',
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/${path}`, {
         headers: {
-          'X-Request-Path': path
+          'Authorization': `Bearer ${token}`
         }
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`Load messages failed: ${response.status}`);
       }
+
+      const data = await response.json();
 
       setMessages(data.messages || []);
     } catch (error: any) {
@@ -355,13 +380,18 @@ export const useWhatsAppIntegration = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'get-contacts' }
+      const token = await getAccessToken();
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/contacts`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`Load contacts failed: ${response.status}`);
       }
+
+      const data = await response.json();
 
       setContacts(data.contacts || []);
     } catch (error: any) {
@@ -388,17 +418,24 @@ export const useWhatsAppIntegration = () => {
     try {
       console.log('whatsapp_message_sending');
       
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: {
-          action: 'send-message',
-          phone: cleanPhone,
+      const token = await getAccessToken();
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/send-message`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          to: cleanPhone,
           message: message.trim()
-        }
+        })
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`Send message failed: ${response.status}`);
       }
+
+      const data = await response.json();
 
       if (data?.success) {
         toast({
