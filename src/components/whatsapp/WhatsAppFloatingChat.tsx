@@ -6,7 +6,7 @@ export const WhatsAppFloatingChat: React.FC = () => {
   const supportNumber = "5549999150421"; // Número de suporte
   
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent("Olá! Preciso de ajuda com o Plushify.");
+    const message = encodeURIComponent("Olá! Vi sobre o Plushify e tenho interesse em conhecer melhor o sistema. Poderia me passar mais informações?");
     const url = `https://wa.me/${supportNumber}?text=${message}`;
     window.open(url, '_blank');
   };
