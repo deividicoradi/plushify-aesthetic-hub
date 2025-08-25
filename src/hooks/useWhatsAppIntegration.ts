@@ -158,24 +158,17 @@ export const useWhatsAppIntegration = () => {
     if (!user) return;
 
     try {
-      const response = await fetch('https://whatsapp.plushify.com.br/qr', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        },
-        signal
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+        body: { action: 'get-qr' }
       });
 
       if (signal?.aborted) return;
 
-      if (!response.ok) {
-        throw new Error(`QR request failed: ${response.status}`);
+      if (error) {
+        throw new Error(`QR request failed: ${error.message}`);
       }
-
-      const data = await response.json();
       
-      if (data.qrCode) {
+      if (data?.qrCode) {
         setSession(prev => ({
           ...prev,
           qrCode: data.qrCode
@@ -242,6 +235,11 @@ export const useWhatsAppIntegration = () => {
             title: "QR Code Gerado",
             description: "Escaneie o QR Code com seu WhatsApp para conectar"
           });
+          
+          // Buscar QR Code imediatamente
+          setTimeout(() => {
+            getQRCode(controller.signal);
+          }, 1000);
           
           // Start polling for status updates
           pollIntervalRef.current = setInterval(async () => {

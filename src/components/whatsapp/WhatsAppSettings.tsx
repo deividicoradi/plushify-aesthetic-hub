@@ -106,7 +106,7 @@ export const WhatsAppSettings: React.FC = () => {
               </div>
 
               {/* QR Code quando estiver pareando */}
-              {session.status === 'pareando' && session.qrCode && (
+              {session.status === 'pareando' && session.qrCode && typeof session.qrCode === 'string' && (
                 <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-green-300 rounded-lg bg-green-50 dark:bg-green-900/20">
                   <h3 className="text-lg font-semibold mb-4 text-green-800 dark:text-green-200">
                     QR Code Gerado
@@ -128,6 +128,16 @@ export const WhatsAppSettings: React.FC = () => {
                     3. Toque em "Conectar um dispositivo"
                     <br />
                     4. Aponte a câmera para este QR Code
+                  </p>
+                </div>
+              )}
+
+              {/* Indicador de carregamento do QR Code */}
+              {session.status === 'pareando' && !session.qrCode && (
+                <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-yellow-300 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600 mb-4"></div>
+                  <p className="text-sm text-center text-yellow-700 dark:text-yellow-300">
+                    Gerando QR Code... Aguarde um momento.
                   </p>
                 </div>
               )}

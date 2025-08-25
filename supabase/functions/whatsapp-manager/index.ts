@@ -75,6 +75,8 @@ serve(async (req) => {
           return await sendMessage(supabase, user.id, body, token);
         case 'get-contacts':
           return await getContacts(supabase, user.id);
+        case 'get-qr':
+          return await getQRCode(supabase, user.id, token);
         case 'simulate-message':
           return await simulateIncomingMessage(supabase, user.id, body.sessionId || 'default-session');
         default:
@@ -519,4 +521,77 @@ async function simulateIncomingMessage(supabase: any, userId: string, sessionId:
     });
 
   console.log(`Mensagem simulada recebida de ${randomMessage.phone}: ${randomMessage.message}`);
+
+  return new Response(
+    JSON.stringify({ 
+      success: true, 
+      message: 'Mensagem simulada criada com sucesso' 
+    }), 
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+}
+
+async function getQRCode(supabase: any, userId: string, token: string) {
+  try {
+    // Primeiro, verificar se há uma sessão em pareamento
+    const { data: session } = await supabase
+      .from('whatsapp_sessoes')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'pareando')
+      .maybeSingle();
+
+    if (!session) {
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'Nenhuma sessão em pareamento encontrada' 
+        }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Buscar QR Code no servidor real
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/qr`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Servidor WhatsApp retornou erro: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.qrCode) {
+      // Atualizar sessão com QR Code
+      await supabase
+        .from('whatsapp_sessoes')
+        .update({ 
+          sessao_serializada: JSON.stringify({ ...JSON.parse(session.sessao_serializada || '{}'), qrCode: result.qrCode }),
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        success: true,
+        qrCode: result.qrCode || null
+      }), 
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Erro ao buscar QR Code:', error);
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: `Erro ao buscar QR Code: ${error.message}` 
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
 }
