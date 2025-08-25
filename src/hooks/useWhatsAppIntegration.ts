@@ -164,34 +164,39 @@ export const useWhatsAppIntegration = () => {
     if (!user) return;
 
     try {
+      console.log('Requesting QR Code from server');
       const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
         body: { action: 'get-qr' }
       });
 
       if (error) {
-        // QR might not be available if not pairing
-        console.log('QR code not available or error from proxy');
-        return null;
+        console.error('QR code request error:', error);
+        throw new Error(error.message);
       }
 
       if (signal?.aborted) return null;
+
+      console.log('QR Code response:', data);
 
       if (data?.qrCode) {
         setSession(prev => ({
           ...prev,
           qrCode: data.qrCode
         }));
-        console.log('whatsapp_qr_rendered');
+        console.log('QR Code updated in session');
+      } else {
+        console.warn('No QR Code received from server');
       }
 
       return data;
     } catch (error: any) {
       if (!signal?.aborted) {
-        console.warn('QR fetch failed:', error.message);
+        console.error('QR fetch failed:', error.message);
+        handleError(error, 'QR code fetch');
       }
       return null;
     }
-  }, [user]);
+  }, [user, handleError]);
 
   // Connect WhatsApp with proper server communication
   const connectWhatsApp = useCallback(async () => {

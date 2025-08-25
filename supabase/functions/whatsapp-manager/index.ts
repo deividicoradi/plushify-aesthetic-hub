@@ -96,6 +96,8 @@ serve(async (req) => {
 
 async function getSessionStatus(supabase: any, userId: string, token: string) {
   try {
+    console.log('Getting WhatsApp session status for user:', userId);
+    
     // Verificar sessão no banco
     const { data: session } = await supabase
       .from('whatsapp_sessoes')
@@ -103,39 +105,50 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
       .eq('user_id', userId)
       .maybeSingle();
 
-    // Verificar status no servidor real  
-    const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }
-    });
+    console.log('Database session:', session);
 
-    if (response.ok) {
-      const serverStatus = await response.json();
-      
-      // Atualizar status no banco se necessário
-      if (session && session.status !== serverStatus.status) {
-        await supabase
-          .from('whatsapp_sessoes')
-          .update({ 
-            status: serverStatus.status,
-            sessao_serializada: JSON.stringify(serverStatus),
-            atualizado_em: new Date().toISOString()
-          })
-          .eq('user_id', userId);
-      }
+    // Verificar status no servidor real
+    try {
+      const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
 
-      return new Response(
-        JSON.stringify({ 
-          status: serverStatus.status || 'desconectado',
-          sessionId: session?.id || null,
-          qrCode: serverStatus.qrCode || null,
-          ready: serverStatus.ready || false
-        }), 
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.log('Server response status:', response.status);
+
+      if (response.ok) {
+        const serverStatus = await response.json();
+        console.log('Server status data:', serverStatus);
+        
+        // Atualizar status no banco se necessário
+        if (session && session.status !== serverStatus.status) {
+          await supabase
+            .from('whatsapp_sessoes')
+            .update({ 
+              status: serverStatus.status,
+              sessao_serializada: JSON.stringify(serverStatus),
+              atualizado_em: new Date().toISOString()
+            })
+            .eq('user_id', userId);
+        }
+
+        return new Response(
+          JSON.stringify({ 
+            status: serverStatus.status || 'desconectado',
+            sessionId: session?.id || null,
+            qrCode: serverStatus.qrCode || null,
+            ready: serverStatus.ready || false
+          }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } else {
+        console.error('Server error response:', response.status, response.statusText);
+      }
+    } catch (serverError) {
+      console.error('Error connecting to WhatsApp server:', serverError);
     }
     
     // Se o servidor não responder, usar dados do banco
@@ -163,7 +176,8 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
         status: 'desconectado',
         sessionId: null,
         qrCode: null,
-        ready: false
+        ready: false,
+        error: error.message
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -172,6 +186,8 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
 
 async function initiateConnection(supabase: any, userId: string, token: string) {
   try {
+    console.log('Initiating WhatsApp connection for user:', userId);
+    
     // Verificar se já existe uma sessão ativa
     const { data: existingSession } = await supabase
       .from('whatsapp_sessoes')
@@ -181,17 +197,20 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
       .maybeSingle();
 
     if (existingSession) {
+      console.log('Existing active session found');
       return new Response(
         JSON.stringify({ 
           success: true, 
           message: 'Sessão já conectada',
-          sessionId: existingSession.id 
+          sessionId: existingSession.id,
+          status: 'conectado'
         }), 
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // Solicitar conexão ao servidor real
+    console.log('Making connection request to WhatsApp server');
     const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
       method: 'POST',
       headers: {
@@ -201,11 +220,16 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
       body: JSON.stringify({ action: 'connect' })
     });
 
+    console.log('Server connection response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`Servidor WhatsApp retornou erro: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Server error:', response.status, errorText);
+      throw new Error(`Servidor WhatsApp retornou erro: ${response.status} - ${errorText}`);
     }
 
     const serverResponse = await response.json();
+    console.log('Server response data:', serverResponse);
     
     // Criar ou atualizar sessão no banco
     const { data: newSession, error } = await supabase
@@ -224,7 +248,7 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
       console.error('Erro ao salvar sessão:', error);
     }
 
-    console.log('Conexão WhatsApp iniciada:', {
+    console.log('Connection initiated successfully:', {
       success: serverResponse.success,
       sessionId: newSession?.id,
       status: serverResponse.status,
@@ -536,24 +560,8 @@ async function simulateIncomingMessage(supabase: any, userId: string, sessionId:
 
 async function getQRCode(supabase: any, userId: string, token: string) {
   try {
-    // Primeiro, verificar se há uma sessão em pareamento
-    const { data: session } = await supabase
-      .from('whatsapp_sessoes')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'pareando')
-      .maybeSingle();
-
-    if (!session) {
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: 'Nenhuma sessão em pareamento encontrada' 
-        }), 
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
+    console.log('Getting QR Code for user:', userId);
+    
     // Buscar QR Code no servidor real seguindo o padrão correto
     const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
       method: 'POST',
@@ -564,18 +572,23 @@ async function getQRCode(supabase: any, userId: string, token: string) {
       body: JSON.stringify({ action: 'get-qr' })
     });
 
+    console.log('QR Code response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`Servidor WhatsApp retornou erro: ${response.status}`);
+      const errorText = await response.text();
+      console.error('QR Code error:', response.status, errorText);
+      throw new Error(`Servidor WhatsApp retornou erro: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
+    console.log('QR Code result:', result);
     
     if (result.qrCode) {
       // Atualizar sessão com QR Code
       await supabase
         .from('whatsapp_sessoes')
         .update({ 
-          sessao_serializada: JSON.stringify({ ...JSON.parse(session.sessao_serializada || '{}'), qrCode: result.qrCode }),
+          sessao_serializada: JSON.stringify({ qrCode: result.qrCode }),
           atualizado_em: new Date().toISOString()
         })
         .eq('user_id', userId);
