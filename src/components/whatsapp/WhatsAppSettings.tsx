@@ -93,6 +93,8 @@ export const WhatsAppSettings: React.FC = () => {
                     <p className="text-sm text-muted-foreground">
                       {session.status === 'conectado' 
                         ? 'WhatsApp conectado e funcionando'
+                        : session.status === 'pareando' 
+                        ? 'Pareando com WhatsApp - Escaneie o QR Code'
                         : 'WhatsApp não está conectado'
                       }
                     </p>
@@ -102,6 +104,33 @@ export const WhatsAppSettings: React.FC = () => {
                   {getStatusText()}
                 </Badge>
               </div>
+
+              {/* QR Code quando estiver pareando */}
+              {session.status === 'pareando' && session.qrCode && (
+                <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-green-300 rounded-lg bg-green-50 dark:bg-green-900/20">
+                  <h3 className="text-lg font-semibold mb-4 text-green-800 dark:text-green-200">
+                    QR Code Gerado
+                  </h3>
+                  <div className="bg-white p-4 rounded-lg shadow-md">
+                    <img 
+                      src={session.qrCode} 
+                      alt="QR Code do WhatsApp" 
+                      className="w-64 h-64 mx-auto"
+                    />
+                  </div>
+                  <p className="text-sm text-center text-green-700 dark:text-green-300 mt-4 max-w-md">
+                    <strong>Escaneie o QR Code com seu WhatsApp para conectar</strong>
+                    <br />
+                    1. Abra o WhatsApp no seu celular
+                    <br />
+                    2. Vá em Menu → Dispositivos conectados
+                    <br />
+                    3. Toque em "Conectar um dispositivo"
+                    <br />
+                    4. Aponte a câmera para este QR Code
+                  </p>
+                </div>
+              )}
 
               {/* Ações */}
               <div className="flex gap-2">
