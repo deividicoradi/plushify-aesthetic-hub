@@ -18,7 +18,7 @@ export const WhatsAppSettings: React.FC = () => {
   console.log('WhatsApp Settings - Session:', session);
   console.log('WhatsApp Settings - Status:', session.status);
   if (session.qrCode) {
-    console.log('WhatsApp Settings - QR Code disponível:', session.qrCode.substring(0, 50) + '...');
+    console.log('WhatsApp Settings - QR Code disponível:', session.qrCode);
   }
 
   const getStatusColor = () => {
@@ -191,7 +191,7 @@ export const WhatsAppSettings: React.FC = () => {
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <div>
                     <p className="text-sm font-medium">Servidor Configurado</p>
-                    <p className="text-xs text-muted-foreground">https://whatsapp.plushify.com.br</p>
+                    <p className="text-xs text-muted-foreground">Edge Function Supabase</p>
                   </div>
                 </div>
                 <Alert>

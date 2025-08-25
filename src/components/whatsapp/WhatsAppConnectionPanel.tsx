@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
-import { QrCode, Smartphone, Wifi, MessageCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { QrCode, Smartphone, Wifi, MessageCircle, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { useWhatsApp, WhatsAppSession } from '@/hooks/useWhatsApp';
 
 interface PanelProps {
@@ -16,17 +17,63 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
   const hook = useWhatsApp();
   const session = sessionProp ?? hook.session;
   const connectWhatsApp = connectProp ?? hook.connectWhatsApp;
+  const disconnectWhatsApp = hook.disconnectWhatsApp;
   const loading = loadingProp ?? hook.loading;
+  const [progress, setProgress] = useState(0);
+
+  console.log('WhatsApp Connection Panel - Session:', session);
+  console.log('WhatsApp Connection Panel - Status:', session.status);
+  if (session.qrCode) {
+    console.log('WhatsApp Connection Panel - QR Code URL:', session.qrCode);
+  }
 
   // Manter o QR Code e status atualizados durante o pareamento
   useEffect(() => {
     if (session.status === 'pareando' || session.status === 'conectando') {
       const id = setInterval(() => {
         hook.getSessionStatus();
-      }, 5000);
+      }, 3000); // Verificar a cada 3 segundos
       return () => clearInterval(id);
     }
   }, [session.status, hook]);
+
+  // Simular progresso quando em estado de pareamento
+  useEffect(() => {
+    if (session.status === 'pareando' || session.status === 'conectando') {
+      const interval = setInterval(() => {
+        setProgress(prev => (prev >= 90 ? 20 : prev + 10));
+      }, 1000);
+
+      return () => clearInterval(interval);
+    } else {
+      setProgress(0);
+    }
+  }, [session.status]);
+
+  const getStatusColor = () => {
+    switch (session.status) {
+      case 'conectado':
+        return 'bg-green-500';
+      case 'conectando':
+      case 'pareando':
+        return 'bg-yellow-500';
+      default:
+        return 'bg-red-500';
+    }
+  };
+
+  const getStatusText = () => {
+    switch (session.status) {
+      case 'conectado':
+        return 'Conectado';
+      case 'conectando':
+        return 'Conectando';
+      case 'pareando':
+        return 'Aguardando QR Code';
+      default:
+        return 'Desconectado';
+    }
+  };
 
   if (session.status === 'pareando' && session.qrCode) {
     return (
@@ -79,10 +126,24 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
               </div>
             </div>
 
-            <Progress value={60} className="mt-4" />
-            <p className="text-xs text-muted-foreground mt-2">
-              Aguardando pareamento...
-            </p>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Aguardando pareamento...</span>
+                <span>{progress}%</span>
+              </div>
+              <Progress value={progress} className="w-full" />
+            </div>
+
+            <div className="flex justify-center">
+              <Button
+                onClick={connectWhatsApp}
+                disabled={loading}
+                variant="outline"
+                size="sm"
+              >
+                {loading ? 'Gerando...' : 'Gerar novo QR Code'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -162,6 +223,25 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
           </div>
         </div>
 
+        {/* Status da conexão */}
+        <div className="flex items-center justify-between p-4 border rounded-lg max-w-sm w-full">
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${getStatusColor()}`} />
+            <div>
+              <h4 className="font-medium">Status da Conexão</h4>
+              <p className="text-sm text-muted-foreground">
+                {session.status === 'conectado' 
+                  ? 'WhatsApp conectado e funcionando'
+                  : 'WhatsApp não está conectado'
+                }
+              </p>
+            </div>
+          </div>
+          <Badge variant="secondary">
+            {getStatusText()}
+          </Badge>
+        </div>
+
         {/* Aviso importante */}
         <Alert className="max-w-sm">
           <Wifi className="h-4 w-4" />
@@ -170,25 +250,40 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
           </AlertDescription>
         </Alert>
 
-        {/* Botão de conectar */}
-        <Button
-          onClick={connectWhatsApp}
-          disabled={loading}
-          size="lg"
-          className="w-full max-w-sm bg-green-500 hover:bg-green-600 text-white font-semibold"
-        >
-          {loading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
-              Conectando...
-            </>
+        {/* Botões de ação */}
+        <div className="flex gap-2 w-full max-w-sm">
+          {session.status === 'conectado' ? (
+            <Button
+              onClick={disconnectWhatsApp}
+              disabled={loading}
+              variant="destructive"
+              size="lg"
+              className="flex-1"
+            >
+              <WifiOff className="w-5 h-5 mr-2" />
+              Desconectar
+            </Button>
           ) : (
-            <>
-              <QrCode className="w-5 h-5 mr-3" />
-              Conectar WhatsApp
-            </>
+            <Button
+              onClick={connectWhatsApp}
+              disabled={loading}
+              size="lg"
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
+                  Conectando...
+                </>
+              ) : (
+                <>
+                  <QrCode className="w-5 h-5 mr-3" />
+                  Conectar WhatsApp
+                </>
+              )}
+            </Button>
           )}
-        </Button>
+        </div>
       </div>
     </div>
   );

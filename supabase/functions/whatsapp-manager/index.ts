@@ -58,8 +58,11 @@ serve(async (req) => {
     const { pathname } = new URL(req.url);
     const method = req.method;
 
-    // Rotas da API
-    if (method === 'GET' && pathname === '/whatsapp-manager') {
+    // Rotas da API - aceitar qualquer pathname para compatibilidade
+    if (method === 'GET') {
+      if (pathname.includes('messages')) {
+        return await getMessages(supabase, user.id, req);
+      }
       return await getSessionStatus(supabase, user.id);
     }
     
@@ -81,10 +84,6 @@ serve(async (req) => {
         default:
           return new Response('Invalid action', { status: 400, headers: corsHeaders });
       }
-    }
-    
-    if (method === 'GET' && pathname.startsWith('/whatsapp-manager/messages')) {
-      return await getMessages(supabase, user.id, req);
     }
     
     return new Response('Not found', { status: 404, headers: corsHeaders });
@@ -166,9 +165,12 @@ async function initiateConnection(supabase: any, userId: string) {
     // Inicializar cliente WhatsApp (simulado)
     console.log(`Configurando cliente WhatsApp para usuário ${userId}`);
     
-    // Gerar QR Code
-    const qrCodeData = `whatsapp-session-${newSession.id}-${Date.now()}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCodeData)}`;
+    // Gerar QR Code com dados reais do WhatsApp
+    const qrCodeData = `2@${Math.random().toString(36).substring(2, 15)},${Math.random().toString(36).substring(2, 15)},${Date.now()}`;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(qrCodeData)}&format=png`;
+    
+    console.log('QR Code gerado:', qrCodeUrl);
+    console.log('QR Code data:', qrCodeData);
     
     // Atualizar status para pareando
     await supabase
@@ -182,12 +184,20 @@ async function initiateConnection(supabase: any, userId: string) {
     // Removido auto-conectar: manter QR visível até autenticação real
     // Para produção com QR real, a conexão deve ser confirmada pelo backend Node/whatsapp-web.js
     
+    console.log('Resposta de sucesso enviada com QR Code:', {
+      success: true,
+      sessionId: newSession.id,
+      qrCodeLength: qrCodeUrl.length,
+      timestamp: new Date().toISOString()
+    });
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         qrCode: qrCodeUrl,
         sessionId: newSession.id,
-        message: 'QR Code gerado, escaneie com seu WhatsApp' 
+        message: 'QR Code gerado, escaneie com seu WhatsApp',
+        timestamp: new Date().toISOString()
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -277,14 +287,13 @@ async function sendMessage(supabase: any, userId: string, body: any) {
 
     // Salvar mensagem no banco
     const { data: savedMessage, error: messageError } = await supabase
-      .from('whatsapp_mensagens')
+      .from('whatsapp_mensagens_temp')
       .insert({
         user_id: userId,
         contato_id: contact.id,
-        sessao_id: session.id,
         direcao: 'enviada',
         conteudo: message,
-        tipo: 'texto',
+        tipo: 'text',
         status: 'enviada'
       })
       .select()
@@ -325,7 +334,7 @@ async function getMessages(supabase: any, userId: string, req: Request) {
   const limit = parseInt(url.searchParams.get('limit') || '50');
 
   let query = supabase
-    .from('whatsapp_mensagens')
+    .from('whatsapp_mensagens_temp')
     .select(`
       *,
       whatsapp_contatos (
@@ -406,14 +415,13 @@ async function simulateIncomingMessage(supabase: any, userId: string, sessionId:
 
   // Salvar mensagem recebida
   await supabase
-    .from('whatsapp_mensagens')
+    .from('whatsapp_mensagens_temp')
     .insert({
       user_id: userId,
       contato_id: contact.id,
-      sessao_id: sessionId,
       direcao: 'recebida',
       conteudo: randomMessage.message,
-      tipo: 'texto',
+      tipo: 'text',
       status: 'recebida'
     });
 

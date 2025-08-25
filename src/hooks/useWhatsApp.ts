@@ -28,8 +28,8 @@ export interface WhatsAppSession {
 }
 
 const getWhatsAppBaseUrl = () => {
-  // URL fixa do servidor WhatsApp para o Plushify
-  return 'https://whatsapp.plushify.com.br';
+  // URL da edge function WhatsApp Manager no Supabase
+  return 'https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager';
 };
 
 export const useWhatsApp = () => {
@@ -288,7 +288,7 @@ export const useWhatsApp = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'whatsapp_mensagens'
+          table: 'whatsapp_mensagens_temp'
         },
         () => {
           console.log('Nova mensagem WhatsApp detectada, recarregando...');
