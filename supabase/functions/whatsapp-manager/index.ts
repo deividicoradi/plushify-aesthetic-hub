@@ -95,7 +95,7 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
       .maybeSingle();
 
     // Verificar status no servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}/`, {
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/status`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -183,15 +183,12 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
     }
 
     // Solicitar conexão ao servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}/`, {
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/connect`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        action: 'connect'
-      })
+      }
     });
 
     if (!response.ok) {
@@ -248,17 +245,14 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
 
 async function disconnectSession(supabase: any, userId: string, token: string) {
   try {
-    // Desconectar no servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}/`, {
+    // Desconectar no servidor real (se existir endpoint)
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/disconnect`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        action: 'disconnect'
-      })
-    });
+      }
+    }).catch(() => null); // Ignorar erros de rede
 
     // Atualizar status no banco independente da resposta do servidor
     const { error } = await supabase
@@ -322,17 +316,15 @@ async function sendMessage(supabase: any, userId: string, body: any, token: stri
     }
 
     // Enviar mensagem via servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}/`, {
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/send`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        action: 'send-message',
         phone: phone,
-        message: message,
-        contactName: contactName
+        message: message
       })
     });
 

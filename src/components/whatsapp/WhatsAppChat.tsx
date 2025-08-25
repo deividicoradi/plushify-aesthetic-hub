@@ -42,7 +42,7 @@ export function WhatsAppChat() {
       if (selectedContact) {
         await sendMessage(selectedContact.telefone, newMessage);
       } else if (newPhone.trim()) {
-        await sendMessage(newPhone, newMessage, newContactName || newPhone);
+        await sendMessage(newPhone, newMessage);
         setNewPhone('');
         setNewContactName('');
         setShowNewContact(false);

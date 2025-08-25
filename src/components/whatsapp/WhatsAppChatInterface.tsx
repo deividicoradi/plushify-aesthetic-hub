@@ -63,7 +63,7 @@ export const WhatsAppChatInterface: React.FC = () => {
     if (!newContactPhone.trim() || !messageText.trim()) return;
 
     try {
-      await sendMessage(newContactPhone, messageText, newContactName || newContactPhone);
+      await sendMessage(newContactPhone, messageText);
       setMessageText('');
       setNewContactPhone('');
       setNewContactName('');
