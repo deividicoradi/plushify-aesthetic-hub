@@ -165,19 +165,27 @@ async function initiateConnection(supabase: any, userId: string) {
     // Inicializar cliente WhatsApp (simulado)
     console.log(`Configurando cliente WhatsApp para usuário ${userId}`);
     
-    // Gerar QR Code com dados reais do WhatsApp
-    const qrCodeData = `2@${Math.random().toString(36).substring(2, 15)},${Math.random().toString(36).substring(2, 15)},${Date.now()}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(qrCodeData)}&format=png`;
+    // Gerar QR Code com formato válido do WhatsApp Web
+    const clientId = `${Math.random().toString(36).substring(2, 15)}.${Math.random().toString(36).substring(2, 15)}@s.whatsapp.net`;
+    const serverToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const qrCodeData = `${clientId},${serverToken},${Date.now()}`;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}&format=png&margin=0`;
     
     console.log('QR Code gerado:', qrCodeUrl);
     console.log('QR Code data:', qrCodeData);
     
-    // Atualizar status para pareando
+    // Atualizar status para pareando e salvar dados do QR
     await supabase
       .from('whatsapp_sessoes')
       .update({ 
         status: 'pareando',
-        sessao_serializada: JSON.stringify({ sessionId, qrCode: qrCodeUrl })
+        sessao_serializada: JSON.stringify({ 
+          sessionId, 
+          qrCode: qrCodeUrl,
+          qrData: qrCodeData,
+          clientId,
+          serverToken
+        })
       })
       .eq('id', newSession.id);
 
