@@ -62,7 +62,7 @@ const DashboardSidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 h-[calc(100vh-180px)]">
+      <nav className="flex-1 overflow-y-auto py-4 px-3" style={{ maxHeight: 'calc(100vh - 200px)' }}>
         <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
