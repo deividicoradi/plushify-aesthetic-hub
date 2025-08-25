@@ -7,20 +7,8 @@ export const WhatsAppFloatingChat: React.FC = () => {
   
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent("Olá! Preciso de ajuda com o Plushify.");
-    const phone = supportNumber;
-    const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
-
-    const mobileDeepLink = `whatsapp://send?phone=${phone}&text=${message}`;
-    const desktopWebLink = `https://web.whatsapp.com/send?phone=${phone}&text=${message}`;
-    const waMeFallback = `https://wa.me/${phone}?text=${message}`;
-
-    // Prefer deep link on mobile, Web WhatsApp on desktop; fall back to wa.me
-    const targetUrl = isMobile ? mobileDeepLink : desktopWebLink;
-    try {
-      window.location.href = targetUrl;
-    } catch (e) {
-      window.location.href = waMeFallback;
-    }
+    const url = `https://wa.me/${supportNumber}?text=${message}`;
+    window.open(url, '_blank');
   };
   return (
     <div className="fixed bottom-6 right-6 z-50">
