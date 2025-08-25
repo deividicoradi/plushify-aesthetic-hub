@@ -123,33 +123,20 @@ export const useWhatsAppIntegration = () => {
     }
 
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        throw new Error('No access token available');
-      }
-
-      const response = await fetch(`${WHATSAPP_SERVER_URL}/status`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        signal
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+        method: 'GET'
       });
 
-      if (signal?.aborted) return;
-
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
+      if (error) {
+        throw new Error(error.message);
       }
-
-      const data = await response.json();
 
       setSession(prev => ({
         ...prev,
         status: data.status || 'desconectado',
         id: data.sessionId || prev.id,
-        ready: data.ready || false
+        ready: data.ready || false,
+        qrCode: data.qrCode || prev.qrCode
       }));
 
       setError(null);
@@ -169,7 +156,7 @@ export const useWhatsAppIntegration = () => {
       }
       throw error;
     }
-  }, [handleError, user, getAccessToken]);
+  }, [handleError, user]);
 
   // Get QR code from server
   const getQRCode = useCallback(async (signal?: AbortSignal) => {
@@ -177,34 +164,19 @@ export const useWhatsAppIntegration = () => {
     if (!user) return;
 
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        throw new Error('No access token available');
-      }
-
-      const response = await fetch(`${WHATSAPP_SERVER_URL}/qr`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        signal
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+        body: { action: 'get-qr' }
       });
 
-      if (signal?.aborted) return;
-
-      if (!response.ok) {
+      if (error) {
         // QR might not be available if not pairing
-        if (response.status === 400 || response.status === 404) {
-          console.log('QR code not available (expected when not pairing)');
-          return null;
-        }
-        throw new Error(`QR request failed: ${response.status}`);
+        console.log('QR code not available or error from proxy');
+        return null;
       }
 
-      const data = await response.json();
-      
-      if (data.qrCode) {
+      if (signal?.aborted) return null;
+
+      if (data?.qrCode) {
         setSession(prev => ({
           ...prev,
           qrCode: data.qrCode
@@ -219,7 +191,7 @@ export const useWhatsAppIntegration = () => {
       }
       return null;
     }
-  }, [user, getAccessToken]);
+  }, [user]);
 
   // Connect WhatsApp with proper server communication
   const connectWhatsApp = useCallback(async () => {
@@ -245,31 +217,17 @@ export const useWhatsAppIntegration = () => {
     try {
       console.log('whatsapp_connect_clicked');
       
-      const token = await getAccessToken();
-      if (!token) {
-        throw new Error('No access token available');
-      }
-
-      const response = await fetch(`${WHATSAPP_SERVER_URL}/connect`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        signal: controller.signal
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+        body: { action: 'connect' }
       });
 
-      if (controller.signal.aborted) return;
-
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
+      if (error) {
+        throw new Error(error.message);
       }
-
-      const data = await response.json();
 
       if (data?.success) {
         setSession({
-          id: data.sessionId,
+          id: data.sessionId ?? null,
           status: data.status || 'pareando',
           qrCode: data.qrCode
         });
@@ -285,7 +243,7 @@ export const useWhatsAppIntegration = () => {
             description: "Escaneie o QR Code com seu WhatsApp para conectar"
           });
           
-          // Start polling for status updates every 3-5 seconds
+          // Start polling for status updates every 4 seconds
           pollIntervalRef.current = setInterval(async () => {
             try {
               const status = await getSessionStatus(controller.signal);
@@ -304,7 +262,7 @@ export const useWhatsAppIntegration = () => {
             }
           }, 4000);
 
-          // Start QR code refresh polling every 5-8 seconds
+          // Start QR code refresh polling every 6 seconds
           qrIntervalRef.current = setInterval(() => {
             getQRCode(controller.signal);
           }, 6000);
@@ -327,7 +285,7 @@ export const useWhatsAppIntegration = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, toast, getSessionStatus, getQRCode, handleError, retryCount, clearIntervals, user, getAccessToken]);
+  }, [loading, toast, getSessionStatus, getQRCode, handleError, retryCount, clearIntervals, user]);
 
   // Disconnect WhatsApp
   const disconnectWhatsApp = useCallback(async () => {
@@ -337,21 +295,12 @@ export const useWhatsAppIntegration = () => {
     clearIntervals();
     
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        throw new Error('No access token available');
-      }
-
-      const response = await fetch(`${WHATSAPP_SERVER_URL}/disconnect`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        }
+      const { error } = await supabase.functions.invoke('whatsapp-manager', {
+        body: { action: 'disconnect' }
       });
 
-      if (!response.ok) {
-        console.warn('Disconnect error (non-critical):', response.status);
+      if (error) {
+        console.warn('Disconnect error (non-critical):', error.message);
       }
 
       setSession({
@@ -375,71 +324,7 @@ export const useWhatsAppIntegration = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast, clearIntervals, user, getAccessToken]);
-
-  // Send message with validation
-  const sendMessage = useCallback(async (phone: string, message: string) => {
-    if (!user) {
-      throw new Error('Você precisa estar logado para enviar mensagens');
-    }
-
-    if (!phone || !message.trim()) {
-      throw new Error('Telefone e mensagem são obrigatórios');
-    }
-
-    // E164 basic validation
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length < 10) {
-      throw new Error('Número de telefone inválido');
-    }
-
-    try {
-      console.log('whatsapp_message_sending');
-      
-      const token = await getAccessToken();
-      if (!token) {
-        throw new Error('No access token available');
-      }
-
-      const response = await fetch(`${WHATSAPP_SERVER_URL}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          phone: cleanPhone,
-          message: message.trim()
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data?.success) {
-        toast({
-          title: "Mensagem Enviada",
-          description: "Mensagem enviada com sucesso"
-        });
-        
-        console.log('whatsapp_message_sent');
-        
-        // Reload data
-        await Promise.all([loadMessages(), loadContacts()]);
-        
-        return data.messageId;
-      } else {
-        throw new Error(data?.error || 'Falha ao enviar mensagem');
-      }
-    } catch (error: any) {
-      console.log('whatsapp_message_failed');
-      handleError(error, 'send message');
-      throw error;
-    }
-  }, [toast, handleError, user, getAccessToken]);
+  }, [toast, clearIntervals, user]);
 
   // Load messages with pagination support
   const loadMessages = useCallback(async (contactId?: string, limit = 50) => {
@@ -483,6 +368,59 @@ export const useWhatsAppIntegration = () => {
       handleError(error, 'load contacts');
     }
   }, [handleError, user]);
+
+  // Send message with validation
+  const sendMessage = useCallback(async (phone: string, message: string) => {
+    if (!user) {
+      throw new Error('Você precisa estar logado para enviar mensagens');
+    }
+
+    if (!phone || !message.trim()) {
+      throw new Error('Telefone e mensagem são obrigatórios');
+    }
+
+    // E164 basic validation
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      throw new Error('Número de telefone inválido');
+    }
+
+    try {
+      console.log('whatsapp_message_sending');
+      
+      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+        body: {
+          action: 'send-message',
+          phone: cleanPhone,
+          message: message.trim()
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.success) {
+        toast({
+          title: "Mensagem Enviada",
+          description: "Mensagem enviada com sucesso"
+        });
+        
+        console.log('whatsapp_message_sent');
+        
+        // Reload data
+        await Promise.all([loadMessages(), loadContacts()]);
+        
+        return data.messageId;
+      } else {
+        throw new Error(data?.error || 'Falha ao enviar mensagem');
+      }
+    } catch (error: any) {
+      console.log('whatsapp_message_failed');
+      handleError(error, 'send message');
+      throw error;
+    }
+  }, [toast, handleError, user, loadMessages, loadContacts]);
 
   // Retry failed operations
   const retry = useCallback(() => {
