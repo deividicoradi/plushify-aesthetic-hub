@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { WhatsAppHeaderButton } from "@/components/whatsapp/WhatsAppHeaderButton";
 
 interface DesktopMenuProps {
   onLogin: () => void;
@@ -46,7 +45,6 @@ const DesktopMenu = ({ onLogin, onSignUp }: DesktopMenuProps) => {
         Depoimentos
       </button>
       <div className="flex items-center space-x-3">
-        <WhatsAppHeaderButton />
         <ThemeToggle />
         <Button 
           variant="outline"
