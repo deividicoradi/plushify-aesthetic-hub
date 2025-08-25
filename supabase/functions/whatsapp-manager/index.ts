@@ -42,13 +42,17 @@ serve(async (req) => {
 
     const { pathname } = new URL(req.url);
     const method = req.method;
+    const xRequestPath = req.headers.get('X-Request-Path') || req.headers.get('x-request-path') || '';
 
     // Rotas da API
     if (method === 'GET') {
-      if (pathname.includes('messages')) {
-        return await getMessages(supabase, user.id, req);
+      if (xRequestPath.startsWith('messages') || pathname.includes('messages')) {
+        return await getMessages(supabase, user.id, req, token);
       }
-      return await getSessionStatus(supabase, user.id);
+      if (xRequestPath.startsWith('contacts') || pathname.includes('contacts')) {
+        return await getContacts(supabase, user.id);
+      }
+      return await getSessionStatus(supabase, user.id, token);
     }
     
     if (method === 'POST') {
@@ -57,11 +61,11 @@ serve(async (req) => {
       
       switch (action) {
         case 'connect':
-          return await initiateConnection(supabase, user.id);
+          return await initiateConnection(supabase, user.id, token);
         case 'disconnect':
-          return await disconnectSession(supabase, user.id);
+          return await disconnectSession(supabase, user.id, token);
         case 'send-message':
-          return await sendMessage(supabase, user.id, body);
+          return await sendMessage(supabase, user.id, body, token);
         case 'get-contacts':
           return await getContacts(supabase, user.id);
         case 'simulate-message':
@@ -81,7 +85,7 @@ serve(async (req) => {
   }
 });
 
-async function getSessionStatus(supabase: any, userId: string) {
+async function getSessionStatus(supabase: any, userId: string, token: string) {
   try {
     // Verificar sessão no banco
     const { data: session } = await supabase
@@ -91,10 +95,11 @@ async function getSessionStatus(supabase: any, userId: string) {
       .maybeSingle();
 
     // Verificar status no servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/status/${userId}`, {
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       }
     });
 
@@ -156,7 +161,7 @@ async function getSessionStatus(supabase: any, userId: string) {
   }
 }
 
-async function initiateConnection(supabase: any, userId: string) {
+async function initiateConnection(supabase: any, userId: string, token: string) {
   try {
     // Verificar se já existe uma sessão ativa
     const { data: existingSession } = await supabase
@@ -178,13 +183,14 @@ async function initiateConnection(supabase: any, userId: string) {
     }
 
     // Solicitar conexão ao servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/connect`, {
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        userId: userId
+        action: 'connect'
       })
     });
 
@@ -240,16 +246,17 @@ async function initiateConnection(supabase: any, userId: string) {
   }
 }
 
-async function disconnectSession(supabase: any, userId: string) {
+async function disconnectSession(supabase: any, userId: string, token: string) {
   try {
     // Desconectar no servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/disconnect`, {
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        userId: userId
+        action: 'disconnect'
       })
     });
 
@@ -288,7 +295,7 @@ async function disconnectSession(supabase: any, userId: string) {
   }
 }
 
-async function sendMessage(supabase: any, userId: string, body: any) {
+async function sendMessage(supabase: any, userId: string, body: any, token: string) {
   const { phone, message, contactName } = body;
 
   if (!phone || !message) {
@@ -315,13 +322,14 @@ async function sendMessage(supabase: any, userId: string, body: any) {
     }
 
     // Enviar mensagem via servidor real
-    const response = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/send-message`, {
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        userId: userId,
+        action: 'send-message',
         phone: phone,
         message: message,
         contactName: contactName
@@ -411,37 +419,42 @@ async function sendMessage(supabase: any, userId: string, body: any) {
   }
 }
 
-async function getMessages(supabase: any, userId: string, req: Request) {
+async function getMessages(supabase: any, userId: string, req: Request, token: string) {
   const url = new URL(req.url);
-  const contactId = url.searchParams.get('contactId');
-  const limit = parseInt(url.searchParams.get('limit') || '50');
+  let contactId = url.searchParams.get('contactId') || '';
+  let limit = parseInt(url.searchParams.get('limit') || '50');
 
-  let query = supabase
-    .from('whatsapp_mensagens_temp')
-    .select(`
-      *,
-      whatsapp_contatos (
-        id,
-        nome,
-        telefone
-      )
-    `)
-    .eq('user_id', userId)
-    .order('horario', { ascending: false })
-    .limit(limit);
-
-  if (contactId) {
-    query = query.eq('contato_id', contactId);
+  // Suporte para cabeçalho X-Request-Path (quando não podemos alterar o path da Edge Function)
+  const headerPath = req.headers.get('X-Request-Path') || req.headers.get('x-request-path') || '';
+  if (headerPath) {
+    const qs = headerPath.split('?')[1];
+    if (qs) {
+      const params = new URLSearchParams(qs);
+      contactId = params.get('contactId') || contactId;
+      limit = parseInt(params.get('limit') || String(limit));
+    }
   }
 
-  const { data: messages, error } = await query;
+  const serverUrl = new URL(`${WHATSAPP_SERVER_URL}/messages`);
+  if (contactId) serverUrl.searchParams.set('contactId', contactId);
+  serverUrl.searchParams.set('limit', String(limit));
 
-  if (error) {
-    throw error;
+  const response = await fetch(serverUrl.toString(), {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Servidor retornou erro: ${response.status}`);
   }
+
+  const result = await response.json();
 
   return new Response(
-    JSON.stringify({ messages: messages || [] }), 
+    JSON.stringify({ messages: result.messages || [] }), 
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
 }
