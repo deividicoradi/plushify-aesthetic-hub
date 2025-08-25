@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface WhatsAppContact {
   id: string;
@@ -35,6 +36,7 @@ export interface WhatsAppError {
 }
 
 export const useWhatsAppIntegration = () => {
+  const { user } = useAuth();
   const [session, setSession] = useState<WhatsAppSession>({
     id: null,
     status: 'desconectado'
@@ -106,6 +108,12 @@ export const useWhatsAppIntegration = () => {
 
   // Get session status with proper error handling
   const getSessionStatus = useCallback(async (signal?: AbortSignal) => {
+    // Don't make requests if user is not authenticated
+    if (!user) {
+      setSession({ id: null, status: 'desconectado' });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
         method: 'GET',
@@ -142,10 +150,13 @@ export const useWhatsAppIntegration = () => {
       }
       throw error;
     }
-  }, [handleError]);
+  }, [handleError, user]);
 
   // Get QR code with retry logic
   const getQRCode = useCallback(async (signal?: AbortSignal) => {
+    // Don't make requests if user is not authenticated
+    if (!user) return;
+
     try {
       const response = await fetch('https://whatsapp.plushify.com.br/qr', {
         method: 'GET',
@@ -178,10 +189,20 @@ export const useWhatsAppIntegration = () => {
         console.warn('QR fetch failed:', error.message);
       }
     }
-  }, []);
+  }, [user]);
 
   // Connect WhatsApp with polling
   const connectWhatsApp = useCallback(async () => {
+    // Don't allow connection if user is not authenticated
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para conectar o WhatsApp",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (loading) return;
     
     setLoading(true);
@@ -259,10 +280,12 @@ export const useWhatsAppIntegration = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, toast, getSessionStatus, getQRCode, handleError, retryCount, clearIntervals]);
+  }, [loading, toast, getSessionStatus, getQRCode, handleError, retryCount, clearIntervals, user]);
 
   // Disconnect WhatsApp
   const disconnectWhatsApp = useCallback(async () => {
+    if (!user) return;
+    
     setLoading(true);
     clearIntervals();
     
@@ -296,10 +319,14 @@ export const useWhatsAppIntegration = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast, clearIntervals]);
+  }, [toast, clearIntervals, user]);
 
   // Send message with validation
   const sendMessage = useCallback(async (phone: string, message: string) => {
+    if (!user) {
+      throw new Error('Você precisa estar logado para enviar mensagens');
+    }
+
     if (!phone || !message.trim()) {
       throw new Error('Telefone e mensagem são obrigatórios');
     }
@@ -345,10 +372,12 @@ export const useWhatsAppIntegration = () => {
       handleError(error, 'send message');
       throw error;
     }
-  }, [toast, handleError]);
+  }, [toast, handleError, user]);
 
   // Load messages with pagination support
   const loadMessages = useCallback(async (contactId?: string, limit = 50) => {
+    if (!user) return;
+    
     try {
       const path = contactId ? `messages?contactId=${contactId}&limit=${limit}` : `messages?limit=${limit}`;
       
@@ -367,10 +396,12 @@ export const useWhatsAppIntegration = () => {
     } catch (error: any) {
       handleError(error, 'load messages');
     }
-  }, [handleError]);
+  }, [handleError, user]);
 
   // Load contacts
   const loadContacts = useCallback(async () => {
+    if (!user) return;
+    
     try {
       const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
         body: { action: 'get-contacts' }
@@ -384,7 +415,7 @@ export const useWhatsAppIntegration = () => {
     } catch (error: any) {
       handleError(error, 'load contacts');
     }
-  }, [handleError]);
+  }, [handleError, user]);
 
   // Retry failed operations
   const retry = useCallback(() => {
@@ -399,13 +430,16 @@ export const useWhatsAppIntegration = () => {
 
   // Initialize and cleanup
   useEffect(() => {
-    getSessionStatus();
-    loadContacts();
+    // Only initialize if user is authenticated
+    if (user) {
+      getSessionStatus();
+      loadContacts();
+    }
     
     return () => {
       clearIntervals();
     };
-  }, [getSessionStatus, loadContacts, clearIntervals]);
+  }, [getSessionStatus, loadContacts, clearIntervals, user]);
 
   // Realtime subscriptions
   useEffect(() => {

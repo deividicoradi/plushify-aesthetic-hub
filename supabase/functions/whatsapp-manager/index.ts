@@ -26,7 +26,10 @@ serve(async (req) => {
     // Verificar autenticação
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response('Authorization header missing', { status: 401, headers: corsHeaders });
+      return new Response(
+        JSON.stringify({ error: 'Authorization header missing', authenticated: false }), 
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -34,10 +37,14 @@ serve(async (req) => {
     
     if (authError || !user) {
       console.error('Auth error:', authError);
-      return new Response(JSON.stringify({ error: 'Invalid authentication', details: authError?.message }), { 
-        status: 401, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      });
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid authentication', 
+          details: authError?.message,
+          authenticated: false 
+        }), 
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const { pathname } = new URL(req.url);
