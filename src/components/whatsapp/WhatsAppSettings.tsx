@@ -175,47 +175,28 @@ export const WhatsAppSettings: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Informações sobre o servidor */}
           <Card>
             <CardHeader>
-              <CardTitle>Servidor WhatsApp (Node)</CardTitle>
-              <CardDescription>Configure a URL do seu microserviço com whatsapp-web.js</CardDescription>
+              <CardTitle>Servidor WhatsApp</CardTitle>
+              <CardDescription>Integração automática com WhatsApp Web</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <Label htmlFor="wa-server-url">URL do servidor</Label>
-                <Input
-                  id="wa-server-url"
-                  placeholder="https://seu-dominio.com/whatsapp"
-                  value={serverUrl}
-                  onChange={(e) => setServerUrl(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">Exemplo: https://api.minhaempresa.com/whatsapp</p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      const v = serverUrl.trim();
-                      if (!v || !/^https?:\/\//i.test(v)) {
-                        alert('Informe uma URL válida iniciando com http(s)');
-                        return;
-                      }
-                      localStorage.setItem('WHATSAPP_SERVER_URL', v.replace(/\/$/, ''));
-                      alert('URL do servidor salva.');
-                    }}
-                  >
-                    Salvar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      localStorage.removeItem('WHATSAPP_SERVER_URL');
-                      setServerUrl('');
-                      alert('Voltando ao provedor padrão (Supabase Edge Function).');
-                    }}
-                  >
-                    Usar padrão (Supabase)
-                  </Button>
+                <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div>
+                    <p className="text-sm font-medium">Servidor Configurado</p>
+                    <p className="text-xs text-muted-foreground">https://whatsapp.plushify.com.br</p>
+                  </div>
                 </div>
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Configuração automática:</strong> O servidor WhatsApp está pré-configurado. 
+                    Basta clicar em "Conectar WhatsApp" para começar a usar.
+                  </AlertDescription>
+                </Alert>
               </div>
             </CardContent>
           </Card>

@@ -28,8 +28,8 @@ export interface WhatsAppSession {
 }
 
 const getWhatsAppBaseUrl = () => {
-  const url = localStorage.getItem('WHATSAPP_SERVER_URL')?.trim();
-  return url && /^https?:\/\//i.test(url) ? url.replace(/\/$/, '') : 'https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager';
+  // URL fixa do servidor WhatsApp para o Plushify
+  return 'https://whatsapp.plushify.com.br';
 };
 
 export const useWhatsApp = () => {
