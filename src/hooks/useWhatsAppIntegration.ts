@@ -35,6 +35,8 @@ export interface WhatsAppError {
   code?: number;
 }
 
+const WHATSAPP_SERVER_URL = 'https://whatsapp.plushify.com.br';
+
 export const useWhatsAppIntegration = () => {
   const { user } = useAuth();
   const [session, setSession] = useState<WhatsAppSession>({
@@ -66,6 +68,12 @@ export const useWhatsAppIntegration = () => {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+  }, []);
+
+  // Get access token for server requests
+  const getAccessToken = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token;
   }, []);
 
   // Error handler with retry logic
@@ -115,22 +123,33 @@ export const useWhatsAppIntegration = () => {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+      const token = await getAccessToken();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/status`, {
         method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        signal
       });
 
       if (signal?.aborted) return;
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
       }
+
+      const data = await response.json();
 
       setSession(prev => ({
         ...prev,
         status: data.status || 'desconectado',
-        id: data.sessionId,
-        qrCode: data.qrCode,
-        ready: data.ready
+        id: data.sessionId || prev.id,
+        ready: data.ready || false
       }));
 
       setError(null);
@@ -150,34 +169,42 @@ export const useWhatsAppIntegration = () => {
       }
       throw error;
     }
-  }, [handleError, user]);
+  }, [handleError, user, getAccessToken]);
 
-  // Get QR code with retry logic
+  // Get QR code from server
   const getQRCode = useCallback(async (signal?: AbortSignal) => {
     // Don't make requests if user is not authenticated
     if (!user) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'get-qr' }
+      const token = await getAccessToken();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/qr`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        signal
       });
 
       if (signal?.aborted) return;
 
-      if (error) {
-        console.warn('QR request failed, using mock QR:', error.message);
-        // Use a mock QR code for demo purposes
-        const mockQRCode = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAABTElEQVR4nO3BIQEAAACCIP+vbkhAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAODfAEcsAAG4MjECAAAAAElFTkSuQmCC";
-        
-        setSession(prev => ({
-          ...prev,
-          qrCode: mockQRCode
-        }));
-        console.log('whatsapp_qr_rendered');
-        return { qrCode: mockQRCode };
+      if (!response.ok) {
+        // QR might not be available if not pairing
+        if (response.status === 400 || response.status === 404) {
+          console.log('QR code not available (expected when not pairing)');
+          return null;
+        }
+        throw new Error(`QR request failed: ${response.status}`);
       }
+
+      const data = await response.json();
       
-      if (data?.qrCode) {
+      if (data.qrCode) {
         setSession(prev => ({
           ...prev,
           qrCode: data.qrCode
@@ -188,19 +215,13 @@ export const useWhatsAppIntegration = () => {
       return data;
     } catch (error: any) {
       if (!signal?.aborted) {
-        console.warn('QR fetch failed, using mock QR:', error.message);
-        // Use a mock QR code for demo purposes
-        const mockQRCode = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAABTElEQVR4nO3BIQEAAACCIP+vbkhAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAODfAEcsAAG4MjECAAAAAElFTkSuQmCC";
-        
-        setSession(prev => ({
-          ...prev,
-          qrCode: mockQRCode
-        }));
+        console.warn('QR fetch failed:', error.message);
       }
+      return null;
     }
-  }, [user]);
+  }, [user, getAccessToken]);
 
-  // Connect WhatsApp with polling
+  // Connect WhatsApp with proper server communication
   const connectWhatsApp = useCallback(async () => {
     // Don't allow connection if user is not authenticated
     if (!user) {
@@ -224,15 +245,27 @@ export const useWhatsAppIntegration = () => {
     try {
       console.log('whatsapp_connect_clicked');
       
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'connect' }
+      const token = await getAccessToken();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/connect`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        signal: controller.signal
       });
 
       if (controller.signal.aborted) return;
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
       }
+
+      const data = await response.json();
 
       if (data?.success) {
         setSession({
@@ -252,16 +285,7 @@ export const useWhatsAppIntegration = () => {
             description: "Escaneie o QR Code com seu WhatsApp para conectar"
           });
           
-          // Generate a demo QR code immediately if not provided
-          if (!data.qrCode) {
-            const mockQRCode = "https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=" + encodeURIComponent("WhatsApp Demo QR Code - Use seu WhatsApp real para escanear");
-            setSession(prev => ({
-              ...prev,
-              qrCode: mockQRCode
-            }));
-          }
-          
-          // Start polling for status updates
+          // Start polling for status updates every 3-5 seconds
           pollIntervalRef.current = setInterval(async () => {
             try {
               const status = await getSessionStatus(controller.signal);
@@ -280,10 +304,15 @@ export const useWhatsAppIntegration = () => {
             }
           }, 4000);
 
-          // Start QR code refresh polling
+          // Start QR code refresh polling every 5-8 seconds
           qrIntervalRef.current = setInterval(() => {
             getQRCode(controller.signal);
           }, 6000);
+
+          // Initial QR fetch after a short delay
+          setTimeout(() => {
+            getQRCode(controller.signal);
+          }, 1000);
 
           // Clear polling after 2 minutes
           setTimeout(() => {
@@ -298,7 +327,7 @@ export const useWhatsAppIntegration = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, toast, getSessionStatus, getQRCode, handleError, retryCount, clearIntervals, user]);
+  }, [loading, toast, getSessionStatus, getQRCode, handleError, retryCount, clearIntervals, user, getAccessToken]);
 
   // Disconnect WhatsApp
   const disconnectWhatsApp = useCallback(async () => {
@@ -308,12 +337,21 @@ export const useWhatsAppIntegration = () => {
     clearIntervals();
     
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'disconnect' }
+      const token = await getAccessToken();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/disconnect`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
       });
 
-      if (error) {
-        console.warn('Disconnect error (non-critical):', error);
+      if (!response.ok) {
+        console.warn('Disconnect error (non-critical):', response.status);
       }
 
       setSession({
@@ -337,7 +375,7 @@ export const useWhatsAppIntegration = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast, clearIntervals, user]);
+  }, [toast, clearIntervals, user, getAccessToken]);
 
   // Send message with validation
   const sendMessage = useCallback(async (phone: string, message: string) => {
@@ -358,17 +396,28 @@ export const useWhatsAppIntegration = () => {
     try {
       console.log('whatsapp_message_sending');
       
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: {
-          action: 'send-message',
+      const token = await getAccessToken();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      const response = await fetch(`${WHATSAPP_SERVER_URL}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           phone: cleanPhone,
           message: message.trim()
-        }
+        })
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
       }
+
+      const data = await response.json();
 
       if (data?.success) {
         toast({
@@ -390,7 +439,7 @@ export const useWhatsAppIntegration = () => {
       handleError(error, 'send message');
       throw error;
     }
-  }, [toast, handleError, user]);
+  }, [toast, handleError, user, getAccessToken]);
 
   // Load messages with pagination support
   const loadMessages = useCallback(async (contactId?: string, limit = 50) => {
