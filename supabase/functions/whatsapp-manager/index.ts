@@ -6,22 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface WhatsAppSession {
-  id: string;
-  status: string;
-  qrCode?: string;
-  client?: any;
-}
-
-interface MessageData {
-  phone: string;
-  message: string;
-  contactName?: string;
-}
-
-// Cache global para sessões ativas e clientes WhatsApp
-const activeSessions = new Map<string, WhatsAppSession>();
-const messageQueue = new Map<string, MessageData[]>();
+const WHATSAPP_SERVER_URL = 'https://whatsapp.plushify.com.br';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -58,7 +43,7 @@ serve(async (req) => {
     const { pathname } = new URL(req.url);
     const method = req.method;
 
-    // Rotas da API - aceitar qualquer pathname para compatibilidade
+    // Rotas da API
     if (method === 'GET') {
       if (pathname.includes('messages')) {
         return await getMessages(supabase, user.id, req);
@@ -97,28 +82,78 @@ serve(async (req) => {
 });
 
 async function getSessionStatus(supabase: any, userId: string) {
-  const { data: session } = await supabase
-    .from('whatsapp_sessoes')
-    .select('*')
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  let qrCode: string | null = null;
   try {
-    if (session?.sessao_serializada) {
-      const meta = JSON.parse(session.sessao_serializada);
-      qrCode = meta?.qrCode ?? null;
-    }
-  } catch (_) {}
+    // Verificar sessão no banco
+    const { data: session } = await supabase
+      .from('whatsapp_sessoes')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
 
-  return new Response(
-    JSON.stringify({ 
-      status: session?.status || 'desconectado',
-      sessionId: session?.id || null,
-      qrCode
-    }), 
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+    // Verificar status no servidor real
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/status/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (response.ok) {
+      const serverStatus = await response.json();
+      
+      // Atualizar status no banco se necessário
+      if (session && session.status !== serverStatus.status) {
+        await supabase
+          .from('whatsapp_sessoes')
+          .update({ 
+            status: serverStatus.status,
+            sessao_serializada: JSON.stringify(serverStatus),
+            atualizado_em: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          status: serverStatus.status || 'desconectado',
+          sessionId: session?.id || null,
+          qrCode: serverStatus.qrCode || null,
+          ready: serverStatus.ready || false
+        }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Se o servidor não responder, usar dados do banco
+    let qrCode: string | null = null;
+    try {
+      if (session?.sessao_serializada) {
+        const meta = JSON.parse(session.sessao_serializada);
+        qrCode = meta?.qrCode ?? null;
+      }
+    } catch (_) {}
+
+    return new Response(
+      JSON.stringify({ 
+        status: session?.status || 'desconectado',
+        sessionId: session?.id || null,
+        qrCode,
+        ready: false
+      }), 
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Error getting session status:', error);
+    return new Response(
+      JSON.stringify({ 
+        status: 'desconectado',
+        sessionId: null,
+        qrCode: null,
+        ready: false
+      }), 
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
 }
 
 async function initiateConnection(supabase: any, userId: string) {
@@ -142,93 +177,115 @@ async function initiateConnection(supabase: any, userId: string) {
       );
     }
 
-    // Criar nova sessão
+    // Solicitar conexão ao servidor real
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/connect`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: userId
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Servidor WhatsApp retornou erro: ${response.status}`);
+    }
+
+    const serverResponse = await response.json();
+    
+    // Criar ou atualizar sessão no banco
     const { data: newSession, error } = await supabase
       .from('whatsapp_sessoes')
-      .insert({
+      .upsert({
         user_id: userId,
-        status: 'conectando'
+        status: serverResponse.status || 'pareando',
+        sessao_serializada: JSON.stringify(serverResponse)
+      }, {
+        onConflict: 'user_id'
       })
       .select()
       .single();
 
     if (error) {
-      throw error;
+      console.error('Erro ao salvar sessão:', error);
     }
 
-    // Inicializar WhatsApp Web.js (simulado para Deno)
-    const sessionId = `session_${userId}_${newSession.id}`;
-    
-    // Simular inicialização do cliente WhatsApp
-    console.log(`Inicializando WhatsApp Web.js para usuário ${userId}`);
-    
-    // Inicializar cliente WhatsApp (simulado)
-    console.log(`Configurando cliente WhatsApp para usuário ${userId}`);
-    
-    // Gerar QR Code com formato válido do WhatsApp Web
-    const clientId = `${Math.random().toString(36).substring(2, 15)}.${Math.random().toString(36).substring(2, 15)}@s.whatsapp.net`;
-    const serverToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    const qrCodeData = `${clientId},${serverToken},${Date.now()}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}&format=png&margin=0`;
-    
-    console.log('QR Code gerado:', qrCodeUrl);
-    console.log('QR Code data:', qrCodeData);
-    
-    // Atualizar status para pareando e salvar dados do QR
-    await supabase
-      .from('whatsapp_sessoes')
-      .update({ 
-        status: 'pareando',
-        sessao_serializada: JSON.stringify({ 
-          sessionId, 
-          qrCode: qrCodeUrl,
-          qrData: qrCodeData,
-          clientId,
-          serverToken
-        })
-      })
-      .eq('id', newSession.id);
-
-    // Removido auto-conectar: manter QR visível até autenticação real
-    // Para produção com QR real, a conexão deve ser confirmada pelo backend Node/whatsapp-web.js
-    
-    console.log('Resposta de sucesso enviada com QR Code:', {
-      success: true,
-      sessionId: newSession.id,
-      qrCodeLength: qrCodeUrl.length,
-      timestamp: new Date().toISOString()
+    console.log('Conexão WhatsApp iniciada:', {
+      success: serverResponse.success,
+      sessionId: newSession?.id,
+      status: serverResponse.status,
+      hasQrCode: !!serverResponse.qrCode
     });
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        qrCode: qrCodeUrl,
-        sessionId: newSession.id,
-        message: 'QR Code gerado, escaneie com seu WhatsApp',
-        timestamp: new Date().toISOString()
+        qrCode: serverResponse.qrCode,
+        sessionId: newSession?.id || serverResponse.sessionId,
+        status: serverResponse.status,
+        message: serverResponse.message || 'Conexão iniciada com sucesso'
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Erro ao iniciar conexão WhatsApp:', error);
-    throw error;
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: `Erro ao conectar: ${error.message}` 
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 }
 
 async function disconnectSession(supabase: any, userId: string) {
-  const { error } = await supabase
-    .from('whatsapp_sessoes')
-    .update({ status: 'desconectado' })
-    .eq('user_id', userId);
+  try {
+    // Desconectar no servidor real
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/disconnect`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: userId
+      })
+    });
 
-  if (error) {
-    throw error;
+    // Atualizar status no banco independente da resposta do servidor
+    const { error } = await supabase
+      .from('whatsapp_sessoes')
+      .update({ 
+        status: 'desconectado',
+        sessao_serializada: null,
+        atualizado_em: new Date().toISOString()
+      })
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Erro ao atualizar status no banco:', error);
+    }
+
+    const serverResponse = response.ok ? await response.json() : { success: true };
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: serverResponse.message || 'Sessão desconectada' 
+      }), 
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Erro ao desconectar:', error);
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: `Erro ao desconectar: ${error.message}` 
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
-
-  return new Response(
-    JSON.stringify({ success: true, message: 'Sessão desconectada' }), 
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
 }
 
 async function sendMessage(supabase: any, userId: string, body: any) {
@@ -242,6 +299,45 @@ async function sendMessage(supabase: any, userId: string, body: any) {
   }
 
   try {
+    // Verificar se há sessão conectada
+    const { data: session } = await supabase
+      .from('whatsapp_sessoes')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'conectado')
+      .maybeSingle();
+
+    if (!session) {
+      return new Response(
+        JSON.stringify({ error: 'WhatsApp não conectado' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Enviar mensagem via servidor real
+    const response = await fetch(`${WHATSAPP_SERVER_URL}/api/whatsapp/send-message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: userId,
+        phone: phone,
+        message: message,
+        contactName: contactName
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Servidor retornou erro: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao enviar mensagem');
+    }
+
     // Buscar ou criar contato
     let { data: contact } = await supabase
       .from('whatsapp_contatos')
@@ -263,74 +359,53 @@ async function sendMessage(supabase: any, userId: string, body: any) {
         .single();
 
       if (contactError) {
-        throw contactError;
+        console.error('Erro ao criar contato:', contactError);
+      } else {
+        contact = newContact;
       }
-      contact = newContact;
     }
 
-    // Buscar sessão ativa
-    const { data: session } = await supabase
-      .from('whatsapp_sessoes')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'conectado')
-      .maybeSingle();
+    // Salvar mensagem no banco se temos o contato
+    if (contact) {
+      const { data: savedMessage, error: messageError } = await supabase
+        .from('whatsapp_mensagens_temp')
+        .insert({
+          user_id: userId,
+          contato_id: contact.id,
+          direcao: 'enviada',
+          conteudo: message,
+          tipo: 'text',
+          status: 'enviada'
+        })
+        .select()
+        .single();
 
-    if (!session) {
-      return new Response(
-        JSON.stringify({ error: 'WhatsApp não conectado' }), 
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (messageError) {
+        console.error('Erro ao salvar mensagem:', messageError);
+      }
+
+      // Atualizar última interação do contato
+      await supabase
+        .from('whatsapp_contatos')
+        .update({ ultima_interacao: new Date().toISOString() })
+        .eq('id', contact.id);
     }
-
-    // Enviar mensagem via WhatsApp Web.js (simulado)
-    console.log(`Enviando mensagem para ${phone}: ${message}`);
-    
-    // Simular envio da mensagem
-    const success = await sendWhatsAppMessage(userId, phone, message);
-    
-    if (!success) {
-      throw new Error('Falha ao enviar mensagem via WhatsApp');
-    }
-
-    // Salvar mensagem no banco
-    const { data: savedMessage, error: messageError } = await supabase
-      .from('whatsapp_mensagens_temp')
-      .insert({
-        user_id: userId,
-        contato_id: contact.id,
-        direcao: 'enviada',
-        conteudo: message,
-        tipo: 'text',
-        status: 'enviada'
-      })
-      .select()
-      .single();
-
-    if (messageError) {
-      throw messageError;
-    }
-
-    // Atualizar última interação do contato
-    await supabase
-      .from('whatsapp_contatos')
-      .update({ ultima_interacao: new Date().toISOString() })
-      .eq('id', contact.id);
-
-    console.log(`Mensagem enviada e salva no banco de dados`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Mensagem enviada com sucesso',
-        messageId: savedMessage.id 
+        messageId: result.messageId 
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Erro ao enviar mensagem:', error);
     return new Response(
-      JSON.stringify({ error: 'Erro ao enviar mensagem: ' + error.message }), 
+      JSON.stringify({ 
+        success: false,
+        error: `Erro ao enviar mensagem: ${error.message}` 
+      }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -370,8 +445,6 @@ async function getMessages(supabase: any, userId: string, req: Request) {
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
 }
-
-// ==================== FUNÇÕES AUXILIARES ====================
 
 async function getContacts(supabase: any, userId: string) {
   const { data: contacts, error } = await supabase
@@ -434,31 +507,4 @@ async function simulateIncomingMessage(supabase: any, userId: string, sessionId:
     });
 
   console.log(`Mensagem simulada recebida de ${randomMessage.phone}: ${randomMessage.message}`);
-}
-
-async function startMessageMonitoring(supabase: any, userId: string, sessionId: string) {
-  console.log(`Iniciando monitoramento de mensagens para usuário ${userId}`);
-  
-  // Simular recebimento de mensagens do WhatsApp
-  setInterval(async () => {
-    // Aqui seria o listener real do whatsapp-web.js
-    // client.on('message', async (msg) => { ... });
-    
-    console.log(`Monitorando mensagens para sessão ${sessionId}`);
-  }, 30000); // Check a cada 30 segundos
-}
-
-async function sendWhatsAppMessage(userId: string, phone: string, message: string): Promise<boolean> {
-  try {
-    // Aqui seria o envio real via whatsapp-web.js
-    // const chatId = phone.includes('@c.us') ? phone : `${phone}@c.us`;
-    // await client.sendMessage(chatId, message);
-    
-    console.log(`Simulando envio WhatsApp - Usuário: ${userId}, Para: ${phone}, Mensagem: ${message}`);
-    
-    return true;
-  } catch (error) {
-    console.error('Erro ao enviar mensagem WhatsApp:', error);
-    return false;
-  }
 }

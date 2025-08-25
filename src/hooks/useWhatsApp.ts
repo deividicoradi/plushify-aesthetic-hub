@@ -28,8 +28,8 @@ export interface WhatsAppSession {
 }
 
 const getWhatsAppBaseUrl = () => {
-  // URL da edge function WhatsApp Manager no Supabase
-  return 'https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-manager';
+  // Usar diretamente a edge function do Supabase
+  return 'whatsapp-manager';
 };
 
 export const useWhatsApp = () => {
@@ -44,27 +44,21 @@ export const useWhatsApp = () => {
 
   const getSessionStatus = useCallback(async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) return;
-
-      const response = await fetch(`${getWhatsAppBaseUrl()}`, {
+      const { data, error } = await supabase.functions.invoke(getWhatsAppBaseUrl(), {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Erro ao verificar status:', error);
+        return;
       }
 
-      const data = await response.json();
+      console.log('Status recebido:', data);
       setSession(prev => ({
         ...prev,
         status: data.status,
         id: data.sessionId,
-        qrCode: data.qrCode ?? prev.qrCode
+        qrCode: data.qrCode
       }));
     } catch (error) {
       console.error('Erro ao verificar status da sessão:', error);
@@ -74,23 +68,13 @@ export const useWhatsApp = () => {
   const connectWhatsApp = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('Não autenticado');
-
-      const response = await fetch(`${getWhatsAppBaseUrl()}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action: 'connect' }),
+      const { data, error } = await supabase.functions.invoke(getWhatsAppBaseUrl(), {
+        body: { action: 'connect' }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        throw new Error(error.message);
       }
-
-      const data = await response.json();
 
       if (data?.success) {
         console.log('Resposta do servidor WhatsApp:', data);
@@ -116,7 +100,7 @@ export const useWhatsApp = () => {
           setTimeout(() => {
             clearInterval(checkStatus);
           }, 120000);
-        } else {
+        } else if (data.status === 'conectado') {
           setSession({
             id: data.sessionId,
             status: 'conectado'
@@ -124,7 +108,7 @@ export const useWhatsApp = () => {
           
           toast({
             title: "WhatsApp Conectado",
-            description: data.message || "Sessão já estava ativa"
+            description: data.message || "Conectado com sucesso"
           });
         }
       } else {
@@ -145,20 +129,12 @@ export const useWhatsApp = () => {
   const disconnectWhatsApp = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('Não autenticado');
-
-      const response = await fetch(`${getWhatsAppBaseUrl()}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action: 'disconnect' }),
+      const { data, error } = await supabase.functions.invoke(getWhatsAppBaseUrl(), {
+        body: { action: 'disconnect' }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        throw new Error(error.message);
       }
 
       setSession({
@@ -185,93 +161,81 @@ export const useWhatsApp = () => {
 
   const loadMessages = useCallback(async (contactId?: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) return;
-
-      const base = getWhatsAppBaseUrl();
-      const url = new URL(`${base}/messages`);
-      if (contactId) url.searchParams.set('contactId', contactId);
-      url.searchParams.set('limit', '50');
-
-      const response = await fetch(url.toString(), {
+      const url = contactId ? `messages?contactId=${contactId}` : 'messages';
+      const { data, error } = await supabase.functions.invoke(getWhatsAppBaseUrl(), {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
+          'X-Request-Path': url
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Erro ao carregar mensagens:', error);
+        return;
       }
 
-      const result = await response.json();
-      setMessages(result.messages || []);
+      setMessages(data.messages || []);
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error);
     }
   }, []);
 
-  const sendMessage = useCallback(async (phone: string, message: string, contactName?: string) => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('Não autenticado');
-
-      const response = await fetch(`${getWhatsAppBaseUrl()}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'send-message',
-          phone,
-          message,
-          contactName
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      toast({
-        title: "Mensagem Enviada",
-        description: "Mensagem enviada com sucesso"
-      });
-
-      // Recarregar mensagens
-      await loadMessages();
-      
-      return data.messageId;
-    } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
-      toast({
-        title: "Erro",
-        description: "Falha ao enviar mensagem",
-        variant: "destructive"
-      });
-      throw error;
-    }
-  }, [toast, loadMessages]);
-
-
   const loadContacts = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('whatsapp_contatos')
-        .select('*')
-        .order('ultima_interacao', { ascending: false });
+      const { data, error } = await supabase.functions.invoke(getWhatsAppBaseUrl(), {
+        body: { action: 'get-contacts' }
+      });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao carregar contatos:', error);
+        return;
+      }
 
-      setContacts(data || []);
+      setContacts(data.contacts || []);
     } catch (error) {
       console.error('Erro ao carregar contatos:', error);
     }
   }, []);
+
+  const sendMessage = useCallback(async (phone: string, message: string, contactName?: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke(getWhatsAppBaseUrl(), {
+        body: {
+          action: 'send-message',
+          phone,
+          message,
+          contactName
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data.success) {
+        toast({
+          title: "Mensagem Enviada",
+          description: "Mensagem enviada com sucesso"
+        });
+
+        // Recarregar mensagens e contatos
+        await loadMessages();
+        await loadContacts();
+        
+        return data.messageId;
+      } else {
+        throw new Error(data.error || 'Falha ao enviar mensagem');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao enviar mensagem: " + (error as Error).message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, [toast, loadMessages, loadContacts]);
 
   // Verificar status da sessão ao montar o componente
   useEffect(() => {
