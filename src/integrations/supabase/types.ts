@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -977,11 +977,11 @@ export type Database = {
       }
       check_appointment_availability: {
         Args: {
-          p_user_id: string
           p_appointment_date: string
           p_appointment_time: string
           p_duration: number
           p_exclude_appointment_id?: string
+          p_user_id: string
         }
         Returns: boolean
       }
@@ -992,21 +992,21 @@ export type Database = {
       comprehensive_security_check: {
         Args: { check_user_id: string }
         Returns: {
-          table_name: string
           check_type: string
-          status: string
           details: string
+          status: string
+          table_name: string
         }[]
       }
       create_public_booking: {
         Args: {
-          p_client_name: string
-          p_client_email: string
-          p_client_phone: string
-          p_service_id: string
           p_appointment_date: string
           p_appointment_time: string
+          p_client_email: string
+          p_client_name: string
+          p_client_phone: string
           p_notes?: string
+          p_service_id: string
         }
         Returns: string
       }
@@ -1016,24 +1016,24 @@ export type Database = {
       }
       get_available_slots: {
         Args: {
-          p_user_id: string
           p_date: string
           p_service_duration?: number
           p_slot_interval?: number
+          p_user_id: string
         }
         Returns: {
-          slot_time: string
           is_available: boolean
+          slot_time: string
         }[]
       }
       get_dashboard_summary: {
         Args: { target_user_id: string }
         Returns: {
-          total_clients: number
-          total_payments: number
-          pending_payments: number
-          total_expenses: number
           active_services: number
+          pending_payments: number
+          total_clients: number
+          total_expenses: number
+          total_payments: number
         }[]
       }
       get_plan_limits: {
@@ -1044,21 +1044,21 @@ export type Database = {
         }[]
       }
       get_public_available_slots: {
-        Args: { p_service_id: string; p_date: string }
+        Args: { p_date: string; p_service_id: string }
         Returns: {
-          slot_time: string
           is_available: boolean
+          slot_time: string
         }[]
       }
       get_public_services: {
         Args: Record<PropertyKey, never>
         Returns: {
+          category: string
+          description: string
+          duration: number
           id: string
           name: string
-          description: string
           price: number
-          duration: number
-          category: string
         }[]
       }
       get_user_plan: {
@@ -1068,9 +1068,9 @@ export type Database = {
       get_user_usage_stats: {
         Args: { user_uuid?: string }
         Returns: {
+          can_add_more: boolean
           current_active_users: number
           max_users_allowed: number
-          can_add_more: boolean
           plan_name: string
         }[]
       }
@@ -1080,9 +1080,9 @@ export type Database = {
       }
       log_unauthorized_access: {
         Args: {
-          table_name: string
-          attempted_user_id: string
           actual_user_id: string
+          attempted_user_id: string
+          table_name: string
         }
         Returns: undefined
       }
@@ -1091,14 +1091,14 @@ export type Database = {
         Returns: string
       }
       search_clients: {
-        Args: { target_user_id: string; search_term?: string }
+        Args: { search_term?: string; target_user_id: string }
         Returns: {
-          id: string
-          name: string
           email: string
+          id: string
+          last_visit: string
+          name: string
           phone: string
           status: string
-          last_visit: string
         }[]
       }
       validate_email: {
@@ -1112,10 +1112,10 @@ export type Database = {
       verify_data_integrity: {
         Args: { check_user_id: string }
         Returns: {
+          status: string
           table_name: string
           total_records: number
           unauthorized_records: number
-          status: string
         }[]
       }
       verify_user_access: {
