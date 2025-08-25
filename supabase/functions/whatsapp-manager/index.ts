@@ -562,42 +562,44 @@ async function getQRCode(supabase: any, userId: string, token: string) {
   try {
     console.log('Getting QR Code for user:', userId);
     
-    // Buscar QR Code no servidor real seguindo o padrão correto
+    // O seu servidor expõe o QR no GET / (status)
     const response = await fetch(`${WHATSAPP_SERVER_URL}`, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ action: 'get-qr' })
+      }
     });
 
-    console.log('QR Code response status:', response.status);
+    console.log('QR Code status response:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('QR Code error:', response.status, errorText);
+      console.error('QR Code status error:', response.status, errorText);
       throw new Error(`Servidor WhatsApp retornou erro: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
-    console.log('QR Code result:', result);
+    console.log('QR from status:', result?.qrCode ? 'present' : 'absent');
     
-    if (result.qrCode) {
+    const qr = result?.qrCode || null;
+
+    if (qr) {
       // Atualizar sessão com QR Code
       await supabase
         .from('whatsapp_sessoes')
-        .update({ 
-          sessao_serializada: JSON.stringify({ qrCode: result.qrCode }),
+        .upsert({
+          user_id: userId,
+          status: result.status || 'pareando',
+          sessao_serializada: JSON.stringify({ qrCode: qr }),
           atualizado_em: new Date().toISOString()
-        })
-        .eq('user_id', userId);
+        }, { onConflict: 'user_id' });
     }
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        qrCode: result.qrCode || null
+        qrCode: qr
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
