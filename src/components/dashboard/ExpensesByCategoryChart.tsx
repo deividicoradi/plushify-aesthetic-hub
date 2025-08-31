@@ -65,39 +65,47 @@ export const ExpensesByCategoryChart = ({ expensesByCategory, formatCurrency }: 
   };
 
   const renderPieChart = (data: ExpensesByCategoryData[], title: string, emptyMessage: string) => (
-    <div className="h-80">
+    <div className="h-80 relative">
       {data && data.length > 0 ? (
-        <ResponsiveContainer width="100%" height="100%">
-          <RechartsPieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, percent }) => {
-                // Truncar nomes longos e mostrar percentual
-                const shortName = name.length > 10 ? `${name.substring(0, 10)}...` : name;
-                return `${shortName} ${(percent * 100).toFixed(0)}%`;
-              }}
-              outerRadius={60}
-              innerRadius={20}
-              fill="#8884d8"
-              dataKey="value"
-              stroke="none"
-              isAnimationActive={false}
-            >
-              {data.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={entry.color} 
-                  stroke="none"
-                  style={{ outline: 'none', cursor: 'default' }}
-                />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-          </RechartsPieChart>
-        </ResponsiveContainer>
+        <>
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsPieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                label={false}
+                labelLine={false}
+                outerRadius={70}
+                innerRadius={40}
+                fill="#8884d8"
+                dataKey="value"
+                stroke="none"
+                isAnimationActive={false}
+              >
+                {data.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.color} 
+                    stroke="none"
+                    style={{ outline: 'none', cursor: 'default' }}
+                  />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </RechartsPieChart>
+          </ResponsiveContainer>
+
+          {/* Centro com total */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="text-center animate-fade-in">
+              <p className="text-xs text-muted-foreground">Total</p>
+              <p className="text-lg font-semibold text-foreground">
+                {formatCurrency(data.reduce((sum, exp) => sum + exp.value, 0))}
+              </p>
+            </div>
+          </div>
+        </>
       ) : (
         <div className="h-full flex items-center justify-center text-muted-foreground">
           {emptyMessage}
