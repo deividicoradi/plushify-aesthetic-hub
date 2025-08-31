@@ -36,16 +36,16 @@ const PaymentMethodChart: React.FC<PaymentMethodChartProps> = ({ data }) => {
               cy="50%"
               labelLine={false}
               label={({ method, percent }) => `${method} ${(percent * 100).toFixed(0)}%`}
-              outerRadius={100}
+              outerRadius={80}
               fill="#8884d8"
               dataKey="amount"
+              stroke="none"
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
+                <Cell key={`cell-${index}`} fill={entry.fill} stroke="none" />
               ))}
             </Pie>
             <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-            <Legend />
           </PieChart>
         </ResponsiveContainer>
       </CardContent>
