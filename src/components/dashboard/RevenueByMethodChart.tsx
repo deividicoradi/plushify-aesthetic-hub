@@ -52,9 +52,15 @@ export const RevenueByMethodChart = ({ revenueByMethod, formatCurrency }: Revenu
                   fill="#8884d8"
                   dataKey="value"
                   stroke="none"
+                  isAnimationActive={false}
                 >
                   {revenueByMethod.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.color} 
+                      stroke="none"
+                      style={{ outline: 'none', cursor: 'default' }}
+                    />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />

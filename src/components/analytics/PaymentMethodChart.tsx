@@ -40,9 +40,15 @@ const PaymentMethodChart: React.FC<PaymentMethodChartProps> = ({ data }) => {
               fill="#8884d8"
               dataKey="amount"
               stroke="none"
+              isAnimationActive={false}
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} stroke="none" />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.fill} 
+                  stroke="none"
+                  style={{ outline: 'none', cursor: 'default' }}
+                />
               ))}
             </Pie>
             <Tooltip formatter={(value) => formatCurrency(Number(value))} />
