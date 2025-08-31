@@ -2,6 +2,7 @@
 import React from 'react';
 import { Users, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { GlobalHeader } from '@/components/layout/GlobalHeader';
 
 interface ClientsHeaderProps {
   onNewClientClick: () => void;
@@ -27,13 +28,16 @@ const ClientsHeader: React.FC<ClientsHeaderProps> = ({ onNewClientClick }) => {
               </div>
             </div>
           </div>
-          <Button
-            className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 gap-2"
-            onClick={onNewClientClick}
-          >
-            <Plus className="w-4 h-4" />
-            Novo Cliente
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button
+              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 gap-2"
+              onClick={onNewClientClick}
+            >
+              <Plus className="w-4 h-4" />
+              Novo Cliente
+            </Button>
+            <GlobalHeader />
+          </div>
         </div>
       </div>
     </header>

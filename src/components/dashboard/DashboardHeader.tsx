@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { LayoutDashboard } from 'lucide-react';
-import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { UserLimitDisplay } from '@/components/team/UserLimitDisplay';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { GlobalHeader } from '@/components/layout/GlobalHeader';
 
 export const DashboardHeader = () => {
   const { hasFeature } = usePlanLimits();
@@ -16,10 +16,7 @@ export const DashboardHeader = () => {
           <LayoutDashboard className="w-6 h-6 text-primary" />
           <h1 className="text-2xl font-bold">Dashboard</h1>
         </div>
-        {/* Mostra notificações em todas as telas, não apenas lg+ */}
-        <div className="flex-shrink-0">
-          <NotificationCenter />
-        </div>
+        <GlobalHeader />
       </div>
       
       {/* Exibir limitação de usuários se gestão de equipe estiver disponível */}

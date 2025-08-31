@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useResponsive } from '@/hooks/useResponsive';
 import DashboardSidebar from './DashboardSidebar';
 import { MobileSidebar } from './MobileSidebar';
+import { GlobalHeader } from './GlobalHeader';
 
 interface ResponsiveLayoutProps {
   children: React.ReactNode;
@@ -80,12 +81,11 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
               )}
             </div>
             
-            {/* Actions */}
-            {actions && (
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {actions}
-              </div>
-            )}
+            {/* Actions and Global Header */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {actions}
+              <GlobalHeader />
+            </div>
           </div>
         </header>
 

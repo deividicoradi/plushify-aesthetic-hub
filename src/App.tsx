@@ -20,6 +20,7 @@ import Auth from "./pages/Auth";
 import Signup from "./pages/Signup";
 import WhatsApp from "./pages/WhatsApp";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Notes from "./pages/Notes";
 import Loyalty from "./pages/Loyalty";
@@ -141,6 +142,14 @@ const AppContent = () => {
         element={
           <ProtectedRoute>
             <Settings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         }
       />
