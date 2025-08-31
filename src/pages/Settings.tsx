@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X, MessageCircle } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X, MessageCircle, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { WhatsAppSettings } from '@/components/whatsapp/WhatsAppSettings';
 
 const Settings = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +54,18 @@ const Settings = () => {
         {/* Main content */}
         <main className="flex-1 p-6">
           <div className="max-w-4xl">
+            {/* Back to Dashboard Button */}
+            <div className="mb-6">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/dashboard')}
+                className="gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Voltar ao Dashboard
+              </Button>
+            </div>
+            
             <Tabs defaultValue="profile" className="space-y-6">
               <TabsList className="grid w-full grid-cols-3 lg:w-[600px]">
                 <TabsTrigger value="profile" className="flex items-center gap-2">
