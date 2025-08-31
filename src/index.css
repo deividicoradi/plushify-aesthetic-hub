@@ -89,4 +89,21 @@
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
   }
+
+  /* Recharts: remove focus outlines that create selection rectangles */
+  .recharts-responsive-container:focus,
+  .recharts-wrapper:focus,
+  .recharts-surface:focus,
+  .recharts-sector:focus,
+  .recharts-pie:focus {
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Prevent iOS tap highlight around charts */
+  .recharts-responsive-container,
+  .recharts-wrapper,
+  .recharts-surface {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
