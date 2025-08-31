@@ -1,17 +1,20 @@
 
 import React, { useState } from 'react';
-import { Clock, User, Package, MoreVertical, MessageCircle } from 'lucide-react';
+import { Clock, User, Package, MessageCircle, UserCheck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { format } from 'date-fns';
+import { format, differenceInHours } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAppointments, type Appointment } from '@/hooks/useAppointments';
+import { toast } from '@/hooks/use-toast';
 
 interface AppointmentCardProps {
   appointment: Appointment;
+  isSelected?: boolean;
+  onSelect?: (checked: boolean) => void;
 }
 
 const statusColors = {
@@ -22,19 +25,28 @@ const statusColors = {
 };
 
 const statusLabels = {
-  agendado: 'Agendado',
+  agendado: 'Aguardando Confirmação',
   confirmado: 'Confirmado',
   concluido: 'Concluído',
   cancelado: 'Cancelado'
 };
 
-export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
+export const AppointmentCard = ({ appointment, isSelected = false, onSelect }: AppointmentCardProps) => {
   const { updateAppointment, deleteAppointment } = useAppointments();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const formatDate = (date: string) => {
     return format(new Date(date), "dd/MM/yyyy", { locale: ptBR });
+  };
+
+  const formatTime = (time: string) => {
+    // Se já está no formato HH:MM, retorna como está
+    if (time.includes(':')) {
+      const [hours, minutes] = time.split(':');
+      return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+    return time;
   };
 
   const formatPrice = (price: number) => {
@@ -45,11 +57,45 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
   };
 
   const handleStatusChange = async (newStatus: Appointment['status']) => {
+    // Validações específicas
+    if (newStatus === 'cancelado') {
+      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+      const hoursUntilAppointment = differenceInHours(appointmentDateTime, new Date());
+      
+      if (hoursUntilAppointment < 24) {
+        toast({
+          title: "Cancelamento não permitido",
+          description: "Só é permitido cancelamento com até 24h de antecedência.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    if (newStatus === 'concluido' && appointment.status !== 'confirmado') {
+      toast({
+        title: "Conclusão não permitida",
+        description: "Só é possível concluir agendamentos com status confirmado.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     console.log('Changing status to:', newStatus);
     await updateAppointment(appointment.id, { status: newStatus });
   };
 
   const handleDeleteClick = () => {
+    // Validação: só permitir excluir agendamentos aguardando confirmação e cancelados
+    if (appointment.status === 'confirmado' || appointment.status === 'concluido') {
+      toast({
+        title: "Exclusão não permitida",
+        description: "Só é possível excluir agendamentos com status 'aguardando confirmação' e 'cancelados'.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     console.log('Delete button clicked for appointment:', appointment.id);
     setShowDeleteDialog(true);
   };
@@ -96,9 +142,19 @@ Nos vemos em breve!`;
 
   return (
     <>
-      <Card className="hover:shadow-md transition-shadow duration-200">
+      <Card className={`hover:shadow-md transition-shadow duration-200 ${isSelected ? 'ring-2 ring-primary' : ''}`}>
         <CardContent className="p-6">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            {/* Checkbox para seleção */}
+            {onSelect && (
+              <div className="pt-1">
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={onSelect}
+                />
+              </div>
+            )}
+
             <div className="flex-1 space-y-3">
               {/* Header with client and status */}
               <div className="flex items-center justify-between">
@@ -120,15 +176,19 @@ Nos vemos em breve!`;
                 </Badge>
               </div>
 
-              {/* Service and time info */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Service, time and professional info */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="flex items-center gap-2">
                   <Package className="w-4 h-4 text-gray-400" />
                   <span className="text-sm font-medium">{appointment.service_name}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm">{appointment.appointment_time} ({appointment.duration}min)</span>
+                  <span className="text-sm">{formatTime(appointment.appointment_time)} ({appointment.duration}min)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm">Profissional Responsável</span>
                 </div>
                 <div className="font-semibold text-plush-600">
                   {formatPrice(appointment.price)}
@@ -146,7 +206,7 @@ Nos vemos em breve!`;
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 ml-4">
+            <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
                 size="sm"
@@ -156,30 +216,6 @@ Nos vemos em breve!`;
                 <MessageCircle className="w-4 h-4 mr-1" />
                 WhatsApp
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleStatusChange('confirmado')}>
-                    Confirmar
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleStatusChange('concluido')}>
-                    Concluir
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleStatusChange('cancelado')}>
-                    Cancelar
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="text-red-600"
-                    onClick={handleDeleteClick}
-                  >
-                    Excluir
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </div>
         </CardContent>

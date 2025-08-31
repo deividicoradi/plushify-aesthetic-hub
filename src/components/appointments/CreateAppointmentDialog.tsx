@@ -52,10 +52,11 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
     setIsSubmitting(true);
 
     try {
+      // Garantir que a data seja tratada corretamente (UTC para evitar problemas de fuso horário)
       const appointmentPayload = {
         client_name: formData.client_name,
         service_name: formData.service_name,
-        appointment_date: formData.appointment_date,
+        appointment_date: formData.appointment_date, // Formato YYYY-MM-DD já é correto
         appointment_time: formData.appointment_time,
         duration: formData.duration,
         status: 'agendado' as const,
