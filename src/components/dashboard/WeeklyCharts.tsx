@@ -3,6 +3,8 @@ import React from 'react';
 import { Activity, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
+import { PeriodFilter } from './PeriodFilter';
+import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 
 interface WeeklyChartsProps {
   chartData: Array<{
@@ -14,15 +16,22 @@ interface WeeklyChartsProps {
 }
 
 export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) => {
+  const { selectedPeriod, setSelectedPeriod } = usePeriodFilter();
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Agendamentos da Semana */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="w-5 h-5 text-indigo-600" />
-            Agendamentos da Semana
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-indigo-600" />
+              Agendamentos da Semana
+            </CardTitle>
+            <PeriodFilter 
+              value={selectedPeriod} 
+              onChange={setSelectedPeriod}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="h-80">
@@ -61,10 +70,16 @@ export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) =
       {/* Faturamento da Semana */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-emerald-600" />
-            Faturamento Semanal
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-600" />
+              Faturamento Semanal
+            </CardTitle>
+            <PeriodFilter 
+              value={selectedPeriod} 
+              onChange={setSelectedPeriod}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="h-80">

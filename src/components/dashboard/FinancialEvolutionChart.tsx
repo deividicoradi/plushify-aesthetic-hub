@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import { PeriodFilter, PeriodOption } from './PeriodFilter';
+import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 
 interface FinancialEvolutionChartProps {
   monthlyData: Array<{
@@ -14,13 +16,21 @@ interface FinancialEvolutionChartProps {
 }
 
 export const FinancialEvolutionChart = ({ monthlyData, formatCurrency }: FinancialEvolutionChartProps) => {
+  const { selectedPeriod, setSelectedPeriod } = usePeriodFilter();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-blue-600" />
-          Evolução Financeira - Últimos 6 Meses
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-blue-600" />
+            Evolução Financeira - Últimos 6 Meses
+          </CardTitle>
+          <PeriodFilter 
+            value={selectedPeriod} 
+            onChange={setSelectedPeriod}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <div className="h-80">

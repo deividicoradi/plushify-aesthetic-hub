@@ -3,6 +3,8 @@ import React from 'react';
 import { PieChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, Tooltip } from 'recharts';
+import { PeriodFilter } from './PeriodFilter';
+import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 
 interface RevenueByMethodChartProps {
   revenueByMethod: Array<{
@@ -14,6 +16,8 @@ interface RevenueByMethodChartProps {
 }
 
 export const RevenueByMethodChart = ({ revenueByMethod, formatCurrency }: RevenueByMethodChartProps) => {
+  const { selectedPeriod, setSelectedPeriod } = usePeriodFilter();
+  
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -32,10 +36,16 @@ export const RevenueByMethodChart = ({ revenueByMethod, formatCurrency }: Revenu
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <PieChart className="w-5 h-5 text-purple-600" />
-          Receitas por Método de Pagamento
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <PieChart className="w-5 h-5 text-purple-600" />
+            Receitas por Método de Pagamento
+          </CardTitle>
+          <PeriodFilter 
+            value={selectedPeriod} 
+            onChange={setSelectedPeriod}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <div className="h-80">

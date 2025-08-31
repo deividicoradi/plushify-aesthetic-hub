@@ -3,6 +3,8 @@ import React from 'react';
 import { Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, Tooltip } from 'recharts';
+import { PeriodFilter } from './PeriodFilter';
+import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 
 interface ExpensesByCategoryChartProps {
   expensesByCategory: Array<{
@@ -14,6 +16,7 @@ interface ExpensesByCategoryChartProps {
 }
 
 export const ExpensesByCategoryChart = ({ expensesByCategory, formatCurrency }: ExpensesByCategoryChartProps) => {
+  const { selectedPeriod, setSelectedPeriod } = usePeriodFilter();
   if (!expensesByCategory || expensesByCategory.length === 0) {
     return null;
   }
@@ -36,10 +39,16 @@ export const ExpensesByCategoryChart = ({ expensesByCategory, formatCurrency }: 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Package className="w-5 h-5 text-red-600" />
-          Despesas por Categoria
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Package className="w-5 h-5 text-red-600" />
+            Despesas por Categoria
+          </CardTitle>
+          <PeriodFilter 
+            value={selectedPeriod} 
+            onChange={setSelectedPeriod}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <div className="h-80">
