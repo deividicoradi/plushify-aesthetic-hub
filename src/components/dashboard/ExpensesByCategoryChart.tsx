@@ -74,8 +74,13 @@ export const ExpensesByCategoryChart = ({ expensesByCategory, formatCurrency }: 
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
-              outerRadius={80}
+              label={({ name, percent }) => {
+                // Truncar nomes longos e mostrar percentual
+                const shortName = name.length > 10 ? `${name.substring(0, 10)}...` : name;
+                return `${shortName} ${(percent * 100).toFixed(0)}%`;
+              }}
+              outerRadius={60}
+              innerRadius={20}
               fill="#8884d8"
               dataKey="value"
               stroke="none"
@@ -158,8 +163,28 @@ export const ExpensesByCategoryChart = ({ expensesByCategory, formatCurrency }: 
               Total: {formatCurrency(fixedExpenses.reduce((sum, exp) => sum + exp.value, 0))}
             </p>
           </CardHeader>
-          <CardContent>
-            {renderPieChart(fixedExpenses, 'Despesas Fixas', 'Nenhuma despesa fixa encontrada')}
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <div className="text-center">
+                {renderPieChart(fixedExpenses, 'Despesas Fixas', 'Nenhuma despesa fixa encontrada')}
+              </div>
+              {fixedExpenses.length > 0 && (
+                <div className="space-y-1 text-xs">
+                  {fixedExpenses.map((expense, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: expense.color }}
+                        />
+                        <span className="text-muted-foreground">{expense.name}</span>
+                      </div>
+                      <span className="font-medium">{formatCurrency(expense.value)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -174,8 +199,28 @@ export const ExpensesByCategoryChart = ({ expensesByCategory, formatCurrency }: 
               Total: {formatCurrency(variableExpenses.reduce((sum, exp) => sum + exp.value, 0))}
             </p>
           </CardHeader>
-          <CardContent>
-            {renderPieChart(variableExpenses, 'Despesas Variáveis', 'Nenhuma despesa variável encontrada')}
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <div className="text-center">
+                {renderPieChart(variableExpenses, 'Despesas Variáveis', 'Nenhuma despesa variável encontrada')}
+              </div>
+              {variableExpenses.length > 0 && (
+                <div className="space-y-1 text-xs">
+                  {variableExpenses.map((expense, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: expense.color }}
+                        />
+                        <span className="text-muted-foreground">{expense.name}</span>
+                      </div>
+                      <span className="font-medium">{formatCurrency(expense.value)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
