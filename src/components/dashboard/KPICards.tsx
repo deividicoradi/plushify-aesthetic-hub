@@ -2,6 +2,7 @@
 import React from 'react';
 import { TrendingUp, Users, Calendar, DollarSign } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 
 interface KPICardsProps {
   metrics: {
@@ -19,6 +20,11 @@ interface KPICardsProps {
 
 export const KPICards = ({ metrics, dashboardStats, formatCurrency }: KPICardsProps) => {
   const saldoLiquido = metrics ? metrics.totalReceitas - (metrics as any).totalDespesas : 0;
+  const navigate = useNavigate();
+
+  const handleDoubleClick = (route: string) => {
+    navigate(route);
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -34,7 +40,11 @@ export const KPICards = ({ metrics, dashboardStats, formatCurrency }: KPICardsPr
                 +{metrics?.crescimentoReceitas?.toFixed(1) || '0'}% vs mês anterior
               </p>
             </div>
-            <div className="bg-blue-500 p-3 rounded-full">
+            <div 
+              className="bg-blue-500 p-3 rounded-full cursor-pointer hover:bg-blue-600 transition-colors"
+              onDoubleClick={() => handleDoubleClick('/financial')}
+              title="Duplo clique para ir ao Financeiro"
+            >
               <DollarSign className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -53,7 +63,11 @@ export const KPICards = ({ metrics, dashboardStats, formatCurrency }: KPICardsPr
                 +{dashboardStats.newThisMonth || 0} este mês
               </p>
             </div>
-            <div className="bg-green-500 p-3 rounded-full">
+            <div 
+              className="bg-green-500 p-3 rounded-full cursor-pointer hover:bg-green-600 transition-colors"
+              onDoubleClick={() => handleDoubleClick('/clients')}
+              title="Duplo clique para ir aos Clientes"
+            >
               <Users className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -72,7 +86,11 @@ export const KPICards = ({ metrics, dashboardStats, formatCurrency }: KPICardsPr
                 {dashboardStats.weeklyAppointments || 0} esta semana
               </p>
             </div>
-            <div className="bg-purple-500 p-3 rounded-full">
+            <div 
+              className="bg-purple-500 p-3 rounded-full cursor-pointer hover:bg-purple-600 transition-colors"
+              onDoubleClick={() => handleDoubleClick('/appointments')}
+              title="Duplo clique para ir aos Agendamentos"
+            >
               <Calendar className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -91,7 +109,11 @@ export const KPICards = ({ metrics, dashboardStats, formatCurrency }: KPICardsPr
                 Receitas - Despesas
               </p>
             </div>
-            <div className="bg-orange-500 p-3 rounded-full">
+            <div 
+              className="bg-orange-500 p-3 rounded-full cursor-pointer hover:bg-orange-600 transition-colors"
+              onDoubleClick={() => handleDoubleClick('/financial')}
+              title="Duplo clique para ir ao Financeiro"
+            >
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
           </div>
