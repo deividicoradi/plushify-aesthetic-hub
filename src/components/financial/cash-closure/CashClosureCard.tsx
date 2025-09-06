@@ -34,31 +34,25 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
   };
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      <CardHeader className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 pb-4">
         <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Calculator className="w-5 h-5" />
-              Fechamento - {format(new Date(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
+          <div className="flex-1">
+            <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+              <div className="p-2 bg-red-100 dark:bg-red-800/50 rounded-lg">
+                <Calculator className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <div>Fechamento de Caixa</div>
+                <div className="text-base font-medium text-muted-foreground">
+                  {format(new Date(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
+                </div>
+              </div>
             </CardTitle>
-            <div className="mt-2">
-              {getStatusBadge(closure.status)}
-            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-right">
-              {closure.closed_at && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Fechado em: {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                </p>
-              )}
-              {closure.operator_id && (
-                <p className="text-xs text-gray-500">
-                  Op: {closure.operator_id.slice(0, 8)}...
-                </p>
-              )}
-            </div>
+          
+          <div className="flex items-center gap-3">
+            {getStatusBadge(closure.status)}
             {(onEdit || onDelete) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -87,74 +81,167 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
             )}
           </div>
         </div>
+        
+        {/* Informações adicionais */}
+        <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
+          {closure.closed_at && (
+            <div className="flex items-center gap-1">
+              <span>Fechado em:</span>
+              <span className="font-medium">
+                {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+              </span>
+            </div>
+          )}
+          {closure.operator_id && (
+            <div className="flex items-center gap-1">
+              <span>Operador:</span>
+              <span className="font-medium">{closure.operator_id.slice(0, 8)}...</span>
+            </div>
+          )}
+          {closure.machine_id && (
+            <div className="flex items-center gap-1">
+              <span>Terminal:</span>
+              <span className="font-medium">{closure.machine_id.slice(-8)}</span>
+            </div>
+          )}
+        </div>
       </CardHeader>
       
       <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard
-            title="Saldo Inicial"
-            value={Number(closure.opening_balance)}
-            icon={Calculator}
-          />
-          
-          <MetricCard
-            title="Total Receitas"
-            value={Number(closure.total_income)}
-            icon={TrendingUp}
-            trend="up"
-          />
-          
-          <MetricCard
-            title="Total Despesas"
-            value={Number(closure.total_expenses)}
-            icon={TrendingDown}
-            trend="down"
-          />
-          
-          <MetricCard
-            title="Saldo Final"
-            value={Number(closure.closing_balance)}
-            icon={Calculator}
-            trend={Number(closure.closing_balance) > Number(closure.opening_balance) ? 'up' : 'down'}
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Dinheiro</p>
-            <p className="font-semibold">{formatCurrency(Number(closure.cash_amount))}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Cartão</p>
-            <p className="font-semibold">{formatCurrency(Number(closure.card_amount))}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">PIX</p>
-            <p className="font-semibold">{formatCurrency(Number(closure.pix_amount))}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Outros</p>
-            <p className="font-semibold">{formatCurrency(Number(closure.other_amount))}</p>
-          </div>
-        </div>
-
-        {Number(closure.difference) !== 0 && (
-          <div className={`mt-4 p-3 rounded-lg ${
-            Number(closure.difference) > 0 
-              ? 'bg-green-50 dark:bg-green-800/20 text-green-800 dark:text-green-200' 
-              : 'bg-red-50 dark:bg-red-800/20 text-red-800 dark:text-red-200'
-          }`}>
-            <p className="font-medium">
-              Diferença: {formatCurrency(Number(closure.difference))}
+        {/* Métricas Principais */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex justify-center mb-2">
+              <Calculator className="w-5 h-5 text-blue-600" />
+            </div>
+            <p className="text-xs text-blue-700 dark:text-blue-300 mb-1">Saldo Inicial</p>
+            <p className="font-bold text-sm text-blue-900 dark:text-blue-100">
+              {formatCurrency(Number(closure.opening_balance))}
             </p>
+          </div>
+          
+          <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+            <div className="flex justify-center mb-2">
+              <TrendingUp className="w-5 h-5 text-green-600" />
+            </div>
+            <p className="text-xs text-green-700 dark:text-green-300 mb-1">Total Receitas</p>
+            <p className="font-bold text-sm text-green-900 dark:text-green-100">
+              {formatCurrency(Number(closure.total_income))}
+            </p>
+          </div>
+          
+          <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+            <div className="flex justify-center mb-2">
+              <TrendingDown className="w-5 h-5 text-red-600" />
+            </div>
+            <p className="text-xs text-red-700 dark:text-red-300 mb-1">Total Despesas</p>
+            <p className="font-bold text-sm text-red-900 dark:text-red-100">
+              {formatCurrency(Number(closure.total_expenses))}
+            </p>
+          </div>
+          
+          <div className={`text-center p-4 rounded-lg border ${
+            Number(closure.closing_balance) >= Number(closure.opening_balance)
+              ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
+              : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+          }`}>
+            <div className="flex justify-center mb-2">
+              <Calculator className={`w-5 h-5 ${
+                Number(closure.closing_balance) >= Number(closure.opening_balance)
+                  ? 'text-emerald-600'
+                  : 'text-orange-600'
+              }`} />
+            </div>
+            <p className={`text-xs mb-1 ${
+              Number(closure.closing_balance) >= Number(closure.opening_balance)
+                ? 'text-emerald-700 dark:text-emerald-300'
+                : 'text-orange-700 dark:text-orange-300'
+            }`}>
+              Saldo Final
+            </p>
+            <p className={`font-bold text-sm ${
+              Number(closure.closing_balance) >= Number(closure.opening_balance)
+                ? 'text-emerald-900 dark:text-emerald-100'
+                : 'text-orange-900 dark:text-orange-100'
+            }`}>
+              {formatCurrency(Number(closure.closing_balance))}
+            </p>
+          </div>
+        </div>
+
+        {/* Métodos de Pagamento */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Detalhamento por Método de Pagamento
+          </h4>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">Dinheiro</p>
+              <p className="font-semibold text-sm">{formatCurrency(Number(closure.cash_amount))}</p>
+            </div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">Cartão</p>
+              <p className="font-semibold text-sm">{formatCurrency(Number(closure.card_amount))}</p>
+            </div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">PIX</p>
+              <p className="font-semibold text-sm">{formatCurrency(Number(closure.pix_amount))}</p>
+            </div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">Outros</p>
+              <p className="font-semibold text-sm">{formatCurrency(Number(closure.other_amount))}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Diferença */}
+        {Number(closure.difference) !== 0 && (
+          <div className={`mt-6 p-4 rounded-lg border ${
+            Number(closure.difference) > 0 
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+          }`}>
+            <div className="flex items-center gap-2">
+              <div className={`p-1 rounded ${
+                Number(closure.difference) > 0 
+                  ? 'bg-green-100 dark:bg-green-800/50' 
+                  : 'bg-red-100 dark:bg-red-800/50'
+              }`}>
+                {Number(closure.difference) > 0 ? (
+                  <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
+                )}
+              </div>
+              <div>
+                <p className={`text-sm font-medium ${
+                  Number(closure.difference) > 0 
+                    ? 'text-green-800 dark:text-green-200' 
+                    : 'text-red-800 dark:text-red-200'
+                }`}>
+                  Diferença: {formatCurrency(Number(closure.difference))}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {Number(closure.difference) > 0 ? 'Superávit no caixa' : 'Déficit no caixa'}
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
+        {/* Observações */}
         {closure.notes && (
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-800/20 rounded-lg">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Observações:</strong> {closure.notes}
-            </p>
+          <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <div className="flex items-start gap-2">
+              <div className="p-1 bg-amber-100 dark:bg-amber-800/50 rounded">
+                <Calculator className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">Observações:</p>
+                <p className="text-sm text-amber-700 dark:text-amber-300">{closure.notes}</p>
+              </div>
+            </div>
           </div>
         )}
       </CardContent>
