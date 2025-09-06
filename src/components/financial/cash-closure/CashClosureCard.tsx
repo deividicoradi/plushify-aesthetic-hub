@@ -4,10 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Calculator, TrendingUp, TrendingDown, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { 
+  Calculator, 
+  TrendingUp, 
+  TrendingDown, 
+  Lock,
+  Wallet,
+  CreditCard,
+  Smartphone,
+  Banknote,
+  MoreVertical,
+  Edit,
+  Trash2,
+  StickyNote,
+  AlertTriangle
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import MetricCard from './MetricCard';
 
 interface CashClosureCardProps {
   closure: any;
@@ -16,16 +29,6 @@ interface CashClosureCardProps {
 }
 
 const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) => {
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      aberto: { label: 'Aberto', variant: 'secondary' as const },
-      fechado: { label: 'Fechado', variant: 'default' as const },
-    };
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.aberto;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -33,47 +36,65 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
     }).format(value);
   };
 
+  const difference = Number(closure.difference) || 0;
+  const hasDifference = Math.abs(difference) > 0.01;
+
   return (
-    <Card className="w-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
-      {/* Header */}
-      <CardHeader className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 pb-6">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-100 dark:bg-red-800/50 rounded-lg shrink-0">
-              <Calculator className="w-5 h-5 text-red-600 dark:text-red-400" />
+    <Card className="w-full overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-all duration-300">
+      {/* Modern Header */}
+      <CardHeader className="bg-gradient-to-br from-destructive/5 via-destructive/10 to-destructive/5 border-b border-border/50 p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0 p-3 bg-destructive/10 rounded-xl border border-destructive/20">
+              <Lock className="w-6 h-6 text-destructive" />
             </div>
-            <div>
-              <CardTitle className="text-lg font-semibold text-foreground">
+            <div className="min-w-0">
+              <CardTitle className="text-xl font-bold text-foreground mb-1">
                 Fechamento de Caixa
               </CardTitle>
-              <p className="text-sm font-medium text-muted-foreground mt-1">
+              <p className="text-base font-semibold text-destructive">
                 {format(new Date(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
               </p>
+              {closure.closed_at && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                </p>
+              )}
             </div>
           </div>
           
-          <div className="flex items-center gap-3 self-start">
-            {getStatusBadge(closure.status)}
+          <div className="flex items-center gap-3">
+            <Badge 
+              variant={closure.status === 'fechado' ? 'default' : 'secondary'}
+              className={`px-3 py-1.5 font-medium ${
+                closure.status === 'fechado' 
+                  ? 'bg-red-500 text-white hover:bg-red-600' 
+                  : 'bg-gray-500 text-white'
+              }`}
+            >
+              {closure.status === 'fechado' ? 'Fechado' : 'Aberto'}
+            </Badge>
+            
             {(onEdit || onDelete) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground">
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-40">
                   {onEdit && (
-                    <DropdownMenuItem onClick={() => onEdit(closure)}>
-                      <Edit className="mr-2 h-4 w-4" />
+                    <DropdownMenuItem onClick={() => onEdit(closure)} className="gap-2">
+                      <Edit className="h-4 w-4" />
                       Editar
                     </DropdownMenuItem>
                   )}
                   {onDelete && (
                     <DropdownMenuItem 
                       onClick={() => onDelete(closure.id)}
-                      className="text-red-600"
+                      className="gap-2 text-destructive focus:text-destructive"
                     >
-                      <Trash2 className="mr-2 h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                       Deletar
                     </DropdownMenuItem>
                   )}
@@ -82,173 +103,164 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
             )}
           </div>
         </div>
-        
-        {/* Additional Information */}
-        <div className="mt-4 space-y-2">
-          {closure.closed_at && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="shrink-0">Fechado em:</span>
-              <span className="font-medium">
-                {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-              </span>
-            </div>
-          )}
-          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-            {closure.operator_id && (
-              <div className="flex items-center gap-2">
-                <span>Operador:</span>
-                <span className="font-medium">{closure.operator_id.slice(0, 8)}...</span>
-              </div>
-            )}
-            {closure.machine_id && (
-              <div className="flex items-center gap-2">
-                <span>Terminal:</span>
-                <span className="font-medium">{closure.machine_id.slice(-8)}</span>
-              </div>
-            )}
-          </div>
-        </div>
       </CardHeader>
       
       <CardContent className="p-6 space-y-6">
-        {/* Main Metrics - 4 card grid */}
+        {/* Main Financial Metrics Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 text-center space-y-2">
-            <div className="flex justify-center">
-              <div className="p-2 bg-blue-100 dark:bg-blue-800/50 rounded-full">
-                <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          {/* Initial Balance */}
+          <div className="bg-gradient-to-br from-blue-50/80 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200/60 dark:border-blue-800/40 rounded-xl p-4 text-center shadow-sm">
+            <div className="flex justify-center mb-3">
+              <div className="p-2.5 bg-blue-500/10 dark:bg-blue-400/10 rounded-full border border-blue-200/50 dark:border-blue-700/50">
+                <Calculator className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <div>
-              <p className="text-xs text-blue-700 dark:text-blue-300">Saldo Inicial</p>
-              <p className="text-sm font-bold text-blue-900 dark:text-blue-100 break-words leading-tight">
-                {formatCurrency(Number(closure.opening_balance))}
-              </p>
-            </div>
+            <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-2 uppercase tracking-wide">
+              Saldo Inicial
+            </p>
+            <p className="text-lg font-bold text-blue-900 dark:text-blue-100 leading-tight">
+              {formatCurrency(Number(closure.opening_balance))}
+            </p>
           </div>
-          
-          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 text-center space-y-2">
-            <div className="flex justify-center">
-              <div className="p-2 bg-green-100 dark:bg-green-800/50 rounded-full">
-                <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+
+          {/* Total Revenue */}
+          <div className="bg-gradient-to-br from-emerald-50/80 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 border border-emerald-200/60 dark:border-emerald-800/40 rounded-xl p-4 text-center shadow-sm">
+            <div className="flex justify-center mb-3">
+              <div className="p-2.5 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-full border border-emerald-200/50 dark:border-emerald-700/50">
+                <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
-            <div>
-              <p className="text-xs text-green-700 dark:text-green-300">Total Receitas</p>
-              <p className="text-sm font-bold text-green-900 dark:text-green-100 break-words leading-tight">
-                {formatCurrency(Number(closure.total_income))}
-              </p>
-            </div>
+            <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 mb-2 uppercase tracking-wide">
+              Total Receitas
+            </p>
+            <p className="text-lg font-bold text-emerald-900 dark:text-emerald-100 leading-tight">
+              {formatCurrency(Number(closure.total_income))}
+            </p>
           </div>
-          
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 text-center space-y-2">
-            <div className="flex justify-center">
-              <div className="p-2 bg-red-100 dark:bg-red-800/50 rounded-full">
-                <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
+
+          {/* Total Expenses */}
+          <div className="bg-gradient-to-br from-red-50/80 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border border-red-200/60 dark:border-red-800/40 rounded-xl p-4 text-center shadow-sm">
+            <div className="flex justify-center mb-3">
+              <div className="p-2.5 bg-red-500/10 dark:bg-red-400/10 rounded-full border border-red-200/50 dark:border-red-700/50">
+                <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
               </div>
             </div>
-            <div>
-              <p className="text-xs text-red-700 dark:text-red-300">Total Despesas</p>
-              <p className="text-sm font-bold text-red-900 dark:text-red-100 break-words leading-tight">
-                {formatCurrency(Number(closure.total_expenses))}
-              </p>
-            </div>
+            <p className="text-xs font-semibold text-red-700 dark:text-red-300 mb-2 uppercase tracking-wide">
+              Total Despesas
+            </p>
+            <p className="text-lg font-bold text-red-900 dark:text-red-100 leading-tight">
+              {formatCurrency(Number(closure.total_expenses))}
+            </p>
           </div>
-          
-          <div className={`p-4 rounded-lg border text-center space-y-2 ${
+
+          {/* Final Balance */}
+          <div className={`rounded-xl p-4 text-center shadow-sm border ${
             Number(closure.closing_balance) >= Number(closure.opening_balance)
-              ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
-              : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+              ? 'bg-gradient-to-br from-green-50/80 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200/60 dark:border-green-800/40'
+              : 'bg-gradient-to-br from-orange-50/80 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border-orange-200/60 dark:border-orange-800/40'
           }`}>
-            <div className="flex justify-center">
-              <div className={`p-2 rounded-full ${
+            <div className="flex justify-center mb-3">
+              <div className={`p-2.5 rounded-full border ${
                 Number(closure.closing_balance) >= Number(closure.opening_balance)
-                  ? 'bg-emerald-100 dark:bg-emerald-800/50'
-                  : 'bg-orange-100 dark:bg-orange-800/50'
+                  ? 'bg-green-500/10 dark:bg-green-400/10 border-green-200/50 dark:border-green-700/50'
+                  : 'bg-orange-500/10 dark:bg-orange-400/10 border-orange-200/50 dark:border-orange-700/50'
               }`}>
-                <Calculator className={`w-4 h-4 ${
+                <Calculator className={`w-5 h-5 ${
                   Number(closure.closing_balance) >= Number(closure.opening_balance)
-                    ? 'text-emerald-600 dark:text-emerald-400'
+                    ? 'text-green-600 dark:text-green-400'
                     : 'text-orange-600 dark:text-orange-400'
                 }`} />
               </div>
             </div>
-            <div>
-              <p className={`text-xs ${
-                Number(closure.closing_balance) >= Number(closure.opening_balance)
-                  ? 'text-emerald-700 dark:text-emerald-300'
-                  : 'text-orange-700 dark:text-orange-300'
-              }`}>
-                Saldo Final
-              </p>
-              <p className={`text-sm font-bold break-words leading-tight ${
-                Number(closure.closing_balance) >= Number(closure.opening_balance)
-                  ? 'text-emerald-900 dark:text-emerald-100'
-                  : 'text-orange-900 dark:text-orange-100'
-              }`}>
-                {formatCurrency(Number(closure.closing_balance))}
-              </p>
-            </div>
+            <p className={`text-xs font-semibold mb-2 uppercase tracking-wide ${
+              Number(closure.closing_balance) >= Number(closure.opening_balance)
+                ? 'text-green-700 dark:text-green-300'
+                : 'text-orange-700 dark:text-orange-300'
+            }`}>
+              Saldo Final
+            </p>
+            <p className={`text-lg font-bold leading-tight ${
+              Number(closure.closing_balance) >= Number(closure.opening_balance)
+                ? 'text-green-900 dark:text-green-100'
+                : 'text-orange-900 dark:text-orange-100'
+            }`}>
+              {formatCurrency(Number(closure.closing_balance))}
+            </p>
           </div>
         </div>
 
-        {/* Payment Methods Section */}
+        {/* Payment Methods Grid */}
         <div className="space-y-4">
-          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
-            Detalhamento por Método de Pagamento
-          </h4>
+          <div className="flex items-center gap-3 pb-2 border-b border-border/50">
+            <Wallet className="w-4 h-4 text-muted-foreground" />
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+              Métodos de Pagamento
+            </h4>
+          </div>
           
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex flex-col items-center space-y-3">
-                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
-                  <Calculator className="w-5 h-5 text-green-600 dark:text-green-400" />
+            {/* Cash */}
+            <div className="bg-gradient-to-br from-emerald-50/80 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 border border-emerald-200/60 dark:border-emerald-800/40 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="p-2.5 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-full border border-emerald-200/50 dark:border-emerald-700/50">
+                  <Banknote className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <div className="text-center space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Dinheiro</p>
-                  <p className="text-sm font-bold text-foreground break-words leading-tight">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">
+                    Dinheiro
+                  </p>
+                  <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100 leading-tight">
                     {formatCurrency(Number(closure.cash_amount))}
                   </p>
                 </div>
               </div>
             </div>
-            
-            <div className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex flex-col items-center space-y-3">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                  <Calculator className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+
+            {/* Card */}
+            <div className="bg-gradient-to-br from-blue-50/80 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200/60 dark:border-blue-800/40 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="p-2.5 bg-blue-500/10 dark:bg-blue-400/10 rounded-full border border-blue-200/50 dark:border-blue-700/50">
+                  <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div className="text-center space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Cartão</p>
-                  <p className="text-sm font-bold text-foreground break-words leading-tight">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                    Cartão
+                  </p>
+                  <p className="text-sm font-bold text-blue-900 dark:text-blue-100 leading-tight">
                     {formatCurrency(Number(closure.card_amount))}
                   </p>
                 </div>
               </div>
             </div>
-            
-            <div className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex flex-col items-center space-y-3">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                  <Calculator className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+
+            {/* PIX */}
+            <div className="bg-gradient-to-br from-purple-50/80 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 border border-purple-200/60 dark:border-purple-800/40 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="p-2.5 bg-purple-500/10 dark:bg-purple-400/10 rounded-full border border-purple-200/50 dark:border-purple-700/50">
+                  <Smartphone className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
-                <div className="text-center space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">PIX</p>
-                  <p className="text-sm font-bold text-foreground break-words leading-tight">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wide">
+                    PIX
+                  </p>
+                  <p className="text-sm font-bold text-purple-900 dark:text-purple-100 leading-tight">
                     {formatCurrency(Number(closure.pix_amount))}
                   </p>
                 </div>
               </div>
             </div>
-            
-            <div className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex flex-col items-center space-y-3">
-                <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
+
+            {/* Others */}
+            <div className="bg-gradient-to-br from-orange-50/80 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border border-orange-200/60 dark:border-orange-800/40 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="p-2.5 bg-orange-500/10 dark:bg-orange-400/10 rounded-full border border-orange-200/50 dark:border-orange-700/50">
                   <Calculator className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                 </div>
-                <div className="text-center space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Outros</p>
-                  <p className="text-sm font-bold text-foreground break-words leading-tight">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-orange-700 dark:text-orange-300 uppercase tracking-wide">
+                    Outros
+                  </p>
+                  <p className="text-sm font-bold text-orange-900 dark:text-orange-100 leading-tight">
                     {formatCurrency(Number(closure.other_amount))}
                   </p>
                 </div>
@@ -257,35 +269,39 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
           </div>
         </div>
 
-        {/* Difference Section - Only show if there's a difference */}
-        {Number(closure.difference) !== 0 && (
-          <div className={`p-4 rounded-lg border ${
-            Number(closure.difference) > 0 
-              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
-              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+        {/* Difference Alert - Only show if there's a significant difference */}
+        {hasDifference && (
+          <div className={`rounded-lg border p-4 ${
+            difference > 0 
+              ? 'bg-gradient-to-br from-emerald-50/80 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 border-emerald-200/60 dark:border-emerald-800/40' 
+              : 'bg-gradient-to-br from-red-50/80 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border-red-200/60 dark:border-red-800/40'
           }`}>
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-full shrink-0 ${
-                Number(closure.difference) > 0 
-                  ? 'bg-green-100 dark:bg-green-800/50' 
-                  : 'bg-red-100 dark:bg-red-800/50'
+              <div className={`flex-shrink-0 p-2.5 rounded-full border ${
+                difference > 0 
+                  ? 'bg-emerald-500/10 dark:bg-emerald-400/10 border-emerald-200/50 dark:border-emerald-700/50' 
+                  : 'bg-red-500/10 dark:bg-red-400/10 border-red-200/50 dark:border-red-700/50'
               }`}>
-                {Number(closure.difference) > 0 ? (
-                  <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                {difference > 0 ? (
+                  <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 ) : (
-                  <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
+                  <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className={`text-sm font-medium ${
-                  Number(closure.difference) > 0 
-                    ? 'text-green-800 dark:text-green-200' 
+                <p className={`text-sm font-semibold mb-1 ${
+                  difference > 0 
+                    ? 'text-emerald-800 dark:text-emerald-200' 
                     : 'text-red-800 dark:text-red-200'
                 }`}>
-                  Diferença: {formatCurrency(Number(closure.difference))}
+                  {difference > 0 ? 'Superávit no Caixa' : 'Déficit no Caixa'}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {Number(closure.difference) > 0 ? 'Superávit no caixa' : 'Déficit no caixa'}
+                <p className={`text-lg font-bold ${
+                  difference > 0 
+                    ? 'text-emerald-900 dark:text-emerald-100' 
+                    : 'text-red-900 dark:text-red-100'
+                }`}>
+                  {formatCurrency(difference)}
                 </p>
               </div>
             </div>
@@ -294,16 +310,42 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
 
         {/* Notes Section */}
         {closure.notes && (
-          <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <div className="bg-gradient-to-br from-amber-50/80 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border border-amber-200/60 dark:border-amber-800/40 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-amber-100 dark:bg-amber-800/50 rounded-full shrink-0">
-                <Calculator className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div className="flex-shrink-0 p-2 bg-amber-500/10 dark:bg-amber-400/10 rounded-full border border-amber-200/50 dark:border-amber-700/50">
+                <StickyNote className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">Observações:</p>
-                <p className="text-sm text-amber-700 dark:text-amber-300 break-words">{closure.notes}</p>
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-2">
+                  Observações
+                </p>
+                <p className="text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
+                  {closure.notes}
+                </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Metadata */}
+        {(closure.operator_id || closure.machine_id) && (
+          <div className="flex flex-wrap gap-4 pt-2 border-t border-border/50">
+            {closure.operator_id && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="font-medium">Operador:</span>
+                <code className="px-2 py-0.5 bg-muted rounded text-xs">
+                  {closure.operator_id.slice(0, 8)}...
+                </code>
+              </div>
+            )}
+            {closure.machine_id && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="font-medium">Terminal:</span>
+                <code className="px-2 py-0.5 bg-muted rounded text-xs">
+                  {closure.machine_id.slice(-8)}
+                </code>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
