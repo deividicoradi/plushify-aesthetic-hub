@@ -112,7 +112,7 @@ const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) =>
         <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <div className="text-center">
             <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">Saldo Inicial</p>
-            <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900 dark:text-blue-100 break-words leading-tight">
               {formatCurrency(Number(opening.opening_balance))}
             </p>
           </div>
@@ -132,7 +132,7 @@ const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) =>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Dinheiro</p>
-                  <p className="text-base font-bold text-foreground">
+                  <p className="text-sm sm:text-base font-bold text-foreground break-words leading-tight">
                     {formatCurrency(Number(opening.cash_amount))}
                   </p>
                 </div>
@@ -146,7 +146,7 @@ const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) =>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Cartão</p>
-                  <p className="text-base font-bold text-foreground">
+                  <p className="text-sm sm:text-base font-bold text-foreground break-words leading-tight">
                     {formatCurrency(Number(opening.card_amount))}
                   </p>
                 </div>
@@ -160,7 +160,7 @@ const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) =>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">PIX</p>
-                  <p className="text-base font-bold text-foreground">
+                  <p className="text-sm sm:text-base font-bold text-foreground break-words leading-tight">
                     {formatCurrency(Number(opening.pix_amount))}
                   </p>
                 </div>
@@ -174,7 +174,7 @@ const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) =>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Outros</p>
-                  <p className="text-base font-bold text-foreground">
+                  <p className="text-sm sm:text-base font-bold text-foreground break-words leading-tight">
                     {formatCurrency(Number(opening.other_amount))}
                   </p>
                 </div>
