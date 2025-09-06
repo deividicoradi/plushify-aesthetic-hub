@@ -179,12 +179,12 @@ export const AppointmentFiltersAdvanced = ({
                 <CheckCircle className="w-4 h-4" />
                 <Label className="font-medium">Status</Label>
               </div>
-              <Select value={localFilters.status || ''} onValueChange={(value) => updateFilter('status', value)}>
+              <Select value={localFilters.status || ''} onValueChange={(value) => updateFilter('status', value === 'all' ? '' : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os status</SelectItem>
+                  <SelectItem value="all">Todos os status</SelectItem>
                   {STATUS_OPTIONS.map(status => (
                     <SelectItem key={status.value} value={status.value}>
                       <div className="flex items-center gap-2">

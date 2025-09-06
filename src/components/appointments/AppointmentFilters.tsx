@@ -60,12 +60,12 @@ export const AppointmentFilters = ({ open, onOpenChange }: AppointmentFiltersPro
           {/* Status Filter */}
           <div className="space-y-2">
             <Label>Status</Label>
-            <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+            <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os status</SelectItem>
+                <SelectItem value="all">Todos os status</SelectItem>
                 <SelectItem value="agendado">Agendado</SelectItem>
                 <SelectItem value="confirmado">Confirmado</SelectItem>
                 <SelectItem value="concluido">Concluído</SelectItem>
@@ -77,12 +77,12 @@ export const AppointmentFilters = ({ open, onOpenChange }: AppointmentFiltersPro
           {/* Service Filter */}
           <div className="space-y-2">
             <Label>Serviço</Label>
-            <Select value={filters.service} onValueChange={(value) => handleFilterChange('service', value)}>
+            <Select value={filters.service} onValueChange={(value) => handleFilterChange('service', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos os serviços" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os serviços</SelectItem>
+                <SelectItem value="all">Todos os serviços</SelectItem>
                 <SelectItem value="corte-escova">Corte e Escova</SelectItem>
                 <SelectItem value="manicure">Manicure</SelectItem>
                 <SelectItem value="massagem">Massagem Relaxante</SelectItem>
@@ -93,12 +93,12 @@ export const AppointmentFilters = ({ open, onOpenChange }: AppointmentFiltersPro
           {/* Date Range Filter */}
           <div className="space-y-2">
             <Label>Período</Label>
-            <Select value={filters.dateRange} onValueChange={(value) => handleFilterChange('dateRange', value)}>
+            <Select value={filters.dateRange} onValueChange={(value) => handleFilterChange('dateRange', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos os períodos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os períodos</SelectItem>
+                <SelectItem value="all">Todos os períodos</SelectItem>
                 <SelectItem value="today">Hoje</SelectItem>
                 <SelectItem value="tomorrow">Amanhã</SelectItem>
                 <SelectItem value="week">Esta semana</SelectItem>
@@ -110,12 +110,12 @@ export const AppointmentFilters = ({ open, onOpenChange }: AppointmentFiltersPro
           {/* Client Filter */}
           <div className="space-y-2">
             <Label>Cliente</Label>
-            <Select value={filters.client} onValueChange={(value) => handleFilterChange('client', value)}>
+            <Select value={filters.client} onValueChange={(value) => handleFilterChange('client', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos os clientes" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os clientes</SelectItem>
+                <SelectItem value="all">Todos os clientes</SelectItem>
                 <SelectItem value="maria-silva">Maria Silva</SelectItem>
                 <SelectItem value="ana-costa">Ana Costa</SelectItem>
                 <SelectItem value="julia-santos">Julia Santos</SelectItem>

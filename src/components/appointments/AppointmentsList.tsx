@@ -36,7 +36,7 @@ export const AppointmentsList = ({ searchQuery, filters = {} }: AppointmentsList
       );
 
       // Status filter
-      const matchesStatus = !statusFilter || appointment.status === statusFilter;
+      const matchesStatus = !statusFilter || statusFilter === 'all' || appointment.status === statusFilter;
 
       // Date filter
       let matchesSelectedDate = true;
@@ -294,7 +294,7 @@ export const AppointmentsList = ({ searchQuery, filters = {} }: AppointmentsList
               <SelectValue placeholder="Todos os status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os status</SelectItem>
+              <SelectItem value="all">Todos os status</SelectItem>
               <SelectItem value="agendado">Agendando</SelectItem>
               <SelectItem value="confirmado">Confirmados</SelectItem>
               <SelectItem value="concluido">Concluídos</SelectItem>
