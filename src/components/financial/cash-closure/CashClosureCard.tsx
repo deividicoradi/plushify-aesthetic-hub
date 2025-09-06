@@ -34,24 +34,25 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-      <CardHeader className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 pb-4">
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-              <div className="p-2 bg-red-100 dark:bg-red-800/50 rounded-lg">
-                <Calculator className="w-5 h-5 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <div>Fechamento de Caixa</div>
-                <div className="text-base font-medium text-muted-foreground">
-                  {format(new Date(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
-                </div>
-              </div>
-            </CardTitle>
+    <Card className="w-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      {/* Header */}
+      <CardHeader className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-100 dark:bg-red-800/50 rounded-lg shrink-0">
+              <Calculator className="w-5 h-5 text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-semibold text-foreground">
+                Fechamento de Caixa
+              </CardTitle>
+              <p className="text-sm font-medium text-muted-foreground mt-1">
+                {format(new Date(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
+              </p>
+            </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 self-start">
             {getStatusBadge(closure.status)}
             {(onEdit || onDelete) && (
               <DropdownMenu>
@@ -82,128 +83,181 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
           </div>
         </div>
         
-        {/* Informações adicionais */}
-        <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
+        {/* Additional Information */}
+        <div className="mt-4 space-y-2">
           {closure.closed_at && (
-            <div className="flex items-center gap-1">
-              <span>Fechado em:</span>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="shrink-0">Fechado em:</span>
               <span className="font-medium">
                 {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
               </span>
             </div>
           )}
-          {closure.operator_id && (
-            <div className="flex items-center gap-1">
-              <span>Operador:</span>
-              <span className="font-medium">{closure.operator_id.slice(0, 8)}...</span>
-            </div>
-          )}
-          {closure.machine_id && (
-            <div className="flex items-center gap-1">
-              <span>Terminal:</span>
-              <span className="font-medium">{closure.machine_id.slice(-8)}</span>
-            </div>
-          )}
+          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+            {closure.operator_id && (
+              <div className="flex items-center gap-2">
+                <span>Operador:</span>
+                <span className="font-medium">{closure.operator_id.slice(0, 8)}...</span>
+              </div>
+            )}
+            {closure.machine_id && (
+              <div className="flex items-center gap-2">
+                <span>Terminal:</span>
+                <span className="font-medium">{closure.machine_id.slice(-8)}</span>
+              </div>
+            )}
+          </div>
         </div>
       </CardHeader>
       
-      <CardContent className="p-6">
-        {/* Métricas Principais */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="flex justify-center mb-2">
-              <Calculator className="w-5 h-5 text-blue-600" />
+      <CardContent className="p-6 space-y-6">
+        {/* Main Metrics - 4 card grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 text-center space-y-2">
+            <div className="flex justify-center">
+              <div className="p-2 bg-blue-100 dark:bg-blue-800/50 rounded-full">
+                <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
-            <p className="text-xs text-blue-700 dark:text-blue-300 mb-1">Saldo Inicial</p>
-            <p className="font-bold text-sm text-blue-900 dark:text-blue-100">
-              {formatCurrency(Number(closure.opening_balance))}
-            </p>
+            <div>
+              <p className="text-xs text-blue-700 dark:text-blue-300">Saldo Inicial</p>
+              <p className="font-bold text-sm text-blue-900 dark:text-blue-100">
+                {formatCurrency(Number(closure.opening_balance))}
+              </p>
+            </div>
           </div>
           
-          <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-            <div className="flex justify-center mb-2">
-              <TrendingUp className="w-5 h-5 text-green-600" />
+          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 text-center space-y-2">
+            <div className="flex justify-center">
+              <div className="p-2 bg-green-100 dark:bg-green-800/50 rounded-full">
+                <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+              </div>
             </div>
-            <p className="text-xs text-green-700 dark:text-green-300 mb-1">Total Receitas</p>
-            <p className="font-bold text-sm text-green-900 dark:text-green-100">
-              {formatCurrency(Number(closure.total_income))}
-            </p>
+            <div>
+              <p className="text-xs text-green-700 dark:text-green-300">Total Receitas</p>
+              <p className="font-bold text-sm text-green-900 dark:text-green-100">
+                {formatCurrency(Number(closure.total_income))}
+              </p>
+            </div>
           </div>
           
-          <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-            <div className="flex justify-center mb-2">
-              <TrendingDown className="w-5 h-5 text-red-600" />
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 text-center space-y-2">
+            <div className="flex justify-center">
+              <div className="p-2 bg-red-100 dark:bg-red-800/50 rounded-full">
+                <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
+              </div>
             </div>
-            <p className="text-xs text-red-700 dark:text-red-300 mb-1">Total Despesas</p>
-            <p className="font-bold text-sm text-red-900 dark:text-red-100">
-              {formatCurrency(Number(closure.total_expenses))}
-            </p>
+            <div>
+              <p className="text-xs text-red-700 dark:text-red-300">Total Despesas</p>
+              <p className="font-bold text-sm text-red-900 dark:text-red-100">
+                {formatCurrency(Number(closure.total_expenses))}
+              </p>
+            </div>
           </div>
           
-          <div className={`text-center p-4 rounded-lg border ${
+          <div className={`p-4 rounded-lg border text-center space-y-2 ${
             Number(closure.closing_balance) >= Number(closure.opening_balance)
               ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
               : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
           }`}>
-            <div className="flex justify-center mb-2">
-              <Calculator className={`w-5 h-5 ${
+            <div className="flex justify-center">
+              <div className={`p-2 rounded-full ${
                 Number(closure.closing_balance) >= Number(closure.opening_balance)
-                  ? 'text-emerald-600'
-                  : 'text-orange-600'
-              }`} />
+                  ? 'bg-emerald-100 dark:bg-emerald-800/50'
+                  : 'bg-orange-100 dark:bg-orange-800/50'
+              }`}>
+                <Calculator className={`w-4 h-4 ${
+                  Number(closure.closing_balance) >= Number(closure.opening_balance)
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-orange-600 dark:text-orange-400'
+                }`} />
+              </div>
             </div>
-            <p className={`text-xs mb-1 ${
-              Number(closure.closing_balance) >= Number(closure.opening_balance)
-                ? 'text-emerald-700 dark:text-emerald-300'
-                : 'text-orange-700 dark:text-orange-300'
-            }`}>
-              Saldo Final
-            </p>
-            <p className={`font-bold text-sm ${
-              Number(closure.closing_balance) >= Number(closure.opening_balance)
-                ? 'text-emerald-900 dark:text-emerald-100'
-                : 'text-orange-900 dark:text-orange-100'
-            }`}>
-              {formatCurrency(Number(closure.closing_balance))}
-            </p>
+            <div>
+              <p className={`text-xs ${
+                Number(closure.closing_balance) >= Number(closure.opening_balance)
+                  ? 'text-emerald-700 dark:text-emerald-300'
+                  : 'text-orange-700 dark:text-orange-300'
+              }`}>
+                Saldo Final
+              </p>
+              <p className={`font-bold text-sm ${
+                Number(closure.closing_balance) >= Number(closure.opening_balance)
+                  ? 'text-emerald-900 dark:text-emerald-100'
+                  : 'text-orange-900 dark:text-orange-100'
+              }`}>
+                {formatCurrency(Number(closure.closing_balance))}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Métodos de Pagamento */}
+        {/* Payment Methods Section */}
         <div className="space-y-4">
-          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
             Detalhamento por Método de Pagamento
           </h4>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Dinheiro</p>
-              <p className="font-semibold text-sm">{formatCurrency(Number(closure.cash_amount))}</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="p-4 bg-muted/30 rounded-lg text-center space-y-2">
+              <div className="flex justify-center">
+                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+                  <Calculator className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Dinheiro</p>
+                <p className="font-semibold text-sm">{formatCurrency(Number(closure.cash_amount))}</p>
+              </div>
             </div>
-            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Cartão</p>
-              <p className="font-semibold text-sm">{formatCurrency(Number(closure.card_amount))}</p>
+            
+            <div className="p-4 bg-muted/30 rounded-lg text-center space-y-2">
+              <div className="flex justify-center">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                  <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Cartão</p>
+                <p className="font-semibold text-sm">{formatCurrency(Number(closure.card_amount))}</p>
+              </div>
             </div>
-            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">PIX</p>
-              <p className="font-semibold text-sm">{formatCurrency(Number(closure.pix_amount))}</p>
+            
+            <div className="p-4 bg-muted/30 rounded-lg text-center space-y-2">
+              <div className="flex justify-center">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                  <Calculator className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">PIX</p>
+                <p className="font-semibold text-sm">{formatCurrency(Number(closure.pix_amount))}</p>
+              </div>
             </div>
-            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Outros</p>
-              <p className="font-semibold text-sm">{formatCurrency(Number(closure.other_amount))}</p>
+            
+            <div className="p-4 bg-muted/30 rounded-lg text-center space-y-2">
+              <div className="flex justify-center">
+                <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-full">
+                  <Calculator className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Outros</p>
+                <p className="font-semibold text-sm">{formatCurrency(Number(closure.other_amount))}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Diferença */}
+        {/* Difference Section - Only show if there's a difference */}
         {Number(closure.difference) !== 0 && (
-          <div className={`mt-6 p-4 rounded-lg border ${
+          <div className={`p-4 rounded-lg border ${
             Number(closure.difference) > 0 
               ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
               : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
           }`}>
-            <div className="flex items-center gap-2">
-              <div className={`p-1 rounded ${
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-full shrink-0 ${
                 Number(closure.difference) > 0 
                   ? 'bg-green-100 dark:bg-green-800/50' 
                   : 'bg-red-100 dark:bg-red-800/50'
@@ -214,7 +268,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
                   <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
                 )}
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className={`text-sm font-medium ${
                   Number(closure.difference) > 0 
                     ? 'text-green-800 dark:text-green-200' 
@@ -230,16 +284,16 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
           </div>
         )}
 
-        {/* Observações */}
+        {/* Notes Section */}
         {closure.notes && (
-          <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <div className="flex items-start gap-2">
-              <div className="p-1 bg-amber-100 dark:bg-amber-800/50 rounded">
-                <Calculator className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+          <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-amber-100 dark:bg-amber-800/50 rounded-full shrink-0">
+                <Calculator className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">Observações:</p>
-                <p className="text-sm text-amber-700 dark:text-amber-300">{closure.notes}</p>
+                <p className="text-sm text-amber-700 dark:text-amber-300 break-words">{closure.notes}</p>
               </div>
             </div>
           </div>
