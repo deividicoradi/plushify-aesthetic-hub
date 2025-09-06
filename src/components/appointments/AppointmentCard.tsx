@@ -156,7 +156,7 @@ Nos vemos em breve!`;
             )}
 
             <div className="flex-1 space-y-3">
-              {/* Header with client and status */}
+              {/* Header with client info */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-plush-100 rounded-full flex items-center justify-center">
@@ -171,9 +171,22 @@ Nos vemos em breve!`;
                     </p>
                   </div>
                 </div>
-                <Badge className={statusColors[appointment.status]}>
-                  {statusLabels[appointment.status]}
-                </Badge>
+                
+                {/* Status and Actions moved to header for better space usage */}
+                <div className="flex items-center gap-3">
+                  <Badge className={statusColors[appointment.status]}>
+                    {statusLabels[appointment.status]}
+                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={sendWhatsAppMessage}
+                    className="text-green-600 border-green-200 hover:bg-green-50 shrink-0"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-1" />
+                    WhatsApp
+                  </Button>
+                </div>
               </div>
 
               {/* Service, time and professional info */}
@@ -203,19 +216,6 @@ Nos vemos em breve!`;
                   </p>
                 </div>
               )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={sendWhatsAppMessage}
-                className="text-green-600 border-green-200 hover:bg-green-50"
-              >
-                <MessageCircle className="w-4 h-4 mr-1" />
-                WhatsApp
-              </Button>
             </div>
           </div>
         </CardContent>
