@@ -44,27 +44,16 @@ export const AppointmentsEmptyState = ({
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           {isSearchOrFilter ? (
-            <>
-              {onClearFilters && (
-                <Button
-                  variant="outline"
-                  onClick={onClearFilters}
-                  className="gap-2 transition-all duration-200 hover:scale-105"
-                >
-                  <Filter className="w-4 h-4" />
-                  Limpar Filtros
-                </Button>
-              )}
-              {onCreateNew && (
-                <Button
-                  onClick={onCreateNew}
-                  className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 hover:scale-105"
-                >
-                  <CalendarPlus className="w-4 h-4" />
-                  Novo Agendamento
-                </Button>
-              )}
-            </>
+            onClearFilters && (
+              <Button
+                variant="outline"
+                onClick={onClearFilters}
+                className="gap-2 transition-all duration-200 hover:scale-105"
+              >
+                <Filter className="w-4 h-4" />
+                Limpar Filtros
+              </Button>
+            )
           ) : (
             onCreateNew && (
               <Button
