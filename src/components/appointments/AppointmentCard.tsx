@@ -172,20 +172,18 @@ Nos vemos em breve!`;
                   </div>
                 </div>
                 
-                {/* Status and Actions moved to header for better space usage */}
-                <div className="flex items-center gap-3">
-                  <Badge className={statusColors[appointment.status]}>
+                {/* Status and WhatsApp buttons side by side */}
+                <div className="flex items-center gap-2">
+                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[appointment.status]}`}>
                     {statusLabels[appointment.status]}
-                  </Badge>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
+                  </div>
+                  <div 
                     onClick={sendWhatsAppMessage}
-                    className="text-green-600 border-green-200 hover:bg-green-50 shrink-0"
+                    className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 cursor-pointer hover:bg-green-200 dark:hover:bg-green-800 transition-colors flex items-center gap-1"
                   >
-                    <MessageCircle className="w-4 h-4 mr-1" />
+                    <MessageCircle className="w-4 h-4" />
                     WhatsApp
-                  </Button>
+                  </div>
                 </div>
               </div>
 
