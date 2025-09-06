@@ -318,12 +318,12 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
       .upsert({
         user_id: userId,
         status: serverResponse.status || 'pareando',
-        sessao_serializada: JSON.stringify(serverResponse)
-      }, {
-        onConflict: 'user_id'
+        sessao_serializada: JSON.stringify(serverResponse),
+        atualizado_em: new Date().toISOString()
       })
       .select()
-      .single();
+      .eq('user_id', userId)
+      .maybeSingle();
 
     if (error) {
       console.error('Erro ao salvar sessão:', error);
