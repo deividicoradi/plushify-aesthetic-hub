@@ -253,34 +253,55 @@ export type Database = {
       }
       clients: {
         Row: {
+          address: string | null
+          cep: string | null
+          city: string | null
+          cpf: string | null
           created_at: string
           email: string | null
           id: string
           last_visit: string | null
           name: string
+          neighborhood: string | null
+          payment_method: string | null
           phone: string | null
+          state: string | null
           status: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          address?: string | null
+          cep?: string | null
+          city?: string | null
+          cpf?: string | null
           created_at?: string
           email?: string | null
           id?: string
           last_visit?: string | null
           name: string
+          neighborhood?: string | null
+          payment_method?: string | null
           phone?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          address?: string | null
+          cep?: string | null
+          city?: string | null
+          cpf?: string | null
           created_at?: string
           email?: string | null
           id?: string
           last_visit?: string | null
           name?: string
+          neighborhood?: string | null
+          payment_method?: string | null
           phone?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string
@@ -1235,6 +1256,10 @@ export type Database = {
           phone: string
           status: string
         }[]
+      }
+      validate_cpf: {
+        Args: { cpf_input: string }
+        Returns: boolean
       }
       validate_email: {
         Args: { email: string }
