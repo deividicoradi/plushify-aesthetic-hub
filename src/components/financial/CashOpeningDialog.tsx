@@ -28,7 +28,9 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
     card_amount: '',
     pix_amount: '',
     other_amount: '',
-    notes: ''
+    notes: '',
+    operator_id: user?.id || '',
+    machine_id: ''
   });
 
   useEffect(() => {
@@ -40,9 +42,21 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
         card_amount: opening.card_amount?.toString() || '',
         pix_amount: opening.pix_amount?.toString() || '',
         other_amount: opening.other_amount?.toString() || '',
-        notes: opening.notes || ''
+        notes: opening.notes || '',
+        operator_id: opening.operator_id || user?.id || '',
+        machine_id: opening.machine_id || ''
       });
     } else {
+      // Get machine identifier (browser fingerprint)
+      const getMachineId = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('Machine ID', 2, 2);
+        return canvas.toDataURL().slice(-50);
+      };
+
       setFormData({
         opening_date: new Date().toISOString().split('T')[0],
         opening_balance: '',
@@ -50,7 +64,9 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
         card_amount: '',
         pix_amount: '',
         other_amount: '',
-        notes: ''
+        notes: '',
+        operator_id: user?.id || '',
+        machine_id: getMachineId()
       });
     }
   }, [opening, open]);
@@ -114,6 +130,8 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
       pix_amount: parseFloat(formData.pix_amount) || 0,
       other_amount: parseFloat(formData.other_amount) || 0,
       notes: formData.notes || null,
+      operator_id: formData.operator_id || user?.id,
+      machine_id: formData.machine_id || null,
     };
 
     mutation.mutate(processedData);
@@ -129,7 +147,9 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
     const card = parseFloat(formData.card_amount) || 0;
     const pix = parseFloat(formData.pix_amount) || 0;
     const other = parseFloat(formData.other_amount) || 0;
-    return balance + cash + card + pix + other;
+    // O saldo inicial NÃO deve somar com os métodos de pagamento
+    // Os métodos de pagamento são apenas para controle/conferência
+    return cash + card + pix + other;
   };
 
   const formatCurrency = (value: number) => {
@@ -228,6 +248,26 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
                 Total em caixa: {formatCurrency(calculateTotal())}
               </p>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="operator_id">Operador</Label>
+            <Input
+              id="operator_id"
+              value={user?.email || ''}
+              disabled
+              className="bg-muted"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="machine_id">Máquina/Terminal</Label>
+            <Input
+              id="machine_id"
+              value={formData.machine_id}
+              onChange={(e) => handleChange('machine_id', e.target.value)}
+              placeholder="ID da máquina ou terminal"
+            />
           </div>
 
           <div className="space-y-2">

@@ -2,16 +2,20 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, TrendingUp, TrendingDown } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Calculator, TrendingUp, TrendingDown, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import MetricCard from './MetricCard';
 
 interface CashClosureCardProps {
   closure: any;
+  onEdit?: (closure: any) => void;
+  onDelete?: (id: string) => void;
 }
 
-const CashClosureCard = ({ closure }: CashClosureCardProps) => {
+const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) => {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       aberto: { label: 'Aberto', variant: 'secondary' as const },
@@ -42,11 +46,44 @@ const CashClosureCard = ({ closure }: CashClosureCardProps) => {
               {getStatusBadge(closure.status)}
             </div>
           </div>
-          <div className="text-right">
-            {closure.closed_at && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Fechado em: {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-              </p>
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              {closure.closed_at && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Fechado em: {format(new Date(closure.closed_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                </p>
+              )}
+              {closure.operator_id && (
+                <p className="text-xs text-gray-500">
+                  Op: {closure.operator_id.slice(0, 8)}...
+                </p>
+              )}
+            </div>
+            {(onEdit || onDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onEdit && (
+                    <DropdownMenuItem onClick={() => onEdit(closure)}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Editar
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem 
+                      onClick={() => onDelete(closure.id)}
+                      className="text-red-600"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Deletar
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>

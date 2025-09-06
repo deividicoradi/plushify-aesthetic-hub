@@ -1,16 +1,20 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { DoorOpen, Calculator } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DoorOpen, Calculator, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import MetricCard from './MetricCard';
 
 interface CashOpeningCardProps {
   opening: any;
+  onEdit?: (opening: any) => void;
+  onDelete?: (id: string) => void;
 }
 
-const CashOpeningCard = ({ opening }: CashOpeningCardProps) => {
+const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) => {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       aberto: { label: 'Aberto', variant: 'secondary' as const, className: 'bg-green-500 text-white hover:bg-green-600' },
@@ -34,10 +38,43 @@ const CashOpeningCard = ({ opening }: CashOpeningCardProps) => {
               {getStatusBadge(opening.status)}
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Aberto em: {format(new Date(opening.opened_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-            </p>
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Aberto em: {format(new Date(opening.opened_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+              </p>
+              {opening.operator_id && (
+                <p className="text-xs text-gray-500">
+                  Op: {opening.operator_id.slice(0, 8)}...
+                </p>
+              )}
+            </div>
+            {(onEdit || onDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onEdit && (
+                    <DropdownMenuItem onClick={() => onEdit(opening)}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Editar
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem 
+                      onClick={() => onDelete(opening.id)}
+                      className="text-red-600"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Deletar
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </CardHeader>

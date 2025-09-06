@@ -153,8 +153,10 @@ export type Database = {
           created_at: string
           difference: number
           id: string
+          machine_id: string | null
           notes: string | null
           opening_balance: number
+          operator_id: string | null
           other_amount: number
           pix_amount: number
           status: string
@@ -172,8 +174,10 @@ export type Database = {
           created_at?: string
           difference?: number
           id?: string
+          machine_id?: string | null
           notes?: string | null
           opening_balance?: number
+          operator_id?: string | null
           other_amount?: number
           pix_amount?: number
           status?: string
@@ -191,8 +195,10 @@ export type Database = {
           created_at?: string
           difference?: number
           id?: string
+          machine_id?: string | null
           notes?: string | null
           opening_balance?: number
+          operator_id?: string | null
           other_amount?: number
           pix_amount?: number
           status?: string
@@ -209,10 +215,12 @@ export type Database = {
           cash_amount: number
           created_at: string
           id: string
+          machine_id: string | null
           notes: string | null
           opened_at: string
           opening_balance: number
           opening_date: string
+          operator_id: string | null
           other_amount: number
           pix_amount: number
           status: string
@@ -224,10 +232,12 @@ export type Database = {
           cash_amount?: number
           created_at?: string
           id?: string
+          machine_id?: string | null
           notes?: string | null
           opened_at?: string
           opening_balance?: number
           opening_date: string
+          operator_id?: string | null
           other_amount?: number
           pix_amount?: number
           status?: string
@@ -239,10 +249,12 @@ export type Database = {
           cash_amount?: number
           created_at?: string
           id?: string
+          machine_id?: string | null
           notes?: string | null
           opened_at?: string
           opening_balance?: number
           opening_date?: string
+          operator_id?: string | null
           other_amount?: number
           pix_amount?: number
           status?: string

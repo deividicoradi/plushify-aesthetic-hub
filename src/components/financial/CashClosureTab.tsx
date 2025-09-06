@@ -1,91 +1,193 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { FeatureGuard } from '@/components/FeatureGuard';
+import { Button } from "@/components/ui/button";
+import { Plus, FolderOpen } from 'lucide-react';
+import { useCashClosureData } from '@/hooks/financial/useCashClosureData';
 import CashClosureDialog from './CashClosureDialog';
 import CashOpeningDialog from './CashOpeningDialog';
-import CashClosureHeader from './cash-closure/CashClosureHeader';
-import CashOpeningCard from './cash-closure/CashOpeningCard';
+import CashSearchAndFilters from './CashSearchAndFilters';
+import { useCashStatus } from './CashStatusProvider';
 import CashClosureCard from './cash-closure/CashClosureCard';
-import { useCashClosureData } from './cash-closure/useCashClosureData';
+import CashOpeningCard from './cash-closure/CashOpeningCard';
 
 const CashClosureTab = () => {
   const [isClosureDialogOpen, setIsClosureDialogOpen] = useState(false);
   const [isOpeningDialogOpen, setIsOpeningDialogOpen] = useState(false);
+  const [editingClosure, setEditingClosure] = useState<any>(null);
+  const [editingOpening, setEditingOpening] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    dateFrom: '',
+    dateTo: '',
+    type: 'all'
+  });
+  
+  const { canOpenCash, canCloseCash, currentOpening, refreshStatus } = useCashStatus();
 
   const {
-    cashClosures,
-    cashOpenings,
+    cashClosures = [],
+    cashOpenings = [],
     loadingClosures,
     loadingOpenings,
     handleRefetch,
+    deleteClosure,
+    deleteOpening,
   } = useCashClosureData();
+
+  // Filter data based on search and filters
+  const filteredData = () => {
+    let openingsData = cashOpenings || [];
+    let closuresData = cashClosures || [];
+
+    // Apply search filter
+    if (searchTerm) {
+      openingsData = openingsData.filter(item => 
+        item.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      closuresData = closuresData.filter(item => 
+        item.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply date filters
+    if (filters.dateFrom) {
+      openingsData = openingsData.filter(item => item.opening_date >= filters.dateFrom);
+      closuresData = closuresData.filter(item => item.closure_date >= filters.dateFrom);
+    }
+    if (filters.dateTo) {
+      openingsData = openingsData.filter(item => item.opening_date <= filters.dateTo);
+      closuresData = closuresData.filter(item => item.closure_date <= filters.dateTo);
+    }
+
+    // Apply type filter
+    let combinedData = [];
+    if (filters.type === 'all' || filters.type === 'opening') {
+      combinedData.push(...openingsData.map(item => ({ ...item, type: 'opening' })));
+    }
+    if (filters.type === 'all' || filters.type === 'closure') {
+      combinedData.push(...closuresData.map(item => ({ ...item, type: 'closure' })));
+    }
+
+    // Sort by date
+    return combinedData.sort((a, b) => {
+      const dateA = new Date(a.opening_date || a.closure_date);
+      const dateB = new Date(b.opening_date || b.closure_date);
+      return dateB.getTime() - dateA.getTime();
+    });
+  };
+
+  const handleCreateClosure = () => {
+    if (!canCloseCash) {
+      return;
+    }
+    setEditingClosure(null);
+    setIsClosureDialogOpen(true);
+  };
+
+  const handleCreateOpening = () => {
+    if (!canOpenCash) {
+      return;
+    }
+    setEditingOpening(null);
+    setIsOpeningDialogOpen(true);
+  };
+
+  const handleClosureSuccess = () => {
+    handleRefetch();
+    refreshStatus();
+  };
+
+  const handleOpeningSuccess = () => {
+    handleRefetch();
+    refreshStatus();
+  };
 
   return (
     <div className="space-y-6">
-      <FeatureGuard 
-        planFeature="hasCashFlow"
-        showUpgradePrompt={true}
-      >
-        <CashClosureHeader
-          onOpenCashOpening={() => setIsOpeningDialogOpen(true)}
-          onOpenCashClosure={() => setIsClosureDialogOpen(true)}
-        />
-
-        <div className="grid gap-6">
-          {loadingClosures || loadingOpenings ? (
-            <div className="text-center py-8">Carregando dados...</div>
-          ) : (
-            <>
-              {/* Aberturas de Caixa */}
-              {cashOpenings && cashOpenings.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Aberturas de Caixa</h3>
-                  {cashOpenings.map((opening) => (
-                    <CashOpeningCard
-                      key={opening.id}
-                      opening={opening}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Fechamentos de Caixa */}
-              {cashClosures && cashClosures.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Fechamentos de Caixa</h3>
-                  {cashClosures.map((closure) => (
-                    <CashClosureCard
-                      key={closure.id}
-                      closure={closure}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {(!cashOpenings || cashOpenings.length === 0) && (!cashClosures || cashClosures.length === 0) && (
-                <Card>
-                  <CardContent className="text-center py-8">
-                    <p className="text-gray-500">Nenhum registro de caixa encontrado</p>
-                  </CardContent>
-                </Card>
-              )}
-            </>
-          )}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Controle de Caixa</h2>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleCreateOpening} 
+            className="gap-2"
+            disabled={!canOpenCash}
+            variant={canOpenCash ? "default" : "secondary"}
+          >
+            <FolderOpen className="w-4 h-4" />
+            {canOpenCash ? 'Abrir Caixa' : 'Caixa Aberto'}
+          </Button>
+          <Button 
+            onClick={handleCreateClosure} 
+            variant="outline" 
+            className="gap-2"
+            disabled={!canCloseCash}
+          >
+            <Plus className="w-4 h-4" />
+            {canCloseCash ? 'Fechar Caixa' : 'Abra o Caixa Primeiro'}
+          </Button>
         </div>
+      </div>
 
-        <CashClosureDialog 
-          open={isClosureDialogOpen} 
-          onOpenChange={setIsClosureDialogOpen}
-          onSuccess={handleRefetch}
-        />
+      <CashSearchAndFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
 
-        <CashOpeningDialog 
-          open={isOpeningDialogOpen} 
-          onOpenChange={setIsOpeningDialogOpen}
-          onSuccess={handleRefetch}
-        />
-      </FeatureGuard>
+      {loadingClosures || loadingOpenings ? (
+        <div className="text-center py-8">Carregando dados...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredData().map((item) => {
+            if (item.type === 'opening') {
+              return (
+                <CashOpeningCard
+                  key={`opening-${item.id}`}
+                  opening={item}
+                  onEdit={(opening) => {
+                    setEditingOpening(opening);
+                    setIsOpeningDialogOpen(true);
+                  }}
+                  onDelete={deleteOpening}
+                />
+              );
+            } else {
+              return (
+                <CashClosureCard
+                  key={`closure-${item.id}`}
+                  closure={item}
+                  onEdit={(closure) => {
+                    setEditingClosure(closure);
+                    setIsClosureDialogOpen(true);
+                  }}
+                  onDelete={deleteClosure}
+                />
+              );
+            }
+          })}
+        </div>
+      )}
+
+      {filteredData().length === 0 && !loadingClosures && !loadingOpenings && (
+        <div className="text-center py-12 text-gray-500">
+          <p>Nenhum registro de caixa encontrado.</p>
+          <p className="text-sm">Comece abrindo um caixa.</p>
+        </div>
+      )}
+
+      <CashOpeningDialog
+        open={isOpeningDialogOpen}
+        onOpenChange={setIsOpeningDialogOpen}
+        onSuccess={handleOpeningSuccess}
+        opening={editingOpening}
+      />
+
+      <CashClosureDialog
+        open={isClosureDialogOpen}
+        onOpenChange={setIsClosureDialogOpen}
+        onSuccess={handleClosureSuccess}
+        closure={editingClosure}
+      />
     </div>
   );
 };

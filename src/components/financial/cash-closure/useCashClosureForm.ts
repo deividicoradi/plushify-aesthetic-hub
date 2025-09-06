@@ -132,6 +132,15 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
     },
   });
 
+  const getMachineId = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Machine ID', 2, 2);
+    return canvas.toDataURL().slice(-50);
+  };
+
   const handleChange = (field: keyof CashClosureFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -166,6 +175,8 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
       pix_amount: parseFloat(formData.pix_amount) || 0,
       other_amount: parseFloat(formData.other_amount) || 0,
       notes: formData.notes || null,
+      operator_id: user?.id,
+      machine_id: getMachineId()
     };
 
     mutation.mutate(processedData);
