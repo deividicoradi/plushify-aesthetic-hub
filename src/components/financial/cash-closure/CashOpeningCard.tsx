@@ -124,60 +124,60 @@ const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) =>
             Valores por Método de Pagamento
           </h4>
           
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="p-4 bg-muted/30 rounded-lg text-center space-y-2">
-              <div className="flex justify-center">
-                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
-                  <Calculator className="w-4 h-4 text-green-600 dark:text-green-400" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
+                  <Calculator className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Dinheiro</p>
-                <p className="font-semibold text-sm">
-                  {formatCurrency(Number(opening.cash_amount))}
-                </p>
+                <div className="text-center space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Dinheiro</p>
+                  <p className="text-base font-bold text-foreground">
+                    {formatCurrency(Number(opening.cash_amount))}
+                  </p>
+                </div>
               </div>
             </div>
             
-            <div className="p-4 bg-muted/30 rounded-lg text-center space-y-2">
-              <div className="flex justify-center">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                  <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                  <Calculator className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Cartão</p>
-                <p className="font-semibold text-sm">
-                  {formatCurrency(Number(opening.card_amount))}
-                </p>
+                <div className="text-center space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Cartão</p>
+                  <p className="text-base font-bold text-foreground">
+                    {formatCurrency(Number(opening.card_amount))}
+                  </p>
+                </div>
               </div>
             </div>
             
-            <div className="p-4 bg-muted/30 rounded-lg text-center space-y-2">
-              <div className="flex justify-center">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                  <Calculator className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <div className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                  <Calculator className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">PIX</p>
-                <p className="font-semibold text-sm">
-                  {formatCurrency(Number(opening.pix_amount))}
-                </p>
+                <div className="text-center space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">PIX</p>
+                  <p className="text-base font-bold text-foreground">
+                    {formatCurrency(Number(opening.pix_amount))}
+                  </p>
+                </div>
               </div>
             </div>
             
-            <div className="p-4 bg-muted/30 rounded-lg text-center space-y-2">
-              <div className="flex justify-center">
-                <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-full">
-                  <Calculator className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            <div className="p-4 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
+                  <Calculator className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                 </div>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Outros</p>
-                <p className="font-semibold text-sm">
-                  {formatCurrency(Number(opening.other_amount))}
-                </p>
+                <div className="text-center space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Outros</p>
+                  <p className="text-base font-bold text-foreground">
+                    {formatCurrency(Number(opening.other_amount))}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
