@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Clock, Save } from 'lucide-react';
-import { useWorkingHours } from '@/hooks/useWorkingHours';
+import { Separator } from '@/components/ui/separator';
+import { Clock, Save, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useWorkingHoursEnhanced } from '@/hooks/useWorkingHoursEnhanced';
+import { toast } from '@/hooks/use-toast';
 
 const DAYS_OF_WEEK = [
   { value: 0, label: 'Domingo' },
@@ -18,59 +20,68 @@ const DAYS_OF_WEEK = [
 ];
 
 export const WorkingHoursSetup = () => {
-  const { workingHours, isLoading, createOrUpdateWorkingHour } = useWorkingHours();
-  const [editingHours, setEditingHours] = useState<Record<number, { start_time: string; end_time: string; is_active: boolean }>>({});
+  const { 
+    workingHours, 
+    isLoading, 
+    saveAllWorkingHours, 
+    checkPendingAppointments 
+  } = useWorkingHoursEnhanced();
+  
+  const [editedHours, setEditedHours] = useState<any[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
 
-  const getWorkingHourForDay = (dayOfWeek: number) => {
-    const existing = workingHours.find(wh => wh.day_of_week === dayOfWeek);
-    const editing = editingHours[dayOfWeek];
-    
-    if (editing) return editing;
-    if (existing) {
-      return {
-        start_time: existing.start_time,
-        end_time: existing.end_time,
-        is_active: existing.is_active
-      };
+  useEffect(() => {
+    if (workingHours.length > 0) {
+      setEditedHours([...workingHours]);
     }
-    
-    return {
-      start_time: '09:00',
-      end_time: '18:00',
-      is_active: false
+  }, [workingHours]);
+
+  const updateHour = (index: number, field: string, value: any) => {
+    const newEditedHours = [...editedHours];
+    newEditedHours[index] = {
+      ...newEditedHours[index],
+      [field]: value
     };
+    setEditedHours(newEditedHours);
+    setHasChanges(true);
   };
 
-  const updateEditingHours = (dayOfWeek: number, field: string, value: any) => {
-    setEditingHours(prev => ({
-      ...prev,
-      [dayOfWeek]: {
-        ...getWorkingHourForDay(dayOfWeek),
-        [field]: value
+  const handleToggleActive = async (index: number, checked: boolean) => {
+    if (!checked) {
+      // Verificar se há agendamentos pendentes antes de desativar
+      const dayOfWeek = editedHours[index].day_of_week;
+      const hasPending = await checkPendingAppointments(dayOfWeek);
+      
+      if (hasPending) {
+        toast({
+          title: "Não é possível desativar",
+          description: "Não é possível desativar o dia de trabalho com agendamentos pendentes.",
+          variant: "destructive"
+        });
+        return;
       }
-    }));
+    }
+    
+    updateHour(index, 'is_active', checked);
   };
 
-  const saveWorkingHour = async (dayOfWeek: number) => {
-    const hours = getWorkingHourForDay(dayOfWeek);
-    
-    if (hours.start_time >= hours.end_time) {
-      return;
+  const handleSaveAll = async () => {
+    // Validações
+    for (const hour of editedHours) {
+      if (hour.is_active && hour.start_time >= hour.end_time) {
+        toast({
+          title: "Erro de validação",
+          description: `O horário de início deve ser menor que o horário de fim para ${DAYS_OF_WEEK.find(d => d.value === hour.day_of_week)?.label}`,
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
-    await createOrUpdateWorkingHour({
-      day_of_week: dayOfWeek,
-      start_time: hours.start_time,
-      end_time: hours.end_time,
-      is_active: hours.is_active
-    });
-
-    // Remover do estado de edição após salvar
-    setEditingHours(prev => {
-      const newState = { ...prev };
-      delete newState[dayOfWeek];
-      return newState;
-    });
+    const success = await saveAllWorkingHours(editedHours);
+    if (success) {
+      setHasChanges(false);
+    }
   };
 
   if (isLoading) {
@@ -79,12 +90,12 @@ export const WorkingHoursSetup = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="w-5 h-5" />
-            Horários de Trabalho
+            Configurações de Horário
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-4">
-            Carregando horários...
+            Carregando configurações...
           </div>
         </CardContent>
       </Card>
@@ -93,68 +104,144 @@ export const WorkingHoursSetup = () => {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <Clock className="w-5 h-5" />
-          Horários de Trabalho
+          Configurações de Horário
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {DAYS_OF_WEEK.map(day => {
-          const hours = getWorkingHourForDay(day.value);
-          const hasChanges = editingHours[day.value];
+      
+      <CardContent className="space-y-6">
+        {/* Configurações Globais */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Configurações Gerais
+          </h3>
           
-          return (
-            <div key={day.value} className="flex items-center gap-4 p-4 border rounded-lg">
-              <div className="w-24">
-                <Label className="text-sm font-medium">{day.label}</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200 dark:border-blue-800/50">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium">Confirmar agendamentos automaticamente</Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Aprovar agendamentos dentro do horário de trabalho
+                </p>
               </div>
-              
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={hours.is_active}
-                  onCheckedChange={(checked) => updateEditingHours(day.value, 'is_active', checked)}
-                />
-                <span className="text-sm text-muted-foreground">Ativo</span>
-              </div>
-
-              {hours.is_active && (
-                <>
-                  <div className="flex items-center gap-2">
-                    <Label className="text-sm">De:</Label>
-                    <Input
-                      type="time"
-                      value={hours.start_time}
-                      onChange={(e) => updateEditingHours(day.value, 'start_time', e.target.value)}
-                      className="w-32"
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Label className="text-sm">Até:</Label>
-                    <Input
-                      type="time"
-                      value={hours.end_time}
-                      onChange={(e) => updateEditingHours(day.value, 'end_time', e.target.value)}
-                      className="w-32"
-                    />
-                  </div>
-                </>
-              )}
-
-              {hasChanges && (
-                <Button
-                  size="sm"
-                  onClick={() => saveWorkingHour(day.value)}
-                  className="ml-auto"
-                >
-                  <Save className="w-4 h-4 mr-1" />
-                  Salvar
-                </Button>
-              )}
+              <Switch
+                checked={editedHours.some(h => h.auto_confirm_appointments)}
+                onCheckedChange={(checked) => {
+                  const newEditedHours = editedHours.map(h => ({
+                    ...h,
+                    auto_confirm_appointments: checked
+                  }));
+                  setEditedHours(newEditedHours);
+                  setHasChanges(true);
+                }}
+              />
             </div>
-          );
-        })}
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium">Concluir agendamentos automaticamente</Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Finalizar agendamentos confirmados às 23:00
+                </p>
+              </div>
+              <Switch
+                checked={editedHours.some(h => h.auto_complete_appointments)}
+                onCheckedChange={(checked) => {
+                  const newEditedHours = editedHours.map(h => ({
+                    ...h,
+                    auto_complete_appointments: checked
+                  }));
+                  setEditedHours(newEditedHours);
+                  setHasChanges(true);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Horários por Dia */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Horários de Trabalho
+          </h3>
+          
+          <div className="space-y-3">
+            {DAYS_OF_WEEK.map((day, index) => {
+              const hour = editedHours.find(h => h.day_of_week === day.value) || {
+                day_of_week: day.value,
+                start_time: '09:00',
+                end_time: '18:00',
+                is_active: false,
+                auto_confirm_appointments: false,
+                auto_complete_appointments: false
+              };
+              
+              const hourIndex = editedHours.findIndex(h => h.day_of_week === day.value);
+              
+              return (
+                <div key={day.value} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <div className="w-32">
+                    <Label className="text-sm font-medium">{day.label}</Label>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={hour.is_active}
+                      onCheckedChange={(checked) => handleToggleActive(hourIndex >= 0 ? hourIndex : editedHours.length, checked)}
+                    />
+                    <span className="text-sm text-muted-foreground">Ativo</span>
+                  </div>
+
+                  {hour.is_active && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm">De:</Label>
+                        <Input
+                          type="time"
+                          value={hour.start_time}
+                          onChange={(e) => updateHour(hourIndex, 'start_time', e.target.value)}
+                          className="w-32"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm">Até:</Label>
+                        <Input
+                          type="time"
+                          value={hour.end_time}
+                          onChange={(e) => updateHour(hourIndex, 'end_time', e.target.value)}
+                          className="w-32"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="ml-auto">
+                    {hour.is_active ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-gray-400" />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Botão de Salvar Global */}
+        {hasChanges && (
+          <div className="flex justify-end pt-4 border-t">
+            <Button onClick={handleSaveAll} className="gap-2">
+              <Save className="w-4 h-4" />
+              Salvar Todas as Configurações
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

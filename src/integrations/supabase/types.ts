@@ -25,6 +25,7 @@ export type Database = {
           id: string
           notes: string | null
           price: number
+          professional_id: string | null
           service_id: string | null
           service_name: string
           status: string
@@ -41,6 +42,7 @@ export type Database = {
           id?: string
           notes?: string | null
           price?: number
+          professional_id?: string | null
           service_id?: string | null
           service_name: string
           status?: string
@@ -57,6 +59,7 @@ export type Database = {
           id?: string
           notes?: string | null
           price?: number
+          professional_id?: string | null
           service_id?: string | null
           service_name?: string
           status?: string
@@ -688,6 +691,66 @@ export type Database = {
         }
         Relationships: []
       }
+      professionals: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          specialties: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      service_professionals: {
+        Row: {
+          created_at: string
+          id: string
+          professional_id: string
+          service_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          professional_id: string
+          service_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          professional_id?: string
+          service_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           active: boolean
@@ -979,6 +1042,8 @@ export type Database = {
       }
       working_hours: {
         Row: {
+          auto_complete_appointments: boolean
+          auto_confirm_appointments: boolean
           created_at: string
           day_of_week: number
           end_time: string
@@ -989,6 +1054,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_complete_appointments?: boolean
+          auto_confirm_appointments?: boolean
           created_at?: string
           day_of_week: number
           end_time: string
@@ -999,6 +1066,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_complete_appointments?: boolean
+          auto_confirm_appointments?: boolean
           created_at?: string
           day_of_week?: number
           end_time?: string
@@ -1015,6 +1084,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_complete_appointments: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      auto_confirm_appointments: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       can_add_team_member: {
         Args: { user_uuid?: string }
         Returns: boolean
@@ -1027,6 +1104,10 @@ export type Database = {
           p_exclude_appointment_id?: string
           p_user_id: string
         }
+        Returns: boolean
+      }
+      check_pending_appointments_for_day: {
+        Args: { p_day_of_week: number; p_user_id: string }
         Returns: boolean
       }
       cleanup_old_audit_logs: {
@@ -1085,6 +1166,16 @@ export type Database = {
         Returns: {
           active_users_limit: number
           plan_name: string
+        }[]
+      }
+      get_professionals_by_service: {
+        Args: { p_service_id: string; p_user_id: string }
+        Returns: {
+          email: string
+          id: string
+          name: string
+          phone: string
+          specialties: string[]
         }[]
       }
       get_public_available_slots: {

@@ -1,13 +1,18 @@
-
-import React, { useState } from 'react';
-import { Calendar, Clock, User, Package } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Clock, User, Package, UserCheck, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAppointments } from '@/hooks/useAppointments';
+import { useServices } from '@/hooks/useServices';
+import { useProfessionals } from '@/hooks/useProfessionals';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { useAvailableSlots } from '@/hooks/useAvailableSlots';
 import { toast } from 'sonner';
 
 interface CreateAppointmentDialogProps {
@@ -17,12 +22,23 @@ interface CreateAppointmentDialogProps {
 
 export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmentDialogProps) => {
   const { createAppointment, appointments } = useAppointments();
+  const { services } = useServices();
+  const { professionals, getProfessionalsByService } = useProfessionals();
   const { hasReachedLimit } = usePlanLimits();
+  const { slots, fetchAvailableSlots } = useAvailableSlots();
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serviceSearchOpen, setServiceSearchOpen] = useState(false);
+  const [professionalSearchOpen, setProfessionalSearchOpen] = useState(false);
+  const [availableProfessionals, setAvailableProfessionals] = useState<any[]>([]);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [selectedProfessional, setSelectedProfessional] = useState<any>(null);
   
   const [formData, setFormData] = useState({
     client_name: '',
+    service_id: '',
     service_name: '',
+    professional_id: '',
     appointment_date: '',
     appointment_time: '',
     duration: 60,
@@ -30,16 +46,82 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
     notes: ''
   });
 
+  // Validação de data retroativa
+  const today = new Date().toISOString().split('T')[0];
+
+  // Buscar profissionais quando serviço é selecionado
+  useEffect(() => {
+    if (selectedService) {
+      getProfessionalsByService(selectedService.id).then(setAvailableProfessionals);
+      setFormData(prev => ({
+        ...prev,
+        duration: selectedService.duration,
+        price: selectedService.price
+      }));
+    }
+  }, [selectedService, getProfessionalsByService]);
+
+  // Auto-selecionar profissional se houver apenas um
+  useEffect(() => {
+    if (availableProfessionals.length === 1) {
+      const professional = availableProfessionals[0];
+      setSelectedProfessional(professional);
+      setFormData(prev => ({
+        ...prev,
+        professional_id: professional.id
+      }));
+    } else {
+      setSelectedProfessional(null);
+      setFormData(prev => ({
+        ...prev,
+        professional_id: ''
+      }));
+    }
+  }, [availableProfessionals]);
+
+  // Buscar horários disponíveis
+  useEffect(() => {
+    if (selectedProfessional && formData.appointment_date) {
+      fetchAvailableSlots(formData.appointment_date, formData.duration);
+    }
+  }, [selectedProfessional, formData.appointment_date, formData.duration, fetchAvailableSlots]);
+
+  const handleServiceSelect = (service: any) => {
+    setSelectedService(service);
+    setFormData(prev => ({
+      ...prev,
+      service_id: service.id,
+      service_name: service.name,
+      duration: service.duration,
+      price: service.price
+    }));
+    setServiceSearchOpen(false);
+  };
+
+  const handleProfessionalSelect = (professional: any) => {
+    setSelectedProfessional(professional);
+    setFormData(prev => ({
+      ...prev,
+      professional_id: professional.id
+    }));
+    setProfessionalSearchOpen(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (isSubmitting) return;
     
-    console.log('Form submitted with data:', formData);
-    
-    if (!formData.client_name || !formData.service_name || !formData.appointment_date || !formData.appointment_time) {
-      console.log('Missing required fields');
+    // Validações
+    if (!formData.client_name || !formData.service_id || !formData.professional_id || 
+        !formData.appointment_date || !formData.appointment_time) {
       toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
+
+    // Validação de data retroativa
+    if (formData.appointment_date < today) {
+      toast.error('Não é possível criar agendamentos com data retroativa');
       return;
     }
 
@@ -52,11 +134,12 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
     setIsSubmitting(true);
 
     try {
-      // Garantir que a data seja tratada corretamente (UTC para evitar problemas de fuso horário)
       const appointmentPayload = {
         client_name: formData.client_name,
         service_name: formData.service_name,
-        appointment_date: formData.appointment_date, // Formato YYYY-MM-DD já é correto
+        service_id: formData.service_id,
+        professional_id: formData.professional_id,
+        appointment_date: formData.appointment_date,
         appointment_time: formData.appointment_time,
         duration: formData.duration,
         status: 'agendado' as const,
@@ -64,22 +147,24 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
         notes: formData.notes || undefined
       };
 
-      console.log('Creating appointment with payload:', appointmentPayload);
-
       const result = await createAppointment(appointmentPayload);
 
-      console.log('Create appointment result:', result);
-
       if (result) {
+        // Reset form
         setFormData({
           client_name: '',
+          service_id: '',
           service_name: '',
+          professional_id: '',
           appointment_date: '',
           appointment_time: '',
           duration: 60,
           price: 0,
           notes: ''
         });
+        setSelectedService(null);
+        setSelectedProfessional(null);
+        setAvailableProfessionals([]);
         onOpenChange(false);
       }
     } finally {
@@ -93,7 +178,7 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
@@ -118,19 +203,101 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
               />
             </div>
 
-            {/* Service */}
+            {/* Service Search */}
             <div className="space-y-2">
-              <Label htmlFor="service" className="flex items-center gap-2">
+              <Label className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Serviço *
               </Label>
-              <Input
-                id="service"
-                placeholder="Nome do serviço"
-                value={formData.service_name}
-                onChange={(e) => handleInputChange('service_name', e.target.value)}
-                required
-              />
+              <Popover open={serviceSearchOpen} onOpenChange={setServiceSearchOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
+                  >
+                    {selectedService ? selectedService.name : "Selecione um serviço..."}
+                    <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Buscar serviço..." />
+                    <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup>
+                        {services.map((service) => (
+                          <CommandItem
+                            key={service.id}
+                            onSelect={() => handleServiceSelect(service)}
+                          >
+                            <div className="flex flex-col">
+                              <span>{service.name}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {service.duration}min - R$ {service.price}
+                              </span>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Professional Search */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <UserCheck className="w-4 h-4" />
+                Profissional *
+              </Label>
+              {availableProfessionals.length === 1 ? (
+                <Input
+                  value={availableProfessionals[0]?.name || ''}
+                  disabled
+                  placeholder="Profissional selecionado automaticamente"
+                />
+              ) : (
+                <Popover open={professionalSearchOpen} onOpenChange={setProfessionalSearchOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className="w-full justify-between"
+                      disabled={!selectedService || availableProfessionals.length === 0}
+                    >
+                      {selectedProfessional ? selectedProfessional.name : "Selecione um profissional..."}
+                      <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Buscar profissional..." />
+                      <CommandEmpty>Nenhum profissional encontrado.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup>
+                          {availableProfessionals.map((professional) => (
+                            <CommandItem
+                              key={professional.id}
+                              onSelect={() => handleProfessionalSelect(professional)}
+                            >
+                              <div className="flex flex-col">
+                                <span>{professional.name}</span>
+                                {professional.specialties && (
+                                  <span className="text-sm text-muted-foreground">
+                                    {professional.specialties.join(', ')}
+                                  </span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
 
             {/* Date */}
@@ -144,7 +311,7 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
                 type="date"
                 value={formData.appointment_date}
                 onChange={(e) => handleInputChange('appointment_date', e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
+                min={today}
                 required
               />
             </div>
@@ -155,13 +322,29 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
                 <Clock className="w-4 h-4" />
                 Horário *
               </Label>
-              <Input
-                id="time"
-                type="time"
-                value={formData.appointment_time}
-                onChange={(e) => handleInputChange('appointment_time', e.target.value)}
-                required
-              />
+              {slots.length > 0 ? (
+                <Select value={formData.appointment_time} onValueChange={(value) => handleInputChange('appointment_time', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um horário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {slots.map((slot) => (
+                      <SelectItem key={slot.slot_time} value={slot.slot_time} disabled={!slot.is_available}>
+                        {slot.slot_time} {!slot.is_available && '(Ocupado)'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id="time"
+                  type="time"
+                  value={formData.appointment_time}
+                  onChange={(e) => handleInputChange('appointment_time', e.target.value)}
+                  disabled={!selectedProfessional || !formData.appointment_date}
+                  required
+                />
+              )}
             </div>
 
             {/* Duration */}
@@ -170,10 +353,10 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
               <Input
                 id="duration"
                 type="number"
-                placeholder="60"
                 value={formData.duration}
                 onChange={(e) => handleInputChange('duration', parseInt(e.target.value) || 60)}
                 min="1"
+                disabled={!!selectedService}
               />
             </div>
 
@@ -184,10 +367,10 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
                 id="price"
                 type="number"
                 step="0.01"
-                placeholder="0,00"
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
                 min="0"
+                disabled={!!selectedService}
               />
             </div>
           </div>
