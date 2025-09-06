@@ -221,23 +221,34 @@ export const WhatsAppSettings: React.FC = () => {
           {/* Informações sobre o servidor */}
           <Card>
             <CardHeader>
-              <CardTitle>Servidor WhatsApp</CardTitle>
-              <CardDescription>Integração automática com WhatsApp Web</CardDescription>
+              <CardTitle>Servidor WhatsApp VPS</CardTitle>
+              <CardDescription>Configuração do servidor externo WhatsApp</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div>
-                    <p className="text-sm font-medium">Servidor Configurado</p>
-                    <p className="text-xs text-muted-foreground">Edge Function Supabase</p>
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Servidor VPS Configurado</p>
+                  </div>
+                  <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
+                    URL do servidor: <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded text-xs font-mono">http://31.97.30.241:8787</code>
+                  </p>
+                  <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded">
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      <strong>📁 Localização da configuração:</strong> Esta URL está definida no arquivo:
+                      <br />
+                      <code className="font-mono">src/hooks/useWhatsAppIntegration.ts</code> (linha 38)
+                      <br />
+                      <br />
+                      <strong>Para alterar o servidor:</strong> Modifique a constante <code>WHATSAPP_SERVER_URL</code> neste arquivo.
+                    </p>
                   </div>
                 </div>
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>Configuração automática:</strong> O servidor WhatsApp está pré-configurado. 
-                    Basta clicar em "Conectar WhatsApp" para começar a usar.
+                    <strong>Servidor externo:</strong> Este sistema usa um servidor Node.js rodando em VPS para gerenciar as conexões WhatsApp Web.
                   </AlertDescription>
                 </Alert>
               </div>
