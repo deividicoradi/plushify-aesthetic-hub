@@ -137,7 +137,7 @@ const CashClosureTab = () => {
       {loadingClosures || loadingOpenings ? (
         <div className="text-center py-8">Carregando dados...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-4">
           {filteredData().map((item) => {
             if (item.type === 'opening') {
               return (
