@@ -8,6 +8,13 @@ type Client = {
   name: string;
   email: string | null;
   phone: string | null;
+  cpf: string | null;
+  cep: string | null;
+  address: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  payment_method: string | null;
   status: string;
   created_at: string;
   last_visit: string | null;

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
-import EditClientDrawer from './EditClientDrawer';
+import EditClientDialog from './EditClientDialog';
 import ClientTable from './ClientTable';
 
 type Client = {
@@ -11,6 +11,13 @@ type Client = {
   name: string;
   email: string | null;
   phone: string | null;
+  cpf: string | null;
+  cep: string | null;
+  address: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  payment_method: string | null;
   status: string;
   created_at: string;
   last_visit: string | null;
@@ -56,7 +63,8 @@ const ClientList: React.FC<{
         filteredData = filteredData.filter(client => 
           client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          (client.phone && client.phone.includes(searchTerm))
+          (client.phone && client.phone.includes(searchTerm)) ||
+          (client.cpf && client.cpf.includes(searchTerm.replace(/\D/g, '')))
         );
       }
 
@@ -66,6 +74,13 @@ const ClientList: React.FC<{
         name: client.name,
         email: client.email,
         phone: client.phone,
+        cpf: client.cpf,
+        cep: client.cep,
+        address: client.address,
+        neighborhood: client.neighborhood,
+        city: client.city,
+        state: client.state,
+        payment_method: client.payment_method,
         status: client.status || 'Ativo',
         created_at: client.created_at,
         last_visit: client.last_visit
@@ -137,7 +152,7 @@ const ClientList: React.FC<{
         onDeleteClient={handleDeleteClient}
       />
       
-      <EditClientDrawer
+      <EditClientDialog
         client={selectedClient}
         open={isEditDrawerOpen}
         onOpenChange={setIsEditDrawerOpen}

@@ -4,7 +4,7 @@ import { Users, Plus } from 'lucide-react';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { Button } from '@/components/ui/button';
 import ClientList from '@/components/clients/ClientList';
-import NewClientDrawer from "@/components/clients/NewClientDrawer";
+import NewClientDialog from "@/components/clients/NewClientDialog";
 import ClientsSearchAndFilters from '@/components/clients/ClientsSearchAndFilters';
 import ClientsStatsCards from '@/components/clients/ClientsStatsCards';
 import { useClientStats } from '@/hooks/useClientStats';
@@ -75,7 +75,7 @@ const Clients = () => {
         </div>
       </ResponsiveLayout>
 
-      <NewClientDrawer
+      <NewClientDialog
         open={isDrawerOpen}
         onOpenChange={setDrawerOpen}
         onSuccess={handleClientAdded}
