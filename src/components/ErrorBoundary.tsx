@@ -85,7 +85,27 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    // Verificar se o usuário está autenticado usando diferentes métodos
+    const checkAuthentication = () => {
+      // Verificar tokens no storage
+      const localToken = localStorage.getItem('supabase.auth.token');
+      const sessionToken = sessionStorage.getItem('supabase.auth.token');
+      
+      // Verificar a presença da sessão atual do Supabase
+      const supabaseSession = localStorage.getItem('sb-wmoylybbwikkqbxiqwbq-auth-token');
+      
+      return !!(localToken || sessionToken || supabaseSession);
+    };
+    
+    const isAuthenticated = checkAuthentication();
+    
+    if (isAuthenticated) {
+      // Se autenticado, ir para o dashboard
+      window.location.href = '/dashboard';
+    } else {
+      // Se não autenticado, ir para home
+      window.location.href = '/';
+    }
   };
 
   handleRetry = () => {

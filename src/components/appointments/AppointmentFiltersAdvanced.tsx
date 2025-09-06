@@ -40,6 +40,11 @@ export const AppointmentFiltersAdvanced = ({
   const [localFilters, setLocalFilters] = useState<AppointmentFilters>(filters);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Sync localFilters with external filters when they change
+  React.useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
+
   const updateFilter = (key: keyof AppointmentFilters, value: string) => {
     const newFilters = { ...localFilters, [key]: value || undefined };
     setLocalFilters(newFilters);
@@ -64,15 +69,19 @@ export const AppointmentFiltersAdvanced = ({
     const activeFilters = [];
     
     if (filters.dateFrom || filters.dateTo) {
-      const fromDate = filters.dateFrom ? format(new Date(filters.dateFrom), 'dd/MM', { locale: ptBR }) : '';
-      const toDate = filters.dateTo ? format(new Date(filters.dateTo), 'dd/MM', { locale: ptBR }) : '';
-      
-      if (fromDate && toDate) {
-        activeFilters.push(`${fromDate} - ${toDate}`);
-      } else if (fromDate) {
-        activeFilters.push(`A partir de ${fromDate}`);
-      } else if (toDate) {
-        activeFilters.push(`Até ${toDate}`);
+      try {
+        const fromDate = filters.dateFrom ? format(new Date(filters.dateFrom), 'dd/MM', { locale: ptBR }) : '';
+        const toDate = filters.dateTo ? format(new Date(filters.dateTo), 'dd/MM', { locale: ptBR }) : '';
+        
+        if (fromDate && toDate) {
+          activeFilters.push(`${fromDate} - ${toDate}`);
+        } else if (fromDate) {
+          activeFilters.push(`A partir de ${fromDate}`);
+        } else if (toDate) {
+          activeFilters.push(`Até ${toDate}`);
+        }
+      } catch (error) {
+        console.error('Error formatting dates:', error);
       }
     }
     
@@ -239,16 +248,16 @@ export const AppointmentFiltersAdvanced = ({
           {activeFiltersDisplay.map((filter, index) => (
             <Badge key={index} variant="secondary" className="flex items-center gap-1">
               {filter}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 w-4 h-4 hover:bg-transparent"
-                onClick={() => {
-                  // This would require more complex logic to remove specific filters
-                  // For now, just clear all filters
-                  clearAllFilters();
-                }}
-              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto p-0 w-4 h-4 hover:bg-transparent"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearAllFilters();
+                  }}
+                >
                 <X className="w-3 h-3" />
               </Button>
             </Badge>

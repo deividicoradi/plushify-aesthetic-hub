@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useResponsive } from '@/hooks/useResponsive';
 import DashboardSidebar from './DashboardSidebar';
 import { MobileSidebar } from './MobileSidebar';
@@ -98,4 +99,3 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
   );
 };
 
-import { cn } from '@/lib/utils';
