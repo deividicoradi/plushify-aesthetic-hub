@@ -172,8 +172,8 @@ Nos vemos em breve!`;
                   </div>
                 </div>
                 
-                {/* Status and WhatsApp buttons side by side */}
-                <div className="flex items-center gap-2">
+                {/* Status and WhatsApp buttons stacked vertically */}
+                <div className="flex flex-col gap-2">
                   <div className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[appointment.status]}`}>
                     {statusLabels[appointment.status]}
                   </div>
