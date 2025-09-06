@@ -7,21 +7,83 @@ import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServicesList } from '@/components/services/ServicesList';
 import { useServices, Service } from '@/hooks/useServices';
+import { Professional } from '@/hooks/useProfessionals';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { LimitAlert } from '@/components/LimitAlert';
+import { toast } from 'sonner';
 
 const Services = () => {
+  const { user } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const { services, isLoading, createService, updateService, deleteService, toggleServiceStatus } = useServices();
 
-  const handleCreateService = async (data: any) => {
+  const saveServiceProfessionals = async (serviceId: string, professionals: Professional[]) => {
+    if (!user) return;
+
+    try {
+      // Remove existing associations
+      await supabase
+        .from('service_professionals')
+        .delete()
+        .eq('service_id', serviceId)
+        .eq('user_id', user.id);
+
+      // Add new associations
+      if (professionals.length > 0) {
+        const associations = professionals.map(prof => ({
+          user_id: user.id,
+          service_id: serviceId,
+          professional_id: prof.id
+        }));
+
+        const { error } = await supabase
+          .from('service_professionals')
+          .insert(associations);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error saving service professionals:', error);
+      toast.error('Erro ao salvar profissionais do serviço');
+    }
+  };
+
+  const handleCreateService = async (data: any, professionals: Professional[]) => {
     const success = await createService(data);
+    
+    if (success && user && professionals.length > 0) {
+      // Find the created service ID (we need to get the latest service)
+      try {
+        const { data: latestServices } = await supabase
+          .from('services')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('name', data.name)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (latestServices && latestServices.length > 0) {
+          await saveServiceProfessionals(latestServices[0].id, professionals);
+        }
+      } catch (error) {
+        console.error('Error linking professionals to service:', error);
+      }
+    }
+    
     return success;
   };
 
-  const handleUpdateService = async (data: any) => {
+  const handleUpdateService = async (data: any, professionals: Professional[]) => {
     if (!editingService) return false;
+    
     const success = await updateService(editingService.id, data);
+    
+    if (success) {
+      await saveServiceProfessionals(editingService.id, professionals);
+    }
+    
     return success;
   };
 

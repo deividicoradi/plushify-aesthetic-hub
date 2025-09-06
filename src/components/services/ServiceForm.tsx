@@ -13,19 +13,26 @@ import {
 } from "@/components/ui/dialog";
 import { Service, useServices } from '@/hooks/useServices';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { useProfessionals, Professional } from '@/hooks/useProfessionals';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import ProfessionalSelector from './ProfessionalSelector';
 import { toast } from 'sonner';
 
 interface ServiceFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => Promise<boolean>;
+  onSubmit: (data: any, professionals: Professional[]) => Promise<boolean>;
   service?: Service | null;
   title: string;
 }
 
 export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: ServiceFormProps) => {
+  const { user } = useAuth();
   const { hasReachedLimit } = usePlanLimits();
   const { services } = useServices();
+  const { professionals } = useProfessionals();
+  const [selectedProfessionals, setSelectedProfessionals] = useState<Professional[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -35,6 +42,39 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
     active: true
   });
   const [loading, setLoading] = useState(false);
+
+  // Fetch service professionals when editing
+  const fetchServiceProfessionals = async (serviceId: string) => {
+    if (!user) return;
+    
+    try {
+      // First get the professional IDs linked to this service
+      const { data: serviceProfessionals, error: spError } = await supabase
+        .from('service_professionals')
+        .select('professional_id')
+        .eq('service_id', serviceId)
+        .eq('user_id', user.id);
+
+      if (spError) throw spError;
+
+      if (serviceProfessionals && serviceProfessionals.length > 0) {
+        const professionalIds = serviceProfessionals.map(sp => sp.professional_id);
+        
+        // Then get the full professional data
+        const { data: professionalsData, error: profError } = await supabase
+          .from('professionals')
+          .select('*')
+          .in('id', professionalIds)
+          .eq('user_id', user.id);
+
+        if (profError) throw profError;
+        
+        setSelectedProfessionals(professionalsData || []);
+      }
+    } catch (error) {
+      console.error('Error fetching service professionals:', error);
+    }
+  };
 
   useEffect(() => {
     if (service) {
@@ -46,6 +86,7 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
         category: service.category || '',
         active: service.active
       });
+      fetchServiceProfessionals(service.id);
     } else {
       setFormData({
         name: '',
@@ -55,8 +96,9 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
         category: '',
         active: true
       });
+      setSelectedProfessionals([]);
     }
-  }, [service, isOpen]);
+  }, [service, isOpen, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,11 +115,19 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
     }
     
     setLoading(true);
-    const success = await onSubmit(formData);
-    if (success) {
-      onClose();
+    
+    try {
+      // Submit the service data along with selected professionals
+      const success = await onSubmit(formData, selectedProfessionals);
+      
+      if (success) {
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error submitting service:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleChange = (field: string, value: any) => {
@@ -85,6 +135,14 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleAddProfessional = (professional: Professional) => {
+    setSelectedProfessionals(prev => [...prev, professional]);
+  };
+
+  const handleRemoveProfessional = (professionalId: string) => {
+    setSelectedProfessionals(prev => prev.filter(prof => prof.id !== professionalId));
   };
 
   return (
@@ -150,6 +208,17 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
               value={formData.category}
               onChange={(e) => handleChange('category', e.target.value)}
               placeholder="Ex: Cabelo, Unhas, Estética"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Profissionais</Label>
+            <ProfessionalSelector
+              selectedProfessionals={selectedProfessionals}
+              availableProfessionals={professionals}
+              onAddProfessional={handleAddProfessional}
+              onRemoveProfessional={handleRemoveProfessional}
+              disabled={loading}
             />
           </div>
 
