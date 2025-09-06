@@ -322,7 +322,6 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
         atualizado_em: new Date().toISOString()
       })
       .select()
-      .eq('user_id', userId)
       .maybeSingle();
 
     if (error) {
