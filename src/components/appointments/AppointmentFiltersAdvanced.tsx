@@ -113,11 +113,14 @@ export const AppointmentFiltersAdvanced = ({
     <div className="space-y-3">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button 
+            variant={activeFiltersCount > 0 ? "default" : "outline"} 
+            className="flex items-center gap-2 transition-all duration-200"
+          >
             <Filter className="w-4 h-4" />
-            Filtros Avançados
+            <span className="hidden sm:inline">Filtros</span>
             {activeFiltersCount > 0 && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant={activeFiltersCount > 0 ? "secondary" : "default"} className="bg-white/20 text-white border-white/30">
                 {activeFiltersCount}
               </Badge>
             )}
@@ -242,26 +245,50 @@ export const AppointmentFiltersAdvanced = ({
         </SheetContent>
       </Sheet>
 
-      {/* Active Filters Display */}
+      {/* Active Filters Summary - Compact Display */}
       {activeFiltersDisplay.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {activeFiltersDisplay.map((filter, index) => (
-            <Badge key={index} variant="secondary" className="flex items-center gap-1">
-              {filter}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-auto p-0 w-4 h-4 hover:bg-transparent"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    clearAllFilters();
-                  }}
-                >
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800/50 rounded-lg p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                {activeFiltersDisplay.length} filtro{activeFiltersDisplay.length > 1 ? 's' : ''} ativo{activeFiltersDisplay.length > 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 h-7 px-2 text-xs"
+                onClick={() => setIsOpen(true)}
+              >
+                Editar
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 h-7 px-2"
+                onClick={clearAllFilters}
+              >
                 <X className="w-3 h-3" />
               </Button>
-            </Badge>
-          ))}
+            </div>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1">
+            {activeFiltersDisplay.slice(0, 2).map((filter, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center gap-1 px-2 py-1 bg-white/60 dark:bg-gray-800/60 text-xs text-gray-700 dark:text-gray-300 rounded-md border border-gray-200/50 dark:border-gray-700/50"
+              >
+                {filter}
+              </span>
+            ))}
+            {activeFiltersDisplay.length > 2 && (
+              <span className="inline-flex items-center px-2 py-1 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                +{activeFiltersDisplay.length - 2} mais
+              </span>
+            )}
+          </div>
         </div>
       )}
     </div>

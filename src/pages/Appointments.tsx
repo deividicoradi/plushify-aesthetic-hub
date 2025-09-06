@@ -74,7 +74,12 @@ const Appointments = () => {
               </div>
             </div>
             
-            <AppointmentsList searchQuery={searchQuery} filters={filters} />
+            <AppointmentsList 
+              searchQuery={searchQuery} 
+              filters={filters}
+              onCreateNew={() => setIsCreateDialogOpen(true)}
+              onClearFilters={() => setFilters({})}
+            />
           </TabsContent>
           
           <TabsContent value="config" className="space-y-6">
