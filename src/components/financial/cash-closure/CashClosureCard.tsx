@@ -121,7 +121,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
             </div>
             <div>
               <p className="text-xs text-blue-700 dark:text-blue-300">Saldo Inicial</p>
-              <p className="text-sm sm:text-base font-bold text-blue-900 dark:text-blue-100 break-words leading-tight">
+              <p className="text-sm font-bold text-blue-900 dark:text-blue-100 break-words leading-tight">
                 {formatCurrency(Number(closure.opening_balance))}
               </p>
             </div>
@@ -135,7 +135,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
             </div>
             <div>
               <p className="text-xs text-green-700 dark:text-green-300">Total Receitas</p>
-              <p className="text-sm sm:text-base font-bold text-green-900 dark:text-green-100 break-words leading-tight">
+              <p className="text-sm font-bold text-green-900 dark:text-green-100 break-words leading-tight">
                 {formatCurrency(Number(closure.total_income))}
               </p>
             </div>
@@ -149,7 +149,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
             </div>
             <div>
               <p className="text-xs text-red-700 dark:text-red-300">Total Despesas</p>
-              <p className="text-sm sm:text-base font-bold text-red-900 dark:text-red-100 break-words leading-tight">
+              <p className="text-sm font-bold text-red-900 dark:text-red-100 break-words leading-tight">
                 {formatCurrency(Number(closure.total_expenses))}
               </p>
             </div>
@@ -181,7 +181,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
               }`}>
                 Saldo Final
               </p>
-              <p className={`text-sm sm:text-base font-bold break-words leading-tight ${
+              <p className={`text-sm font-bold break-words leading-tight ${
                 Number(closure.closing_balance) >= Number(closure.opening_balance)
                   ? 'text-emerald-900 dark:text-emerald-100'
                   : 'text-orange-900 dark:text-orange-100'
@@ -206,7 +206,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Dinheiro</p>
-                  <p className="text-sm sm:text-base font-bold text-foreground break-words leading-tight">
+                  <p className="text-sm font-bold text-foreground break-words leading-tight">
                     {formatCurrency(Number(closure.cash_amount))}
                   </p>
                 </div>
@@ -220,7 +220,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Cartão</p>
-                  <p className="text-sm sm:text-base font-bold text-foreground break-words leading-tight">
+                  <p className="text-sm font-bold text-foreground break-words leading-tight">
                     {formatCurrency(Number(closure.card_amount))}
                   </p>
                 </div>
@@ -234,7 +234,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">PIX</p>
-                  <p className="text-sm sm:text-base font-bold text-foreground break-words leading-tight">
+                  <p className="text-sm font-bold text-foreground break-words leading-tight">
                     {formatCurrency(Number(closure.pix_amount))}
                   </p>
                 </div>
@@ -248,7 +248,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Outros</p>
-                  <p className="text-sm sm:text-base font-bold text-foreground break-words leading-tight">
+                  <p className="text-sm font-bold text-foreground break-words leading-tight">
                     {formatCurrency(Number(closure.other_amount))}
                   </p>
                 </div>
