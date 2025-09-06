@@ -63,8 +63,22 @@ serve(async (req) => {
     }
     
     if (method === 'POST') {
-      const body = await req.json();
+      let body;
+      try {
+        body = await req.json();
+      } catch (error) {
+        console.error('Erro ao fazer parse do JSON:', error);
+        return new Response(
+          JSON.stringify({ 
+            success: false,
+            error: 'Dados JSON inválidos no corpo da requisição' 
+          }), 
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       const { action } = body;
+      console.log('Ação solicitada:', action, 'para usuário:', user.id);
       
       switch (action) {
         case 'connect':
@@ -80,15 +94,32 @@ serve(async (req) => {
         case 'simulate-message':
           return await simulateIncomingMessage(supabase, user.id, body.sessionId || 'default-session');
         default:
-          return new Response('Invalid action', { status: 400, headers: corsHeaders });
+          console.error('Ação inválida:', action);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: `Ação inválida: ${action}. Ações válidas: connect, disconnect, send-message, get-contacts, get-qr, simulate-message`
+            }), 
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
       }
     }
     
-    return new Response('Not found', { status: 404, headers: corsHeaders });
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: 'Método não suportado. Use GET para status ou POST para ações.'
+      }), 
+      { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
     console.error('WhatsApp Manager Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }), 
+      JSON.stringify({ 
+        success: false,
+        error: `Erro interno do servidor: ${error.message}`,
+        stack: error.stack
+      }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -99,66 +130,89 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
     console.log('Getting WhatsApp session status for user:', userId);
     
     // Verificar sessão no banco
-    const { data: session } = await supabase
+    const { data: session, error: sessionError } = await supabase
       .from('whatsapp_sessoes')
       .select('*')
       .eq('user_id', userId)
       .maybeSingle();
 
-    console.log('Database session:', session);
+    if (sessionError) {
+      console.error('Erro ao buscar sessão no banco:', sessionError);
+    }
 
-    // Verificar status no servidor real
-    try {
-      // Tenta primeiro /status, depois fallback para raiz /
-      let response = await fetch(`${WHATSAPP_SERVER_URL}/status`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        }
-      });
-      if (!response.ok) {
-        response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+    console.log('Database session:', session ? { id: session.id, status: session.status } : 'nenhuma');
+
+    // Verificar status no servidor real apenas se há uma sessão no banco
+    let serverStatus = null;
+    if (session) {
+      try {
+        console.log('Verificando status no servidor WhatsApp...');
+        
+        // Tenta primeiro /status, depois fallback para raiz /
+        let response = await fetch(`${WHATSAPP_SERVER_URL}/status`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
-          }
+          },
+          signal: AbortSignal.timeout(10000) // 10 segundos timeout
         });
-      }
-
-      console.log('Server response status:', response.status);
-
-      if (response.ok) {
-        const serverStatus = await response.json();
-        console.log('Server status data:', serverStatus);
         
-        // Atualizar status no banco se necessário
-        if (session && session.status !== serverStatus.status) {
-          await supabase
-            .from('whatsapp_sessoes')
-            .update({ 
-              status: serverStatus.status,
-              sessao_serializada: JSON.stringify(serverStatus),
-              atualizado_em: new Date().toISOString()
-            })
-            .eq('user_id', userId);
+        if (!response.ok) {
+          console.log('Tentando endpoint alternativo...');
+          response = await fetch(`${WHATSAPP_SERVER_URL}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            signal: AbortSignal.timeout(10000)
+          });
         }
 
-        return new Response(
-          JSON.stringify({ 
-            status: serverStatus.status || 'desconectado',
-            sessionId: session?.id || null,
-            qrCode: serverStatus.qrCode || null,
-            ready: serverStatus.ready || false
-          }), 
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      } else {
-        console.error('Server error response:', response.status, response.statusText);
+        console.log('Server response status:', response.status);
+
+        if (response.ok) {
+          serverStatus = await response.json();
+          console.log('Server status data:', serverStatus);
+          
+          // Atualizar status no banco se necessário
+          if (session && session.status !== serverStatus.status) {
+            console.log(`Atualizando status no banco: ${session.status} -> ${serverStatus.status}`);
+            await supabase
+              .from('whatsapp_sessoes')
+              .update({ 
+                status: serverStatus.status,
+                sessao_serializada: JSON.stringify(serverStatus),
+                atualizado_em: new Date().toISOString()
+              })
+              .eq('user_id', userId);
+          }
+        } else {
+          console.error('Server error response:', response.status, response.statusText);
+          const errorText = await response.text();
+          console.error('Server error details:', errorText);
+        }
+      } catch (serverError) {
+        console.error('Error connecting to WhatsApp server:', serverError);
+        // Se o servidor não responder, usar status do banco
       }
-    } catch (serverError) {
-      console.error('Error connecting to WhatsApp server:', serverError);
+    } else {
+      console.log('Nenhuma sessão encontrada no banco, servidor não será verificado');
+    }
+    
+    // Se temos dados do servidor, usar eles
+    if (serverStatus) {
+      return new Response(
+        JSON.stringify({ 
+          status: serverStatus.status || 'desconectado',
+          sessionId: session?.id || null,
+          qrCode: serverStatus.qrCode || null,
+          ready: serverStatus.ready || false,
+          serverConnected: true
+        }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
     // Se o servidor não responder, usar dados do banco
@@ -168,14 +222,20 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
         const meta = JSON.parse(session.sessao_serializada);
         qrCode = meta?.qrCode ?? null;
       }
-    } catch (_) {}
+    } catch (e) {
+      console.error('Erro ao fazer parse da sessão serializada:', e);
+    }
+
+    const finalStatus = session?.status || 'desconectado';
+    console.log('Retornando status final:', finalStatus);
 
     return new Response(
       JSON.stringify({ 
-        status: session?.status || 'desconectado',
+        status: finalStatus,
         sessionId: session?.id || null,
         qrCode,
-        ready: false
+        ready: false,
+        serverConnected: false
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -187,6 +247,7 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
         sessionId: null,
         qrCode: null,
         ready: false,
+        serverConnected: false,
         error: error.message
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -357,40 +418,102 @@ async function disconnectSession(supabase: any, userId: string, token: string) {
 async function sendMessage(supabase: any, userId: string, body: any, token: string) {
   const { phone, message, contactName } = body;
 
+  console.log('Iniciando envio de mensagem:', { phone, message: message?.substring(0, 50) + '...', userId });
+
   if (!phone || !message) {
+    console.error('Parâmetros obrigatórios não fornecidos:', { phone: !!phone, message: !!message });
     return new Response(
-      JSON.stringify({ error: 'Telefone e mensagem são obrigatórios' }), 
+      JSON.stringify({ 
+        success: false,
+        error: 'Telefone e mensagem são obrigatórios' 
+      }), 
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 
   try {
     // Verificar se há sessão conectada
-    const { data: session } = await supabase
+    const { data: session, error: sessionError } = await supabase
       .from('whatsapp_sessoes')
       .select('*')
       .eq('user_id', userId)
-      .eq('status', 'conectado')
       .maybeSingle();
 
-    if (!session) {
+    console.log('Sessão encontrada:', { 
+      hasSession: !!session, 
+      status: session?.status,
+      sessionError: sessionError?.message 
+    });
+
+    if (sessionError) {
+      console.error('Erro ao buscar sessão:', sessionError);
       return new Response(
-        JSON.stringify({ error: 'WhatsApp não conectado' }), 
+        JSON.stringify({ 
+          success: false,
+          error: 'Erro ao verificar sessão do WhatsApp' 
+        }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!session || session.status !== 'conectado') {
+      console.error('WhatsApp não conectado:', { 
+        hasSession: !!session, 
+        status: session?.status 
+      });
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'WhatsApp não está conectado. Conecte primeiro antes de enviar mensagens.' 
+        }), 
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Enviar mensagem via servidor real (tenta /send, /send-message, depois raiz com action)
-    let response = await fetch(`${WHATSAPP_SERVER_URL}/send`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ phone, message })
-    });
+    // Tentar enviar mensagem via servidor WhatsApp
+    console.log('Tentando enviar mensagem via servidor WhatsApp...');
+    
+    let response;
+    let lastError;
 
-    if (!response.ok) {
+    // Primeira tentativa: /send
+    try {
+      console.log('Tentativa 1: /send');
+      response = await fetch(`${WHATSAPP_SERVER_URL}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ phone, message })
+      });
+      
+      console.log('Resposta /send:', { status: response.status, ok: response.ok });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Sucesso /send:', result);
+        
+        if (result.success || result.messageId) {
+          await saveMessageToDatabase(supabase, userId, phone, message, contactName, result.messageId);
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              message: 'Mensagem enviada com sucesso',
+              messageId: result.messageId 
+            }), 
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Erro na tentativa /send:', error);
+      lastError = error;
+    }
+
+    // Segunda tentativa: /send-message
+    try {
+      console.log('Tentativa 2: /send-message');
       response = await fetch(`${WHATSAPP_SERVER_URL}/send-message`, {
         method: 'POST',
         headers: {
@@ -399,9 +522,33 @@ async function sendMessage(supabase: any, userId: string, body: any, token: stri
         },
         body: JSON.stringify({ phone, message })
       });
+      
+      console.log('Resposta /send-message:', { status: response.status, ok: response.ok });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Sucesso /send-message:', result);
+        
+        if (result.success || result.messageId) {
+          await saveMessageToDatabase(supabase, userId, phone, message, contactName, result.messageId);
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              message: 'Mensagem enviada com sucesso',
+              messageId: result.messageId 
+            }), 
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Erro na tentativa /send-message:', error);
+      lastError = error;
     }
 
-    if (!response.ok) {
+    // Terceira tentativa: raiz com action
+    try {
+      console.log('Tentativa 3: / com action');
       response = await fetch(`${WHATSAPP_SERVER_URL}`, {
         method: 'POST',
         headers: {
@@ -410,18 +557,69 @@ async function sendMessage(supabase: any, userId: string, body: any, token: stri
         },
         body: JSON.stringify({ action: 'send-message', phone, message })
       });
+      
+      console.log('Resposta / com action:', { status: response.status, ok: response.ok });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Sucesso / com action:', result);
+        
+        if (result.success || result.messageId) {
+          await saveMessageToDatabase(supabase, userId, phone, message, contactName, result.messageId);
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              message: 'Mensagem enviada com sucesso',
+              messageId: result.messageId 
+            }), 
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Erro na tentativa / com action:', error);
+      lastError = error;
     }
 
-    if (!response.ok) {
-      throw new Error(`Servidor retornou erro: ${response.status}`);
+    // Se chegou até aqui, todas as tentativas falharam
+    console.error('Todas as tentativas de envio falharam. Última resposta:', {
+      status: response?.status,
+      statusText: response?.statusText
+    });
+
+    // Tentar obter detalhes do erro da resposta
+    let errorMessage = 'Falha ao enviar mensagem via WhatsApp';
+    if (response) {
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.message || errorMessage;
+      } catch (e) {
+        console.error('Erro ao parse da resposta de erro:', e);
+      }
     }
 
-    const result = await response.json();
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: `${errorMessage}. Status: ${response?.status || 'desconhecido'}` 
+      }), 
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
-    if (!result.success) {
-      throw new Error(result.error || 'Falha ao enviar mensagem');
-    }
+  } catch (error) {
+    console.error('Erro geral ao enviar mensagem:', error);
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: `Erro interno: ${error.message}` 
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
 
+async function saveMessageToDatabase(supabase: any, userId: string, phone: string, message: string, contactName: string, messageId: string) {
+  try {
     // Buscar ou criar contato
     let { data: contact } = await supabase
       .from('whatsapp_contatos')
@@ -451,7 +649,7 @@ async function sendMessage(supabase: any, userId: string, body: any, token: stri
 
     // Salvar mensagem no banco se temos o contato
     if (contact) {
-      const { data: savedMessage, error: messageError } = await supabase
+      const { error: messageError } = await supabase
         .from('whatsapp_mensagens_temp')
         .insert({
           user_id: userId,
@@ -460,9 +658,7 @@ async function sendMessage(supabase: any, userId: string, body: any, token: stri
           conteudo: message,
           tipo: 'text',
           status: 'enviada'
-        })
-        .select()
-        .single();
+        });
 
       if (messageError) {
         console.error('Erro ao salvar mensagem:', messageError);
@@ -474,24 +670,8 @@ async function sendMessage(supabase: any, userId: string, body: any, token: stri
         .update({ ultima_interacao: new Date().toISOString() })
         .eq('id', contact.id);
     }
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Mensagem enviada com sucesso',
-        messageId: result.messageId 
-      }), 
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
-    console.error('Erro ao enviar mensagem:', error);
-    return new Response(
-      JSON.stringify({ 
-        success: false,
-        error: `Erro ao enviar mensagem: ${error.message}` 
-      }), 
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    console.error('Erro ao salvar mensagem no banco:', error);
   }
 }
 
