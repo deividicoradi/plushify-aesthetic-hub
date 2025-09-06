@@ -154,6 +154,10 @@ export default function WhatsApp() {
                     <Badge variant="outline">{getStatusText(session.status)}</Badge>
                   </div>
                   <div className="flex justify-between">
+                    <span>Servidor WhatsApp:</span>
+                    <span className="font-mono text-green-600">31.97.30.241:8787</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span>ID da Sessão:</span>
                     <span className="font-mono">{session.id || 'N/A'}</span>
                   </div>
