@@ -35,7 +35,7 @@ export interface WhatsAppError {
   code?: number;
 }
 
-const WHATSAPP_SERVER_URL = 'https://whatsapp.plushify.com.br';
+const WHATSAPP_SERVER_URL = 'http://31.97.30.241:8787';
 
 export const useWhatsAppIntegration = () => {
   const { user } = useAuth();
