@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const WHATSAPP_SERVER_URL = 'https://whatsapp.plushify.com.br';
+const WHATSAPP_SERVER_URL = 'http://31.97.30.241:8787';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
