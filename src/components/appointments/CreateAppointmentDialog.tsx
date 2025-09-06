@@ -394,7 +394,6 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
             </Button>
             <Button 
               type="submit" 
-              className="bg-plush-600 hover:bg-plush-700"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Criando...' : 'Criar Agendamento'}
