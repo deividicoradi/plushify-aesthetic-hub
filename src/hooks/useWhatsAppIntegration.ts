@@ -123,14 +123,20 @@ export const useWhatsAppIntegration = () => {
     }
 
     try {
+      console.log('🔄 Fazendo requisição para WhatsApp edge function...');
       const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
         method: 'GET'
       });
 
+      console.log('📡 Resposta da edge function:', { data, error });
+
       if (error) {
+        console.error('❌ Erro na edge function:', error);
         throw new Error(error.message);
       }
 
+      console.log('✅ Status recebido:', data?.status);
+      
       setSession(prev => ({
         ...prev,
         status: data.status || 'desconectado',
@@ -220,13 +226,17 @@ export const useWhatsAppIntegration = () => {
     abortControllerRef.current = controller;
 
     try {
+      console.log('🚀 Tentando conectar WhatsApp...');
       console.log('whatsapp_connect_clicked');
       
       const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
         body: { action: 'connect' }
       });
 
+      console.log('📱 Resposta da conexão:', { data, error });
+
       if (error) {
+        console.error('❌ Erro ao conectar:', error);
         throw new Error(error.message);
       }
 
