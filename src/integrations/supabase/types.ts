@@ -660,6 +660,7 @@ export type Database = {
       }
       products: {
         Row: {
+          acquisition_date: string | null
           active: boolean
           barcode: string | null
           brand: string | null
@@ -675,8 +676,10 @@ export type Database = {
           stock_quantity: number
           updated_at: string
           user_id: string
+          validity_date: string | null
         }
         Insert: {
+          acquisition_date?: string | null
           active?: boolean
           barcode?: string | null
           brand?: string | null
@@ -692,8 +695,10 @@ export type Database = {
           stock_quantity?: number
           updated_at?: string
           user_id: string
+          validity_date?: string | null
         }
         Update: {
+          acquisition_date?: string | null
           active?: boolean
           barcode?: string | null
           brand?: string | null
@@ -709,6 +714,7 @@ export type Database = {
           stock_quantity?: number
           updated_at?: string
           user_id?: string
+          validity_date?: string | null
         }
         Relationships: []
       }

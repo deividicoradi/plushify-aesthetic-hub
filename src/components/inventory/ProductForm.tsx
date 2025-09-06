@@ -6,6 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { ProductFormData, Product, useProductsData } from "@/hooks/inventory/useProductsData";
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { toast } from 'sonner';
@@ -41,11 +46,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       min_stock_level: initialData?.min_stock_level || 0,
       category: initialData?.category || "",
       brand: initialData?.brand || "",
+      validity_date: initialData?.validity_date || "",
+      acquisition_date: initialData?.acquisition_date || "",
       active: initialData?.active ?? true,
     },
   });
 
   const activeValue = watch("active");
+  const validityDate = watch("validity_date");
+  const acquisitionDate = watch("acquisition_date");
 
   const handleFormSubmit = (data: ProductFormData) => {
     // Check limits only for new products
@@ -156,6 +165,60 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               placeholder="Ex: L'Oréal, Garnier, etc."
               className="focus:border-primary focus:ring-primary"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="acquisition_date">Data de Aquisição</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !acquisitionDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {acquisitionDate ? format(new Date(acquisitionDate), "dd/MM/yyyy") : "Selecionar data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={acquisitionDate ? new Date(acquisitionDate) : undefined}
+                  onSelect={(date) => setValue("acquisition_date", date ? format(date, "yyyy-MM-dd") : "")}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="validity_date">Data de Validade</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !validityDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {validityDate ? format(new Date(validityDate), "dd/MM/yyyy") : "Selecionar data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={validityDate ? new Date(validityDate) : undefined}
+                  onSelect={(date) => setValue("validity_date", date ? format(date, "yyyy-MM-dd") : "")}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">

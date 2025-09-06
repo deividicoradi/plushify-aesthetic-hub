@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export type Product = {
   id: string;
@@ -18,6 +18,8 @@ export type Product = {
   category?: string;
   brand?: string;
   barcode?: string;
+  validity_date?: string;
+  acquisition_date?: string;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -34,6 +36,8 @@ export type ProductFormData = {
   category?: string;
   brand?: string;
   barcode?: string;
+  validity_date?: string;
+  acquisition_date?: string;
   active: boolean;
 };
 
