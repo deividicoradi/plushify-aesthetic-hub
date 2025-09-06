@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServicesList } from '@/components/services/ServicesList';
+import ServicesSearchAndFilters from '@/components/services/ServicesSearchAndFilters';
 import { useServices, Service } from '@/hooks/useServices';
 import { Professional } from '@/hooks/useProfessionals';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +18,7 @@ const Services = () => {
   const { user } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const { services, isLoading, createService, updateService, deleteService, toggleServiceStatus } = useServices();
 
   const saveServiceProfessionals = async (serviceId: string, professionals: Professional[]) => {
@@ -97,12 +99,24 @@ const Services = () => {
     setEditingService(null);
   };
 
+  // Filter services based on search term
+  const filteredServices = services.filter(service => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      service.name.toLowerCase().includes(searchLower) ||
+      service.category?.toLowerCase().includes(searchLower) ||
+      service.description?.toLowerCase().includes(searchLower)
+    );
+  });
+
   const stats = {
-    total: services.length,
-    active: services.filter(s => s.active).length,
-    inactive: services.filter(s => !s.active).length,
-    averagePrice: services.length > 0 
-      ? services.reduce((sum, s) => sum + s.price, 0) / services.length 
+    total: filteredServices.length,
+    active: filteredServices.filter(s => s.active).length,
+    inactive: filteredServices.filter(s => !s.active).length,
+    averagePrice: filteredServices.length > 0 
+      ? filteredServices.reduce((sum, s) => sum + s.price, 0) / filteredServices.length 
       : 0
   };
 
@@ -125,6 +139,12 @@ const Services = () => {
     >
       {/* Limit Alert */}
       <LimitAlert type="services" currentCount={services.length} action="criar" />
+      
+      {/* Search and Filters */}
+      <ServicesSearchAndFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
       
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -182,7 +202,7 @@ const Services = () => {
             </div>
           ) : (
             <ServicesList
-              services={services}
+              services={filteredServices}
               onEdit={handleEdit}
               onDelete={deleteService}
               onToggleStatus={toggleServiceStatus}

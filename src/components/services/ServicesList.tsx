@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { MoreHorizontal, Edit, Trash2, Clock, DollarSign } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -38,6 +41,7 @@ interface ServicesListProps {
 
 export const ServicesList = ({ services, onEdit, onDelete, onToggleStatus }: ServicesListProps) => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -56,7 +60,34 @@ export const ServicesList = ({ services, onEdit, onDelete, onToggleStatus }: Ser
     return `${mins}min`;
   };
 
-  const handleDelete = (id: string) => {
+  const checkServiceAppointments = async (serviceId: string): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('service_id', serviceId)
+        .in('status', ['agendado', 'confirmado', 'concluido']);
+
+      if (error) throw error;
+      return data && data.length > 0;
+    } catch (error) {
+      console.error('Erro ao verificar agendamentos:', error);
+      return false;
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const hasAppointments = await checkServiceAppointments(id);
+    
+    if (hasAppointments) {
+      toast.error('Não é possível excluir registro que tenha Agendamentos com status Agendado, Confirmado e Concluído.');
+      setDeleteId(null);
+      return;
+    }
+    
     onDelete(id);
     setDeleteId(null);
   };
@@ -117,11 +148,7 @@ export const ServicesList = ({ services, onEdit, onDelete, onToggleStatus }: Ser
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge 
-                    variant={service.active ? "default" : "secondary"}
-                    className="cursor-pointer"
-                    onClick={() => onToggleStatus(service.id, !service.active)}
-                  >
+                  <Badge variant={service.active ? "default" : "secondary"}>
                     {service.active ? 'Ativo' : 'Inativo'}
                   </Badge>
                 </TableCell>
@@ -165,7 +192,7 @@ export const ServicesList = ({ services, onEdit, onDelete, onToggleStatus }: Ser
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => deleteId && handleDelete(deleteId)}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               Deletar
             </AlertDialogAction>
