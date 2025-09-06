@@ -57,7 +57,7 @@ serve(async (req) => {
         return await getMessages(supabase, user.id, req, token);
       }
       if (xRequestPath.startsWith('contacts') || pathname.includes('contacts')) {
-        return await getContacts(supabase, user.id);
+        return await getContacts(supabase, user.id, token);
       }
       return await getSessionStatus(supabase, user.id, token);
     }
@@ -88,7 +88,7 @@ serve(async (req) => {
         case 'send-message':
           return await sendMessage(supabase, user.id, body, token);
         case 'get-contacts':
-          return await getContacts(supabase, user.id);
+          return await getContacts(supabase, user.id, token);
         case 'get-qr':
           return await getQRCode(supabase, user.id, token);
         case 'simulate-message':
@@ -144,6 +144,8 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
 
     // Verificar status no servidor real apenas se há uma sessão no banco
     let serverStatus = null;
+    let serverConnected = false;
+    
     if (session) {
       try {
         console.log('Verificando status no servidor WhatsApp...');
@@ -155,7 +157,7 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          signal: AbortSignal.timeout(10000) // 10 segundos timeout
+          signal: AbortSignal.timeout(5000) // 5 segundos timeout reduzido
         });
         
         if (!response.ok) {
@@ -166,7 +168,7 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            signal: AbortSignal.timeout(10000)
+            signal: AbortSignal.timeout(5000)
           });
         }
 
@@ -174,6 +176,7 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
 
         if (response.ok) {
           serverStatus = await response.json();
+          serverConnected = true;
           console.log('Server status data:', serverStatus);
           
           // Atualizar status no banco se necessário
@@ -194,22 +197,33 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
           console.error('Server error details:', errorText);
         }
       } catch (serverError) {
-        console.error('Error connecting to WhatsApp server:', serverError);
-        // Se o servidor não responder, usar status do banco
+        console.error('Error connecting to WhatsApp server:', serverError.message);
+        console.log('Servidor WhatsApp não está disponível. Para usar WhatsApp real, configure o servidor conforme documentação.');
+        // Se o servidor não responder, usar status do banco mas marcar como desconectado
+        if (session) {
+          await supabase
+            .from('whatsapp_sessoes')
+            .update({ 
+              status: 'desconectado',
+              atualizado_em: new Date().toISOString()
+            })
+            .eq('user_id', userId);
+        }
       }
     } else {
       console.log('Nenhuma sessão encontrada no banco, servidor não será verificado');
     }
     
     // Se temos dados do servidor, usar eles
-    if (serverStatus) {
+    if (serverStatus && serverConnected) {
       return new Response(
         JSON.stringify({ 
           status: serverStatus.status || 'desconectado',
           sessionId: session?.id || null,
           qrCode: serverStatus.qrCode || null,
           ready: serverStatus.ready || false,
-          serverConnected: true
+          serverConnected: true,
+          message: serverStatus.ready ? 'WhatsApp conectado e pronto' : 'WhatsApp em processo de conexão'
         }), 
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -231,11 +245,12 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
 
     return new Response(
       JSON.stringify({ 
-        status: finalStatus,
+        status: serverConnected ? finalStatus : 'desconectado',
         sessionId: session?.id || null,
         qrCode,
         ready: false,
-        serverConnected: false
+        serverConnected: false,
+        message: 'Servidor WhatsApp não disponível. Para conectar ao WhatsApp real, configure o servidor conforme documentação em docs/whatsapp-server/'
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -714,21 +729,77 @@ async function getMessages(supabase: any, userId: string, req: Request, token: s
   );
 }
 
-async function getContacts(supabase: any, userId: string) {
-  const { data: contacts, error } = await supabase
-    .from('whatsapp_contatos')
-    .select('*')
-    .eq('user_id', userId)
-    .order('ultima_interacao', { ascending: false });
+async function getContacts(supabase: any, userId: string, token?: string) {
+  try {
+    // Primeiro, tentar buscar contatos do servidor WhatsApp real
+    if (token) {
+      try {
+        const response = await fetch(`${WHATSAPP_SERVER_URL}/contacts`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          signal: AbortSignal.timeout(5000) // 5 segundos timeout
+        });
+      
+      if (response.ok) {
+        const serverData = await response.json();
+        console.log('Contatos do servidor WhatsApp:', serverData.contacts?.length || 0);
+        
+        // Sincronizar contatos do servidor com o banco
+        if (serverData.contacts && serverData.contacts.length > 0) {
+          for (const contact of serverData.contacts) {
+            await supabase
+              .from('whatsapp_contatos')
+              .upsert({
+                user_id: userId,
+                nome: contact.name || contact.phone,
+                telefone: contact.phone,
+                ultima_interacao: contact.lastInteraction || new Date().toISOString()
+              }, { onConflict: 'user_id,telefone' });
+          }
+        }
+        
+        return new Response(
+          JSON.stringify({ contacts: serverData.contacts || [] }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+        } catch (serverError) {
+          console.log('Servidor WhatsApp não disponível, usando dados do banco:', serverError.message);
+        }
+      }
+    
+    // Fallback: buscar contatos do banco de dados
+    const { data: contacts, error } = await supabase
+      .from('whatsapp_contatos')
+      .select('*')
+      .eq('user_id', userId)
+      .order('ultima_interacao', { ascending: false });
 
-  if (error) {
-    throw error;
+    if (error) {
+      throw error;
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        contacts: contacts || [],
+        serverStatus: 'offline',
+        message: 'Contatos carregados do banco de dados. Para sincronizar com WhatsApp real, conecte o servidor WhatsApp.' 
+      }), 
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Erro ao buscar contatos:', error);
+    return new Response(
+      JSON.stringify({ 
+        contacts: [],
+        error: error.message 
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
-
-  return new Response(
-    JSON.stringify({ contacts: contacts || [] }), 
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
 }
 
 async function simulateIncomingMessage(supabase: any, userId: string, sessionId: string) {
