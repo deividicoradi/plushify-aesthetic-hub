@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import EditClientDialog from './EditClientDialog';
 import ClientTable from './ClientTable';
 
@@ -36,6 +37,7 @@ const ClientList: React.FC<{
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const { user } = useAuth();
+  const { logDelete } = useAuditLog();
 
   const fetchClients = async () => {
     if (!user) return;
@@ -106,15 +108,50 @@ const ClientList: React.FC<{
   };
 
   const handleDeleteClient = async (clientId: string) => {
+    if (!user) return;
     if (!window.confirm('Tem certeza que deseja excluir este cliente?')) return;
     
     try {
+      // Verificar se o cliente possui agendamentos ativos
+      const { data: appointments, error: appointmentsError } = await supabase
+        .from('appointments')
+        .select('id, status')
+        .eq('client_id', clientId)
+        .eq('user_id', user.id)
+        .in('status', ['agendado', 'confirmado', 'concluido']);
+
+      if (appointmentsError) throw appointmentsError;
+
+      if (appointments && appointments.length > 0) {
+        toast({
+          title: "Erro",
+          description: "Não é possível excluir registro que tenha Agendamentos com status Agendado, Confirmado e Concluído.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Buscar dados do cliente para auditoria
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', clientId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (clientError) throw clientError;
+
+      // Excluir o cliente
       const { error } = await supabase
         .from('clients')
         .delete()
-        .eq('id', clientId);
+        .eq('id', clientId)
+        .eq('user_id', user.id);
 
       if (error) throw error;
+
+      // Log de auditoria
+      await logDelete('clients', clientId, clientData, 'Cliente excluído pelo usuário');
 
       toast({
         title: "Sucesso",

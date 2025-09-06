@@ -1,13 +1,13 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, MoreVertical } from "lucide-react";
+import { Edit, Trash2, MoreVertical, Calendar } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import { useNavigate } from 'react-router-dom';
 
 type Client = {
   id: string;
@@ -26,6 +26,12 @@ interface ClientActionsProps {
 }
 
 const ClientActions: React.FC<ClientActionsProps> = ({ client, onEdit, onDelete }) => {
+  const navigate = useNavigate();
+
+  const handleScheduleClick = () => {
+    navigate('/appointments', { state: { selectedClientId: client.id, selectedClientName: client.name } });
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,6 +47,13 @@ const ClientActions: React.FC<ClientActionsProps> = ({ client, onEdit, onDelete 
         >
           <Edit className="h-4 w-4" />
           <span>Editar</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={handleScheduleClick}
+          className="flex items-center gap-2 cursor-pointer text-popover-foreground hover:bg-accent"
+        >
+          <Calendar className="h-4 w-4" />
+          <span>Agendamento</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => onDelete(client.id)}
