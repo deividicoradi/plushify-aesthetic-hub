@@ -1052,6 +1052,48 @@ export type Database = {
           },
         ]
       }
+      whatsapp_messages: {
+        Row: {
+          contact_name: string | null
+          contact_phone: string | null
+          content: string
+          created_at: string
+          direction: string
+          id: string
+          session_id: string
+          status: string
+          timestamp: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          content: string
+          created_at?: string
+          direction: string
+          id?: string
+          session_id: string
+          status?: string
+          timestamp?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          content?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          session_id?: string
+          status?: string
+          timestamp?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_rate_limits: {
         Row: {
           created_at: string
@@ -1108,6 +1150,39 @@ export type Database = {
           metadata?: Json | null
           session_id?: string
           user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_session_stats: {
+        Row: {
+          created_at: string
+          id: string
+          last_activity: string | null
+          messages_received: number
+          messages_sent: number
+          total_contacts: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_activity?: string | null
+          messages_received?: number
+          messages_sent?: number
+          total_contacts?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_activity?: string | null
+          messages_received?: number
+          messages_sent?: number
+          total_contacts?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1436,6 +1511,15 @@ export type Database = {
           current_active_users: number
           max_users_allowed: number
           plan_name: string
+        }[]
+      }
+      get_whatsapp_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          last_activity: string
+          messages_received: number
+          messages_sent: number
+          total_contacts: number
         }[]
       }
       has_feature_access: {
