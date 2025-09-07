@@ -2328,6 +2328,15 @@ export type Database = {
           user_id: string
         }[]
       }
+      validate_refresh_token_security: {
+        Args: { p_session_id: string; p_token_hash: string; p_user_id: string }
+        Returns: {
+          expires_in_seconds: number
+          is_valid: boolean
+          remaining_uses: number
+          security_status: string
+        }[]
+      }
       validate_session_secure: {
         Args: { p_session_id: string }
         Returns: {
