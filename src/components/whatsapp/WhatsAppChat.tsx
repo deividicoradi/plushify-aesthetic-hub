@@ -66,7 +66,7 @@ export function WhatsAppChat() {
   };
 
   const filteredMessages = messages.filter(msg => 
-    selectedContact ? msg.contato_id === selectedContact.id : false
+    selectedContact ? msg.contact_phone === selectedContact.telefone : false
   );
 
   if (session.status !== 'conectado') {
@@ -213,25 +213,25 @@ export function WhatsAppChat() {
                   <div
                     key={message.id}
                     className={`flex ${
-                      message.direcao === 'enviada' ? 'justify-end' : 'justify-start'
+                      message.direction === 'sent' ? 'justify-end' : 'justify-start'
                     }`}
                   >
                     <div
                       className={`max-w-[70%] rounded-lg p-3 ${
-                        message.direcao === 'enviada'
+                        message.direction === 'sent'
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted'
                       }`}
                     >
-                      <p className="text-sm">{message.conteudo}</p>
+                      <p className="text-sm">{message.content}</p>
                       <div className="flex items-center gap-1 mt-1 opacity-70">
                         <Clock className="w-3 h-3" />
                         <span className="text-xs">
-                          {format(new Date(message.horario), 'HH:mm', {
+                          {format(new Date(message.timestamp), 'HH:mm', {
                             locale: ptBR
                           })}
                         </span>
-                        {message.direcao === 'enviada' && (
+                        {message.direction === 'sent' && (
                           <CheckCircle2 className="w-3 h-3 ml-1" />
                         )}
                       </div>

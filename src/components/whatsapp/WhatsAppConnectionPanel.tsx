@@ -23,8 +23,8 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
 
   console.log('WhatsApp Connection Panel - Session:', session);
   console.log('WhatsApp Connection Panel - Status:', session.status);
-  if (session.qrCode) {
-    console.log('WhatsApp Connection Panel - QR Code URL:', session.qrCode);
+  if (session.qr_code) {
+    console.log('WhatsApp Connection Panel - QR Code URL:', session.qr_code);
   }
 
   // Manter o QR Code e status atualizados durante o pareamento
@@ -75,7 +75,7 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
     }
   };
 
-  if (session.status === 'pareando' && session.qrCode) {
+  if (session.status === 'pareando' && session.qr_code) {
     return (
       <div className="flex-1 p-6 flex flex-col items-center justify-center space-y-6">
         <Card className="w-full max-w-sm">
@@ -90,14 +90,14 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
           </CardHeader>
           <CardContent className="text-center">
             <div className="bg-white dark:bg-gray-100 p-4 rounded-lg mb-4 border">
-              {session.qrCode ? (
+              {session.qr_code ? (
                 <img 
-                  src={session.qrCode} 
+                  src={session.qr_code} 
                   alt="QR Code WhatsApp" 
                   className="w-full h-auto max-w-[200px] mx-auto"
                   onLoad={() => console.log('QR Code carregado com sucesso')}
                   onError={(e) => {
-                    console.error('Erro ao carregar QR Code:', session.qrCode);
+                    console.error('Erro ao carregar QR Code:', session.qr_code);
                     e.currentTarget.src = '/lovable-uploads/ff398e71-2a2a-4da0-9e55-7039622dc732.png';
                   }}
                 />

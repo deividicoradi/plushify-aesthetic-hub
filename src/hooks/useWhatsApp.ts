@@ -1,13 +1,13 @@
-// Legacy hook - maintained for backward compatibility
+// Legacy hook - now using REST API
 import { 
-  useWhatsAppIntegration,
+  useWhatsAppRESTAPI,
   type WhatsAppContact,
   type WhatsAppMessage,
   type WhatsAppSession
-} from './useWhatsAppIntegration';
+} from './useWhatsAppRESTAPI';
 
-// Re-export the integration hook as the legacy useWhatsApp
-export const useWhatsApp = useWhatsAppIntegration;
+// Re-export the REST API hook as the legacy useWhatsApp
+export const useWhatsApp = useWhatsAppRESTAPI;
 
 // Re-export types
 export type { WhatsAppContact, WhatsAppMessage, WhatsAppSession };

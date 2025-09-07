@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Smartphone, Wifi, WifiOff, RefreshCw } from 'lucide-react';
-import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
+import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export function WhatsAppConnectionCard() {
   const { 
@@ -13,36 +14,39 @@ export function WhatsAppConnectionCard() {
     error, 
     connectWhatsApp, 
     disconnectWhatsApp, 
-    retry
-  } = useWhatsAppIntegration();
+    getSessionStatus,
+    clearError
+  } = useWhatsAppRESTAPI();
   
-  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [refreshingQR, setRefreshingQR] = useState(false);
 
-  // Atualizar QR code quando a sessão mudar para "pareando"
+  // Mostrar modal QR quando status for pareando
   useEffect(() => {
-    if (session.status === 'pareando' && session.qrCode) {
-      setQrCodeUrl(session.qrCode);
+    if (session.status === 'pareando' && session.qr_code) {
+      setShowQRModal(true);
     } else if (session.status === 'conectado') {
-      setQrCodeUrl(null);
+      setShowQRModal(false);
     }
-  }, [session]);
+  }, [session.status, session.qr_code]);
 
   const handleConnect = async () => {
-    setQrCodeUrl(null);
-    await connectWhatsApp();
+    clearError();
+    const success = await connectWhatsApp();
+    if (success && session.status === 'pareando') {
+      setShowQRModal(true);
+    }
   };
 
   const handleDisconnect = async () => {
-    setQrCodeUrl(null);
+    setShowQRModal(false);
     await disconnectWhatsApp();
   };
 
   const handleRefreshQR = async () => {
     setRefreshingQR(true);
     try {
-      // Implementar atualização manual do QR se necessário
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await getSessionStatus();
     } catch (error) {
       console.warn('Erro ao atualizar QR:', error);
     } finally {
@@ -112,9 +116,9 @@ export function WhatsAppConnectionCard() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={retry}
+                onClick={clearError}
               >
-                Tentar Novamente
+                Fechar
               </Button>
             </AlertDescription>
           </Alert>
@@ -143,53 +147,78 @@ export function WhatsAppConnectionCard() {
             </Button>
           )}
 
-          {session.status === 'pareando' && qrCodeUrl && (
+          {session.status === 'pareando' && (
             <Button 
-              onClick={handleRefreshQR}
+              onClick={() => setShowQRModal(true)}
               variant="outline"
-              disabled={refreshingQR}
               className="flex items-center gap-2"
             >
-              {refreshingQR ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
-              Atualizar QR
+              <Smartphone className="w-4 h-4" />
+              Ver QR Code
             </Button>
           )}
         </div>
 
-        {/* QR Code Display */}
-        {session.status === 'pareando' && (
-          <div className="space-y-4">
-            <div className="text-center">
-              <h3 className="text-lg font-medium mb-2">Escaneie o QR Code</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Abra o WhatsApp no seu celular → Aparelhos conectados → Conectar um aparelho
-              </p>
-              
-              {qrCodeUrl ? (
-                <div className="flex justify-center">
-                  <div className="p-4 bg-white rounded-lg border">
-                    <img 
-                      src={qrCodeUrl} 
-                      alt="QR Code WhatsApp" 
-                      className="w-48 h-48"
-                    />
+        {/* QR Code Modal */}
+        <Dialog open={showQRModal} onOpenChange={setShowQRModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center">Conectar WhatsApp</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-4">
+                  1. Abra o WhatsApp no seu celular<br/>
+                  2. Vá em Aparelhos conectados<br/>
+                  3. Toque em "Conectar um aparelho"<br/>
+                  4. Escaneie o código abaixo
+                </p>
+                
+                {session.qr_code ? (
+                  <div className="flex justify-center">
+                    <div className="p-4 bg-white rounded-lg border">
+                      <img 
+                        src={session.qr_code} 
+                        alt="QR Code WhatsApp" 
+                        className="w-64 h-64"
+                      />
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex justify-center">
-                  <div className="p-8 bg-muted rounded-lg border flex flex-col items-center">
-                    <Loader2 className="w-8 h-8 animate-spin mb-2" />
-                    <span className="text-sm">Gerando QR Code...</span>
+                ) : (
+                  <div className="flex justify-center">
+                    <div className="p-8 bg-muted rounded-lg border flex flex-col items-center">
+                      <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                      <span className="text-sm">Gerando QR Code...</span>
+                    </div>
                   </div>
+                )}
+                
+                <div className="flex gap-2 justify-center mt-4">
+                  <Button 
+                    onClick={handleRefreshQR}
+                    variant="outline"
+                    disabled={refreshingQR}
+                    size="sm"
+                  >
+                    {refreshingQR ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                    )}
+                    Atualizar
+                  </Button>
+                  <Button 
+                    onClick={() => setShowQRModal(false)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Fechar
+                  </Button>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-        )}
+          </DialogContent>
+        </Dialog>
 
         {/* Connected Status */}
         {session.status === 'conectado' && (
@@ -213,12 +242,18 @@ export function WhatsAppConnectionCard() {
         <div className="text-sm text-muted-foreground space-y-1">
           <div className="flex justify-between">
             <span>ID da Sessão:</span>
-            <span className="font-mono">{session.id || 'N/A'}</span>
+            <span className="font-mono">{session.session_id || 'N/A'}</span>
           </div>
           <div className="flex justify-between">
             <span>Status:</span>
             <span>{getStatusText(session.status)}</span>
           </div>
+          {session.last_activity && (
+            <div className="flex justify-between">
+              <span>Última Atividade:</span>
+              <span className="text-xs">{new Date(session.last_activity).toLocaleString()}</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

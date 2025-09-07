@@ -18,7 +18,7 @@ import {
   Loader2,
   AlertTriangle
 } from 'lucide-react';
-import { useWhatsAppIntegration, WhatsAppContact, WhatsAppMessage } from '@/hooks/useWhatsAppIntegration';
+import { useWhatsAppRESTAPI, WhatsAppContact, WhatsAppMessage } from '@/hooks/useWhatsAppRESTAPI';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -32,7 +32,7 @@ export const WhatsAppConversations = () => {
     sendMessage, 
     loadMessages, 
     loadContacts 
-  } = useWhatsAppIntegration();
+  } = useWhatsAppRESTAPI();
   
   const [selectedContact, setSelectedContact] = useState<WhatsAppContact | null>(null);
   const [newMessage, setNewMessage] = useState('');
@@ -52,7 +52,7 @@ export const WhatsAppConversations = () => {
 
   // Get messages for selected contact
   const contactMessages = messages.filter(message => 
-    selectedContact ? message.contato_id === selectedContact.id : false
+    selectedContact ? message.contact_phone === selectedContact.telefone : false
   );
 
   // Scroll to bottom of messages
@@ -63,7 +63,7 @@ export const WhatsAppConversations = () => {
   // Load messages when contact is selected
   useEffect(() => {
     if (selectedContact) {
-      loadMessages(selectedContact.id);
+      loadMessages(selectedContact.telefone);
     }
   }, [selectedContact, loadMessages]);
 
@@ -80,15 +80,19 @@ export const WhatsAppConversations = () => {
     setSendingMessage(true);
     try {
       const phone = selectedContact ? selectedContact.telefone : newPhone;
-      await sendMessage(phone, newMessage);
-      setNewMessage('');
-      if (!selectedContact) {
-        setNewPhone('');
-        setShowNewContact(false);
-        // Reload contacts to show the new one
-        await loadContacts();
+      const contactName = selectedContact ? selectedContact.nome : `Contato ${newPhone}`;
+      const success = await sendMessage(phone, newMessage, contactName);
+      
+      if (success) {
+        setNewMessage('');
+        if (!selectedContact) {
+          setNewPhone('');
+          setShowNewContact(false);
+          // Reload contacts to show the new one
+          await loadContacts();
+        }
+        messageInputRef.current?.focus();
       }
-      messageInputRef.current?.focus();
     } catch (error) {
       console.error('Failed to send message:', error);
     } finally {
@@ -256,22 +260,22 @@ export const WhatsAppConversations = () => {
                         <div
                           key={message.id}
                           className={`flex ${
-                            message.direcao === 'enviada' ? 'justify-end' : 'justify-start'
+                            message.direction === 'sent' ? 'justify-end' : 'justify-start'
                           }`}
                         >
                           <div
                             className={`max-w-[70%] rounded-lg px-3 py-2 ${
-                              message.direcao === 'enviada'
+                              message.direction === 'sent'
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-muted'
                             }`}
                           >
                             <div className="whitespace-pre-wrap break-words">
-                              {message.conteudo}
+                              {message.content}
                             </div>
                             <div className="text-xs opacity-70 mt-1 flex items-center justify-between">
-                              <span>{formatMessageTime(message.horario)}</span>
-                              {message.direcao === 'enviada' && (
+                              <span>{formatMessageTime(message.timestamp)}</span>
+                              {message.direction === 'sent' && (
                                 <Badge variant="secondary" className="text-xs">
                                   {message.status}
                                 </Badge>

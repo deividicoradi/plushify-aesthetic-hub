@@ -17,8 +17,8 @@ export const WhatsAppSettings: React.FC = () => {
   
   console.log('WhatsApp Settings - Session:', session);
   console.log('WhatsApp Settings - Status:', session.status);
-  if (session.qrCode) {
-    console.log('WhatsApp Settings - QR Code disponível:', session.qrCode);
+  if (session.qr_code) {
+    console.log('WhatsApp Settings - QR Code disponível:', session.qr_code);
   }
 
   const getStatusColor = () => {
@@ -47,8 +47,8 @@ export const WhatsAppSettings: React.FC = () => {
   };
 
   const totalMessages = messages.length;
-  const sentMessages = messages.filter(m => m.direcao === 'enviada').length;
-  const receivedMessages = messages.filter(m => m.direcao === 'recebida').length;
+  const sentMessages = messages.filter(m => m.direction === 'sent').length;
+  const receivedMessages = messages.filter(m => m.direction === 'received').length;
 
   return (
     <Tabs defaultValue="chat" className="w-full">
@@ -106,14 +106,14 @@ export const WhatsAppSettings: React.FC = () => {
               </div>
 
               {/* QR Code quando estiver pareando */}
-              {session.status === 'pareando' && session.qrCode && typeof session.qrCode === 'string' && (
+              {session.status === 'pareando' && session.qr_code && typeof session.qr_code === 'string' && (
                 <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-green-300 rounded-lg bg-green-50 dark:bg-green-900/20">
                   <h3 className="text-lg font-semibold mb-4 text-green-800 dark:text-green-200">
                     QR Code Gerado
                   </h3>
                   <div className="bg-white p-4 rounded-lg shadow-md">
                     <img 
-                      src={session.qrCode} 
+                      src={session.qr_code} 
                       alt="QR Code do WhatsApp" 
                       className="w-64 h-64 mx-auto"
                     />
@@ -133,7 +133,7 @@ export const WhatsAppSettings: React.FC = () => {
               )}
 
               {/* Indicador de carregamento do QR Code */}
-              {session.status === 'pareando' && !session.qrCode && (
+              {session.status === 'pareando' && !session.qr_code && (
                 <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-yellow-300 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600 mb-4"></div>
                   <p className="text-sm text-center text-yellow-700 dark:text-yellow-300">

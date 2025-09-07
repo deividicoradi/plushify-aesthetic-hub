@@ -29,7 +29,7 @@ export const WhatsAppChatInterface: React.FC = () => {
 
   // Filtrar mensagens do contato selecionado
   const contactMessages = selectedContact 
-    ? messages.filter(msg => msg.contato_id === selectedContact.id)
+    ? messages.filter(msg => msg.contact_phone === selectedContact.telefone)
     : [];
 
   const scrollToBottom = () => {
@@ -212,23 +212,23 @@ export const WhatsAppChatInterface: React.FC = () => {
                 {contactMessages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.direcao === 'enviada' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${message.direction === 'sent' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
                       className={`max-w-[70%] p-3 rounded-lg ${
-                        message.direcao === 'enviada'
+                        message.direction === 'sent'
                           ? 'bg-green-500 text-white'
                           : 'bg-muted'
                       }`}
                     >
-                      <p className="text-sm">{message.conteudo}</p>
+                      <p className="text-sm">{message.content}</p>
                       <div className="flex items-center justify-end gap-1 mt-1">
                         <span className={`text-xs ${
-                          message.direcao === 'enviada' ? 'text-green-100' : 'text-muted-foreground'
+                          message.direction === 'sent' ? 'text-green-100' : 'text-muted-foreground'
                         }`}>
-                          {formatMessageTime(message.horario)}
+                          {formatMessageTime(message.timestamp)}
                         </span>
-                        {message.direcao === 'enviada' && (
+                        {message.direction === 'sent' && (
                           <Badge
                             variant="secondary"
                             className="text-xs px-1 py-0 h-4 bg-green-600 text-green-100"

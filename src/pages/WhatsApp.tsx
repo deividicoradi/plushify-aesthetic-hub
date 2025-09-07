@@ -9,6 +9,7 @@ import { WhatsAppQuickSend } from '@/components/whatsapp/WhatsAppQuickSend';
 import { SecureWhatsAppConnection } from '@/components/whatsapp/SecureWhatsAppConnection';
 import { WhatsAppSecurityDashboard } from '@/components/whatsapp/WhatsAppSecurityDashboard';
 import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
+import { WhatsAppStatsPanel } from '@/components/whatsapp/WhatsAppStatsPanel';
 import { MessageCircle, Users, Send, Activity } from 'lucide-react';
 
 export default function WhatsApp() {
@@ -127,7 +128,7 @@ export default function WhatsApp() {
           <TabsTrigger value="connection">Conexão</TabsTrigger>
           <TabsTrigger value="conversations">Conversas</TabsTrigger>
           <TabsTrigger value="quick-send">Envio Rápido</TabsTrigger>
-          <TabsTrigger value="settings">Configurações</TabsTrigger>
+          <TabsTrigger value="settings">Estatísticas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="connection" className="space-y-4">
@@ -146,66 +147,87 @@ export default function WhatsApp() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações do WhatsApp</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Informações do Sistema</h3>
-                  <div className="grid gap-2 text-sm">
+          <div className="space-y-6">
+            <WhatsAppStatsPanel />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Configurações Avançadas</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Recursos Disponíveis</h3>
+                    <ul className="text-sm space-y-1 list-disc list-inside">
+                      <li>✅ Conexão via QR Code segura</li>
+                      <li>✅ Envio e recebimento de mensagens</li>
+                      <li>✅ Gerenciamento de contatos</li>
+                      <li>✅ Histórico de conversas</li>
+                      <li>✅ Tokens criptografados</li>
+                      <li>✅ Rate limiting (30 req/min)</li>
+                      <li>✅ Auditoria completa</li>
+                      <li>✅ Estatísticas em tempo real</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Limitações Atuais</h3>
+                    <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
+                      <li>Apenas mensagens de texto</li>
+                      <li>Uma sessão ativa por usuário</li>
+                      <li>Sessão expira em 24 horas</li>
+                      <li>Dependente da conexão do celular</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Segurança</h3>
+                    <ul className="text-sm space-y-1 list-disc list-inside text-green-600">
+                      <li>🔒 Tokens criptografados com pgcrypto</li>
+                      <li>🔒 Row Level Security (RLS) ativo</li>
+                      <li>🔒 Rate limiting por usuário</li>
+                      <li>🔒 Auditoria de todas as ações</li>
+                      <li>🔒 Isolamento total entre usuários</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Informações Técnicas</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-3 text-sm">
                     <div className="flex justify-between">
-                      <span>Status da Conexão:</span>
+                      <span>Status:</span>
                       <Badge variant="outline">{getStatusText(session.status)}</Badge>
                     </div>
                     <div className="flex justify-between">
-                      <span>Servidor WhatsApp:</span>
-                      <span className="font-mono text-green-600">31.97.30.241:8787</span>
+                      <span>Servidor API:</span>
+                      <span className="font-mono text-xs">Supabase Edge Function</span>
                     </div>
                     <div className="flex justify-between">
                       <span>ID da Sessão:</span>
-                      <span className="font-mono">{session.id || 'N/A'}</span>
+                      <span className="font-mono text-xs">{session.session_id || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Total de Contatos:</span>
+                      <span>Contatos:</span>
                       <span>{totalContacts}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Total de Mensagens:</span>
-                      <span>{messages.length}</span>
+                      <span>Mensagens:</span>
+                      <span>{sentMessages + receivedMessages}</span>
                     </div>
+                    {session.last_activity && (
+                      <div className="flex justify-between">
+                        <span>Última Atividade:</span>
+                        <span className="text-xs">{new Date(session.last_activity).toLocaleString()}</span>
+                      </div>
+                    )}
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Recursos Disponíveis</h3>
-                  <ul className="text-sm space-y-1 list-disc list-inside">
-                    <li>Conexão via QR Code</li>
-                    <li>Envio e recebimento de mensagens</li>
-                    <li>Gerenciamento de contatos</li>
-                    <li>Histórico de conversas</li>
-                    <li>Envio rápido para múltiplos contatos</li>
-                    <li>Autenticação segura com tokens criptografados</li>
-                    <li>Rate limiting e auditoria completa</li>
-                  </ul>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Limitações</h3>
-                  <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
-                    <li>Apenas mensagens de texto por enquanto</li>
-                    <li>Requer WhatsApp ativo no celular</li>
-                    <li>Sessão expira após 24 horas de inatividade</li>
-                    <li>Uma sessão ativa por usuário</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Importar o Dashboard de Segurança */}
-            <div className="space-y-4">
-              <WhatsAppSecurityDashboard />
+                </CardContent>
+              </Card>
             </div>
           </div>
         </TabsContent>
