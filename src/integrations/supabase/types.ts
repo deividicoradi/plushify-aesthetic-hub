@@ -2171,6 +2171,10 @@ export type Database = {
         }
         Returns: string
       }
+      mask_sensitive_client_data: {
+        Args: { client_data: Json }
+        Returns: Json
+      }
       process_message_queue: {
         Args: { p_batch_size?: number }
         Returns: {
@@ -2247,6 +2251,10 @@ export type Database = {
           p_status?: string
         }
         Returns: undefined
+      }
+      validate_client_access: {
+        Args: { client_id: string; requesting_user_id: string }
+        Returns: boolean
       }
       validate_cpf: {
         Args: { cpf_input: string }
