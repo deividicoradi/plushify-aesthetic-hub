@@ -7,6 +7,7 @@ import { WhatsAppConnectionCard } from '@/components/whatsapp/WhatsAppConnection
 import { WhatsAppConversations } from '@/components/whatsapp/WhatsAppConversations';
 import { WhatsAppQuickSend } from '@/components/whatsapp/WhatsAppQuickSend';
 import { SecureWhatsAppConnection } from '@/components/whatsapp/SecureWhatsAppConnection';
+import { WhatsAppSecurityDashboard } from '@/components/whatsapp/WhatsAppSecurityDashboard';
 import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
 import { MessageCircle, Users, Send, Activity } from 'lucide-react';
 
@@ -145,58 +146,68 @@ export default function WhatsApp() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configurações do WhatsApp</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Informações do Sistema</h3>
-                <div className="grid gap-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Status da Conexão:</span>
-                    <Badge variant="outline">{getStatusText(session.status)}</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Servidor WhatsApp:</span>
-                    <span className="font-mono text-green-600">31.97.30.241:8787</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>ID da Sessão:</span>
-                    <span className="font-mono">{session.id || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total de Contatos:</span>
-                    <span>{totalContacts}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total de Mensagens:</span>
-                    <span>{messages.length}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configurações do WhatsApp</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Informações do Sistema</h3>
+                  <div className="grid gap-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Status da Conexão:</span>
+                      <Badge variant="outline">{getStatusText(session.status)}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Servidor WhatsApp:</span>
+                      <span className="font-mono text-green-600">31.97.30.241:8787</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>ID da Sessão:</span>
+                      <span className="font-mono">{session.id || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total de Contatos:</span>
+                      <span>{totalContacts}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total de Mensagens:</span>
+                      <span>{messages.length}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Recursos Disponíveis</h3>
-                <ul className="text-sm space-y-1 list-disc list-inside">
-                  <li>Conexão via QR Code</li>
-                  <li>Envio e recebimento de mensagens</li>
-                  <li>Gerenciamento de contatos</li>
-                  <li>Histórico de conversas</li>
-                  <li>Envio rápido para múltiplos contatos</li>
-                </ul>
-              </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Recursos Disponíveis</h3>
+                  <ul className="text-sm space-y-1 list-disc list-inside">
+                    <li>Conexão via QR Code</li>
+                    <li>Envio e recebimento de mensagens</li>
+                    <li>Gerenciamento de contatos</li>
+                    <li>Histórico de conversas</li>
+                    <li>Envio rápido para múltiplos contatos</li>
+                    <li>Autenticação segura com tokens criptografados</li>
+                    <li>Rate limiting e auditoria completa</li>
+                  </ul>
+                </div>
 
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Limitações</h3>
-                <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
-                  <li>Apenas mensagens de texto por enquanto</li>
-                  <li>Requer WhatsApp ativo no celular</li>
-                  <li>Sessão expira após inatividade prolongada</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Limitações</h3>
+                  <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
+                    <li>Apenas mensagens de texto por enquanto</li>
+                    <li>Requer WhatsApp ativo no celular</li>
+                    <li>Sessão expira após 24 horas de inatividade</li>
+                    <li>Uma sessão ativa por usuário</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Importar o Dashboard de Segurança */}
+            <div className="space-y-4">
+              <WhatsAppSecurityDashboard />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

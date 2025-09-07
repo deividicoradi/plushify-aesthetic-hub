@@ -100,7 +100,7 @@ export const useSecureWhatsAppAuth = () => {
     return await refreshAccessToken();
   };
 
-  // Fazer login e capturar tokens
+  // Fazer login e capturar tokens com criptografia
   const loginWithCredentials = async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
     try {
@@ -110,10 +110,7 @@ export const useSecureWhatsAppAuth = () => {
           'Content-Type': 'application/json',
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtb3lseWJid2lra3FieGlxd2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzNzc3NTcsImV4cCI6MjA2MDk1Mzc1N30.Z0n_XICRbLX1kRT6KOWvFtV6a12r0pH3kW8HYtO6Ztw'
         },
-        body: JSON.stringify({
-          email,
-          password
-        })
+        body: JSON.stringify({ email, password })
       });
 
       if (!response.ok) {

@@ -1348,6 +1348,18 @@ export type Database = {
         Args: { token: string }
         Returns: string
       }
+      get_active_session_for_user: {
+        Args: { p_user_id: string }
+        Returns: {
+          expires_at: string
+          id: string
+          last_activity: string
+          qr_code: string
+          server_url: string
+          session_id: string
+          status: string
+        }[]
+      }
       get_available_slots: {
         Args: {
           p_date: string
