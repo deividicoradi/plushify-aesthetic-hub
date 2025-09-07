@@ -954,6 +954,39 @@ export type Database = {
           },
         ]
       }
+      whatsapp_login_attempts: {
+        Row: {
+          attempt_time: string
+          blocked_until: string | null
+          failure_reason: string | null
+          id: string
+          ip_address: unknown
+          success: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          attempt_time?: string
+          blocked_until?: string | null
+          failure_reason?: string | null
+          id?: string
+          ip_address: unknown
+          success?: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          attempt_time?: string
+          blocked_until?: string | null
+          failure_reason?: string | null
+          id?: string
+          ip_address?: unknown
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_mensagens: {
         Row: {
           contato_id: string
@@ -1118,6 +1151,99 @@ export type Database = {
           request_count?: number
           user_id?: string
           window_start?: string
+        }
+        Relationships: []
+      }
+      whatsapp_refresh_tokens: {
+        Row: {
+          created_at: string
+          encrypted_refresh_token: string
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          is_active: boolean | null
+          last_used_at: string | null
+          refresh_token_hash: string
+          revoked_at: string | null
+          session_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_refresh_token: string
+          expires_at: string
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_used_at?: string | null
+          refresh_token_hash: string
+          revoked_at?: string | null
+          session_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_refresh_token?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_used_at?: string | null
+          refresh_token_hash?: string
+          revoked_at?: string | null
+          session_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_security_logs: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          location_data: Json | null
+          session_id: string | null
+          severity: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          location_data?: Json | null
+          session_id?: string | null
+          severity?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          location_data?: Json | null
+          session_id?: string | null
+          severity?: string
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
