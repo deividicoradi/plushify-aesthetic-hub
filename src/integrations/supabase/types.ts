@@ -1839,6 +1839,10 @@ export type Database = {
       }
     }
     Functions: {
+      anonymize_client_data: {
+        Args: { p_client_id: string }
+        Returns: boolean
+      }
       auto_complete_appointments: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -2002,6 +2006,26 @@ export type Database = {
         Returns: {
           is_available: boolean
           slot_time: string
+        }[]
+      }
+      get_client_data_secure: {
+        Args: { p_client_id: string; p_mask_sensitive?: boolean }
+        Returns: {
+          address: string
+          cep: string
+          city: string
+          cpf: string
+          created_at: string
+          email: string
+          id: string
+          last_visit: string
+          name: string
+          neighborhood: string
+          payment_method: string
+          phone: string
+          state: string
+          status: string
+          updated_at: string
         }[]
       }
       get_dashboard_summary: {
@@ -2186,6 +2210,10 @@ export type Database = {
       mask_sensitive_client_data: {
         Args: { client_data: Json }
         Returns: Json
+      }
+      mask_sensitive_data: {
+        Args: { input_text: string; mask_type?: string }
+        Returns: string
       }
       process_message_queue: {
         Args: { p_batch_size?: number }
