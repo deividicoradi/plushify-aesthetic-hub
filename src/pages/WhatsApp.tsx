@@ -8,11 +8,11 @@ import { WhatsAppConversations } from '@/components/whatsapp/WhatsAppConversatio
 import { WhatsAppQuickSend } from '@/components/whatsapp/WhatsAppQuickSend';
 import { SecureWhatsAppConnection } from '@/components/whatsapp/SecureWhatsAppConnection';
 import { WhatsAppSecurityDashboard } from '@/components/whatsapp/WhatsAppSecurityDashboard';
-import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
+import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
 import { MessageCircle, Users, Send, Activity } from 'lucide-react';
 
 export default function WhatsApp() {
-  const { session, messages, contacts, loading } = useWhatsAppIntegration();
+  const { session, messages, contacts, stats, loading } = useWhatsAppRESTAPI();
   const [activeTab, setActiveTab] = useState('connection');
 
   const getStatusColor = (status: string) => {
@@ -41,11 +41,11 @@ export default function WhatsApp() {
     }
   };
 
-  // Calcular estatísticas
-  const totalContacts = contacts.length;
-  const sentMessages = messages.filter(m => m.direcao === 'enviada').length;
-  const receivedMessages = messages.filter(m => m.direcao === 'recebida').length;
-  const responseRate = sentMessages > 0 ? Math.round((receivedMessages / sentMessages) * 100) : 0;
+  // Usar estatísticas do novo sistema
+  const totalContacts = stats.total_contacts;
+  const sentMessages = stats.messages_sent;
+  const receivedMessages = stats.messages_received;
+  const responseRate = stats.response_rate;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
