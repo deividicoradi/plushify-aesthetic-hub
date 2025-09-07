@@ -41,62 +41,85 @@ export default function WhatsAppDashboard() {
               <WhatsAppStatusBadge session={session} />
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Contatos</CardTitle>
+          {/* Stats Cards with Enhanced Design */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="hover-scale transition-all duration-200">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Contatos</CardTitle>
+                <div className="relative">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalContacts}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Contatos ativos no WhatsApp
-                  </p>
-                </CardContent>
-              </Card>
+                  {totalContacts > 0 && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold animate-fade-in">{totalContacts}</div>
+                <p className="text-xs text-muted-foreground">
+                  {totalContacts === 1 ? 'Contato ativo' : 'Contatos ativos'} no WhatsApp
+                </p>
+              </CardContent>
+            </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Mensagens Enviadas</CardTitle>
+            <Card className="hover-scale transition-all duration-200">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Mensagens Enviadas</CardTitle>
+                <div className="relative">
                   <Send className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{sentMessages}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Total de mensagens enviadas
-                  </p>
-                </CardContent>
-              </Card>
+                  {sentMessages > 0 && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600 animate-fade-in">{sentMessages}</div>
+                <p className="text-xs text-muted-foreground">
+                  Total de mensagens enviadas
+                </p>
+              </CardContent>
+            </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Mensagens Recebidas</CardTitle>
+            <Card className="hover-scale transition-all duration-200">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Mensagens Recebidas</CardTitle>
+                <div className="relative">
                   <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{receivedMessages}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Total de mensagens recebidas
-                  </p>
-                </CardContent>
-              </Card>
+                  {receivedMessages > 0 && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-600 animate-fade-in">{receivedMessages}</div>
+                <p className="text-xs text-muted-foreground">
+                  Total de mensagens recebidas
+                </p>
+              </CardContent>
+            </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Taxa de Resposta</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {totalMessages > 0 ? Math.round((receivedMessages / totalMessages) * 100) : 0}%
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Porcentagem de respostas
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="hover-scale transition-all duration-200">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Taxa de Resposta</CardTitle>
+                <TrendingUp className={`h-4 w-4 ${
+                  totalMessages > 0 && (receivedMessages / totalMessages) > 0.5 
+                    ? 'text-green-500' 
+                    : 'text-muted-foreground'
+                }`} />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold animate-fade-in ${
+                  totalMessages > 0 && (receivedMessages / totalMessages) > 0.5 
+                    ? 'text-green-600' 
+                    : 'text-orange-600'
+                }`}>
+                  {totalMessages > 0 ? Math.round((receivedMessages / totalMessages) * 100) : 0}%
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Porcentagem de respostas
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
             {/* Main Content */}
           <Tabs defaultValue="conversations" className="space-y-6">
