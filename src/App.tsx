@@ -42,9 +42,24 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
 import ScrollToTop from "./components/ScrollToTop";
+import { PerformanceMonitor } from "./components/PerformanceMonitor";
+import { CacheOptimizerProvider } from "./components/CacheOptimizer";
 
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Cache queries for 5 minutes
+      staleTime: 5 * 60 * 1000,
+      // Keep cache for 10 minutes
+      gcTime: 10 * 60 * 1000,
+      // Retry failed requests only once
+      retry: 1,
+      // Don't refetch on window focus
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Security: Remove Lovable token from URL
 if (typeof window !== 'undefined' && window.location.search.includes('__lovable_token')) {
@@ -205,15 +220,18 @@ const App = () => (
         <TooltipProvider>
           <SecurityProvider>
             <AuthProvider>
-              <PWAProvider>
-                <Toaster />
-                <Sonner />
-                 <BrowserRouter>
-                   <ScrollToTop />
-                   <AppContent />
-                 </BrowserRouter>
-                 <CookieConsent />
-              </PWAProvider>
+              <CacheOptimizerProvider>
+                <PWAProvider>
+                  <Toaster />
+                  <Sonner />
+                   <BrowserRouter>
+                     <PerformanceMonitor />
+                     <ScrollToTop />
+                     <AppContent />
+                   </BrowserRouter>
+                   <CookieConsent />
+                </PWAProvider>
+              </CacheOptimizerProvider>
             </AuthProvider>
           </SecurityProvider>
         </TooltipProvider>

@@ -99,66 +99,58 @@ export const useDashboardStats = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
+    
     fetchDashboardStats();
 
-    // Configurar listener em tempo real para agendamentos
-    const appointmentsChannel = supabase
-      .channel('appointments-changes')
+    // Debounce para evitar múltiplas atualizações
+    let refreshTimeout: NodeJS.Timeout;
+    
+    const debouncedRefresh = () => {
+      clearTimeout(refreshTimeout);
+      refreshTimeout = setTimeout(() => {
+        fetchDashboardStats();
+      }, 1000); // Aguardar 1 segundo antes de atualizar
+    };
+
+    // Single channel para todas as mudanças
+    const dashboardChannel = supabase
+      .channel('dashboard-stats')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'appointments',
-          filter: `user_id=eq.${user?.id}`
+          filter: `user_id=eq.${user.id}`
         },
-        () => {
-          console.log('Appointments changed, refreshing dashboard stats');
-          fetchDashboardStats();
-        }
+        debouncedRefresh
       )
-      .subscribe();
-
-    // Configurar listener em tempo real para clientes
-    const clientsChannel = supabase
-      .channel('clients-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'clients',
-          filter: `user_id=eq.${user?.id}`
+          filter: `user_id=eq.${user.id}`
         },
-        () => {
-          console.log('Clients changed, refreshing dashboard stats');
-          fetchDashboardStats();
-        }
+        debouncedRefresh
       )
-      .subscribe();
-
-    // Configurar listener em tempo real para pagamentos
-    const paymentsChannel = supabase
-      .channel('payments-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'payments',
-          filter: `user_id=eq.${user?.id}`
+          filter: `user_id=eq.${user.id}`
         },
-        () => {
-          console.log('Payments changed, refreshing dashboard stats');
-          fetchDashboardStats();
-        }
+        debouncedRefresh
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(appointmentsChannel);
-      supabase.removeChannel(clientsChannel);
-      supabase.removeChannel(paymentsChannel);
+      clearTimeout(refreshTimeout);
+      supabase.removeChannel(dashboardChannel);
     };
   }, [user]);
 
