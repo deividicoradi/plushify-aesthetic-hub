@@ -2216,6 +2216,10 @@ export type Database = {
           session_id: string
         }[]
       }
+      revoke_user_tokens_secure: {
+        Args: { p_user_id?: string }
+        Returns: number
+      }
       sanitize_input: {
         Args: { input_text: string }
         Returns: string
@@ -2229,6 +2233,14 @@ export type Database = {
           name: string
           phone: string
           status: string
+        }[]
+      }
+      secure_token_cleanup: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          expired_tokens: number
+          old_sessions: number
+          security_issues: number
         }[]
       }
       update_session_isolation: {
@@ -2267,6 +2279,22 @@ export type Database = {
       validate_phone: {
         Args: { phone: string }
         Returns: boolean
+      }
+      validate_refresh_token_secure: {
+        Args: { p_token_hash: string }
+        Returns: {
+          is_valid: boolean
+          session_id: string
+          user_id: string
+        }[]
+      }
+      validate_session_secure: {
+        Args: { p_session_id: string }
+        Returns: {
+          is_valid: boolean
+          status: string
+          user_id: string
+        }[]
       }
       verify_data_integrity: {
         Args: { check_user_id: string }
