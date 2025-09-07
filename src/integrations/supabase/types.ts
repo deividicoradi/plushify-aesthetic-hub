@@ -1672,14 +1672,12 @@ export type Database = {
       }
       whatsapp_sessions: {
         Row: {
-          access_token: string | null
           created_at: string
           expires_at: string | null
           id: string
           ip_address: unknown | null
           last_activity: string | null
           qr_code: string | null
-          refresh_token: string | null
           server_url: string | null
           session_id: string
           status: string
@@ -1689,14 +1687,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          access_token?: string | null
           created_at?: string
           expires_at?: string | null
           id?: string
           ip_address?: unknown | null
           last_activity?: string | null
           qr_code?: string | null
-          refresh_token?: string | null
           server_url?: string | null
           session_id: string
           status?: string
@@ -1706,14 +1702,12 @@ export type Database = {
           user_id: string
         }
         Update: {
-          access_token?: string | null
           created_at?: string
           expires_at?: string | null
           id?: string
           ip_address?: unknown | null
           last_activity?: string | null
           qr_code?: string | null
-          refresh_token?: string | null
           server_url?: string | null
           session_id?: string
           status?: string
@@ -2036,6 +2030,26 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_clients_masked: {
+        Args: { p_mask_sensitive?: boolean }
+        Returns: {
+          address: string
+          cep: string
+          city: string
+          cpf: string
+          created_at: string
+          email: string
+          id: string
+          last_visit: string
+          name: string
+          neighborhood: string
+          payment_method: string
+          phone: string
+          state: string
+          status: string
+          updated_at: string
+        }[]
+      }
       get_dashboard_summary: {
         Args: { target_user_id: string }
         Returns: {
@@ -2321,6 +2335,10 @@ export type Database = {
           security_issues: number
         }[]
       }
+      set_authorization_password: {
+        Args: { p_password: string }
+        Returns: boolean
+      }
       update_session_isolation: {
         Args: {
           p_connection_count?: number
@@ -2382,6 +2400,10 @@ export type Database = {
           status: string
           user_id: string
         }[]
+      }
+      verify_authorization_password: {
+        Args: { p_password: string }
+        Returns: boolean
       }
       verify_data_integrity: {
         Args: { check_user_id: string }

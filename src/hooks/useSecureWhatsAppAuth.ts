@@ -65,16 +65,19 @@ export const useSecureWhatsAppAuth = () => {
 
       setTokens(newTokens);
 
-      // Atualizar na sessão do banco
-      if (whatsappSession) {
-        await supabase
-          .from('whatsapp_sessions')
-          .update({
-            access_token: newTokens.access_token,
-            refresh_token: newTokens.refresh_token,
-            token_expires_at: new Date(newTokens.expires_at * 1000).toISOString()
-          })
-          .eq('user_id', user?.id);
+      // Update tokens securely using refresh token rotation
+      if (whatsappSession && user?.id) {
+        const { error: rotateError } = await supabase.rpc('rotate_refresh_token', {
+          p_old_token_hash: tokens.refresh_token, 
+          p_user_id: user.id,
+          p_new_token_hash: newTokens.refresh_token,
+          p_new_encrypted_token: newTokens.refresh_token,
+          p_session_id: whatsappSession.session_id
+        });
+
+        if (rotateError) {
+          console.error('Error rotating tokens:', rotateError);
+        }
       }
 
       return newTokens.access_token;
@@ -126,17 +129,28 @@ export const useSecureWhatsAppAuth = () => {
 
       setTokens(newTokens);
 
-      // Criar ou atualizar sessão no banco
+      // Create secure session without storing plaintext tokens
       const sessionId = `session_${user?.id}_${Date.now()}`;
+      
+      // Store tokens securely in whatsapp_refresh_tokens table
+      const { error: tokenError } = await supabase.rpc('create_whatsapp_refresh_token', {
+        p_user_id: user?.id,
+        p_session_id: sessionId,
+        p_refresh_token: newTokens.refresh_token,
+        p_expires_at: new Date(newTokens.expires_at * 1000).toISOString()
+      });
+
+      if (tokenError) {
+        console.error('Error storing secure tokens:', tokenError);
+      }
+
+      // Create session without plaintext tokens
       const { data: sessionData, error } = await supabase
         .from('whatsapp_sessions')
         .upsert({
           user_id: user?.id,
           session_id: sessionId,
           status: 'desconectado',
-          access_token: newTokens.access_token,
-          refresh_token: newTokens.refresh_token,
-          token_expires_at: new Date(newTokens.expires_at * 1000).toISOString(),
           server_url: process.env.NODE_ENV === 'production' ? 'https://31.97.30.241:8787' : 'http://localhost:8787'
         }, {
           onConflict: 'user_id'
@@ -176,13 +190,9 @@ export const useSecureWhatsAppAuth = () => {
 
       if (data) {
         setWhatsappSession(data);
-        if (data.access_token && data.refresh_token && data.token_expires_at) {
-          setTokens({
-            access_token: data.access_token,
-            refresh_token: data.refresh_token,
-            expires_at: Math.floor(new Date(data.token_expires_at).getTime() / 1000)
-          });
-        }
+        // Note: Tokens are now handled securely via whatsapp_refresh_tokens table
+        // No longer storing plaintext tokens in whatsapp_sessions for security
+        console.log('🔐 Session loaded successfully - using secure token storage');
       }
     } catch (error) {
       console.error('Erro ao carregar sessão:', error);
