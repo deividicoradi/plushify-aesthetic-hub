@@ -1236,52 +1236,43 @@ export type Database = {
     Views: {
       active_whatsapp_sessions: {
         Row: {
-          access_token: string | null
           created_at: string | null
           expires_at: string | null
           id: string | null
           ip_address: unknown | null
           last_activity: string | null
           qr_code: string | null
-          refresh_token: string | null
           server_url: string | null
           session_id: string | null
           status: string | null
-          token_expires_at: string | null
           updated_at: string | null
           user_agent: string | null
           user_id: string | null
         }
         Insert: {
-          access_token?: string | null
           created_at?: string | null
           expires_at?: string | null
           id?: string | null
           ip_address?: unknown | null
           last_activity?: string | null
           qr_code?: string | null
-          refresh_token?: string | null
           server_url?: string | null
           session_id?: string | null
           status?: string | null
-          token_expires_at?: string | null
           updated_at?: string | null
           user_agent?: string | null
           user_id?: string | null
         }
         Update: {
-          access_token?: string | null
           created_at?: string | null
           expires_at?: string | null
           id?: string | null
           ip_address?: unknown | null
           last_activity?: string | null
           qr_code?: string | null
-          refresh_token?: string | null
           server_url?: string | null
           session_id?: string | null
           status?: string | null
-          token_expires_at?: string | null
           updated_at?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -1378,6 +1369,14 @@ export type Database = {
           total_expenses: number
           total_payments: number
         }[]
+      }
+      get_decrypted_access_token: {
+        Args: { session_id: string }
+        Returns: string
+      }
+      get_decrypted_refresh_token: {
+        Args: { session_id: string }
+        Returns: string
       }
       get_plan_limits: {
         Args: { user_uuid?: string }
