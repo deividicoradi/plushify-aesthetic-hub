@@ -84,12 +84,6 @@ export const WhatsAppMonitoring: React.FC = () => {
           {getStatusBadge()}
         </div>
 
-        {session.id && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">ID da Sessão:</span>
-            <span className="text-sm font-mono">{session.id.slice(0, 8)}...</span>
-          </div>
-        )}
 
         {lastCheck && (
           <div className="flex items-center justify-between">

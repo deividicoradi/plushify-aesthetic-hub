@@ -208,10 +208,6 @@ export default function WhatsApp() {
                       <span className="font-mono text-xs">Supabase Edge Function</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>ID da Sessão:</span>
-                      <span className="font-mono text-xs">{session.session_id || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
                       <span>Contatos:</span>
                       <span>{totalContacts}</span>
                     </div>

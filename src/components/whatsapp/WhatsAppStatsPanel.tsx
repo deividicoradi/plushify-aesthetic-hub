@@ -159,12 +159,6 @@ export const WhatsAppStatsPanel = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <div className="font-medium">ID da Sessão</div>
-                <div className="text-muted-foreground font-mono text-xs">
-                  {session.session_id}
-                </div>
-              </div>
               
               {session.server_url && (
                 <div>
