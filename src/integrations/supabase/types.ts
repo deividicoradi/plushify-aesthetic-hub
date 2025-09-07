@@ -1883,6 +1883,14 @@ export type Database = {
           severity: string
         }[]
       }
+      cleanup_expired_refresh_tokens: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          expired_tokens_cleaned: number
+          old_tokens_cleaned: number
+          revoked_tokens_cleaned: number
+        }[]
+      }
       cleanup_expired_whatsapp_data: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2081,6 +2089,16 @@ export type Database = {
           price: number
         }[]
       }
+      get_token_security_status: {
+        Args: { p_user_id: string }
+        Returns: {
+          last_token_activity: string
+          security_score: number
+          suspicious_tokens: number
+          tokens_expiring_soon: number
+          total_active_tokens: number
+        }[]
+      }
       get_user_login_attempts: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -2256,9 +2274,29 @@ export type Database = {
           session_id: string
         }[]
       }
+      revoke_all_user_tokens: {
+        Args: { p_reason?: string; p_user_id: string }
+        Returns: number
+      }
       revoke_user_tokens_secure: {
         Args: { p_user_id?: string }
         Returns: number
+      }
+      rotate_refresh_token: {
+        Args: {
+          p_ip_address?: unknown
+          p_new_encrypted_token: string
+          p_new_token_hash: string
+          p_old_token_hash: string
+          p_session_id: string
+          p_user_agent?: string
+          p_user_id: string
+        }
+        Returns: {
+          expires_at: string
+          new_token_id: string
+          success: boolean
+        }[]
       }
       sanitize_input: {
         Args: { input_text: string }
