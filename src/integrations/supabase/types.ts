@@ -2057,6 +2057,18 @@ export type Database = {
           price: number
         }[]
       }
+      get_user_login_attempts: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          attempt_time: string
+          blocked_until: string
+          failure_reason: string
+          id: string
+          ip_address: unknown
+          success: boolean
+          user_agent: string
+        }[]
+      }
       get_user_plan: {
         Args: { user_uuid?: string }
         Returns: Database["public"]["Enums"]["plan_type"]
