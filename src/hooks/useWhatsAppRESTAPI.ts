@@ -79,7 +79,7 @@ export const useWhatsAppRESTAPI = () => {
     setError(null);
   }, []);
 
-  // Make authenticated request to API
+  // Make authenticated request to API with rate limiting
   const makeAPIRequest = useCallback(async (endpoint: string, options: RequestInit = {}) => {
     if (!user) {
       throw new Error('Usuário não autenticado');
@@ -92,22 +92,33 @@ export const useWhatsAppRESTAPI = () => {
       throw new Error('Token de acesso não encontrado');
     }
 
-    const response = await fetch(`${WHATSAPP_API_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
-      },
-    });
+    // Create abort controller for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
-    const data = await response.json();
+    try {
+      const response = await fetch(`${WHATSAPP_API_URL}${endpoint}`, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...options.headers,
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP ${response.status}`);
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorData}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
     }
-
-    return data;
   }, [user]);
 
   // POST /whatsapp/connect
@@ -343,26 +354,35 @@ export const useWhatsAppRESTAPI = () => {
     }
   }, [user, makeAPIRequest]);
 
-  // Start status polling
+  // Start status polling with exponential backoff
   const startStatusPolling = useCallback(() => {
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
     }
     
-    pollIntervalRef.current = setInterval(() => {
-      getSessionStatus();
-    }, 5000); // Poll every 5 seconds
-  }, [getSessionStatus]);
+    // Only poll if session is in connecting or pairing state
+    if (session.status === 'conectando' || session.status === 'pareando') {
+      pollIntervalRef.current = setInterval(() => {
+        getSessionStatus();
+      }, 10000); // Poll every 10 seconds instead of 5
+    }
+  }, [getSessionStatus, session.status]);
 
-  // Setup realtime subscriptions
+  // Setup realtime subscriptions with debouncing
   useEffect(() => {
     if (!user) return;
 
-    console.log('Setting up realtime subscriptions for user:', user.id);
+    let debounceTimeout: NodeJS.Timeout;
+    const debouncedStatsLoad = () => {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
+        loadStats();
+      }, 2000);
+    };
 
     // Subscribe to session changes
     const sessionChannel = supabase
-      .channel('whatsapp_sessions_changes')
+      .channel(`whatsapp_session_${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -372,7 +392,6 @@ export const useWhatsAppRESTAPI = () => {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('Session change received:', payload);
           if (payload.new) {
             const newData = payload.new as any;
             setSession(prevSession => ({
@@ -381,14 +400,20 @@ export const useWhatsAppRESTAPI = () => {
               qr_code: newData.qr_code,
               last_activity: newData.last_activity
             }));
+
+            // Stop polling if session is connected
+            if (newData.status === 'conectado' && pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+            }
           }
         }
       )
       .subscribe();
 
-    // Subscribe to new messages
+    // Subscribe to new messages (debounced)
     const messagesChannel = supabase
-      .channel('whatsapp_messages_changes')
+      .channel(`whatsapp_messages_${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -398,46 +423,18 @@ export const useWhatsAppRESTAPI = () => {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('New message received:', payload);
           if (payload.new) {
             setMessages(prev => [payload.new as WhatsAppMessage, ...prev]);
-            loadStats(); // Update stats when new message arrives
-          }
-        }
-      )
-      .subscribe();
-
-    // Subscribe to stats changes
-    const statsChannel = supabase
-      .channel('whatsapp_stats_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'whatsapp_session_stats',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          console.log('Stats change received:', payload);
-          if (payload.new) {
-            const newData = payload.new as any;
-            setStats(prev => ({
-              ...prev,
-              total_contacts: newData.total_contacts,
-              messages_sent: newData.messages_sent,
-              messages_received: newData.messages_received,
-              last_activity: newData.last_activity
-            }));
+            debouncedStatsLoad();
           }
         }
       )
       .subscribe();
 
     return () => {
+      clearTimeout(debounceTimeout);
       supabase.removeChannel(sessionChannel);
       supabase.removeChannel(messagesChannel);
-      supabase.removeChannel(statsChannel);
     };
   }, [user, loadStats]);
 

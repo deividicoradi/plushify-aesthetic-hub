@@ -49,14 +49,17 @@ import { CacheOptimizerProvider } from "./components/CacheOptimizer";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Cache queries for 5 minutes
-      staleTime: 5 * 60 * 1000,
-      // Keep cache for 10 minutes
-      gcTime: 10 * 60 * 1000,
+      // Cache queries for 10 minutes para reduzir requisições
+      staleTime: 10 * 60 * 1000,
+      // Keep cache for 15 minutes
+      gcTime: 15 * 60 * 1000,
       // Retry failed requests only once
       retry: 1,
-      // Don't refetch on window focus
+      retryDelay: 2000,
+      // Don't refetch automatically
       refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     },
   },
 });

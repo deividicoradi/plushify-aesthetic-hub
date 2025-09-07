@@ -45,8 +45,8 @@ export const WhatsAppMonitoringDashboard: React.FC = () => {
   useEffect(() => {
     loadRealtimeMetrics();
     
-    // Atualizar dados a cada 30 segundos
-    const interval = setInterval(loadRealtimeMetrics, 30000);
+    // Atualizar dados a cada 2 minutos para reduzir carga
+    const interval = setInterval(loadRealtimeMetrics, 120000);
 
     return () => {
       clearInterval(interval);

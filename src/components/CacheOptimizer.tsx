@@ -51,7 +51,7 @@ export const CacheOptimizerProvider: React.FC<CacheOptimizerProviderProps> = ({ 
       clearTimeout(refreshTimeout);
       refreshTimeout = setTimeout(() => {
         clearUserCache();
-      }, 3000); // Aguardar 3 segundos antes de invalidar cache
+      }, 10000); // Aguardar 10 segundos antes de invalidar cache
     };
 
     // Listen to real-time changes and intelligently invalidate cache

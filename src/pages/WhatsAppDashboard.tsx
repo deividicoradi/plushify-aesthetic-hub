@@ -6,7 +6,7 @@ import { WhatsAppConversations } from '@/components/whatsapp/WhatsAppConversatio
 import { WhatsAppStatusBadge } from '@/components/whatsapp/WhatsAppStatusBadge';
 import WhatsAppScalabilityDashboard from '@/components/whatsapp/WhatsAppScalabilityDashboard';
 import { WhatsAppMonitoringDashboard } from '@/components/whatsapp/WhatsAppMonitoringDashboard';
-import { WhatsAppMetricsCollector } from '@/components/whatsapp/WhatsAppMetricsCollector';
+// import { WhatsAppMetricsCollector } from '@/components/whatsapp/WhatsAppMetricsCollector';
 import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
@@ -35,11 +35,11 @@ export default function WhatsAppDashboard() {
         
         <main className="flex-1 p-6 lg:p-8">
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Coletor de métricas em background */}
-            <WhatsAppMetricsCollector 
+            {/* Coletor de métricas em background - Desabilitado temporariamente */}
+            {/* <WhatsAppMetricsCollector 
               userId={user?.id} 
               sessionId={session?.id || 'dashboard'} 
-            />
+            /> */}
             
             {/* Header */}
             <div className="flex items-center justify-between">

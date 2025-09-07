@@ -268,7 +268,8 @@ export const useMonitoringData = (timeRange: string = '1h') => {
   };
 
   useEffect(() => {
-    loadAllData();
+    // Desabilitar carregamento automático de dados para melhorar performance
+    // loadAllData();
   }, [timeRange]);
 
   return {

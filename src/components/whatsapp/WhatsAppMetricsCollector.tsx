@@ -88,9 +88,10 @@ export const WhatsAppMetricsCollector: React.FC<WhatsAppMetricsCollectorProps> =
       }
     };
 
-    // Coletar métricas a cada 30 segundos
+    // Coletar métricas apenas uma vez na inicialização
+    // e depois a cada 5 minutos para reduzir carga
     collectMetrics();
-    const interval = setInterval(collectMetrics, 30000);
+    const interval = setInterval(collectMetrics, 300000); // 5 minutos
 
     return () => clearInterval(interval);
   }, [sessionId, userId, recordMetric, logEvent]);
