@@ -32,28 +32,10 @@ export const useSecurityMonitor = () => {
     }, 1000);
   }, []);
 
-  // Detectar tentativas de modificação do console
+  // Desabilitar proteção do console temporariamente para melhorar performance
   const protectConsole = useCallback(() => {
-    if (process.env.NODE_ENV === 'production') {
-      // Sobrescrever funções do console em produção
-      const originalLog = console.log;
-      const originalError = console.error;
-      const originalWarn = console.warn;
-
-      console.log = function(...args) {
-        console.warn('[SECURITY] Console.log interceptado');
-        return originalLog.apply(console, args);
-      };
-
-      console.error = function(...args) {
-        console.warn('[SECURITY] Console.error interceptado');
-        return originalError.apply(console, args);
-      };
-
-      console.warn = function(...args) {
-        return originalWarn.apply(console, args);
-      };
-    }
+    // Função desabilitada para reduzir overhead
+    return;
   }, []);
 
   // Detectar tentativas de injeção de código
@@ -149,14 +131,11 @@ export const useSecurityMonitor = () => {
     }
   }, [toast]);
 
-  // Inicializar monitoramento
+  // Desabilitar inicialização automática para melhorar performance
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      detectDevToolsUsage();
-      protectConsole();
-      monitorNetworkRequests();
-    }
-  }, [detectDevToolsUsage, protectConsole, monitorNetworkRequests]);
+    // Monitoramento desabilitado temporariamente
+    return;
+  }, []);
 
   return {
     detectCodeInjection,

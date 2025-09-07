@@ -6,7 +6,7 @@ export const initSentry = () => {
   const dsn = import.meta.env.VITE_SENTRY_DSN;
   
   if (!dsn) {
-    console.log('Sentry DSN não configurado - Error reporting desabilitado');
+    // console.log('Sentry DSN não configurado - Error reporting desabilitado');
     return;
   }
 

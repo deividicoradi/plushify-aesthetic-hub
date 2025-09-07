@@ -10,11 +10,11 @@ interface SecurityConfig {
 
 export const useSecurityHeaders = (config: SecurityConfig = {}) => {
   const {
-    enableCSP = true,
-    enableXFrameOptions = true,
-    enableXContentTypeOptions = true,
+    enableCSP = false, // Desabilitar por enquanto
+    enableXFrameOptions = false, // Desabilitar por enquanto  
+    enableXContentTypeOptions = false, // Desabilitar por enquanto
     enableReferrerPolicy = true,
-    enablePermissionsPolicy = true
+    enablePermissionsPolicy = false // Desabilitar por enquanto
   } = config;
 
   useEffect(() => {

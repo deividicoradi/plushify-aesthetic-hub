@@ -4,7 +4,7 @@ export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
 // Inicializar Google Analytics
 export const initGA = () => {
   if (!GA_MEASUREMENT_ID) {
-    console.log('Google Analytics ID não configurado - Analytics desabilitado');
+    // console.log('Google Analytics ID não configurado - Analytics desabilitado');
     return;
   }
 

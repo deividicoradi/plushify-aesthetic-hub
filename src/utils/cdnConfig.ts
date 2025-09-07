@@ -104,28 +104,10 @@ export const generateAssetUrl = (
   return url;
 };
 
-// Preload critical resources
+// Desabilitar preload temporariamente para corrigir 404s
 export const preloadCriticalResources = () => {
-  const criticalResources = [
-    // Preload critical CSS
-    { href: '/assets/css/index.css', as: 'style' },
-    // Preload critical JS
-    { href: '/assets/js/main.js', as: 'script' },
-    // Preload critical fonts
-    { href: '/assets/fonts/inter-var.woff2', as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }
-  ];
-  
-  criticalResources.forEach(resource => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.href = resource.href;
-    link.as = resource.as;
-    
-    if (resource.type) link.type = resource.type;
-    if (resource.crossorigin) link.crossOrigin = resource.crossorigin;
-    
-    document.head.appendChild(link);
-  });
+  // Função desabilitada temporariamente para evitar 404s
+  return;
 };
 
 // DNS prefetch for external domains
@@ -228,13 +210,13 @@ export const trackCDNPerformance = (url: string, startTime: number): CDNMetrics 
   };
 };
 
-// Initialize CDN and cache optimizations
+// Desabilitar inicializações automáticas temporariamente  
 export const initializeCDNOptimizations = () => {
-  // Set up resource hints
+  // Set up resource hints apenas
   setupResourceHints();
   
-  // Preload critical resources
-  preloadCriticalResources();
+  // Preload desabilitado temporariamente
+  // preloadCriticalResources();
   
   // Monitor performance
   if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
