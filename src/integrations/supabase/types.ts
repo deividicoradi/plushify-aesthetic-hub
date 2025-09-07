@@ -1079,11 +1079,46 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_session_logs: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          session_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          session_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          session_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_sessions: {
         Row: {
           access_token: string | null
           created_at: string
+          expires_at: string | null
           id: string
+          ip_address: unknown | null
           last_activity: string | null
           qr_code: string | null
           refresh_token: string | null
@@ -1092,12 +1127,15 @@ export type Database = {
           status: string
           token_expires_at: string | null
           updated_at: string
+          user_agent: string | null
           user_id: string
         }
         Insert: {
           access_token?: string | null
           created_at?: string
+          expires_at?: string | null
           id?: string
+          ip_address?: unknown | null
           last_activity?: string | null
           qr_code?: string | null
           refresh_token?: string | null
@@ -1106,12 +1144,15 @@ export type Database = {
           status?: string
           token_expires_at?: string | null
           updated_at?: string
+          user_agent?: string | null
           user_id: string
         }
         Update: {
           access_token?: string | null
           created_at?: string
+          expires_at?: string | null
           id?: string
+          ip_address?: unknown | null
           last_activity?: string | null
           qr_code?: string | null
           refresh_token?: string | null
@@ -1120,6 +1161,7 @@ export type Database = {
           status?: string
           token_expires_at?: string | null
           updated_at?: string
+          user_agent?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1192,7 +1234,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      active_whatsapp_sessions: {
+        Row: {
+          access_token: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string | null
+          ip_address: unknown | null
+          last_activity: string | null
+          qr_code: string | null
+          refresh_token: string | null
+          server_url: string | null
+          session_id: string | null
+          status: string | null
+          token_expires_at: string | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          ip_address?: unknown | null
+          last_activity?: string | null
+          qr_code?: string | null
+          refresh_token?: string | null
+          server_url?: string | null
+          session_id?: string | null
+          status?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          ip_address?: unknown | null
+          last_activity?: string | null
+          qr_code?: string | null
+          refresh_token?: string | null
+          server_url?: string | null
+          session_id?: string | null
+          status?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       auto_complete_appointments: {
@@ -1221,6 +1316,10 @@ export type Database = {
         Args: { p_day_of_week: number; p_user_id: string }
         Returns: boolean
       }
+      cleanup_expired_whatsapp_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       cleanup_old_audit_logs: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -1246,9 +1345,17 @@ export type Database = {
         }
         Returns: string
       }
+      decrypt_token: {
+        Args: { encrypted_token: string }
+        Returns: string
+      }
       detect_sql_injection: {
         Args: { input_text: string }
         Returns: boolean
+      }
+      encrypt_token: {
+        Args: { token: string }
+        Returns: string
       }
       get_available_slots: {
         Args: {
@@ -1329,6 +1436,26 @@ export type Database = {
           actual_user_id: string
           attempted_user_id: string
           table_name: string
+        }
+        Returns: undefined
+      }
+      log_whatsapp_login_attempt: {
+        Args: {
+          p_error_message?: string
+          p_ip_address?: unknown
+          p_session_id: string
+          p_success?: boolean
+          p_user_agent?: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      log_whatsapp_rate_limit: {
+        Args: {
+          p_endpoint: string
+          p_ip_address?: unknown
+          p_request_count?: number
+          p_user_id: string
         }
         Returns: undefined
       }
