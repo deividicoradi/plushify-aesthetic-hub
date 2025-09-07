@@ -5,18 +5,23 @@ import { WhatsAppConnectionCard } from '@/components/whatsapp/WhatsAppConnection
 import { WhatsAppConversations } from '@/components/whatsapp/WhatsAppConversations';
 import { WhatsAppStatusBadge } from '@/components/whatsapp/WhatsAppStatusBadge';
 import WhatsAppScalabilityDashboard from '@/components/whatsapp/WhatsAppScalabilityDashboard';
+import { WhatsAppMonitoringDashboard } from '@/components/whatsapp/WhatsAppMonitoringDashboard';
+import { WhatsAppMetricsCollector } from '@/components/whatsapp/WhatsAppMetricsCollector';
 import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   MessageCircle, 
   Settings, 
   TrendingUp, 
   Users, 
   Send,
-  MessageSquare
+  MessageSquare,
+  Activity
 } from 'lucide-react';
 
 export default function WhatsAppDashboard() {
   const { session, contacts, messages } = useWhatsAppIntegration();
+  const { user } = useAuth();
 
   // Calculate stats
   const totalContacts = contacts.length;
@@ -30,6 +35,12 @@ export default function WhatsAppDashboard() {
         
         <main className="flex-1 p-6 lg:p-8">
           <div className="max-w-7xl mx-auto space-y-6">
+            {/* Coletor de métricas em background */}
+            <WhatsAppMetricsCollector 
+              userId={user?.id} 
+              sessionId={session?.id || 'dashboard'} 
+            />
+            
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
@@ -132,6 +143,10 @@ export default function WhatsAppDashboard() {
                 <TrendingUp className="w-4 h-4" />
                 Escalabilidade
               </TabsTrigger>
+              <TabsTrigger value="monitoring" className="flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                Monitoramento
+              </TabsTrigger>
               <TabsTrigger value="settings" className="flex items-center gap-2">
                 <Settings className="w-4 h-4" />
                 Configurações
@@ -144,6 +159,10 @@ export default function WhatsAppDashboard() {
 
             <TabsContent value="scalability">
               <WhatsAppScalabilityDashboard />
+            </TabsContent>
+
+            <TabsContent value="monitoring">
+              <WhatsAppMonitoringDashboard />
             </TabsContent>
 
             <TabsContent value="settings">

@@ -913,6 +913,54 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          created_at: string | null
+          description: string
+          id: string
+          metadata: Json | null
+          resolved: boolean | null
+          resolved_at: string | null
+          severity: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          created_at?: string | null
+          description: string
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       whatsapp_contatos: {
         Row: {
           atualizado_em: string
@@ -953,6 +1001,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      whatsapp_health_status: {
+        Row: {
+          created_at: string | null
+          error_rate: number | null
+          id: string
+          last_check: string | null
+          metadata: Json | null
+          response_time: number | null
+          service_name: string
+          status: string
+          updated_at: string | null
+          uptime_percentage: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_rate?: number | null
+          id?: string
+          last_check?: string | null
+          metadata?: Json | null
+          response_time?: number | null
+          service_name: string
+          status?: string
+          updated_at?: string | null
+          uptime_percentage?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          error_rate?: number | null
+          id?: string
+          last_check?: string | null
+          metadata?: Json | null
+          response_time?: number | null
+          service_name?: string
+          status?: string
+          updated_at?: string | null
+          uptime_percentage?: number | null
+        }
+        Relationships: []
       }
       whatsapp_load_tests: {
         Row: {
@@ -1044,6 +1131,48 @@ export type Database = {
           success?: boolean
           user_agent?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_logs: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          level: string
+          message: string
+          metadata: Json | null
+          session_id: string | null
+          timestamp: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          level?: string
+          message: string
+          metadata?: Json | null
+          session_id?: string | null
+          timestamp?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          level?: string
+          message?: string
+          metadata?: Json | null
+          session_id?: string | null
+          timestamp?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1244,6 +1373,36 @@ export type Database = {
           timestamp?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          labels: Json | null
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          timestamp: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          labels?: Json | null
+          metric_name: string
+          metric_type?: string
+          metric_value: number
+          timestamp?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          labels?: Json | null
+          metric_name?: string
+          metric_type?: string
+          metric_value?: number
+          timestamp?: string | null
         }
         Relationships: []
       }
@@ -1736,6 +1895,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      cleanup_old_monitoring_data: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       cleanup_old_whatsapp_data: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1770,6 +1933,16 @@ export type Database = {
           p_client_phone: string
           p_notes?: string
           p_service_id: string
+        }
+        Returns: string
+      }
+      create_whatsapp_alert: {
+        Args: {
+          p_alert_type: string
+          p_description?: string
+          p_metadata?: Json
+          p_severity?: string
+          p_title?: string
         }
         Returns: string
       }
@@ -1897,6 +2070,21 @@ export type Database = {
           plan_name: string
         }[]
       }
+      get_whatsapp_metrics_aggregated: {
+        Args: {
+          p_end_time?: string
+          p_interval_minutes?: number
+          p_metric_name: string
+          p_start_time?: string
+        }
+        Returns: {
+          avg_value: number
+          count_values: number
+          max_value: number
+          min_value: number
+          time_bucket: string
+        }[]
+      }
       get_whatsapp_security_alerts: {
         Args: { p_limit?: number; p_severity?: string; p_user_id: string }
         Returns: {
@@ -1928,6 +2116,19 @@ export type Database = {
           table_name: string
         }
         Returns: undefined
+      }
+      log_whatsapp_event: {
+        Args: {
+          p_event_type?: string
+          p_ip_address?: unknown
+          p_level?: string
+          p_message?: string
+          p_metadata?: Json
+          p_session_id?: string
+          p_user_agent?: string
+          p_user_id?: string
+        }
+        Returns: string
       }
       log_whatsapp_login_attempt: {
         Args:
@@ -1992,6 +2193,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      record_whatsapp_metric: {
+        Args: {
+          p_labels?: Json
+          p_metric_name: string
+          p_metric_type?: string
+          p_metric_value: number
+        }
+        Returns: string
+      }
       refresh_whatsapp_token: {
         Args: { p_refresh_token: string; p_user_id: string }
         Returns: {
@@ -2025,6 +2235,16 @@ export type Database = {
           p_instance_id: string
           p_memory_usage?: number
           p_user_id: string
+        }
+        Returns: undefined
+      }
+      update_whatsapp_health: {
+        Args: {
+          p_error_rate?: number
+          p_metadata?: Json
+          p_response_time?: number
+          p_service_name: string
+          p_status?: string
         }
         Returns: undefined
       }
