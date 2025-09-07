@@ -1052,6 +1052,78 @@ export type Database = {
           },
         ]
       }
+      whatsapp_rate_limits: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          request_count: number
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          request_count?: number
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          request_count?: number
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      whatsapp_sessions: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          id: string
+          last_activity: string | null
+          qr_code: string | null
+          refresh_token: string | null
+          server_url: string | null
+          session_id: string
+          status: string
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          last_activity?: string | null
+          qr_code?: string | null
+          refresh_token?: string | null
+          server_url?: string | null
+          session_id: string
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          last_activity?: string | null
+          qr_code?: string | null
+          refresh_token?: string | null
+          server_url?: string | null
+          session_id?: string
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_sessoes: {
         Row: {
           atualizado_em: string

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSecureWhatsAppAuth } from './useSecureWhatsAppAuth';
 
 export interface WhatsAppContact {
   id: string;
@@ -39,6 +40,13 @@ const WHATSAPP_SERVER_URL = 'http://31.97.30.241:8787';
 
 export const useWhatsAppIntegration = () => {
   const { user } = useAuth();
+  const { 
+    whatsappSession, 
+    getValidToken, 
+    checkRateLimit, 
+    cleanup 
+  } = useSecureWhatsAppAuth();
+  
   const [session, setSession] = useState<WhatsAppSession>({
     id: null,
     status: 'desconectado'
@@ -70,11 +78,36 @@ export const useWhatsAppIntegration = () => {
     }
   }, []);
 
-  // Get access token for server requests
-  const getAccessToken = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token;
-  }, []);
+  // Fazer requisição segura com rate limiting e token
+  const makeSecureRequest = useCallback(async (endpoint: string, options: any = {}) => {
+    if (!user) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    // Verificar rate limiting
+    const canProceed = await checkRateLimit(endpoint);
+    if (!canProceed) {
+      throw new Error('Rate limit excedido');
+    }
+
+    // Obter token válido
+    const token = await getValidToken();
+    if (!token) {
+      throw new Error('Token inválido ou expirado');
+    }
+
+    // Configurar URL do servidor baseado na sessão
+    const serverUrl = whatsappSession?.server_url || WHATSAPP_SERVER_URL;
+    
+    return fetch(`${serverUrl}${endpoint}`, {
+      ...options,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+      }
+    });
+  }, [user, checkRateLimit, getValidToken, whatsappSession]);
 
   // Error handler with retry logic
   const handleError = useCallback((error: any, context: string) => {
@@ -114,46 +147,47 @@ export const useWhatsAppIntegration = () => {
     }
   }, [toast, retryCount]);
 
-  // Get session status with proper error handling
+  // Get session status with secure authentication
   const getSessionStatus = useCallback(async (signal?: AbortSignal) => {
-    // Don't make requests if user is not authenticated
-    if (!user) {
+    if (!user || !whatsappSession) {
       setSession({ id: null, status: 'desconectado' });
       return;
     }
 
     try {
-      console.log('🔄 Fazendo requisição para WhatsApp edge function...');
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        method: 'GET'
+      const response = await makeSecureRequest('/', { 
+        method: 'GET',
+        signal 
       });
 
-      console.log('📡 Resposta da edge function:', { data, error });
-
-      if (error) {
-        console.error('❌ Erro na edge function:', error);
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      console.log('✅ Status recebido:', data?.status);
+      const data = await response.json();
       
       setSession(prev => ({
         ...prev,
         status: data.status || 'desconectado',
-        id: data.sessionId || prev.id,
+        id: data.sessionId || whatsappSession.session_id,
         ready: data.ready || false,
         qrCode: data.qrCode || prev.qrCode
       }));
 
+      // Atualizar sessão no banco se status mudou
+      if (data.status !== whatsappSession.status) {
+        await supabase
+          .from('whatsapp_sessions')
+          .update({ 
+            status: data.status,
+            qr_code: data.qrCode,
+            last_activity: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+      }
+
       setError(null);
       setRetryCount(0);
-
-      // Telemetry
-      if (data.status === 'conectado') {
-        console.log('whatsapp_status_connected');
-      } else if (data.status === 'pareando') {
-        console.log('whatsapp_status_pairing');
-      }
 
       return data;
     } catch (error: any) {
@@ -162,7 +196,7 @@ export const useWhatsAppIntegration = () => {
       }
       throw error;
     }
-  }, [handleError, user]);
+  }, [handleError, user, whatsappSession, makeSecureRequest]);
 
   // Get QR code from server
   const getQRCode = useCallback(async (signal?: AbortSignal) => {
@@ -204,10 +238,9 @@ export const useWhatsAppIntegration = () => {
     }
   }, [user, handleError]);
 
-  // Connect WhatsApp with proper server communication
+  // Connect WhatsApp with secure authentication
   const connectWhatsApp = useCallback(async () => {
-    // Don't allow connection if user is not authenticated
-    if (!user) {
+    if (!user || !whatsappSession) {
       toast({
         title: "Erro",
         description: "Você precisa estar logado para conectar o WhatsApp",
@@ -226,19 +259,17 @@ export const useWhatsAppIntegration = () => {
     abortControllerRef.current = controller;
 
     try {
-      console.log('🚀 Tentando conectar WhatsApp...');
-      console.log('whatsapp_connect_clicked');
-      
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'connect' }
+      const response = await makeSecureRequest('/', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'connect' }),
+        signal: controller.signal
       });
 
-      console.log('📱 Resposta da conexão:', { data, error });
-
-      if (error) {
-        console.error('❌ Erro ao conectar:', error);
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+
+      const data = await response.json();
 
       if (data?.success) {
         setSession({
