@@ -1508,6 +1508,28 @@ export type Database = {
         Args: { p_day_of_week: number; p_user_id: string }
         Returns: boolean
       }
+      check_suspicious_login_attempts: {
+        Args: {
+          p_ip_address: unknown
+          p_max_attempts?: number
+          p_time_window_minutes?: number
+          p_user_id: string
+        }
+        Returns: {
+          attempts_count: number
+          blocked_until: string
+          is_blocked: boolean
+          severity: string
+        }[]
+      }
+      cleanup_expired_whatsapp_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cleaned_tokens: number
+          expired_sessions: number
+          old_logs: number
+        }[]
+      }
       cleanup_expired_whatsapp_sessions: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -1534,6 +1556,17 @@ export type Database = {
           p_client_phone: string
           p_notes?: string
           p_service_id: string
+        }
+        Returns: string
+      }
+      create_whatsapp_refresh_token: {
+        Args: {
+          p_expires_at: string
+          p_ip_address?: unknown
+          p_refresh_token: string
+          p_session_id: string
+          p_user_agent?: string
+          p_user_id: string
         }
         Returns: string
       }
@@ -1639,6 +1672,17 @@ export type Database = {
           plan_name: string
         }[]
       }
+      get_whatsapp_security_alerts: {
+        Args: { p_limit?: number; p_severity?: string; p_user_id: string }
+        Returns: {
+          acknowledged: boolean
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          severity: string
+        }[]
+      }
       get_whatsapp_stats: {
         Args: { p_user_id: string }
         Returns: {
@@ -1661,14 +1705,22 @@ export type Database = {
         Returns: undefined
       }
       log_whatsapp_login_attempt: {
-        Args: {
-          p_error_message?: string
-          p_ip_address?: unknown
-          p_session_id: string
-          p_success?: boolean
-          p_user_agent?: string
-          p_user_id: string
-        }
+        Args:
+          | {
+              p_error_message?: string
+              p_ip_address?: unknown
+              p_session_id: string
+              p_success?: boolean
+              p_user_agent?: string
+              p_user_id: string
+            }
+          | {
+              p_failure_reason?: string
+              p_ip_address: unknown
+              p_success: boolean
+              p_user_agent?: string
+              p_user_id: string
+            }
         Returns: undefined
       }
       log_whatsapp_rate_limit: {
@@ -1679,6 +1731,29 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      log_whatsapp_security_event: {
+        Args: {
+          p_details?: Json
+          p_event_type: string
+          p_ip_address?: unknown
+          p_location_data?: Json
+          p_session_id?: string
+          p_severity?: string
+          p_user_agent?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      refresh_whatsapp_token: {
+        Args: { p_refresh_token: string; p_user_id: string }
+        Returns: {
+          expires_at: string
+          is_valid: boolean
+          new_access_token: string
+          new_refresh_token: string
+          session_id: string
+        }[]
       }
       sanitize_input: {
         Args: { input_text: string }
