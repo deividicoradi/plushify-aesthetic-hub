@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { WhatsAppConnectionCard } from '@/components/whatsapp/WhatsAppConnectionCard';
 import { WhatsAppConversations } from '@/components/whatsapp/WhatsAppConversations';
 import { WhatsAppStatusBadge } from '@/components/whatsapp/WhatsAppStatusBadge';
+import WhatsAppScalabilityDashboard from '@/components/whatsapp/WhatsAppScalabilityDashboard';
 import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
 import { 
   MessageCircle, 
@@ -98,23 +99,31 @@ export default function WhatsAppDashboard() {
             </div>
 
             {/* Main Content */}
-            <Tabs defaultValue="conversations" className="space-y-6">
-              <TabsList>
-                <TabsTrigger value="conversations" className="flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4" />
-                  Conversas
-                </TabsTrigger>
-                <TabsTrigger value="settings" className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
-                  Configurações
-                </TabsTrigger>
-              </TabsList>
+          <Tabs defaultValue="conversations" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="conversations" className="flex items-center gap-2">
+                <MessageCircle className="w-4 h-4" />
+                Conversas
+              </TabsTrigger>
+              <TabsTrigger value="scalability" className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Escalabilidade
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Configurações
+              </TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="conversations">
-                <WhatsAppConversations />
-              </TabsContent>
+            <TabsContent value="conversations">
+              <WhatsAppConversations />
+            </TabsContent>
 
-              <TabsContent value="settings">
+            <TabsContent value="scalability">
+              <WhatsAppScalabilityDashboard />
+            </TabsContent>
+
+            <TabsContent value="settings">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <WhatsAppConnectionCard />
                   

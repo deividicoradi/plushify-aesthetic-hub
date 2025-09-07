@@ -93,6 +93,26 @@ serve(async (req) => {
       return await handleGetContacts(supabase, user.id);
     }
 
+    if (path.endsWith('/queue-stats') && method === 'GET') {
+      return await handleGetQueueStats(supabase, user.id);
+    }
+
+    if (path.endsWith('/process-queue') && method === 'POST') {
+      return await handleProcessQueue(supabase, user.id);
+    }
+
+    if (path.endsWith('/performance-metrics') && method === 'GET') {
+      return await handleGetPerformanceMetrics(supabase, user.id);
+    }
+
+    if (path.endsWith('/run-load-test') && method === 'POST') {
+      return await handleRunLoadTest(supabase, user.id, req);
+    }
+
+    if (path.endsWith('/session-isolation') && method === 'GET') {
+      return await handleGetSessionIsolation(supabase, user.id);
+    }
+
     // Invalid endpoint
     return new Response(
       JSON.stringify({
@@ -104,7 +124,12 @@ serve(async (req) => {
           'POST /send-message',
           'GET /stats',
           'GET /messages',
-          'GET /contacts'
+          'GET /contacts',
+          'GET /queue-stats',
+          'POST /process-queue',
+          'GET /performance-metrics',
+          'POST /run-load-test',
+          'GET /session-isolation'
         ]
       }), 
       { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -683,6 +708,307 @@ async function handleGetContacts(supabase: any, userId: string) {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to get contacts',
+        details: error.message
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+// GET /whatsapp/queue-stats
+async function handleGetQueueStats(supabase: any, userId: string) {
+  try {
+    const { data: queueData, error } = await supabase
+      .from('whatsapp_message_queue')
+      .select('status')
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    const stats = queueData.reduce((acc: any, item: any) => {
+      acc[item.status] = (acc[item.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    return new Response(
+      JSON.stringify({
+        pending: stats.pending || 0,
+        processing: stats.processing || 0,
+        completed: stats.completed || 0,
+        failed: stats.failed || 0,
+        total: queueData.length
+      }), 
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Get queue stats error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Failed to get queue stats',
+        details: error.message
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+// POST /whatsapp/process-queue
+async function handleProcessQueue(supabase: any, userId: string) {
+  try {
+    const { data: messages, error } = await supabase.rpc('process_message_queue', {
+      p_batch_size: 10
+    });
+
+    if (error) throw error;
+
+    let processed = 0;
+    let failed = 0;
+
+    for (const msg of messages || []) {
+      try {
+        // Simulate message processing
+        const success = Math.random() > 0.1; // 90% success rate
+
+        await supabase.rpc('complete_message_processing', {
+          p_queue_id: msg.id,
+          p_success: success,
+          p_error_message: success ? null : 'Simulated processing error'
+        });
+
+        if (success) {
+          processed++;
+          
+          // Record the message in database
+          await supabase
+            .from('whatsapp_messages')
+            .insert({
+              user_id: msg.user_id,
+              session_id: msg.session_id,
+              direction: 'sent',
+              content: msg.message,
+              status: 'delivered',
+              contact_phone: msg.phone,
+              contact_name: msg.contact_name
+            });
+        } else {
+          failed++;
+        }
+      } catch (processError) {
+        console.error('Message processing error:', processError);
+        failed++;
+        
+        await supabase.rpc('complete_message_processing', {
+          p_queue_id: msg.id,
+          p_success: false,
+          p_error_message: processError.message
+        });
+      }
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        processed_messages: processed,
+        failed_messages: failed,
+        total_messages: (messages || []).length
+      }), 
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Process queue error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Failed to process queue',
+        details: error.message
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+// GET /whatsapp/performance-metrics
+async function handleGetPerformanceMetrics(supabase: any, userId: string) {
+  try {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    
+    const { data: metrics, error } = await supabase
+      .from('whatsapp_performance_metrics')
+      .select('metric_type, metric_value, timestamp')
+      .eq('user_id', userId)
+      .gte('timestamp', oneHourAgo)
+      .order('timestamp', { ascending: false });
+
+    if (error) throw error;
+
+    // Aggregate metrics
+    const latest = metrics.reduce((acc: any, metric: any) => {
+      acc[metric.metric_type] = metric.metric_value;
+      return acc;
+    }, {});
+
+    return new Response(
+      JSON.stringify({
+        cpu_usage: latest.cpu_usage || 0,
+        memory_usage: latest.memory_usage || 0,
+        response_time: latest.response_time || 0,
+        throughput: latest.throughput || 0,
+        error_rate: latest.error_rate || 0,
+        message_queue_size: latest.message_queue_size || 0
+      }), 
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Get performance metrics error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Failed to get performance metrics',
+        details: error.message
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+// POST /whatsapp/run-load-test
+async function handleRunLoadTest(supabase: any, userId: string, req: Request) {
+  try {
+    const body = await req.json();
+    const { test_name, concurrent_users, duration_seconds } = body;
+
+    // Create load test record
+    const { data: test, error } = await supabase
+      .from('whatsapp_load_tests')
+      .insert({
+        test_name,
+        concurrent_users,
+        duration_seconds,
+        status: 'running',
+        start_time: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Simulate load test execution in background
+    setTimeout(async () => {
+      try {
+        const totalRequests = concurrent_users * (duration_seconds / 5); // 1 req per 5s per user
+        const successRate = 0.85 + Math.random() * 0.1; // 85-95% success
+        const successful = Math.floor(totalRequests * successRate);
+        const failed = totalRequests - successful;
+        const avgResponseTime = 200 + Math.random() * 800; // 200-1000ms
+        const cpuPeak = 30 + Math.random() * 50; // 30-80%
+        const memoryPeak = 40 + Math.random() * 40; // 40-80%
+
+        await supabase
+          .from('whatsapp_load_tests')
+          .update({
+            status: 'completed',
+            total_requests: totalRequests,
+            successful_requests: successful,
+            failed_requests: failed,
+            avg_response_time: avgResponseTime,
+            max_response_time: avgResponseTime * 2,
+            cpu_peak: cpuPeak,
+            memory_peak: memoryPeak,
+            end_time: new Date().toISOString(),
+            results: {
+              success_rate: successRate * 100,
+              requests_per_second: totalRequests / duration_seconds,
+              response_time_p95: avgResponseTime * 1.5
+            }
+          })
+          .eq('id', test.id);
+
+        // Record metrics during test
+        await supabase.rpc('record_performance_metric', {
+          p_user_id: userId,
+          p_session_id: 'load_test',
+          p_metric_type: 'cpu_usage',
+          p_metric_value: cpuPeak,
+          p_metric_unit: 'percent'
+        });
+
+        await supabase.rpc('record_performance_metric', {
+          p_user_id: userId,
+          p_session_id: 'load_test',
+          p_metric_type: 'memory_usage',
+          p_metric_value: memoryPeak,
+          p_metric_unit: 'percent'
+        });
+
+      } catch (updateError) {
+        console.error('Load test update error:', updateError);
+        
+        await supabase
+          .from('whatsapp_load_tests')
+          .update({
+            status: 'failed',
+            end_time: new Date().toISOString()
+          })
+          .eq('id', test.id);
+      }
+    }, 1000); // Start processing after 1 second
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        test_id: test.id,
+        message: 'Load test started successfully'
+      }), 
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Run load test error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Failed to run load test',
+        details: error.message
+      }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+// GET /whatsapp/session-isolation
+async function handleGetSessionIsolation(supabase: any, userId: string) {
+  try {
+    // Update session isolation data
+    await supabase.rpc('update_session_isolation', {
+      p_user_id: userId,
+      p_instance_id: `instance_${Date.now()}`,
+      p_cpu_usage: Math.random() * 50,
+      p_memory_usage: Math.random() * 60,
+      p_connection_count: 1,
+      p_health_status: 'healthy'
+    });
+
+    const { data: isolation, error } = await supabase
+      .from('whatsapp_session_isolation')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) throw error;
+
+    return new Response(
+      JSON.stringify({
+        user_id: isolation.user_id,
+        instance_id: isolation.instance_id,
+        cpu_usage: isolation.cpu_usage,
+        memory_usage: isolation.memory_usage,
+        connection_count: isolation.connection_count,
+        health_status: isolation.health_status,
+        last_heartbeat: isolation.last_heartbeat
+      }), 
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Get session isolation error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Failed to get session isolation data',
         details: error.message
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

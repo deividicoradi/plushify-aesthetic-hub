@@ -954,6 +954,66 @@ export type Database = {
           },
         ]
       }
+      whatsapp_load_tests: {
+        Row: {
+          avg_response_time: number | null
+          concurrent_users: number
+          cpu_peak: number | null
+          created_at: string | null
+          duration_seconds: number
+          end_time: string | null
+          failed_requests: number | null
+          id: string
+          max_response_time: number | null
+          memory_peak: number | null
+          results: Json | null
+          start_time: string | null
+          status: string | null
+          successful_requests: number | null
+          test_name: string
+          total_requests: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avg_response_time?: number | null
+          concurrent_users: number
+          cpu_peak?: number | null
+          created_at?: string | null
+          duration_seconds: number
+          end_time?: string | null
+          failed_requests?: number | null
+          id?: string
+          max_response_time?: number | null
+          memory_peak?: number | null
+          results?: Json | null
+          start_time?: string | null
+          status?: string | null
+          successful_requests?: number | null
+          test_name: string
+          total_requests?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avg_response_time?: number | null
+          concurrent_users?: number
+          cpu_peak?: number | null
+          created_at?: string | null
+          duration_seconds?: number
+          end_time?: string | null
+          failed_requests?: number | null
+          id?: string
+          max_response_time?: number | null
+          memory_peak?: number | null
+          results?: Json | null
+          start_time?: string | null
+          status?: string | null
+          successful_requests?: number | null
+          test_name?: string
+          total_requests?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       whatsapp_login_attempts: {
         Row: {
           attempt_time: string
@@ -1085,6 +1145,66 @@ export type Database = {
           },
         ]
       }
+      whatsapp_message_queue: {
+        Row: {
+          contact_name: string | null
+          created_at: string | null
+          error_message: string | null
+          failed_at: string | null
+          id: string
+          max_retries: number | null
+          message: string
+          metadata: Json | null
+          phone: string
+          priority: number | null
+          processed_at: string | null
+          retry_count: number | null
+          scheduled_at: string | null
+          session_id: string
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          contact_name?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          max_retries?: number | null
+          message: string
+          metadata?: Json | null
+          phone: string
+          priority?: number | null
+          processed_at?: string | null
+          retry_count?: number | null
+          scheduled_at?: string | null
+          session_id: string
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          contact_name?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          max_retries?: number | null
+          message?: string
+          metadata?: Json | null
+          phone?: string
+          priority?: number | null
+          processed_at?: string | null
+          retry_count?: number | null
+          scheduled_at?: string | null
+          session_id?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_messages: {
         Row: {
           contact_name: string | null
@@ -1123,6 +1243,42 @@ export type Database = {
           status?: string
           timestamp?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_performance_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          metric_type: string
+          metric_unit: string
+          metric_value: number
+          session_id: string
+          tags: Json | null
+          timestamp: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metric_type: string
+          metric_unit?: string
+          metric_value: number
+          session_id: string
+          tags?: Json | null
+          timestamp?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metric_type?: string
+          metric_unit?: string
+          metric_value?: number
+          session_id?: string
+          tags?: Json | null
+          timestamp?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1243,6 +1399,48 @@ export type Database = {
           session_id?: string | null
           severity?: string
           user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_session_isolation: {
+        Row: {
+          connection_count: number | null
+          cpu_usage: number | null
+          created_at: string | null
+          health_status: string | null
+          id: string
+          instance_id: string
+          last_heartbeat: string | null
+          memory_usage: number | null
+          metadata: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          connection_count?: number | null
+          cpu_usage?: number | null
+          created_at?: string | null
+          health_status?: string | null
+          id?: string
+          instance_id: string
+          last_heartbeat?: string | null
+          memory_usage?: number | null
+          metadata?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          connection_count?: number | null
+          cpu_usage?: number | null
+          created_at?: string | null
+          health_status?: string | null
+          id?: string
+          instance_id?: string
+          last_heartbeat?: string | null
+          memory_usage?: number | null
+          metadata?: Json | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1538,6 +1736,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      cleanup_old_whatsapp_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cleaned_messages: number
+          cleaned_metrics: number
+          cleaned_sessions: number
+        }[]
+      }
+      complete_message_processing: {
+        Args: {
+          p_error_message?: string
+          p_queue_id: string
+          p_success: boolean
+        }
+        Returns: undefined
+      }
       comprehensive_security_check: {
         Args: { check_user_id: string }
         Returns: {
@@ -1580,6 +1794,17 @@ export type Database = {
       }
       encrypt_token: {
         Args: { token: string }
+        Returns: string
+      }
+      enqueue_whatsapp_message: {
+        Args: {
+          p_contact_name?: string
+          p_message: string
+          p_phone: string
+          p_priority?: number
+          p_session_id: string
+          p_user_id: string
+        }
         Returns: string
       }
       get_active_session_for_user: {
@@ -1745,6 +1970,28 @@ export type Database = {
         }
         Returns: string
       }
+      process_message_queue: {
+        Args: { p_batch_size?: number }
+        Returns: {
+          contact_name: string
+          id: string
+          message: string
+          phone: string
+          session_id: string
+          user_id: string
+        }[]
+      }
+      record_performance_metric: {
+        Args: {
+          p_metric_type: string
+          p_metric_unit?: string
+          p_metric_value: number
+          p_session_id: string
+          p_tags?: Json
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       refresh_whatsapp_token: {
         Args: { p_refresh_token: string; p_user_id: string }
         Returns: {
@@ -1769,6 +2016,17 @@ export type Database = {
           phone: string
           status: string
         }[]
+      }
+      update_session_isolation: {
+        Args: {
+          p_connection_count?: number
+          p_cpu_usage?: number
+          p_health_status?: string
+          p_instance_id: string
+          p_memory_usage?: number
+          p_user_id: string
+        }
+        Returns: undefined
       }
       validate_cpf: {
         Args: { cpf_input: string }
