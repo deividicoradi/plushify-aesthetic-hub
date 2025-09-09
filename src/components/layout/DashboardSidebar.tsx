@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Logo } from '@/components/ui/Logo';
 import {
   LayoutDashboard,
   Calendar,
@@ -51,15 +52,7 @@ const DashboardSidebar = () => {
       {/* Logo */}
       <div className="flex items-center justify-start p-6 border-b border-border bg-background">
         <Link to="/dashboard" className="flex items-center">
-          <div className="flex items-center gap-3">
-            <img 
-              src="/lovable-uploads/1acf9e97-5636-4068-8dde-5082dbe8daca.png" 
-              alt="Plushify Logo" 
-              className="h-10 w-10 object-contain"
-              style={{ background: 'transparent', opacity: 1 }}
-            />
-            <span className="text-xl font-bold text-foreground">Plushify</span>
-          </div>
+          <Logo size="lg" />
         </Link>
       </div>
 
