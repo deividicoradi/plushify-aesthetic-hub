@@ -1963,17 +1963,9 @@ export type Database = {
         }
         Returns: string
       }
-      decrypt_token: {
-        Args: { encrypted_token: string }
-        Returns: string
-      }
       detect_sql_injection: {
         Args: { input_text: string }
         Returns: boolean
-      }
-      encrypt_token: {
-        Args: { token: string }
-        Returns: string
       }
       enqueue_whatsapp_message: {
         Args: {
@@ -2416,6 +2408,10 @@ export type Database = {
       }
       verify_authorization_password: {
         Args: { p_password: string }
+        Returns: boolean
+      }
+      verify_data_access_permission: {
+        Args: { p_record_id: string; p_table_name: string }
         Returns: boolean
       }
       verify_data_integrity: {

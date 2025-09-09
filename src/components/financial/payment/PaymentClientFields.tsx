@@ -16,16 +16,20 @@ const PaymentClientFields = ({ clientId, onFieldChange, disabled = false }: Paym
   const { user } = useAuth();
 
   const { data: clients } = useQuery({
-    queryKey: ['clients', user?.id],
+    queryKey: ['clients', user?.id, 'secure'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name')
-        .eq('user_id', user?.id)
-        .order('name');
+      // Use secure function to fetch client data
+      const { data, error } = await supabase.rpc('get_clients_masked', {
+        p_mask_sensitive: false // Show full data for owner
+      });
 
       if (error) throw error;
-      return data;
+      
+      // Map to expected format and include only necessary fields
+      return (data || []).map((client: any) => ({
+        id: client.id,
+        name: client.name
+      }));
     },
     enabled: !!user?.id,
   });

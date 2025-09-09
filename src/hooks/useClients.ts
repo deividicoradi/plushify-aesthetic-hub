@@ -20,14 +20,23 @@ export const useClients = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name, email, phone, status')
-        .eq('user_id', user.id)
-        .order('name');
+      // Use secure function to fetch client data with proper access control
+      const { data, error } = await supabase.rpc('get_clients_masked', {
+        p_mask_sensitive: false // Show full data for owner
+      });
 
       if (error) throw error;
-      setClients(data || []);
+      
+      // Map the secure data to the expected Client interface
+      const mappedClients: Client[] = (data || []).map((client: any) => ({
+        id: client.id,
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        status: client.status
+      }));
+      
+      setClients(mappedClients);
     } catch (error) {
       console.error('Erro ao buscar clientes:', error);
     } finally {
