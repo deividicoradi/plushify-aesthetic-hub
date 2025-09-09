@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Logo } from '@/components/ui/Logo';
 import { X } from 'lucide-react';
 import {
   LayoutDashboard,
@@ -77,11 +78,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose })
         {/* Header with close button */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <Link to="/dashboard" className="flex items-center" onClick={handleLinkClick}>
-            <img 
-              src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
-              alt="Plushify" 
-              className="h-8 w-auto"
-            />
+            <Logo size="md" />
           </Link>
           <Button
             variant="ghost"

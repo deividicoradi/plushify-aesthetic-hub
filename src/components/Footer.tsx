@@ -2,6 +2,7 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Logo } from '@/components/ui/Logo';
 import FooterNewsletterForm from './FooterNewsletterForm';
 
 const Footer = () => {
@@ -19,12 +20,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div>
             <Link to="/" className="inline-block mb-8">
-              <img 
-                src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
-                alt="Plushify - Beauty Management Platform" 
-                className="h-10 w-auto"
-                style={{ filter: 'brightness(0.9)' }}
-              />
+              <Logo size="lg" />
             </Link>
             <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed">
               Plataforma completa para gestão de salões de beleza e clínicas de estética. 
