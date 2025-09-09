@@ -322,9 +322,10 @@ const Auth = () => {
         <CardHeader className="text-center">
           <div className="flex flex-col items-center gap-3 mb-4">
             <img 
-              src="/lovable-uploads/061f1c0b-2bbf-4db6-9986-c09578c2b84e.png" 
+              src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
               alt="Plushify Logo" 
               className="h-16 w-16 object-contain"
+              style={{ background: 'transparent' }}
             />
             <span className="text-2xl font-bold text-foreground">Plushify</span>
           </div>
