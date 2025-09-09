@@ -107,9 +107,10 @@ const Navbar = () => {
           <Link to="/" className="flex items-center z-50">
             <div className="flex items-center gap-2">
               <img 
-                src="/lovable-uploads/061f1c0b-2bbf-4db6-9986-c09578c2b84e.png" 
+                src="/lovable-uploads/1acf9e97-5636-4068-8dde-5082dbe8daca.png" 
                 alt="Plushify Logo" 
                 className="h-8 w-8 object-contain"
+                style={{ background: 'transparent', opacity: 1 }}
               />
               <span className="text-xl font-bold text-foreground">Plushify</span>
             </div>
