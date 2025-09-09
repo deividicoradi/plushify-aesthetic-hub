@@ -47,8 +47,8 @@ export default defineConfig(({ mode }) => ({
         }
       },
     },
-    // Otimizações de build
-    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
+    // Otimizações de build - Targeting modern browsers only for ES6+ support
+    target: ['es2022', 'edge88', 'firefox100', 'chrome100', 'safari15'],
     cssCodeSplit: true,
     assetsInlineLimit: 4096, // 4kb inline limit
     reportCompressedSize: false // Acelerar build
