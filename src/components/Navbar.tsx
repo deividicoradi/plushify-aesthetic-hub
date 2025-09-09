@@ -1,10 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { Logo } from '@/components/ui/Logo';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -106,7 +105,15 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center z-50">
-            <Logo size="md" />
+            <div className="flex items-center gap-2">
+              <img 
+                src="/lovable-uploads/1acf9e97-5636-4068-8dde-5082dbe8daca.png" 
+                alt="Plushify Logo" 
+                className="h-8 w-8 object-contain"
+                style={{ background: 'transparent', opacity: 1 }}
+              />
+              <span className="text-xl font-bold text-foreground">Plushify</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
