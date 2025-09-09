@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Logo } from '@/components/ui/Logo';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from "@/components/ui/button";
@@ -320,15 +321,7 @@ const Auth = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-md">
         <CardHeader className="text-center">
-          <div className="flex flex-col items-center gap-3 mb-4">
-            <img 
-              src="/lovable-uploads/1acf9e97-5636-4068-8dde-5082dbe8daca.png" 
-              alt="Plushify Logo" 
-              className="h-16 w-16 object-contain"
-              style={{ background: 'transparent', opacity: 1 }}
-            />
-            <span className="text-2xl font-bold text-foreground">Plushify</span>
-          </div>
+          <Logo size="xl" />
           <CardTitle>Bem-vindo ao Plushify</CardTitle>
           <CardDescription>
             Gerencie seu negócio de beleza com facilidade
