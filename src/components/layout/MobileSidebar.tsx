@@ -78,7 +78,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose })
         <div className="flex items-center justify-between p-4 border-b border-border">
           <Link to="/dashboard" className="flex items-center" onClick={handleLinkClick}>
             <img 
-              src="/logo-modern.svg" 
+              src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
               alt="Plushify" 
               className="h-8 w-auto"
             />
