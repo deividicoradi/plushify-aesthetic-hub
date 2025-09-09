@@ -1,5 +1,4 @@
 import React from 'react';
-import { Logo } from '@/components/ui/Logo';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Calendar, Users, CreditCard, BarChart3, Package, Award, FileText, Shield } from 'lucide-react';
@@ -57,7 +56,11 @@ const Product = () => {
       <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex justify-center mb-8">
-            <Logo size="xl" />
+            <img 
+              src="/logo-modern.svg" 
+              alt="Plushify - Beauty Management Platform" 
+              className="h-16 w-auto"
+            />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
             Conheça o <span className="text-primary">Plushify</span>
