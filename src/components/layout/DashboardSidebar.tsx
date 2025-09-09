@@ -53,10 +53,9 @@ const DashboardSidebar = () => {
         <Link to="/dashboard" className="flex items-center">
           <div className="flex items-center gap-3">
             <img 
-              src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
+              src="/lovable-uploads/061f1c0b-2bbf-4db6-9986-c09578c2b84e.png" 
               alt="Plushify Logo" 
               className="h-10 w-10 object-contain"
-              style={{ background: 'transparent' }}
             />
             <span className="text-xl font-bold text-foreground">Plushify</span>
           </div>
