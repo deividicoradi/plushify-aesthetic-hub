@@ -77,11 +77,15 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose })
         {/* Header with close button */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <Link to="/dashboard" className="flex items-center" onClick={handleLinkClick}>
-            <img 
-              src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
-              alt="Plushify" 
-              className="h-8 w-auto"
-            />
+            <div className="flex items-center gap-2">
+              <img 
+                src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
+                alt="Plushify Logo" 
+                className="h-8 w-8 object-contain"
+                style={{ background: 'transparent' }}
+              />
+              <span className="text-lg font-bold text-foreground">Plushify</span>
+            </div>
           </Link>
           <Button
             variant="ghost"
