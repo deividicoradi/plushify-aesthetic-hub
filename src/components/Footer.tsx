@@ -19,15 +19,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div>
             <Link to="/" className="inline-block mb-8">
-              <div className="flex items-center gap-3">
-                <img 
-                  src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
-                  alt="Plushify Logo" 
-                  className="h-10 w-10 object-contain"
-                  style={{ background: 'transparent' }}
-                />
-                <span className="text-2xl font-bold text-foreground">Plushify</span>
-              </div>
+              <img 
+                src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
+                alt="Plushify - Beauty Management Platform" 
+                className="h-10 w-auto"
+                style={{ filter: 'brightness(0.9)' }}
+              />
             </Link>
             <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed">
               Plataforma completa para gestão de salões de beleza e clínicas de estética. 

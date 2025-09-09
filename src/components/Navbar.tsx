@@ -105,15 +105,11 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center z-50">
-            <div className="flex items-center gap-2">
-              <img 
-                src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
-                alt="Plushify Logo" 
-                className="h-8 w-8 object-contain"
-                style={{ background: 'transparent' }}
-              />
-              <span className="text-xl font-bold text-foreground">Plushify</span>
-            </div>
+            <img 
+              src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
+              alt="Plushify - Beauty Management Platform" 
+              className="h-8 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}
