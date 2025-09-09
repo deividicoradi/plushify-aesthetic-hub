@@ -2138,6 +2138,19 @@ export type Database = {
           plan_name: string
         }[]
       }
+      get_whatsapp_messages_secure: {
+        Args: { p_limit?: number; p_offset?: number; p_session_id?: string }
+        Returns: {
+          contact_name: string
+          contact_phone: string
+          content: string
+          direction: string
+          id: string
+          message_timestamp: string
+          session_id: string
+          status: string
+        }[]
+      }
       get_whatsapp_metrics_aggregated: {
         Args: {
           p_end_time?: string
