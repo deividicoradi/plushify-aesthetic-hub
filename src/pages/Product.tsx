@@ -56,11 +56,15 @@ const Product = () => {
       <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex justify-center mb-8">
-            <img 
-              src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
-              alt="Plushify - Beauty Management Platform" 
-              className="h-16 w-auto"
-            />
+            <div className="flex flex-col items-center gap-4">
+              <img 
+                src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
+                alt="Plushify Logo" 
+                className="h-16 w-16 object-contain"
+                style={{ background: 'transparent' }}
+              />
+              <span className="text-3xl font-bold text-foreground">Plushify</span>
+            </div>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
             Conheça o <span className="text-primary">Plushify</span>

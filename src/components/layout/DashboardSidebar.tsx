@@ -51,11 +51,15 @@ const DashboardSidebar = () => {
       {/* Logo */}
       <div className="flex items-center justify-start p-6 border-b border-border bg-background">
         <Link to="/dashboard" className="flex items-center">
-          <img 
-            src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
-            alt="Plushify - Beauty Management Platform" 
-            className="h-10 w-auto"
-          />
+          <div className="flex items-center gap-3">
+            <img 
+              src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
+              alt="Plushify Logo" 
+              className="h-10 w-10 object-contain"
+              style={{ background: 'transparent' }}
+            />
+            <span className="text-xl font-bold text-foreground">Plushify</span>
+          </div>
         </Link>
       </div>
 
