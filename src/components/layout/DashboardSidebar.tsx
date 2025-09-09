@@ -52,7 +52,7 @@ const DashboardSidebar = () => {
       <div className="flex items-center justify-start p-6 border-b border-border bg-background">
         <Link to="/dashboard" className="flex items-center">
           <img 
-            src="/logo-modern.svg" 
+            src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
             alt="Plushify - Beauty Management Platform" 
             className="h-10 w-auto"
           />

@@ -106,7 +106,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center z-50">
             <img 
-              src="/logo-modern.svg" 
+              src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" 
               alt="Plushify - Beauty Management Platform" 
               className="h-8 w-auto"
             />

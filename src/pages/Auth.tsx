@@ -320,7 +320,7 @@ const Auth = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-md">
         <CardHeader className="text-center">
-          <img src="/logo-modern.svg" alt="Plushify" className="h-16 mx-auto mb-4" />
+          <img src="/lovable-uploads/3e8b9f0f-a4f5-41e8-9bc1-009ded5c26ba.png" alt="Plushify" className="h-16 mx-auto mb-4" />
           <CardTitle>Bem-vindo ao Plushify</CardTitle>
           <CardDescription>
             Gerencie seu negócio de beleza com facilidade
