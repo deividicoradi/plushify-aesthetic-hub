@@ -2,9 +2,9 @@
 import React, { lazy } from 'react';
 import { LazyLoadWrapper } from '@/components/LazyLoadWrapper';
 
-// Lazy load do dashboard otimizado para melhor performance
+// Lazy load with preload strategy for better performance
 const OptimizedModernDashboard = lazy(() => 
-  import('@/components/dashboard/OptimizedModernDashboard').then(module => ({
+  import(/* webpackChunkName: "dashboard" */ '@/components/dashboard/OptimizedModernDashboard').then(module => ({
     default: module.OptimizedModernDashboard
   }))
 );

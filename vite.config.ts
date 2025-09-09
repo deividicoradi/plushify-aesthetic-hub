@@ -18,15 +18,22 @@ export default defineConfig(({ mode }) => ({
     sourcemap: mode === 'production' ? 'hidden' : true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Separar Sentry em chunk próprio para otimização
-          sentry: ['@sentry/react'],
-          // Separar bibliotecas em chunks para cache eficiente
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
-          charts: ['recharts'],
-          supabase: ['@supabase/supabase-js'],
-          utils: ['date-fns', 'clsx', 'tailwind-merge']
+        manualChunks: (id) => {
+          // Optimize chunk splitting for better loading performance
+          if (id.includes('node_modules')) {
+            if (id.includes('@sentry')) return 'sentry';
+            if (id.includes('react') && !id.includes('react-router')) return 'vendor';
+            if (id.includes('react-router')) return 'router';
+            if (id.includes('recharts')) return 'charts';
+            if (id.includes('@supabase')) return 'supabase';
+            if (id.includes('@radix-ui')) return 'ui';
+            if (id.includes('date-fns') || id.includes('clsx') || id.includes('tailwind-merge')) return 'utils';
+            if (id.includes('@tanstack/react-query')) return 'query';
+            return 'vendor-misc';
+          }
+          // Separate dashboard and financial components
+          if (id.includes('/dashboard/') || id.includes('/financial/')) return 'dashboard';
+          if (id.includes('/auth/')) return 'auth';
         },
         // Configurar nomes de arquivo para cache busting
         entryFileNames: 'assets/[name]-[hash].js',
