@@ -205,13 +205,25 @@ export const useWhatsAppIntegration = () => {
 
     try {
       console.log('Requesting QR Code from server');
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'get-qr' }
-      });
-
-      if (error) {
-        console.error('QR code request error:', error);
-        throw new Error(error.message);
+      let data: any = null;
+      // Try Edge Function first, then gracefully fall back to direct server
+      try {
+        const res = await supabase.functions.invoke('whatsapp-manager', {
+          body: { action: 'get-qr' }
+        });
+        if (res.error) throw res.error;
+        data = res.data;
+      } catch (efErr: any) {
+        console.warn('Edge Function unavailable, falling back to direct server request:', efErr?.message);
+        const response = await makeSecureRequest('/', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'get-qr' }),
+          signal
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        data = await response.json();
       }
 
       if (signal?.aborted) return null;
@@ -236,7 +248,7 @@ export const useWhatsAppIntegration = () => {
       }
       return null;
     }
-  }, [user, handleError]);
+  }, [user, handleError, makeSecureRequest]);
 
   // Connect WhatsApp with secure authentication
   const connectWhatsApp = useCallback(async () => {
@@ -344,11 +356,21 @@ export const useWhatsAppIntegration = () => {
       const { error } = await supabase.functions.invoke('whatsapp-manager', {
         body: { action: 'disconnect' }
       });
-
-      if (error) {
-        console.warn('Disconnect error (non-critical):', error.message);
+      if (error) throw error;
+    } catch (efErr: any) {
+      console.warn('Edge Function disconnect failed, using direct server request:', efErr?.message);
+      try {
+        const response = await makeSecureRequest('/', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'disconnect' })
+        });
+        if (!response.ok) {
+          console.warn('Direct disconnect returned non-OK:', response.status, response.statusText);
+        }
+      } catch (directErr) {
+        console.warn('Direct disconnect failed:', directErr);
       }
-
+    } finally {
       setSession({
         id: null,
         status: 'desconectado',
@@ -359,18 +381,10 @@ export const useWhatsAppIntegration = () => {
         title: "WhatsApp Desconectado",
         description: "Sessão encerrada com sucesso"
       });
-    } catch (error: any) {
-      console.warn('Disconnect failed (non-critical):', error);
-      // Force local disconnect even if server call fails
-      setSession({
-        id: null,
-        status: 'desconectado',
-        qrCode: undefined
-      });
-    } finally {
+
       setLoading(false);
     }
-  }, [toast, clearIntervals, user]);
+  }, [toast, clearIntervals, user, makeSecureRequest]);
 
   // Load messages with pagination support
   const loadMessages = useCallback(async (contactId?: string, limit = 50) => {
@@ -394,7 +408,7 @@ export const useWhatsAppIntegration = () => {
     } catch (error: any) {
       handleError(error, 'load messages');
     }
-  }, [handleError, user]);
+  }, [handleError, user, makeSecureRequest]);
 
   // Load contacts
   const loadContacts = useCallback(async () => {
@@ -413,7 +427,7 @@ export const useWhatsAppIntegration = () => {
     } catch (error: any) {
       handleError(error, 'load contacts');
     }
-  }, [handleError, user]);
+  }, [handleError, user, makeSecureRequest]);
 
   // Send message with validation
   const sendMessage = useCallback(async (phone: string, message: string) => {
@@ -466,7 +480,7 @@ export const useWhatsAppIntegration = () => {
       handleError(error, 'send message');
       throw error;
     }
-  }, [toast, handleError, user, loadMessages, loadContacts]);
+  }, [toast, handleError, user, loadMessages, loadContacts, makeSecureRequest]);
 
   // Retry failed operations
   const retry = useCallback(() => {
