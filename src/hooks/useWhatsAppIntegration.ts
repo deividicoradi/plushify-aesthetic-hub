@@ -393,18 +393,30 @@ export const useWhatsAppIntegration = () => {
     try {
       const path = contactId ? `messages?contactId=${contactId}&limit=${limit}` : `messages?limit=${limit}`;
       
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        method: 'GET',
-        headers: {
-          'X-Request-Path': path
+      // Try Edge Function first
+      try {
+        const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+          method: 'GET',
+          headers: {
+            'X-Request-Path': path
+          }
+        });
+
+        if (error) throw new Error(error.message);
+        setMessages(data.messages || []);
+        return;
+      } catch (efErr: any) {
+        console.warn('Edge Function loadMessages failed, falling back to direct server:', efErr?.message);
+        // Fallback: call the isolated server directly
+        const response = await makeSecureRequest(`/${path.startsWith('/') ? path.slice(1) : path}`, {
+          method: 'GET'
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-      });
-
-      if (error) {
-        throw new Error(error.message);
+        const data = await response.json();
+        setMessages(data.messages || []);
       }
-
-      setMessages(data.messages || []);
     } catch (error: any) {
       handleError(error, 'load messages');
     }
@@ -415,15 +427,28 @@ export const useWhatsAppIntegration = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
-        body: { action: 'get-contacts' }
-      });
+      // Try Edge Function first
+      try {
+        const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
+          body: { action: 'get-contacts' }
+        });
 
-      if (error) {
-        throw new Error(error.message);
+        if (error) throw new Error(error.message);
+        setContacts(data.contacts || []);
+        return;
+      } catch (efErr: any) {
+        console.warn('Edge Function loadContacts failed, falling back to direct server:', efErr?.message);
+        // Fallback to direct server request
+        const response = await makeSecureRequest('/', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'get-contacts' })
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setContacts(data.contacts || []);
       }
-
-      setContacts(data.contacts || []);
     } catch (error: any) {
       handleError(error, 'load contacts');
     }
