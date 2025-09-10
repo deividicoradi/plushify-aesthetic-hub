@@ -1,8 +1,33 @@
-
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+
+// Expose React globally as a safe fallback for any vendor chunks expecting window.React
+;(window as any).React = (window as any).React || React;
+
+// Force-refresh stale PWA caches once to avoid old vendor bundles causing runtime errors
+const ensureFreshAssets = async () => {
+  try {
+    const FLAG = 'plushify-cache-busted-2025-09-10';
+    if (!localStorage.getItem(FLAG)) {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.update().catch(() => {})));
+      }
+      localStorage.setItem(FLAG, 'true');
+      location.reload();
+    }
+  } catch (e) {
+    console.warn('ensureFreshAssets failed:', e);
+  }
+};
+
+ensureFreshAssets();
 
 // Initialize services safely after app loads
 const initializeServices = async () => {
