@@ -19,10 +19,11 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Optimize chunk splitting for better loading performance
+          // Keep React core together to prevent createContext issues
           if (id.includes('node_modules')) {
             if (id.includes('@sentry')) return 'sentry';
-            if (id.includes('react') && !id.includes('react-router')) return 'vendor';
+            // Keep all React-related packages together in one chunk
+            if (id.includes('react') || id.includes('react-dom')) return 'react-vendor';
             if (id.includes('react-router')) return 'router';
             if (id.includes('recharts')) return 'charts';
             if (id.includes('@supabase')) return 'supabase';
