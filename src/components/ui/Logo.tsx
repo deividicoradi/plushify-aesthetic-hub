@@ -36,19 +36,21 @@ export const Logo: React.FC<LogoProps> = ({
   return (
     <div className={cn("flex items-center gap-3", className)}>
       {/* Ícone Rosa com Transparência */}
-      <img 
-        src="/lovable-uploads/64261687-063a-450e-8c74-f232bf9d2a4b.png"
-        alt="Plushify icon"
-        className={cn(
-          config.icon, 
-          "select-none object-contain rounded-lg",
-          "dark:bg-black dark:p-1"
-        )}
-        style={{ 
-          background: 'transparent',
-          filter: 'brightness(1) contrast(1)'
-        }}
-      />
+      <div className={cn(
+        config.icon,
+        "flex items-center justify-center rounded-lg overflow-hidden",
+        "dark:bg-background dark:p-1"
+      )}>
+        <img 
+          src="/lovable-uploads/64261687-063a-450e-8c74-f232bf9d2a4b.png"
+          alt="Plushify icon"
+          className="w-full h-full select-none object-contain"
+          style={{ 
+            background: 'transparent',
+            filter: 'brightness(1) contrast(1)'
+          }}
+        />
+      </div>
       
       {/* Texto da Marca */}
       {showText && (
