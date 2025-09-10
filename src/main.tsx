@@ -10,7 +10,7 @@ import './index.css'
 // Force-refresh stale PWA caches once to avoid old vendor bundles causing runtime errors
 const ensureFreshAssets = async () => {
   try {
-    const FLAG = 'plushify-cache-busted-2025-09-10-v3-hooks-fix';
+    const FLAG = 'plushify-cache-busted-2025-09-10-v4-security-fix';
     if (!localStorage.getItem(FLAG)) {
       if ('caches' in window) {
         const keys = await caches.keys();

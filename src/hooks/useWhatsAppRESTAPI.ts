@@ -380,13 +380,13 @@ export const useWhatsAppRESTAPI = () => {
       }, 2000);
     };
 
-    // Subscribe to session changes
+    // Subscribe to session changes - USE RPC FOR SECURITY
     const sessionChannel = supabase
       .channel(`whatsapp_session_${user.id}`)
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
           schema: 'public',
           table: 'whatsapp_sessions',
           filter: `user_id=eq.${user.id}`

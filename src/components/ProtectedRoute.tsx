@@ -99,12 +99,6 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       email: user.email,
       route: location.pathname
     });
-  } else {
-    console.log('SECURITY: Route access granted', {
-      userId: user.id,
-      plan: currentPlan,
-      route: location.pathname
-    });
   }
 
   return <>{children}</>;

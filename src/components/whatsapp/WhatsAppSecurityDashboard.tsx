@@ -41,12 +41,9 @@ export const WhatsAppSecurityDashboard = () => {
         .order('created_at', { ascending: false })
         .limit(10);
 
-      // Carregar informações da sessão atual
+      // Carregar informações da sessão atual usando RPC seguro
       const { data: session } = await supabase
-        .from('whatsapp_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+        .rpc('get_active_session_for_user', { p_user_id: user.id });
 
       setSecurityLogs((logs || []).map(log => ({
         ...log,
