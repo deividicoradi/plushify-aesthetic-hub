@@ -20,14 +20,8 @@ interface SecurityProviderProps {
 }
 
 export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) => {
-  // Configurar headers de segurança
-  const { sanitizeURL, sanitizeInput, detectXSS } = useSecurityHeaders({
-    enableCSP: true,
-    enableXFrameOptions: true,
-    enableXContentTypeOptions: true,
-    enableReferrerPolicy: true,
-    enablePermissionsPolicy: true
-  });
+  // Configurar headers de segurança - headers já definidos no index.html
+  const { sanitizeURL, sanitizeInput, detectXSS } = useSecurityHeaders();
 
   // Configurar monitoramento de segurança
   const { detectCodeInjection, detectBruteForce } = useSecurityMonitor();
