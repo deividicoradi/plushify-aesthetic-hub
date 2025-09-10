@@ -35,13 +35,14 @@ export const Logo: React.FC<LogoProps> = ({
   
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      {/* Ícone Rosa */}
+      {/* Ícone Rosa com Transparência */}
       <img 
         src="/lovable-uploads/64261687-063a-450e-8c74-f232bf9d2a4b.png"
         alt="Plushify icon"
-        className={cn(config.icon, "select-none")}
+        className={cn(config.icon, "select-none object-contain")}
         style={{ 
-          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
+          background: 'transparent',
+          mixBlendMode: 'multiply'
         }}
       />
       
