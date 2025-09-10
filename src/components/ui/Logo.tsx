@@ -1,5 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import logoHorizontal from '@/assets/plushify-logo-horizontal.png';
+import logoSquare from '@/assets/plushify-logo-square.png';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -9,19 +11,19 @@ interface LogoProps {
 
 const sizeConfig = {
   sm: {
-    icon: 'h-6 w-6',
+    img: 'h-6',
     text: 'text-lg'
   },
   md: {
-    icon: 'h-8 w-8', 
+    img: 'h-8',
     text: 'text-xl'
   },
   lg: {
-    icon: 'h-10 w-10',
+    img: 'h-10',
     text: 'text-2xl'
   },
   xl: {
-    icon: 'h-16 w-16',
+    img: 'h-16',
     text: 'text-3xl'
   }
 };
@@ -32,25 +34,22 @@ export const Logo: React.FC<LogoProps> = ({
   className 
 }) => {
   const config = sizeConfig[size];
+  const imageSrc = size === 'sm' ? logoSquare : logoHorizontal;
+  const showBrandText = showText && size === 'sm';
   
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      {/* Ícone Moderno */}
-      <div className={cn(
-        "relative flex items-center justify-center rounded-full",
-        "bg-gradient-to-br from-pink-500 to-pink-600",
-        "shadow-lg shadow-pink-500/25",
-        config.icon
-      )}>
-        <div className={cn(
-          "absolute inset-[6px] rounded-full bg-white",
-          "flex items-center justify-center"
-        )}>
-        </div>
-      </div>
+      {/* Logotipo */}
+      <img
+        src={imageSrc}
+        alt="Plushify logotipo"
+        className={cn(config.img, "w-auto select-none")}
+        loading="lazy"
+        decoding="async"
+      />
       
       {/* Texto da Marca */}
-      {showText && (
+      {showBrandText && (
         <span className={cn(
           "font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent",
           "tracking-tight",
