@@ -320,12 +320,16 @@ const Auth = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-md">
-        <CardHeader className="text-center">
-          <Logo size="xl" />
-          <CardTitle>Bem-vindo ao Plushify</CardTitle>
-          <CardDescription>
-            Gerencie seu negócio de beleza com facilidade
-          </CardDescription>
+        <CardHeader className="text-center space-y-6">
+          <div className="flex justify-center">
+            <Logo size="xl" />
+          </div>
+          <div className="space-y-2">
+            <CardTitle>Bem-vindo ao Plushify</CardTitle>
+            <CardDescription>
+              Gerencie seu negócio de beleza com facilidade
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue={defaultTab} className="w-full">
