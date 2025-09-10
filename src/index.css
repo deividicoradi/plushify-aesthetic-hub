@@ -30,6 +30,16 @@
     --chart-3: 340 75% 65%;
     --chart-4: 350 70% 70%;
     --chart-5: 310 60% 50%;
+    
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 330 81% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 330 20% 96%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 330 20% 91%;
+    --sidebar-ring: 330 81% 60%;
   }
 
   .dark {
@@ -57,6 +67,16 @@
     --chart-3: 340 75% 65%;
     --chart-4: 350 70% 70%;
     --chart-5: 310 60% 50%;
+    
+    /* Sidebar colors for dark mode */
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 330 81% 60%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 330 81% 60%;
   }
 }
 
