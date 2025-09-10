@@ -42,7 +42,7 @@ export const Logo: React.FC<LogoProps> = ({
         className={cn(config.icon, "select-none object-contain")}
         style={{ 
           background: 'transparent',
-          mixBlendMode: 'multiply'
+          filter: 'brightness(1) contrast(1)'
         }}
       />
       
