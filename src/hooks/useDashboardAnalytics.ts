@@ -49,10 +49,10 @@ export const useDashboardAnalytics = () => {
     }
   }, [user, dashboardStats, reportsData, saveAnalysis]);
 
-  // Buscar análises ao montar o componente
-  useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+  // Remover fetch automático - só buscar quando explicitamente solicitado
+  // useEffect(() => {
+  //   fetchAnalytics();
+  // }, [fetchAnalytics]);
 
   return {
     analytics,
