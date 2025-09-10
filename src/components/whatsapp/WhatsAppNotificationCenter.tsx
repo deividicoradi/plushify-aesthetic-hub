@@ -41,7 +41,11 @@ export default function WhatsAppNotificationCenter() {
 
   // Carregar notificações
   const loadNotifications = async () => {
-    if (!user) return;
+    if (!user) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
 
     try {
       // Simular carregamento de notificações do banco ou localStorage
@@ -53,6 +57,8 @@ export default function WhatsAppNotificationCenter() {
       }
     } catch (error) {
       console.error('Error loading notifications:', error);
+      setNotifications([]);
+      setUnreadCount(0);
     }
   };
 
@@ -124,7 +130,12 @@ export default function WhatsAppNotificationCenter() {
 
   // Monitorar mudanças no status da sessão
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      // Limpar notificações se não houver usuário
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
 
     const channel = supabase
       .channel('whatsapp_session_notifications')
@@ -203,7 +214,9 @@ export default function WhatsAppNotificationCenter() {
 
   // Carregar notificações ao montar
   useEffect(() => {
-    loadNotifications();
+    if (user) {
+      loadNotifications();
+    }
   }, [user]);
 
   const getNotificationIcon = (type: Notification['type']) => {

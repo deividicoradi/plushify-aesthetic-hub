@@ -43,9 +43,8 @@ export const CacheOptimizerProvider: React.FC<CacheOptimizerProviderProps> = ({ 
   };
 
   useEffect(() => {
-    if (!user) return;
-
     let refreshTimeout: NodeJS.Timeout;
+    let cacheChannel: any;
     
     const debouncedInvalidate = () => {
       clearTimeout(refreshTimeout);
@@ -54,54 +53,58 @@ export const CacheOptimizerProvider: React.FC<CacheOptimizerProviderProps> = ({ 
       }, 10000); // Aguardar 10 segundos antes de invalidar cache
     };
 
-    // Listen to real-time changes and intelligently invalidate cache
-    const cacheChannel = supabase
-      .channel('cache-invalidation')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'appointments',
-          filter: `user_id=eq.${user.id}`
-        },
-        debouncedInvalidate
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'clients',
-          filter: `user_id=eq.${user.id}`
-        },
-        debouncedInvalidate
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'payments',
-          filter: `user_id=eq.${user.id}`
-        },
-        debouncedInvalidate
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'expenses',
-          filter: `user_id=eq.${user.id}`
-        },
-        debouncedInvalidate
-      )
-      .subscribe();
+    if (user) {
+      // Listen to real-time changes and intelligently invalidate cache
+      cacheChannel = supabase
+        .channel('cache-invalidation')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'appointments',
+            filter: `user_id=eq.${user.id}`
+          },
+          debouncedInvalidate
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'clients',
+            filter: `user_id=eq.${user.id}`
+          },
+          debouncedInvalidate
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'payments',
+            filter: `user_id=eq.${user.id}`
+          },
+          debouncedInvalidate
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'expenses',
+            filter: `user_id=eq.${user.id}`
+          },
+          debouncedInvalidate
+        )
+        .subscribe();
+    }
 
     return () => {
       clearTimeout(refreshTimeout);
-      supabase.removeChannel(cacheChannel);
+      if (cacheChannel) {
+        supabase.removeChannel(cacheChannel);
+      }
     };
   }, [user]);
 
