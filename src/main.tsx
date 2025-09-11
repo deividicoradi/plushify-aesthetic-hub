@@ -8,12 +8,12 @@ import './index.css'
 ;(window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ = (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ || {};
 
 // Import App AFTER React is globally available
-import App from './App.tsx'
+// App will be dynamically imported to avoid eval-order issues
 
 // Force-refresh stale PWA caches once to avoid old vendor bundles causing runtime errors
 const ensureFreshAssets = async () => {
   try {
-    const FLAG = 'plushify-cache-busted-2025-09-11-v7-performance-fix';
+    const FLAG = 'plushify-cache-busted-2025-09-11-v8-react-order-fix';
     if (!localStorage.getItem(FLAG)) {
       if ('caches' in window) {
         const keys = await caches.keys();
@@ -75,9 +75,16 @@ if (!(window as any).React) {
 }
 
 try {
-  createRoot(rootElement).render(<App />);
+  // Dynamic import of App to ensure React is initialized and break any circular dependencies
+  import('./App.tsx')
+    .then(({ default: App }) => {
+      createRoot(rootElement).render(React.createElement(App));
+    })
+    .catch((err) => {
+      console.error('Failed to load App module:', err);
+      rootElement.innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Erro ao carregar a aplicação. Recarregue a página.</div>';
+    });
 } catch (error) {
   console.error('Failed to render app:', error);
-  // Fallback rendering with error boundary
   rootElement.innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Erro ao carregar a aplicação. Recarregue a página.</div>';
 }

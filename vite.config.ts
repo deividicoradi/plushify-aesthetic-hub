@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
   
   // Configurar source maps para produção (necessário para Sentry)
   build: {
-    sourcemap: mode === 'production' ? 'hidden' : true,
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
