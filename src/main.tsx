@@ -4,13 +4,17 @@ import App from './App.tsx'
 import './index.css'
 
 // Expose React globally as a safe fallback for any vendor chunks expecting window.React
+// This ensures createContext and other React APIs are available globally
 ;(window as any).React = React;
 ;(window as any).ReactDOM = { createRoot };
+
+// Additional safety for vendor chunks that might access React internals
+;(window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ = (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ || {};
 
 // Force-refresh stale PWA caches once to avoid old vendor bundles causing runtime errors
 const ensureFreshAssets = async () => {
   try {
-    const FLAG = 'plushify-cache-busted-2025-09-10-v4-security-fix';
+    const FLAG = 'plushify-cache-busted-2025-09-11-v5-critical-fix';
     if (!localStorage.getItem(FLAG)) {
       if ('caches' in window) {
         const keys = await caches.keys();
@@ -66,4 +70,15 @@ if (!rootElement) {
   throw new Error("Root element not found");
 }
 
-createRoot(rootElement).render(<App />);
+// Ensure React is available before rendering
+if (!(window as any).React) {
+  (window as any).React = React;
+}
+
+try {
+  createRoot(rootElement).render(<App />);
+} catch (error) {
+  console.error('Failed to render app:', error);
+  // Fallback rendering with error boundary
+  rootElement.innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Erro ao carregar a aplicação. Recarregue a página.</div>';
+}
