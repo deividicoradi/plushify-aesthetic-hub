@@ -1,20 +1,19 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
 import './index.css'
 
-// Expose React globally as a safe fallback for any vendor chunks expecting window.React
-// This ensures createContext and other React APIs are available globally
+// CRITICAL: Expose React globally BEFORE importing App to prevent initialization errors
 ;(window as any).React = React;
 ;(window as any).ReactDOM = { createRoot };
-
-// Additional safety for vendor chunks that might access React internals
 ;(window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ = (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ || {};
+
+// Import App AFTER React is globally available
+import App from './App.tsx'
 
 // Force-refresh stale PWA caches once to avoid old vendor bundles causing runtime errors
 const ensureFreshAssets = async () => {
   try {
-    const FLAG = 'plushify-cache-busted-2025-09-11-v5-critical-fix';
+    const FLAG = 'plushify-cache-busted-2025-09-11-v6-react-fix';
     if (!localStorage.getItem(FLAG)) {
       if ('caches' in window) {
         const keys = await caches.keys();
