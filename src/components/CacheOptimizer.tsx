@@ -43,68 +43,9 @@ export const CacheOptimizerProvider: React.FC<CacheOptimizerProviderProps> = ({ 
   };
 
   useEffect(() => {
-    let refreshTimeout: NodeJS.Timeout;
-    let cacheChannel: any;
-    
-    const debouncedInvalidate = () => {
-      clearTimeout(refreshTimeout);
-      refreshTimeout = setTimeout(() => {
-        clearUserCache();
-      }, 10000); // Aguardar 10 segundos antes de invalidar cache
-    };
-
-    if (user) {
-      // Listen to real-time changes and intelligently invalidate cache
-      cacheChannel = supabase
-        .channel('cache-invalidation')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'appointments',
-            filter: `user_id=eq.${user.id}`
-          },
-          debouncedInvalidate
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'clients',
-            filter: `user_id=eq.${user.id}`
-          },
-          debouncedInvalidate
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'payments',
-            filter: `user_id=eq.${user.id}`
-          },
-          debouncedInvalidate
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'expenses',
-            filter: `user_id=eq.${user.id}`
-          },
-          debouncedInvalidate
-        )
-        .subscribe();
-    }
-
+    // Remover cache listeners para evitar múltiplas invalidações
     return () => {
-      clearTimeout(refreshTimeout);
-      if (cacheChannel) {
-        supabase.removeChannel(cacheChannel);
-      }
+      // Cleanup apenas, sem realtime listeners aqui
     };
   }, [user]);
 

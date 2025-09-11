@@ -13,7 +13,7 @@ import App from './App.tsx'
 // Force-refresh stale PWA caches once to avoid old vendor bundles causing runtime errors
 const ensureFreshAssets = async () => {
   try {
-    const FLAG = 'plushify-cache-busted-2025-09-11-v6-react-fix';
+    const FLAG = 'plushify-cache-busted-2025-09-11-v7-performance-fix';
     if (!localStorage.getItem(FLAG)) {
       if ('caches' in window) {
         const keys = await caches.keys();

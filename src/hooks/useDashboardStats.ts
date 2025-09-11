@@ -24,6 +24,7 @@ export const useDashboardStats = () => {
     loading: true
   });
   const { user } = useAuth();
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   const fetchDashboardStats = async () => {
     if (!user) return;
@@ -99,8 +100,9 @@ export const useDashboardStats = () => {
   };
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || isSubscribed) return;
     
+    setIsSubscribed(true);
     fetchDashboardStats();
 
     // Debounce para evitar múltiplas atualizações
@@ -110,12 +112,12 @@ export const useDashboardStats = () => {
       clearTimeout(refreshTimeout);
       refreshTimeout = setTimeout(() => {
         fetchDashboardStats();
-      }, 1000); // Aguardar 1 segundo antes de atualizar
+      }, 3000); // Aguardar 3 segundos antes de atualizar
     };
 
     // Single channel para todas as mudanças
     const dashboardChannel = supabase
-      .channel('dashboard-stats')
+      .channel(`dashboard-stats-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -151,8 +153,9 @@ export const useDashboardStats = () => {
     return () => {
       clearTimeout(refreshTimeout);
       supabase.removeChannel(dashboardChannel);
+      setIsSubscribed(false);
     };
-  }, [user]);
+  }, [user, isSubscribed]);
 
   return {
     ...stats,

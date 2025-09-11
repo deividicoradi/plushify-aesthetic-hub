@@ -13,6 +13,7 @@ interface ChartData {
 export const useInteractiveChartData = () => {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const { user } = useAuth();
 
   const fetchChartData = async () => {
@@ -97,8 +98,9 @@ export const useInteractiveChartData = () => {
   };
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || isSubscribed) return;
     
+    setIsSubscribed(true);
     fetchChartData();
 
     // Debounce para evitar atualizações muito frequentes
@@ -108,16 +110,16 @@ export const useInteractiveChartData = () => {
       clearTimeout(refreshTimeout);
       refreshTimeout = setTimeout(() => {
         fetchChartData();
-      }, 2000); // Aguardar 2 segundos
+      }, 5000); // Aguardar 5 segundos
     };
 
     // Single channel para todas as mudanças
     const chartChannel = supabase
-      .channel('interactive-chart')
+      .channel(`interactive-chart-${user.id}`)
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'appointments',
           filter: `user_id=eq.${user.id}`
@@ -127,7 +129,7 @@ export const useInteractiveChartData = () => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'clients',
           filter: `user_id=eq.${user.id}`
@@ -137,7 +139,7 @@ export const useInteractiveChartData = () => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'payments',
           filter: `user_id=eq.${user.id}`
@@ -149,8 +151,9 @@ export const useInteractiveChartData = () => {
     return () => {
       clearTimeout(refreshTimeout);
       supabase.removeChannel(chartChannel);
+      setIsSubscribed(false);
     };
-  }, [user]);
+  }, [user, isSubscribed]);
 
   return {
     data,
