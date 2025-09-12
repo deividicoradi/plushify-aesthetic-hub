@@ -14,20 +14,36 @@ export const PWAUpdatePrompt: React.FC<PWAUpdatePromptProps> = ({ onUpdate }) =>
   const { toast } = useToast();
 
   useEffect(() => {
-    // Verificar se há service worker e se há atualizações
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Uma nova versão foi instalada
-        window.location.reload();
-      });
+    if (!('serviceWorker' in navigator)) return;
 
-      navigator.serviceWorker.ready.then((registration) => {
+    let reloaded = false;
+    const onControllerChange = () => {
+      if (reloaded) return;
+      reloaded = true;
+      onUpdate?.();
+      window.location.reload();
+    };
+
+    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+
+    navigator.serviceWorker.ready.then(async (registration) => {
+      try {
+        // Se já houver um SW em "waiting", mostrar prompt imediatamente
+        if (registration.waiting && navigator.serviceWorker.controller) {
+          setUpdateAvailable(true);
+          toast({
+            title: "Atualização Disponível",
+            description: "Uma nova versão do Plushify está disponível!",
+            duration: 5000,
+          });
+        }
+
+        // Monitorar novas atualizações
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Nova versão disponível
                 setUpdateAvailable(true);
                 toast({
                   title: "Atualização Disponível",
@@ -38,9 +54,16 @@ export const PWAUpdatePrompt: React.FC<PWAUpdatePromptProps> = ({ onUpdate }) =>
             });
           }
         });
-      });
-    }
-  }, [toast]);
+
+        // Forçar verificação de atualização
+        registration.update().catch(() => {});
+      } catch {}
+    });
+
+    return () => {
+      navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+    };
+  }, [toast, onUpdate]);
 
   const handleUpdate = async () => {
     if (!('serviceWorker' in navigator)) return;

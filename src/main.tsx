@@ -13,7 +13,7 @@ import './index.css'
 // Force-refresh stale PWA caches once to avoid old vendor bundles causing runtime errors
 const ensureFreshAssets = async () => {
   try {
-    const FLAG = 'plushify-cache-busted-2025-09-11-v8-react-order-fix';
+    const FLAG = 'plushify-cache-busted-2025-09-12-v9-pwa-autoreload';
     if (!localStorage.getItem(FLAG)) {
       if ('caches' in window) {
         const keys = await caches.keys();
@@ -32,6 +32,16 @@ const ensureFreshAssets = async () => {
 };
 
 ensureFreshAssets();
+
+// Auto-reload on new Service Worker activation even before React mounts
+if ('serviceWorker' in navigator) {
+  let __pwaReloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (__pwaReloaded) return;
+    __pwaReloaded = true;
+    location.reload();
+  });
+}
 
 // Initialize services safely after app loads
 const initializeServices = async () => {
