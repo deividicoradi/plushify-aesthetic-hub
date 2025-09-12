@@ -13,17 +13,50 @@ import './index.css'
 // Force-refresh stale PWA caches once to avoid old vendor bundles causing runtime errors
 const ensureFreshAssets = async () => {
   try {
-    const FLAG = 'plushify-cache-busted-2025-09-12-v9-pwa-autoreload';
+    const FLAG = 'plushify-cache-busted-2025-09-12-v10-emergency-fix';
     if (!localStorage.getItem(FLAG)) {
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((k) => caches.delete(k)));
-      }
+      console.log('Emergency cache cleanup initiated...');
+      
+      // Desregistrar TODOS os service workers primeiro
       if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map((r) => r.update().catch(() => {})));
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        console.log(`Found ${registrations.length} service workers to unregister`);
+        await Promise.all(registrations.map(async (reg) => {
+          try {
+            await reg.unregister();
+            console.log('Service worker unregistered successfully');
+          } catch (err) {
+            console.warn('Failed to unregister service worker:', err);
+          }
+        }));
       }
+      
+      // Limpar TODOS os caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        console.log(`Found ${cacheNames.length} caches to delete`);
+        await Promise.all(cacheNames.map(async (cacheName) => {
+          try {
+            await caches.delete(cacheName);
+            console.log(`Cache ${cacheName} deleted`);
+          } catch (err) {
+            console.warn(`Failed to delete cache ${cacheName}:`, err);
+          }
+        }));
+      }
+      
+      // Limpar localStorage relacionado ao PWA
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('pwa') || key.includes('cache') || key.includes('sw'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
       localStorage.setItem(FLAG, 'true');
+      console.log('Emergency cleanup completed, reloading...');
       location.reload();
     }
   } catch (e) {

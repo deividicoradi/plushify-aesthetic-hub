@@ -168,7 +168,7 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       devOptions: {
-        enabled: true
+        enabled: false // Desabilitar PWA em desenvolvimento
       }
     })
   ].filter(Boolean),

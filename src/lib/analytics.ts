@@ -4,30 +4,37 @@ export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
 // Inicializar Google Analytics
 export const initGA = () => {
   if (!GA_MEASUREMENT_ID) {
-    // console.log('Google Analytics ID não configurado - Analytics desabilitado');
+    console.log('Google Analytics ID não configurado - Analytics desabilitado');
     return;
   }
 
-  // Carregar o script do Google Analytics
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-  document.head.appendChild(script);
+  try {
+    // Carregar o script do Google Analytics
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    script.onerror = () => {
+      console.warn('Failed to load Google Analytics script');
+    };
+    document.head.appendChild(script);
 
-  // Inicializar gtag
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function() {
-    window.dataLayer.push(arguments);
-  };
-  
-  window.gtag('js', new Date());
-  window.gtag('config', GA_MEASUREMENT_ID, {
-    // Configurações de privacidade LGPD/GDPR
-    anonymize_ip: true,
-    allow_google_signals: false,
-    allow_ad_personalization_signals: false,
-    send_page_view: false, // Vamos controlar manualmente
-  });
+    // Inicializar gtag
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function() {
+      window.dataLayer.push(arguments);
+    };
+    
+    window.gtag('js', new Date());
+    window.gtag('config', GA_MEASUREMENT_ID, {
+      // Configurações de privacidade LGPD/GDPR
+      anonymize_ip: true,
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      send_page_view: false, // Vamos controlar manualmente
+    });
+  } catch (error) {
+    console.warn('Failed to initialize Google Analytics:', error);
+  }
 };
 
 // Verificar se o usuário deu consentimento
