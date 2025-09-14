@@ -9,29 +9,45 @@ export const initGA = () => {
   }
 
   try {
-    // Carregar o script do Google Analytics
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-    script.onerror = () => {
-      console.warn('Failed to load Google Analytics script');
-    };
-    document.head.appendChild(script);
+    // Verificar se já foi inicializado
+    if (window.gtag && window.dataLayer) {
+      console.log('Google Analytics já inicializado');
+      return;
+    }
 
-    // Inicializar gtag
+    // Inicializar dataLayer primeiro
     window.dataLayer = window.dataLayer || [];
     window.gtag = function() {
       window.dataLayer.push(arguments);
     };
-    
-    window.gtag('js', new Date());
-    window.gtag('config', GA_MEASUREMENT_ID, {
-      // Configurações de privacidade LGPD/GDPR
-      anonymize_ip: true,
-      allow_google_signals: false,
-      allow_ad_personalization_signals: false,
-      send_page_view: false, // Vamos controlar manualmente
+
+    // Configurações de consentimento padrão
+    window.gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      wait_for_update: 500,
     });
+
+    // Carregar o script do Google Analytics de forma assíncrona
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    script.onload = () => {
+      // Configurar após carregamento
+      window.gtag('js', new Date());
+      window.gtag('config', GA_MEASUREMENT_ID, {
+        // Configurações de privacidade LGPD/GDPR
+        anonymize_ip: true,
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false,
+        send_page_view: false, // Controle manual
+        cookie_flags: 'secure;samesite=lax',
+      });
+    };
+    script.onerror = () => {
+      console.warn('Failed to load Google Analytics script');
+    };
+    document.head.appendChild(script);
   } catch (error) {
     console.warn('Failed to initialize Google Analytics:', error);
   }
