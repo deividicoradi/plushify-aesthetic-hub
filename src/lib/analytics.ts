@@ -10,8 +10,15 @@ export const initGA = () => {
 
   try {
     // Verificar se já foi inicializado
-    if (window.gtag && window.dataLayer) {
+    if (window.gtag && window.dataLayer && window.dataLayer.length > 0) {
       console.log('Google Analytics já inicializado');
+      return;
+    }
+
+    // Verificar se o script já existe
+    const existingScript = document.querySelector(`script[src*="${GA_MEASUREMENT_ID}"]`);
+    if (existingScript) {
+      console.log('Google Analytics script já carregado');
       return;
     }
 
