@@ -34,5 +34,35 @@ if (!rootElement) {
   throw new Error("Root element not found")
 }
 
-// Render app
-createRoot(rootElement).render(<App />)
+// Global fatal error fallback to avoid white screen
+function showFatalError(message: string) {
+  if (!rootElement) return
+  rootElement.innerHTML = `
+    <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; padding: 24px; max-width: 720px; margin: 40px auto;">
+      <h1 style="font-size: 20px; line-height: 1.4; margin: 0 0 12px;">Ocorreu um erro ao iniciar o aplicativo</h1>
+      <p style="color: #666; margin: 0 0 16px;">${message}</p>
+      <button style="padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer;" onclick="location.reload()">Recarregar</button>
+    </div>
+  `
+}
+
+// Capture uncaught errors to render a friendly message instead of a blank screen
+window.addEventListener('error', (e) => {
+  showFatalError(e.message || 'Erro inesperado.')
+})
+window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
+  const reason = (e.reason && (e.reason.message || e.reason.toString())) || 'Erro inesperado.'
+  showFatalError(reason)
+})
+
+// Render app with hard guard
+try {
+  // Expose React globally to help detect duplicate copies during development
+  ;(window as any).__REACT__ = React
+  createRoot(rootElement).render(<App />)
+} catch (err: any) {
+  if (import.meta.env.MODE === 'development') {
+    console.error('Falha ao renderizar App:', err)
+  }
+  showFatalError(err?.message || 'Falha ao inicializar o aplicativo.')
+}

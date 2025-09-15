@@ -178,8 +178,16 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    // Deduplicate React to avoid multiple copies that break contexts/hooks
+    dedupe: ['react', 'react-dom', 'react/jsx-runtime'],
   },
   
+  // Pré-empacotar deps e deduplicar React para evitar múltiplas cópias e erros de createContext
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
+    exclude: [],
+  },
+
   // Configurar variáveis de ambiente para diferentes modos
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || 'dev'),
