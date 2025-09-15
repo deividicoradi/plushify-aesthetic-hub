@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 import { PWAProvider } from "@/components/pwa/PWAProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -217,7 +217,7 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <ErrorBoundary>
+  <AppErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <TooltipProvider>
@@ -240,7 +240,7 @@ const App = () => (
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
-  </ErrorBoundary>
+  </AppErrorBoundary>
 );
 
 export default App;

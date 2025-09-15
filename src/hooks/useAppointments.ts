@@ -51,9 +51,23 @@ export const useAppointments = () => {
       setAppointments(formattedData);
     } catch (error: any) {
       console.error('Erro ao buscar agendamentos:', error);
+      
+      // Verificar tipo específico de erro para melhor feedback
+      let errorMessage = "Não foi possível carregar os agendamentos.";
+      
+      if (error.message?.includes('Failed to fetch')) {
+        errorMessage = "Erro de conexão. Verifique sua internet e tente novamente.";
+      } else if (error.message?.includes('NetworkError')) {
+        errorMessage = "Erro de rede. Verifique sua conexão.";
+      } else if (error.code === 'PGRST301') {
+        errorMessage = "Erro de autorização. Faça login novamente.";
+      } else if (error.details) {
+        errorMessage = `Erro: ${error.details}`;
+      }
+      
       toast({
-        title: "Erro",
-        description: "Não foi possível carregar os agendamentos.",
+        title: "Erro ao carregar agendamentos",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

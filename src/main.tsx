@@ -6,6 +6,24 @@ import { initSentry } from './lib/sentry'
 import { initGA } from './lib/analytics'
 import { initCleanup } from './lib/cleanup'
 import { cleanupConsoleLogsInProduction } from './utils/console-cleanup'
+import { validateEnvironment, checkProductionReadiness } from './lib/environment'
+import { logger } from './utils/debugLogger'
+import './utils/codeAudit' // Auto-executa auditoria em desenvolvimento
+
+// Validar ambiente antes de iniciar
+try {
+  checkProductionReadiness();
+} catch (error: any) {
+  console.error('Environment validation failed:', error);
+  document.body.innerHTML = `
+    <div style="padding: 20px; color: red; text-align: center;">
+      <h2>Erro de Configuração</h2>
+      <p>${error.message}</p>
+      <p>Contate o administrador do sistema.</p>
+    </div>
+  `;
+  throw error;
+}
 
 // Initialize cleanup and optimization first
 initCleanup()
@@ -57,8 +75,19 @@ window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
 
 // Render app with hard guard
 try {
+  // Log versões React para detectar duplicatas
+  logger.info('Starting React application');
+  logger.checkReactVersions();
+  logger.checkEnvironment();
+  
+  // Verificar se há múltiplas versões de React
+  if ((window as any).__REACT__) {
+    logger.warn('Multiple React instances detected - potential issue');
+  }
+  
   // Expose React globally to help detect duplicate copies during development
   ;(window as any).__REACT__ = React
+  
   createRoot(rootElement).render(<App />)
 } catch (err: any) {
   if (import.meta.env.MODE === 'development') {
