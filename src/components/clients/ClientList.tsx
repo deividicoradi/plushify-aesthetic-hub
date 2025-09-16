@@ -40,7 +40,10 @@ const ClientList: React.FC<{
   const { logDelete } = useAuditLog();
 
   const fetchClients = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     try {

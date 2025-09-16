@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
@@ -41,28 +41,11 @@ import PublicBooking from "./pages/PublicBooking";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
+import { queryClient } from "@/lib/queryClient";
 import ScrollToTop from "./components/ScrollToTop";
 import { PerformanceMonitor } from "./components/PerformanceMonitor";
 import { CacheOptimizerProvider } from "./components/CacheOptimizer";
 
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // Cache queries for 10 minutes para reduzir requisições
-      staleTime: 10 * 60 * 1000,
-      // Keep cache for 15 minutes
-      gcTime: 15 * 60 * 1000,
-      // Retry failed requests only once
-      retry: 1,
-      retryDelay: 2000,
-      // Don't refetch automatically
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-    },
-  },
-});
 
 // Security: Remove Lovable token from URL
 if (typeof window !== 'undefined' && window.location.search.includes('__lovable_token')) {
@@ -218,28 +201,28 @@ const AppContent = () => {
 
 const App = () => (
   <AppErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <TooltipProvider>
-          <SecurityProvider>
-            <AuthProvider>
+    <AuthProvider>
+      <SecurityProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <TooltipProvider>
               <CacheOptimizerProvider>
                 <PWAProvider>
                   <Toaster />
                   <Sonner />
-                   <BrowserRouter>
-                     <PerformanceMonitor />
-                     <ScrollToTop />
-                     <AppContent />
-                   </BrowserRouter>
-                   <CookieConsent />
+                  <BrowserRouter>
+                    <PerformanceMonitor />
+                    <ScrollToTop />
+                    <AppContent />
+                  </BrowserRouter>
+                  <CookieConsent />
                 </PWAProvider>
               </CacheOptimizerProvider>
-            </AuthProvider>
-          </SecurityProvider>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+            </TooltipProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </SecurityProvider>
+    </AuthProvider>
   </AppErrorBoundary>
 );
 

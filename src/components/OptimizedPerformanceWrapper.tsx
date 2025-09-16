@@ -1,22 +1,6 @@
 import React, { Suspense } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-
-// Otimizar configurações do QueryClient para melhor performance
-const optimizedQueryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutos
-      gcTime: 10 * 60 * 1000, // 10 minutos
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      retry: 1, // Reduzir tentativas
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    },
-  },
-});
 
 const OptimizedSkeleton = () => (
   <div className="space-y-4">
@@ -44,11 +28,10 @@ interface OptimizedPerformanceWrapperProps {
 export const OptimizedPerformanceWrapper: React.FC<OptimizedPerformanceWrapperProps> = ({ 
   children 
 }) => {
+  // Uses the app-level QueryClientProvider. Only provides a Suspense fallback here.
   return (
-    <QueryClientProvider client={optimizedQueryClient}>
-      <Suspense fallback={<OptimizedSkeleton />}>
-        {children}
-      </Suspense>
-    </QueryClientProvider>
+    <Suspense fallback={<OptimizedSkeleton />}>
+      {children}
+    </Suspense>
   );
 };

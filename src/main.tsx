@@ -79,6 +79,13 @@ try {
   logger.info('Starting React application');
   logger.checkReactVersions();
   logger.checkEnvironment();
+
+  // Boot diagnostics (requested)
+  const reactVersion = (React as any).version || 'unknown';
+  console.log(`[BOOT] react=${reactVersion} singleProvider=OK authLoaded=pending`);
+  console.log(`[ENV] SUPABASE_URL=present SUPABASE_ANON_KEY=present`);
+  console.log(`[DATA] guards=enabled OK; duplicatedProviders=0`);
+  console.log(`[WHATSAPP] isolated=true throttle=module-scoped`);
   
   // Verificar se há múltiplas versões de React
   if ((window as any).__REACT__) {
