@@ -1,4 +1,4 @@
-// Validação de variáveis de ambiente
+// Validação de variáveis de ambiente usando valores hardcoded
 interface EnvironmentConfig {
   supabaseUrl: string;
   supabaseAnonKey: string;
@@ -7,11 +7,15 @@ interface EnvironmentConfig {
   mode: string;
 }
 
+// Configuração do Supabase - valores fixos do projeto
+const SUPABASE_URL = "https://wmoylybbwikkqbxiqwbq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtb3lseWJid2lra3FieGlxd2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzNzc3NTcsImV4cCI6MjA2MDk1Mzc1N30.Z0n_XICRbLX1kRT6KOWvFtV6a12r0pH3kW8HYtO6Ztw";
+
 // Verificar se todas as variáveis obrigatórias estão presentes
 export const validateEnvironment = (): EnvironmentConfig => {
   const config: EnvironmentConfig = {
-    supabaseUrl: import.meta.env.VITE_SUPABASE_URL || '',
-    supabaseAnonKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '',
+    supabaseUrl: SUPABASE_URL,
+    supabaseAnonKey: SUPABASE_ANON_KEY,
     gaId: import.meta.env.VITE_GA_MEASUREMENT_ID,
     sentryDsn: import.meta.env.VITE_SENTRY_DSN,
     mode: import.meta.env.MODE || 'development'
@@ -19,11 +23,11 @@ export const validateEnvironment = (): EnvironmentConfig => {
 
   // Validar URLs obrigatórias
   if (!config.supabaseUrl) {
-    throw new Error('VITE_SUPABASE_URL is required');
+    throw new Error('Supabase URL is required');
   }
 
   if (!config.supabaseAnonKey) {
-    throw new Error('VITE_SUPABASE_PUBLISHABLE_KEY is required');
+    throw new Error('Supabase Anon Key is required');
   }
 
   // Validar formato das URLs
