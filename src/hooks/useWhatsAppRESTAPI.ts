@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { whatsappClient, WhatsAppError } from '@/integrations/whatsapp/client';
 
 export interface WhatsAppContact {
   id: string;
@@ -43,13 +44,9 @@ export interface WhatsAppStats {
   response_rate: number;
 }
 
-export interface WhatsAppError {
-  type: 'auth' | 'network' | 'server' | 'unknown';
-  message: string;
-  code?: number;
-}
+// WhatsAppError moved to client
 
-const WHATSAPP_API_URL = 'https://wmoylybbwikkqbxiqwbq.supabase.co/functions/v1/whatsapp-api';
+// Using isolated WhatsApp client
 
 export const useWhatsAppRESTAPI = () => {
   const { user } = useAuth();
@@ -79,45 +76,19 @@ export const useWhatsAppRESTAPI = () => {
     setError(null);
   }, []);
 
-  // Make authenticated request to API with rate limiting
-  const makeAPIRequest = useCallback(async (endpoint: string, options: RequestInit = {}) => {
+  // Use isolated WhatsApp client with error handling
+  const makeAPIRequest = useCallback(async (method: keyof typeof whatsappClient, ...args: any[]) => {
     if (!user) {
-      throw new Error('Usuário não autenticado');
+      throw new WhatsAppError('Usuário não autenticado', 'AUTH_REQUIRED');
     }
-
-    const supabaseSession = await supabase.auth.getSession();
-    const token = supabaseSession.data.session?.access_token;
-    
-    if (!token) {
-      throw new Error('Token de acesso não encontrado');
-    }
-
-    // Create abort controller for this request
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
 
     try {
-      const response = await fetch(`${WHATSAPP_API_URL}${endpoint}`, {
-        ...options,
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          ...options.headers,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorData}`);
+      return await (whatsappClient[method] as any)(...args);
+    } catch (error) {
+      if (error instanceof WhatsAppError) {
+        throw error;
       }
-
-      const data = await response.json();
-      return data;
-    } finally {
-      if (abortControllerRef.current === controller) {
-        abortControllerRef.current = null;
-      }
+      throw new WhatsAppError('Erro inesperado no WhatsApp', 'UNKNOWN_ERROR');
     }
   }, [user]);
 
@@ -131,9 +102,7 @@ export const useWhatsAppRESTAPI = () => {
     try {
       console.log('Connecting to WhatsApp...');
       
-      const response = await makeAPIRequest('/connect', {
-        method: 'POST'
-      });
+      const response = await makeAPIRequest('connect');
 
       if (response.success) {
         setSession({
@@ -158,10 +127,7 @@ export const useWhatsAppRESTAPI = () => {
       return false;
     } catch (error) {
       console.error('Connect error:', error);
-      const errorObj: WhatsAppError = {
-        type: 'server',
-        message: error instanceof Error ? error.message : 'Erro ao conectar'
-      };
+      const errorObj = error instanceof WhatsAppError ? error : new WhatsAppError('Erro ao conectar');
       setError(errorObj);
       
       toast({
@@ -186,9 +152,7 @@ export const useWhatsAppRESTAPI = () => {
     try {
       console.log('Disconnecting from WhatsApp...');
       
-      const response = await makeAPIRequest('/disconnect', {
-        method: 'POST'
-      });
+      const response = await makeAPIRequest('disconnect');
 
       if (response.success) {
         setSession({
@@ -213,14 +177,11 @@ export const useWhatsAppRESTAPI = () => {
       return false;
     } catch (error) {
       console.error('Disconnect error:', error);
-      const errorObj: WhatsAppError = {
-        type: 'server',
-        message: error instanceof Error ? error.message : 'Erro ao desconectar'
-      };
+      const errorObj = error instanceof WhatsAppError ? error : new WhatsAppError('Erro ao desconectar');
       setError(errorObj);
       
       toast({
-        title: "Erro de Desconexão",
+        title: "Erro de Desconexão", 
         description: errorObj.message,
         variant: "destructive",
       });
@@ -236,7 +197,7 @@ export const useWhatsAppRESTAPI = () => {
     if (!user) return;
     
     try {
-      const response = await makeAPIRequest('/status');
+      const response = await makeAPIRequest('getStatus');
       
       setSession(prevSession => ({
         ...prevSession,
@@ -264,14 +225,7 @@ export const useWhatsAppRESTAPI = () => {
     try {
       console.log('Sending message to:', phone);
       
-      const response = await makeAPIRequest('/send-message', {
-        method: 'POST',
-        body: JSON.stringify({
-          phone,
-          message,
-          contact_name: contactName
-        })
-      });
+      const response = await makeAPIRequest('sendMessage', phone, message, contactName);
 
       if (response.success) {
         toast({
@@ -291,17 +245,17 @@ export const useWhatsAppRESTAPI = () => {
       return false;
     } catch (error) {
       console.error('Send message error:', error);
-      const errorObj: WhatsAppError = {
-        type: 'server',
-        message: error instanceof Error ? error.message : 'Erro ao enviar mensagem'
-      };
+      const errorObj = error instanceof WhatsAppError ? error : new WhatsAppError('Erro ao enviar mensagem');
       setError(errorObj);
       
-      toast({
-        title: "Erro ao Enviar",
-        description: errorObj.message,
-        variant: "destructive",
-      });
+      // Only show toast if it's not a rate limit error (user should see the specific WhatsApp error)
+      if (errorObj.status !== 429) {
+        toast({
+          title: "Erro ao Enviar",
+          description: errorObj.message,
+          variant: "destructive",
+        });
+      }
       
       return false;
     } finally {
@@ -314,7 +268,7 @@ export const useWhatsAppRESTAPI = () => {
     if (!user) return;
     
     try {
-      const response = await makeAPIRequest('/stats');
+      const response = await makeAPIRequest('getStats');
       setStats(response);
     } catch (error) {
       console.error('Load stats error:', error);
@@ -326,16 +280,7 @@ export const useWhatsAppRESTAPI = () => {
     if (!user) return;
     
     try {
-      const params = new URLSearchParams({
-        limit: limit.toString(),
-        offset: offset.toString()
-      });
-      
-      if (contactPhone) {
-        params.append('contact_phone', contactPhone);
-      }
-      
-      const response = await makeAPIRequest(`/messages?${params}`);
+      const response = await makeAPIRequest('getMessages', contactPhone, limit, offset);
       setMessages(response.messages || []);
     } catch (error) {
       console.error('Load messages error:', error);
@@ -347,7 +292,7 @@ export const useWhatsAppRESTAPI = () => {
     if (!user) return;
     
     try {
-      const response = await makeAPIRequest('/contacts');
+      const response = await makeAPIRequest('getContacts');
       setContacts(response.contacts || []);
     } catch (error) {
       console.error('Load contacts error:', error);
