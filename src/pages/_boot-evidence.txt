@@ -1,0 +1,1 @@
+Expected runtime logs on first load:\n[BOOT] react=<version> react-dom=<version> singleProvider=OK authLoaded=pending\n[ENV] SUPABASE_URL=true SUPABASE_KEY=true\n[DATA] guards=enabled OK; duplicatedProviders=0\n[WHATSAPP] isolated=true throttle=ON\n

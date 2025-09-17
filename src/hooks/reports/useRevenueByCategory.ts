@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import * as paymentsApi from '@/api/payments';
 
 export interface CategoryData {
   name: string;
@@ -22,40 +22,23 @@ export const useRevenueByCategory = () => {
 
     try {
       setLoading(true);
-      
-      // Buscar pagamentos com métodos de pagamento
-      const { data: payments, error } = await supabase
-        .from('payments')
-        .select(`
-          paid_amount,
-          payment_methods (
-            name,
-            type
-          )
-        `)
-        .eq('user_id', user.id)
-        .eq('status', 'pago');
+      const payments = await paymentsApi.fetchPaidPaymentsWithMethods(user.id);
 
-      if (error) throw error;
-
-      // Agrupar por método de pagamento
       const categoryMap = new Map<string, number>();
       let totalRevenue = 0;
 
-      payments?.forEach(payment => {
-        const amount = Number(payment.paid_amount);
+      payments?.forEach((payment) => {
+        const amount = Number(payment.paid_amount) || 0;
         const categoryName = payment.payment_methods?.name || 'Outros';
-        
         totalRevenue += amount;
         categoryMap.set(categoryName, (categoryMap.get(categoryName) || 0) + amount);
       });
 
-      // Converter para array com percentuais
       const categoriesData: CategoryData[] = Array.from(categoryMap.entries())
         .map(([name, value]) => ({
           name,
           value,
-          percentage: totalRevenue > 0 ? (value / totalRevenue) * 100 : 0
+          percentage: totalRevenue > 0 ? (value / totalRevenue) * 100 : 0,
         }))
         .sort((a, b) => b.value - a.value);
 
@@ -71,9 +54,5 @@ export const useRevenueByCategory = () => {
     fetchRevenueByCategory();
   }, [user]);
 
-  return {
-    revenueByCategory,
-    loading,
-    refetch: fetchRevenueByCategory
-  };
+  return { revenueByCategory, loading, refetch: fetchRevenueByCategory };
 };

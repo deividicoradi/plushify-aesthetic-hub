@@ -83,8 +83,9 @@ try {
   // Boot diagnostics (requested)
   const reactVersion = (React as any).version || 'unknown';
   const reactDomVersion = (window as any).__REACT_DOM_VERSION__ || 'unknown';
+  const envConfig = validateEnvironment();
   console.log(`[BOOT] react=${reactVersion} react-dom=${reactDomVersion} singleProvider=OK authLoaded=pending`);
-  console.log(`[ENV] SUPABASE_URL=present SUPABASE_ANON_KEY=present`);
+  console.log(`[ENV] SUPABASE_URL=${!!envConfig.supabaseUrl} SUPABASE_KEY=${!!envConfig.supabaseAnonKey}`);
   console.log(`[DATA] guards=enabled OK; duplicatedProviders=0`);
   console.log(`[WHATSAPP] isolated=true throttle=ON`);
   

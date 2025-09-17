@@ -1,8 +1,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
+import * as paymentsApi from '@/api/payments';
+import * as clientsApi from '@/api/clients';
 
 export const usePaymentsData = () => {
   const { user } = useAuth();
@@ -10,58 +11,26 @@ export const usePaymentsData = () => {
 
   const { data: payments, isLoading } = useQuery({
     queryKey: ['payments', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('payments')
-        .select(`
-          *,
-          payment_methods (name, type)
-        `)
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => paymentsApi.fetchPayments(user!.id),
     enabled: !!user?.id,
+    staleTime: 60_000,
   });
 
   const { data: clients } = useQuery({
     queryKey: ['clients', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name')
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => clientsApi.fetchClients(user!.id),
     enabled: !!user?.id,
+    staleTime: 60_000,
   });
 
   const deletePaymentMutation = useMutation({
-    mutationFn: async (paymentId: string) => {
-      const { error } = await supabase
-        .from('payments')
-        .delete()
-        .eq('id', paymentId);
-      
-      if (error) throw error;
-    },
+    mutationFn: (paymentId: string) => paymentsApi.deletePayment(user!.id, paymentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
-      toast({
-        title: "Sucesso!",
-        description: "Pagamento excluído com sucesso.",
-      });
+      toast({ title: 'Sucesso!', description: 'Pagamento excluído com sucesso.' });
     },
     onError: (error) => {
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir pagamento",
-        variant: "destructive",
-      });
+      toast({ title: 'Erro', description: 'Erro ao excluir pagamento', variant: 'destructive' });
       console.error(error);
     },
   });
@@ -77,6 +46,6 @@ export const usePaymentsData = () => {
     clients,
     isLoading,
     deletePayment: deletePaymentMutation.mutate,
-    getClientName
+    getClientName,
   };
 };
