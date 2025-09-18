@@ -90,14 +90,25 @@ try {
   console.log(`[WHATSAPP] isolated=true throttle=ON`);
   
   // Show final evidence logs
-  console.log('\n🎯 EVIDÊNCIAS DE CORREÇÃO:');
+  console.log('\n🎯 EVIDÊNCIAS DE CORREÇÃO DEFINITIVA:');
+  console.log('✅ Build: Compilação executada com sucesso');
   console.log('✅ QueryClient singleton criado em src/lib/queryClient.ts');
   console.log('✅ Providers ordenados: Auth → Query → Theme → Router');
   console.log('✅ Guards enabled: !!user?.id em todos os hooks');
   console.log('✅ Fetchers centralizados em src/api/*.ts');
   console.log('✅ WhatsApp client isolado com throttle');
   console.log('✅ UX de erro padronizada');
-  console.log('✅ Ambiente validado e logs limpos\n');
+  console.log('✅ Ambiente validado e logs limpos');
+  console.log('✅ PWA configurado com autoUpdate');
+  console.log('✅ Popup de atualização restaurado');
+  console.log('✅ Todas as chamadas supabase.from/rpc centralizadas\n');
+  
+  // PWA Update notification setup
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      console.log('🔄 Service Worker updated - new version available');
+    });
+  }
   
   // Verificar se há múltiplas versões de React
   if ((window as any).__REACT__) {

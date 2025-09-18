@@ -58,10 +58,10 @@ export const WhatsAppSecurityDashboard = () => {
     }
   };
 
-  const cleanupExpiredSessions = async () => {
+  const handleCleanupExpiredSessions = async () => {
     try {
-      const { data } = await supabase.rpc('cleanup_expired_whatsapp_sessions');
-      if (data > 0) {
+      const data = await cleanupExpiredSessions() as number;
+      if (data && data > 0) {
         alert(`${data} sessões expiradas foram limpas`);
         loadSecurityData();
       } else {
@@ -205,7 +205,7 @@ export const WhatsAppSecurityDashboard = () => {
                 Últimas atividades de segurança registradas
               </CardDescription>
             </div>
-            <Button onClick={cleanupExpiredSessions} variant="outline" size="sm">
+            <Button onClick={handleCleanupExpiredSessions} variant="outline" size="sm">
               Limpar Expiradas
             </Button>
           </div>
