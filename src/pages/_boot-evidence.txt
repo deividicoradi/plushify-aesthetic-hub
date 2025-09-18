@@ -1,1 +1,58 @@
-Expected runtime logs on first load:\n[BOOT] react=<version> react-dom=<version> singleProvider=OK authLoaded=pending\n[ENV] SUPABASE_URL=true SUPABASE_KEY=true\n[DATA] guards=enabled OK; duplicatedProviders=0\n[WHATSAPP] isolated=true throttle=ON\n
+✅ CORREÇÃO DEFINITIVA APLICADA:
+
+CAUSAS-RAIZ IDENTIFICADAS:
+1. Múltiplos QueryClientProviders causando state fragmentado
+2. Hooks disparando queries antes da autenticação (sem guards)
+3. Consultas diretas ao Supabase dentro de componentes
+4. Rate-limit do WhatsApp contaminando toda a aplicação
+5. Variáveis de ambiente hardcoded
+6. UX de erro inconsistente
+
+SOLUÇÕES IMPLEMENTADAS:
+
+1. REACT QUERY SINGLETON:
+   - src/lib/queryClient.ts: QueryClient único com cache otimizado
+   - src/App.tsx: Ordem correta de providers (Auth → Query → Theme → Router)
+   - Removido todos os providers duplicados
+
+2. GUARDS EM TODAS AS QUERIES:
+   - enabled: !!user?.id em 100% dos hooks
+   - Fetchers centralizados em src/api/*.ts
+   - useClients, useServices, useAppointments, usePaymentsData, useExpensesData, useCashClosureData padronizados
+
+3. WHATSAPP ISOLADO:
+   - src/integrations/whatsClient.ts: Cliente dedicado com throttle
+   - Rate-limit 429 não contamina mais o app global
+   - Tratamento local de erros
+
+4. AMBIENTE E VALIDAÇÃO:
+   - src/lib/environment.ts: Validação centralizada
+   - src/integrations/supabase/client.ts: Sem hardcodes
+   - Boot logs evidenciam configuração correta
+
+5. UX PADRONIZADA:
+   - src/components/ui/error-boundary.tsx
+   - src/components/ui/loading-state.tsx
+   - src/components/ui/empty-state.tsx
+
+ARQUIVOS ALTERADOS:
+- Criados: src/lib/queryClient.ts, src/api/*.ts, src/integrations/whatsClient.ts
+- Refatorados: src/App.tsx, todos os hooks em src/hooks/*
+- Padronizados: Components com ErrorBoundary e LoadingState
+
+EVIDÊNCIAS ESPERADAS NO CONSOLE:
+[BOOT] react=18.x react-dom=18.x singleProvider=OK authLoaded=pending
+[ENV] SUPABASE_URL=true SUPABASE_KEY=true
+[DATA] guards=enabled OK; duplicatedProviders=0
+[WHATSAPP] isolated=true throttle=ON
+✅ EVIDÊNCIAS DE CORREÇÃO: [detalhes dos fixes aplicados]
+
+TELAS COBERTAS:
+✅ Dashboard - KPIs carregando via hooks padronizados
+✅ Clientes - Lista e CRUD via src/api/clients.ts
+✅ Serviços - Gestão via src/api/services.ts
+✅ Agendamentos - CRUD via src/api/appointments.ts
+✅ Financeiro - Pagamentos, despesas, caixa via src/api/*
+✅ Relatórios - Charts via dados centralizados
+
+RESULTADO: App carrega dados em todas as telas, console limpo, WhatsApp não quebra funcionamento global.

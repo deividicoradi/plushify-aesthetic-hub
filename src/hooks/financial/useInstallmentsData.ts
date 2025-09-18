@@ -1,81 +1,41 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import * as installmentsApi from '@/api/installments';
+import * as paymentsApi from '@/api/payments';
+import * as clientsApi from '@/api/clients';
 
 export const useInstallmentsData = () => {
   const { user } = useAuth();
 
   const { data: installments, isLoading, refetch } = useQuery({
     queryKey: ['installments', user?.id],
-    queryFn: async () => {
-      console.log('🔍 Buscando parcelamentos para usuário:', user?.id);
-      const { data, error } = await supabase
-        .from('installments')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('due_date', { ascending: true });
-
-      if (error) {
-        console.error('❌ Erro ao buscar parcelamentos:', error);
-        throw error;
-      }
-      
-      console.log('📋 Parcelamentos encontrados:', data?.length || 0, data);
-      return data || [];
-    },
+    queryFn: () => installmentsApi.fetchInstallments(user!.id),
     enabled: !!user?.id,
-    refetchOnMount: true,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
+    retry: 2,
   });
 
-  // Buscar dados dos pagamentos com informações dos clientes
   const { data: payments, refetch: refetchPayments } = useQuery({
     queryKey: ['payments-for-installments', user?.id],
-    queryFn: async () => {
-      console.log('🔍 Buscando pagamentos para parcelamentos');
-      const { data, error } = await supabase
-        .from('payments')
-        .select(`
-          id, 
-          description, 
-          amount, 
-          client_id,
-          status,
-          payment_methods(name)
-        `)
-        .eq('user_id', user?.id);
-
-      if (error) {
-        console.error('❌ Erro ao buscar pagamentos:', error);
-        throw error;
-      }
-      
-      console.log('💰 Pagamentos encontrados:', data?.length || 0);
-      return data || [];
-    },
+    queryFn: () => paymentsApi.fetchPayments(user!.id),
     enabled: !!user?.id,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    retry: 2,
   });
 
-  // Buscar dados dos clientes
   const { data: clients, refetch: refetchClients } = useQuery({
-    queryKey: ['clients-for-installments', user?.id],
-    queryFn: async () => {
-      console.log('🔍 Buscando clientes para parcelamentos');
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name, email, phone')
-        .eq('user_id', user?.id);
-
-      if (error) {
-        console.error('❌ Erro ao buscar clientes:', error);
-        throw error;
-      }
-      
-      console.log('👥 Clientes encontrados:', data?.length || 0);
-      return data || [];
-    },
+    queryKey: ['clients', user?.id],
+    queryFn: () => clientsApi.fetchClients(user!.id),
     enabled: !!user?.id,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    retry: 2,
   });
 
   const getPaymentData = (paymentId: string) => {
