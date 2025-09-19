@@ -34,6 +34,8 @@ const FooterNewsletterForm: React.FC = () => {
       </div>
       <div className="flex flex-col gap-2">
         <Input
+          id="footer-newsletter-name"
+          name="newsletter-name"
           type="text"
           placeholder="Seu nome"
           value={nome}
@@ -42,6 +44,8 @@ const FooterNewsletterForm: React.FC = () => {
           className="bg-background"
         />
         <Input
+          id="footer-newsletter-email"
+          name="newsletter-email"
           type="email"
           placeholder="Seu e-mail"
           value={email}

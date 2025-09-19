@@ -44,6 +44,8 @@ export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Input
+            id="create-note-title"
+            name="note-title"
             placeholder="Título da nota"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -53,6 +55,8 @@ export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
         </div>
         <div className="space-y-2">
           <Textarea
+            id="create-note-content"
+            name="note-content"
             placeholder="Conteúdo da nota..."
             value={content}
             onChange={(e) => setContent(e.target.value)}

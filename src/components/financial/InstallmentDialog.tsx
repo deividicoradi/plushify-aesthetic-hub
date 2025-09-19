@@ -151,6 +151,8 @@ const InstallmentDialog = ({ open, onOpenChange, onSuccess, installment }: Insta
             <div className="space-y-2">
               <label className="text-sm font-medium">Valor da Parcela</label>
               <input
+                id="installment-amount"
+                name="installment-amount"
                 type="number"
                 step="0.01"
                 min="0"

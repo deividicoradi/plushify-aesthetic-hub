@@ -135,6 +135,28 @@ try {
       console.warn('KeepAlive setup failed', e);
     }
   })();
+
+  // Sistema de validação completa
+  (async () => {
+    try {
+      // Aguardar carregamento completo do DOM
+      await new Promise(resolve => {
+        if (document.readyState === 'complete') {
+          resolve(true);
+        } else {
+          window.addEventListener('load', () => resolve(true));
+        }
+      });
+      
+      // Aguardar um pouco mais para componentes React renderizarem
+      setTimeout(async () => {
+        const { runFullValidation } = await import('./lib/formValidation');
+        await runFullValidation();
+      }, 2000);
+    } catch (e) {
+      console.warn('Validation setup failed', e);
+    }
+  })();
   
   // Verificar se há múltiplas versões de React
   if ((window as any).__REACT__) {

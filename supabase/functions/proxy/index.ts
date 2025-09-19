@@ -4,14 +4,14 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Dynamic CORS - echo Origin when present (required for credentials)
+// Dynamic CORS - echo Origin when present (required for credentials) 
 function buildCorsHeaders(origin?: string | null) {
-  const allowedOrigin = origin || "https://lovable.dev"; // default to lovable.dev per user request
+  const allowedOrigin = origin || "*"; // Allow all origins for keepAlive endpoint
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Credentials": origin ? "true" : "false", // Only set credentials if specific origin
     "Vary": "Origin",
     "Cache-Control": "no-store",
     "Content-Type": "application/json; charset=utf-8",

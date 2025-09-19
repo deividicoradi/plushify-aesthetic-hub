@@ -172,6 +172,8 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
             <div className="space-y-2">
               <Label>Data de Contratação</Label>
               <input
+                id="team-member-hire-date"
+                name="hire_date"
                 type="date"
                 value={watch('hire_date') || ''}
                 onChange={(e) => setValue('hire_date', e.target.value)}
@@ -182,6 +184,8 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
             <div className="space-y-2">
               <Label>Salário</Label>
               <input
+                id="team-member-salary"
+                name="salary"
                 type="number"
                 step="0.01"
                 min="0"

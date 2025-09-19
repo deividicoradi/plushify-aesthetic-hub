@@ -72,6 +72,8 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
         <CardHeader className="pb-2">
           {editing ? (
             <Input
+              id={`edit-note-title-${note.id}`}
+              name="edit-note-title"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
               className="font-bold focus:ring-2 focus:ring-plush-500"
@@ -88,6 +90,8 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
         <CardContent className="flex-grow pb-2">
           {editing ? (
             <Textarea
+              id={`edit-note-content-${note.id}`}
+              name="edit-note-content"
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               rows={5}
