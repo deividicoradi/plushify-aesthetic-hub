@@ -42,6 +42,26 @@ export async function recordPerformanceMetric(
   if (error) throw error;
 }
 
+export async function fetchWhatsAppSessionLogs(userId: string) {
+  const { data, error } = await supabase
+    .from('whatsapp_session_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(10);
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function getActiveSessionForUser(userId: string) {
+  const { data, error } = await supabase
+    .rpc('get_active_session_for_user', { p_user_id: userId });
+  
+  if (error) throw error;
+  return data;
+}
+
 export async function cleanupExpiredSessions() {
   const { data, error } = await supabase.rpc('cleanup_expired_whatsapp_sessions');
   if (error) throw error;

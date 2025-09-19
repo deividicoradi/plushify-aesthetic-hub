@@ -2,9 +2,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
 import { Shield, Database, Lock, Activity, AlertTriangle, Clock } from 'lucide-react';
+import * as whatsappApi from '@/api/whatsapp';
 
 interface SecurityAuditLog {
   id: string;
@@ -34,16 +34,10 @@ export const WhatsAppSecurityDashboard = () => {
 
     try {
       // Carregar logs de segurança
-      const { data: logs } = await supabase
-        .from('whatsapp_session_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      const logs = await whatsappApi.fetchWhatsAppSessionLogs(user.id);
 
       // Carregar informações da sessão atual usando RPC seguro
-      const { data: session } = await supabase
-        .rpc('get_active_session_for_user', { p_user_id: user.id });
+      const session = await whatsappApi.getActiveSessionForUser(user.id);
 
       setSecurityLogs((logs || []).map(log => ({
         ...log,
@@ -60,7 +54,7 @@ export const WhatsAppSecurityDashboard = () => {
 
   const handleCleanupExpiredSessions = async () => {
     try {
-      const data = await cleanupExpiredSessions() as number;
+      const data = await whatsappApi.cleanupExpiredSessions() as number;
       if (data && data > 0) {
         alert(`${data} sessões expiradas foram limpas`);
         loadSecurityData();
