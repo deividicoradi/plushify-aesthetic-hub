@@ -103,12 +103,38 @@ try {
   console.log('✅ Popup de atualização restaurado');
   console.log('✅ Todas as chamadas supabase.from/rpc centralizadas\n');
   
-  // PWA Update notification setup
+// PWA Update notification setup
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       console.log('🔄 Service Worker updated - new version available');
     });
   }
+
+  // Stable keep-alive ping to avoid cross-origin proxy errors
+  (async () => {
+    try {
+      const { pingKeepAlive } = await import('./lib/keepAlive');
+      const doPing = async () => {
+        const res = await pingKeepAlive();
+        if (res?.headersEcho) {
+          console.log('[KEEPALIVE:HEADERS]', res.headersEcho);
+        }
+      };
+      // Initial ping and then every 4 minutes
+      doPing();
+      const interval = setInterval(doPing, 4 * 60 * 1000);
+      // Keep-alive when tab becomes visible
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) doPing();
+      });
+      // Clean up on hot reloads
+      if (import.meta && (import.meta as any).hot) {
+        (import.meta as any).hot.on('vite:beforeFullReload', () => clearInterval(interval));
+      }
+    } catch (e) {
+      console.warn('KeepAlive setup failed', e);
+    }
+  })();
   
   // Verificar se há múltiplas versões de React
   if ((window as any).__REACT__) {
