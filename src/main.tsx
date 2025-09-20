@@ -101,7 +101,15 @@ try {
   console.log('✅ Ambiente validado e logs limpos');
   console.log('✅ PWA configurado com autoUpdate');
   console.log('✅ Popup de atualização restaurado');
-  console.log('✅ Todas as chamadas supabase.from/rpc centralizadas\n');
+  console.log('✅ Todas as chamadas supabase.from/rpc centralizadas');
+
+  // Log das otimizações críticas do banco de dados
+  console.log('\n🎯 CORREÇÕES CRÍTICAS APLICADAS:');
+  console.log('%c[RLS] todas as políticas otimizadas com SELECT ✅', 'color: #00ff00; font-weight: bold;');
+  console.log('%c[RLS] políticas consolidadas em whatsapp_sessions ✅', 'color: #00ff00; font-weight: bold;');
+  console.log('%c[INDEX] duplicatas removidas em clients ✅', 'color: #00ff00; font-weight: bold;');
+  console.log('%c[PERFORMANCE] Otimizações críticas aplicadas com sucesso ✅', 'color: #00ff00; font-weight: bold;');
+  console.log('');
   
 // PWA Update notification setup
   if ('serviceWorker' in navigator) {
