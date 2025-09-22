@@ -7,19 +7,32 @@ import { initGA } from './lib/analytics'
 import { initCleanup } from './lib/cleanup'
 import { cleanupConsoleLogsInProduction } from './utils/console-cleanup'
 import { validateEnvironment, checkProductionReadiness } from './lib/environment'
+import { initPerformanceMonitor } from './utils/performanceOptimizer'
+import { initEnvironmentValidation } from './utils/environmentValidator'
 import { logger } from './utils/debugLogger'
 import './utils/codeAudit' // Auto-executa auditoria em desenvolvimento
 
 // Validar ambiente antes de iniciar
 try {
+  // Inicializar validação robusta do ambiente
+  if (!initEnvironmentValidation()) {
+    throw new Error('Falha na validação das variáveis de ambiente');
+  }
+  
   checkProductionReadiness();
+  console.log('[BOOT] ✅ Configuração validada com sucesso');
 } catch (error: any) {
-  console.error('Environment validation failed:', error);
+  console.error('[BOOT] ❌ Configuração crítica inválida:', error);
   document.body.innerHTML = `
-    <div style="padding: 20px; color: red; text-align: center;">
-      <h2>Erro de Configuração</h2>
-      <p>${error.message}</p>
-      <p>Contate o administrador do sistema.</p>
+    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f8fafc; font-family: system-ui;">
+      <div style="text-align: center; max-width: 500px; padding: 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+        <h1 style="color: #dc2626; margin-bottom: 1rem;">Configuração Crítica</h1>
+        <p style="color: #4b5563; margin-bottom: 2rem;">Erro na configuração das variáveis de ambiente. Verifique o console para mais detalhes.</p>
+        <pre style="background: #fee2e2; padding: 1rem; border-radius: 8px; color: #991b1b; text-align: left; overflow: auto;">
+${error instanceof Error ? error.message : String(error)}
+        </pre>
+      </div>
     </div>
   `;
   throw error;
@@ -28,6 +41,9 @@ try {
 // Initialize cleanup and optimization first
 initCleanup()
 cleanupConsoleLogsInProduction()
+
+// Inicializar monitor de performance
+initPerformanceMonitor()
 
 // Initialize services with error handling
 try {
