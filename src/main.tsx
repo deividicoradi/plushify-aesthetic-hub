@@ -11,6 +11,7 @@ import { initPerformanceMonitor } from './utils/performanceOptimizer'
 import { initEnvironmentValidation } from './utils/environmentValidator'
 import { logger } from './utils/debugLogger'
 import './utils/codeAudit' // Auto-executa auditoria em desenvolvimento
+import './utils/attributeValidator' // Validador de atributos DOM
 
 // Validar ambiente antes de iniciar
 try {

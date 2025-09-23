@@ -60,8 +60,6 @@ export const throttle = <T extends (...args: any[]) => any>(
 
 // Otimizar setTimeout para evitar handlers demorados
 export const optimizedSetTimeout = (callback: () => void, delay: number = 0) => {
-  const start = performance.now();
-  
   return setTimeout(() => {
     const optimizedCallback = () => {
       const callbackStart = performance.now();
@@ -71,19 +69,22 @@ export const optimizedSetTimeout = (callback: () => void, delay: number = 0) => 
         console.error('[PERFORMANCE] Erro no setTimeout otimizado:', error);
       } finally {
         const duration = performance.now() - callbackStart;
-        if (duration > 16) { // > 1 frame (16ms)
+        if (duration > 50) { // Aumentado para 50ms para reduzir warnings
           console.warn(`[PERFORMANCE] Handler demorado detectado: ${duration.toFixed(2)}ms`);
         }
       }
     };
     
-    // Se o delay for longo, usar requestIdleCallback se disponível
-    if (delay > 100 && 'requestIdleCallback' in window) {
-      requestIdleCallback(optimizedCallback, { timeout: delay });
+    // Usar requestIdleCallback para delays longos
+    if (delay > 200 && 'requestIdleCallback' in window) {
+      requestIdleCallback(optimizedCallback, { timeout: delay + 100 });
+    } else if (delay === 0) {
+      // Para delays zero, usar requestAnimationFrame
+      requestAnimationFrame(optimizedCallback);
     } else {
-      batchUpdate(optimizedCallback);
+      optimizedCallback();
     }
-  }, delay);
+  }, Math.max(delay, 1)); // Mínimo de 1ms para evitar violações
 };
 
 // Monitor de performance para detectar violações
