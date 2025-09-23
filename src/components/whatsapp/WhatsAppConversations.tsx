@@ -88,8 +88,10 @@ export const WhatsAppConversations = () => {
         if (!selectedContact) {
           setNewPhone('');
           setShowNewContact(false);
-          // Reload contacts to show the new one
-          await loadContacts();
+          // Reload contacts to show the new one - with throttling
+          setTimeout(() => {
+            loadContacts();
+          }, 2000); // FIX: Throttle reload to prevent loops
         }
         messageInputRef.current?.focus();
       }

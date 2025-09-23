@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSecureWhatsAppAuth } from './useSecureWhatsAppAuth';
+import { getWhatsAppCircuitBreaker } from '@/utils/whatsappCircuitBreaker';
 
 export interface WhatsAppContact {
   id: string;
@@ -47,6 +48,9 @@ export const useWhatsAppIntegration = () => {
     cleanup 
   } = useSecureWhatsAppAuth();
   
+  // Get circuit breaker instance
+  const circuitBreaker = getWhatsAppCircuitBreaker();
+  
   const [session, setSession] = useState<WhatsAppSession>({
     id: null,
     status: 'desconectado'
@@ -61,6 +65,8 @@ export const useWhatsAppIntegration = () => {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const qrIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const initializationRef = useRef<boolean>(false);
+  const lastRequestTimeRef = useRef<number>(0);
 
   // Cleanup intervals
   const clearIntervals = useCallback(() => {
@@ -78,11 +84,53 @@ export const useWhatsAppIntegration = () => {
     }
   }, []);
 
-  // Fazer requisição segura com rate limiting e token
+  // Circuit Breaker Logic - agora usando o circuit breaker centralizado
+  const checkCircuitBreaker = useCallback(() => {
+    return circuitBreaker.canMakeRequest();
+  }, [circuitBreaker]);
+
+  const recordFailure = useCallback((error?: Error) => {
+    circuitBreaker.recordFailure(error);
+  }, [circuitBreaker]);
+
+  const recordSuccess = useCallback(() => {
+    circuitBreaker.recordSuccess();
+  }, [circuitBreaker]);
+
+  // Rate limiting adicional para evitar spam
+  const isRateLimited = useCallback(() => {
+    const now = Date.now();
+    const timeSinceLastRequest = now - lastRequestTimeRef.current;
+    
+    if (timeSinceLastRequest < 1000) { // Mínimo 1 segundo entre requisições
+      console.log('[WHATSAPP-RATE] ⚠️ Rate limited - too frequent requests');
+      return true;
+    }
+    
+    lastRequestTimeRef.current = now;
+    return false;
+  }, []);
+
+  // Fazer requisição segura com proteções múltiplas
   const makeSecureRequest = useCallback(async (endpoint: string, options: any = {}) => {
     if (!user) {
       throw new Error('Usuário não autenticado');
     }
+
+    // Check rate limiting interno
+    if (isRateLimited()) {
+      throw new Error('Rate limit interno - aguarde antes de fazer nova requisição');
+    }
+
+    // Check circuit breaker
+    if (!checkCircuitBreaker()) {
+      const cbState = circuitBreaker.getState();
+      const timeUntilRetry = cbState.nextRetryTime ? 
+        Math.ceil((cbState.nextRetryTime - Date.now()) / 1000) : 0;
+      throw new Error(`Circuit breaker ativo - tente novamente em ${timeUntilRetry} segundos`);
+    }
+
+    circuitBreaker.startRequest();
 
     // Verificar rate limiting
     const canProceed = await checkRateLimit(endpoint);
@@ -107,11 +155,12 @@ export const useWhatsAppIntegration = () => {
         ...options.headers
       }
     });
-  }, [user, checkRateLimit, getValidToken, whatsappSession]);
+  }, [user, checkRateLimit, getValidToken, whatsappSession, checkCircuitBreaker, isRateLimited, circuitBreaker]);
 
-  // Error handler with retry logic
+  // Error handler with circuit breaker
   const handleError = useCallback((error: any, context: string) => {
-    console.error(`WhatsApp ${context} error:`, error);
+    console.error(`[WHATSAPP-ERROR] ${context}:`, error);
+    recordFailure();
     
     let errorType: WhatsAppError['type'] = 'unknown';
     let message = error.message || 'Erro desconhecido';
@@ -122,39 +171,44 @@ export const useWhatsAppIntegration = () => {
     } else if (error.message?.includes('5')) {
       errorType = 'server';
       message = 'Serviço temporariamente indisponível. Tente outra vez.';
-    } else if (error.message?.includes('timeout') || error.message?.includes('network')) {
+    } else if (error.message?.includes('timeout') || error.message?.includes('network') || error.message?.includes('ERR_INSUFFICIENT_RESOURCES')) {
       errorType = 'network';
       message = 'Sem resposta do servidor. Verifique sua internet e tente de novo.';
+    } else if (error.message?.includes('Circuit breaker')) {
+      errorType = 'network';
+      message = 'Serviço temporariamente bloqueado devido a falhas consecutivas.';
     }
 
     setError({ type: errorType, message, code: error.status });
     
     if (errorType === 'auth') {
-      // Redirect to login or show re-auth modal
       toast({
         title: "Sessão Expirada",
         description: message,
         variant: "destructive"
       });
-    } else if (retryCount < 3 && errorType === 'network') {
-      setRetryCount(prev => prev + 1);
-    } else {
+    } else if (errorType !== 'network') { // Don't spam for network errors
       toast({
         title: "Erro",
         description: message,
         variant: "destructive"
       });
     }
-  }, [toast, retryCount]);
+  }, [toast, recordFailure]);
 
-  // Get session status with secure authentication - FIX: dependências estáveis
+  // Get session status with secure authentication
   const getSessionStatus = useCallback(async (signal?: AbortSignal) => {
     if (!user?.id || !whatsappSession?.session_id) {
       setSession({ id: null, status: 'desconectado' });
       return;
     }
 
+    if (!checkCircuitBreaker()) {
+      return;
+    }
+
     try {
+      console.log('[WHATSAPP-REQUEST] 📡 Getting session status...');
       const response = await makeSecureRequest('/', { 
         method: 'GET',
         signal 
@@ -186,8 +240,10 @@ export const useWhatsAppIntegration = () => {
           .eq('user_id', user.id);
       }
 
+      recordSuccess();
       setError(null);
       setRetryCount(0);
+      console.log('[WHATSAPP-REQUEST] ✅ Session status success:', data.status);
 
       return data;
     } catch (error: any) {
@@ -196,17 +252,20 @@ export const useWhatsAppIntegration = () => {
       }
       throw error;
     }
-  }, [user?.id, whatsappSession?.session_id, whatsappSession?.status, makeSecureRequest]); // FIX: dependências específicas
+  }, [user?.id, whatsappSession?.session_id, whatsappSession?.status, makeSecureRequest, checkCircuitBreaker, recordSuccess, handleError]);
 
-  // Get QR code from server - FIX: dependências estáveis
+  // Get QR code from server
   const getQRCode = useCallback(async (signal?: AbortSignal) => {
-    // Don't make requests if user is not authenticated
     if (!user?.id) return;
 
+    if (!checkCircuitBreaker()) {
+      return null;
+    }
+
     try {
-      console.log('Requesting QR Code from server');
+      console.log('[WHATSAPP-REQUEST] 📱 Requesting QR Code...');
       let data: any = null;
-      // Try Edge Function first, then gracefully fall back to direct server
+      
       try {
         const res = await supabase.functions.invoke('whatsapp-manager', {
           body: { action: 'get-qr' }
@@ -214,7 +273,7 @@ export const useWhatsAppIntegration = () => {
         if (res.error) throw res.error;
         data = res.data;
       } catch (efErr: any) {
-        console.warn('Edge Function unavailable, falling back to direct server request:', efErr?.message);
+        console.warn('[WHATSAPP-FALLBACK] Edge Function unavailable, falling back to direct server:', efErr?.message);
         const response = await makeSecureRequest('/', {
           method: 'POST',
           body: JSON.stringify({ action: 'get-qr' }),
@@ -228,29 +287,26 @@ export const useWhatsAppIntegration = () => {
 
       if (signal?.aborted) return null;
 
-      console.log('QR Code response:', data);
-
       if (data?.qrCode) {
         setSession(prev => ({
           ...prev,
           qrCode: data.qrCode
         }));
-        console.log('QR Code updated in session');
-      } else {
-        console.warn('No QR Code received from server');
+        recordSuccess();
+        console.log('[WHATSAPP-REQUEST] ✅ QR Code updated');
       }
 
       return data;
     } catch (error: any) {
       if (!signal?.aborted) {
-        console.error('QR fetch failed:', error.message);
+        console.error('[WHATSAPP-ERROR] QR fetch failed:', error.message);
         handleError(error, 'QR code fetch');
       }
       return null;
     }
-  }, [user?.id, makeSecureRequest]); // FIX: dependências específicas (remover handleError)
+  }, [user?.id, makeSecureRequest, checkCircuitBreaker, recordSuccess, handleError]);
 
-  // Connect WhatsApp with secure authentication - FIX: dependências estáveis
+  // Connect WhatsApp with secure authentication
   const connectWhatsApp = useCallback(async () => {
     if (!user?.id || !whatsappSession?.session_id) {
       toast({
@@ -263,6 +319,10 @@ export const useWhatsAppIntegration = () => {
 
     if (loading) return;
     
+    if (!checkCircuitBreaker()) {
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     clearIntervals();
@@ -271,6 +331,7 @@ export const useWhatsAppIntegration = () => {
     abortControllerRef.current = controller;
 
     try {
+      console.log('[WHATSAPP-REQUEST] 🔗 Connecting WhatsApp...');
       const response = await makeSecureRequest('/', {
         method: 'POST',
         body: JSON.stringify({ action: 'connect' }),
@@ -290,6 +351,8 @@ export const useWhatsAppIntegration = () => {
           qrCode: data.qrCode
         });
 
+        recordSuccess();
+
         if (data.status === 'conectado') {
           toast({
             title: "WhatsApp Conectado",
@@ -301,33 +364,36 @@ export const useWhatsAppIntegration = () => {
             description: "Escaneie o QR Code com seu WhatsApp para conectar"
           });
           
-          // Start polling for status updates every 4 seconds
+          // Start polling with circuit breaker check
           pollIntervalRef.current = setInterval(async () => {
-            try {
-              const status = await getSessionStatus(controller.signal);
-              if (status?.status === 'conectado') {
-                clearIntervals();
-                toast({
-                  title: "WhatsApp Conectado",
-                  description: "Conectado com sucesso"
-                });
-              }
-            } catch (error) {
-              // Ignore polling errors unless it's 3+ failures
-              if (retryCount >= 3) {
-                clearIntervals();
+            if (checkCircuitBreaker()) {
+              try {
+                const status = await getSessionStatus(controller.signal);
+                if (status?.status === 'conectado') {
+                  clearIntervals();
+                  toast({
+                    title: "WhatsApp Conectado",
+                    description: "Conectado com sucesso"
+                  });
+                }
+              } catch (error) {
+                console.warn('[WHATSAPP-POLL] Polling error (ignoring):', error);
               }
             }
           }, 4000);
 
-          // Start QR code refresh polling every 6 seconds
+          // QR refresh with circuit breaker
           qrIntervalRef.current = setInterval(() => {
-            getQRCode(controller.signal);
+            if (checkCircuitBreaker()) {
+              getQRCode(controller.signal);
+            }
           }, 6000);
 
-          // Initial QR fetch after a short delay
+          // Initial QR fetch
           setTimeout(() => {
-            getQRCode(controller.signal);
+            if (checkCircuitBreaker()) {
+              getQRCode(controller.signal);
+            }
           }, 1000);
 
           // Clear polling after 2 minutes
@@ -343,7 +409,7 @@ export const useWhatsAppIntegration = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, user?.id, whatsappSession?.session_id, toast, clearIntervals, makeSecureRequest]); // FIX: dependências específicas
+  }, [loading, user?.id, whatsappSession?.session_id, toast, clearIntervals, makeSecureRequest, checkCircuitBreaker, recordSuccess, handleError, getSessionStatus, getQRCode]);
 
   // Disconnect WhatsApp
   const disconnectWhatsApp = useCallback(async () => {
@@ -353,22 +419,26 @@ export const useWhatsAppIntegration = () => {
     clearIntervals();
     
     try {
+      console.log('[WHATSAPP-REQUEST] 🔌 Disconnecting WhatsApp...');
       const { error } = await supabase.functions.invoke('whatsapp-manager', {
         body: { action: 'disconnect' }
       });
       if (error) throw error;
+      recordSuccess();
     } catch (efErr: any) {
-      console.warn('Edge Function disconnect failed, using direct server request:', efErr?.message);
+      console.warn('[WHATSAPP-FALLBACK] Edge Function disconnect failed, using direct server:', efErr?.message);
       try {
         const response = await makeSecureRequest('/', {
           method: 'POST',
           body: JSON.stringify({ action: 'disconnect' })
         });
         if (!response.ok) {
-          console.warn('Direct disconnect returned non-OK:', response.status, response.statusText);
+          console.warn('[WHATSAPP-WARNING] Direct disconnect returned non-OK:', response.status, response.statusText);
+        } else {
+          recordSuccess();
         }
       } catch (directErr) {
-        console.warn('Direct disconnect failed:', directErr);
+        console.warn('[WHATSAPP-WARNING] Direct disconnect failed:', directErr);
       }
     } finally {
       setSession({
@@ -384,16 +454,21 @@ export const useWhatsAppIntegration = () => {
 
       setLoading(false);
     }
-  }, [toast, clearIntervals, user, makeSecureRequest]);
+  }, [toast, clearIntervals, user, makeSecureRequest, recordSuccess]);
 
-  // Load messages with pagination support
+  // Load messages with circuit breaker
   const loadMessages = useCallback(async (contactId?: string, limit = 50) => {
     if (!user) return;
     
+    if (!checkCircuitBreaker()) {
+      console.log('[WHATSAPP-CIRCUIT] ❌ Messages load blocked by circuit breaker');
+      return;
+    }
+    
     try {
+      console.log('[WHATSAPP-REQUEST] 📨 Loading messages...');
       const path = contactId ? `messages?contactId=${contactId}&limit=${limit}` : `messages?limit=${limit}`;
       
-      // Try Edge Function first
       try {
         const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
           method: 'GET',
@@ -404,10 +479,11 @@ export const useWhatsAppIntegration = () => {
 
         if (error) throw new Error(error.message);
         setMessages(data.messages || []);
+        recordSuccess();
+        console.log('[WHATSAPP-REQUEST] ✅ Messages loaded via Edge Function');
         return;
       } catch (efErr: any) {
-        console.warn('Edge Function loadMessages failed, falling back to direct server:', efErr?.message);
-        // Fallback: call the isolated server directly
+        console.warn('[WHATSAPP-FALLBACK] Edge Function loadMessages failed, falling back to direct server:', efErr?.message);
         const response = await makeSecureRequest(`/${path.startsWith('/') ? path.slice(1) : path}`, {
           method: 'GET'
         });
@@ -416,18 +492,26 @@ export const useWhatsAppIntegration = () => {
         }
         const data = await response.json();
         setMessages(data.messages || []);
+        recordSuccess();
+        console.log('[WHATSAPP-REQUEST] ✅ Messages loaded via direct server');
       }
     } catch (error: any) {
       handleError(error, 'load messages');
     }
-  }, [handleError, user, makeSecureRequest]);
+  }, [user, makeSecureRequest, checkCircuitBreaker, recordSuccess, handleError]);
 
-  // Load contacts
+  // Load contacts with circuit breaker and controlled calls
   const loadContacts = useCallback(async () => {
     if (!user) return;
     
+    if (!checkCircuitBreaker()) {
+      console.log('[WHATSAPP-CIRCUIT] ❌ Contacts load blocked by circuit breaker');
+      return;
+    }
+    
     try {
-      // Try Edge Function first
+      console.log('[WHATSAPP-REQUEST] 👥 Loading contacts...');
+      
       try {
         const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
           body: { action: 'get-contacts' }
@@ -435,10 +519,11 @@ export const useWhatsAppIntegration = () => {
 
         if (error) throw new Error(error.message);
         setContacts(data.contacts || []);
+        recordSuccess();
+        console.log('[WHATSAPP-REQUEST] ✅ Contacts loaded via Edge Function:', data.contacts?.length || 0);
         return;
       } catch (efErr: any) {
-        console.warn('Edge Function loadContacts failed, falling back to direct server:', efErr?.message);
-        // Fallback to direct server request
+        console.warn('[WHATSAPP-FALLBACK] Edge Function loadContacts failed, falling back to direct server:', efErr?.message);
         const response = await makeSecureRequest('/', {
           method: 'POST',
           body: JSON.stringify({ action: 'get-contacts' })
@@ -448,13 +533,15 @@ export const useWhatsAppIntegration = () => {
         }
         const data = await response.json();
         setContacts(data.contacts || []);
+        recordSuccess();
+        console.log('[WHATSAPP-REQUEST] ✅ Contacts loaded via direct server:', data.contacts?.length || 0);
       }
     } catch (error: any) {
       handleError(error, 'load contacts');
     }
-  }, [handleError, user, makeSecureRequest]);
+  }, [user, makeSecureRequest, checkCircuitBreaker, recordSuccess, handleError]);
 
-  // Send message with validation
+  // Send message with validation and circuit breaker
   const sendMessage = useCallback(async (phone: string, message: string) => {
     if (!user) {
       throw new Error('Você precisa estar logado para enviar mensagens');
@@ -464,6 +551,10 @@ export const useWhatsAppIntegration = () => {
       throw new Error('Telefone e mensagem são obrigatórios');
     }
 
+    if (!checkCircuitBreaker()) {
+      throw new Error('Serviço temporariamente indisponível. Tente novamente em alguns instantes.');
+    }
+
     // E164 basic validation
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length < 10) {
@@ -471,7 +562,7 @@ export const useWhatsAppIntegration = () => {
     }
 
     try {
-      console.log('whatsapp_message_sending');
+      console.log('[WHATSAPP-REQUEST] 📤 Sending message...');
       
       const { data, error } = await supabase.functions.invoke('whatsapp-manager', {
         body: {
@@ -486,53 +577,71 @@ export const useWhatsAppIntegration = () => {
       }
 
       if (data?.success) {
+        recordSuccess();
         toast({
           title: "Mensagem Enviada",
           description: "Mensagem enviada com sucesso"
         });
         
-        console.log('whatsapp_message_sent');
+        console.log('[WHATSAPP-REQUEST] ✅ Message sent successfully');
         
-        // Reload data
-        await Promise.all([loadMessages(), loadContacts()]);
+        // Reload data with rate limiting
+        setTimeout(() => {
+          Promise.all([loadMessages(), loadContacts()]);
+        }, 1000);
         
         return data.messageId;
       } else {
         throw new Error(data?.error || 'Falha ao enviar mensagem');
       }
     } catch (error: any) {
-      console.log('whatsapp_message_failed');
+      console.log('[WHATSAPP-ERROR] Message send failed:', error);
       handleError(error, 'send message');
       throw error;
     }
-  }, [toast, handleError, user, loadMessages, loadContacts, makeSecureRequest]);
+  }, [toast, user, loadMessages, loadContacts, checkCircuitBreaker, recordSuccess, handleError]);
 
-  // Retry failed operations
+  // Retry com reset do circuit breaker
   const retry = useCallback(() => {
+    console.log('[WHATSAPP-RETRY] 🔄 Manual retry triggered - resetting circuit breaker');
     setError(null);
     setRetryCount(0);
+    circuitBreaker.reset();
+    
     if (session.status === 'desconectado') {
       connectWhatsApp();
     } else {
       getSessionStatus();
     }
-  }, [session.status, connectWhatsApp, getSessionStatus]);
+  }, [session.status, connectWhatsApp, getSessionStatus, circuitBreaker]);
 
-  // Initialize and cleanup
+  // CONTROLLED Initialize - only once per user session
   useEffect(() => {
-    // Only initialize if user is authenticated
-    if (user) {
-      getSessionStatus();
-      loadContacts();
+    if (user?.id && !initializationRef.current) {
+      initializationRef.current = true;
+      console.log('[WHATSAPP-INIT] 🚀 Initializing WhatsApp integration for user:', user.id);
+      
+      // Initialize with delay to avoid rapid calls
+      setTimeout(() => {
+        getSessionStatus();
+      }, 500);
+      
+      setTimeout(() => {
+        loadContacts();
+      }, 1000);
     }
     
     return () => {
       clearIntervals();
     };
-  }, [getSessionStatus, loadContacts, clearIntervals, user]);
+  }, [user?.id]); // Only user.id dependency
 
-  // Realtime subscriptions
+  // CONTROLLED Realtime subscriptions - with debouncing
   useEffect(() => {
+    if (!user?.id) return;
+
+    let debounceTimeout: NodeJS.Timeout;
+    
     const channel = supabase
       .channel('whatsapp-messages')
       .on(
@@ -543,17 +652,37 @@ export const useWhatsAppIntegration = () => {
           table: 'whatsapp_mensagens_temp'
         },
         () => {
-          console.log('Nova mensagem WhatsApp detectada');
-          loadMessages();
-          loadContacts();
+          console.log('[WHATSAPP-REALTIME] 📨 New message detected - debouncing reload...');
+          clearTimeout(debounceTimeout);
+          debounceTimeout = setTimeout(() => {
+            if (checkCircuitBreaker()) {
+              console.log('[WHATSAPP-REALTIME] ⚡ Reloading data...');
+              loadMessages();
+              loadContacts();
+            }
+          }, 2000); // 2 second debounce
         }
       )
       .subscribe();
 
     return () => {
+      clearTimeout(debounceTimeout);
       supabase.removeChannel(channel);
     };
-  }, [loadMessages, loadContacts]);
+  }, [user?.id]); // Only user.id dependency
+
+  // Reset quando usuário muda
+  useEffect(() => {
+    if (!user) {
+      initializationRef.current = false;
+      setSession({ id: null, status: 'desconectado' });
+      setMessages([]);
+      setContacts([]);
+      setError(null);
+      circuitBreaker.reset();
+      console.log('[WHATSAPP-RESET] 🔄 User changed - resetting state');
+    }
+  }, [user?.id, circuitBreaker]);
 
   return {
     session,
@@ -562,6 +691,7 @@ export const useWhatsAppIntegration = () => {
     loading,
     error,
     retryCount,
+    circuitBreaker: circuitBreaker.getState(),
     connectWhatsApp,
     disconnectWhatsApp,
     sendMessage,
@@ -569,6 +699,7 @@ export const useWhatsAppIntegration = () => {
     loadContacts,
     getSessionStatus,
     retry,
-    clearError: () => setError(null)
+    clearError: () => setError(null),
+    getDebugInfo: () => circuitBreaker.getDebugInfo()
   };
 };
