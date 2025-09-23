@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout>();
 
-  // Atualizar última atividade
+  // Atualizar última atividade - FIX: callback estável
   const updateActivity = useCallback(() => {
     if (!user) return;
     
@@ -140,7 +140,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       timeRemaining: 30 * 60,
       showWarning: false
     }));
-  }, [user]);
+  }, [user?.id]); // FIX: apenas user.id como dependência
 
   // Auto logout por inatividade
   const handleAutoLogout = useCallback(async () => {
@@ -152,32 +152,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await signOut();
   }, [toast]);
 
-  // Verificar tempo de sessão
+  // Verificar tempo de sessão - FIX: callback estável
   const checkSessionTime = useCallback(() => {
     if (!user) return;
 
-    const now = new Date();
-    const timeSinceActivity = Math.floor((now.getTime() - sessionState.lastActivity.getTime()) / 1000);
-    const remainingTime = (30 * 60) - timeSinceActivity;
+    setSessionState(prev => {
+      const now = new Date();
+      const timeSinceActivity = Math.floor((now.getTime() - prev.lastActivity.getTime()) / 1000);
+      const remainingTime = (30 * 60) - timeSinceActivity;
 
-    setSessionState(prev => ({
-      ...prev,
-      timeRemaining: Math.max(0, remainingTime)
-    }));
+      // Mostrar aviso com 5 minutos restantes
+      if (remainingTime <= 300 && remainingTime > 0 && !prev.showWarning) {
+        setShowWarningDialog(true);
+        return {
+          ...prev,
+          timeRemaining: Math.max(0, remainingTime),
+          showWarning: true
+        };
+      }
 
-    // Mostrar aviso com 5 minutos restantes
-    if (remainingTime <= 300 && remainingTime > 0 && !sessionState.showWarning) {
-      setSessionState(prev => ({ ...prev, showWarning: true }));
-      setShowWarningDialog(true);
-    }
+      // Logout se tempo esgotou
+      if (remainingTime <= 0) {
+        handleAutoLogout();
+      }
 
-    // Logout se tempo esgotou
-    if (remainingTime <= 0) {
-      handleAutoLogout();
-    }
-  }, [user, sessionState.lastActivity, sessionState.showWarning, handleAutoLogout]);
+      return {
+        ...prev,
+        timeRemaining: Math.max(0, remainingTime)
+      };
+    });
+  }, [user?.id, handleAutoLogout]); // FIX: dependências estáveis
 
-  // Configurar listeners de atividade
+  // Configurar listeners de atividade - FIX: usar useCallback e memoização
   useEffect(() => {
     if (!user) return;
 
@@ -198,7 +204,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [user, updateActivity, checkSessionTime]);
+  }, [user?.id]); // FIX: apenas user.id como dependência
 
   const handleExtendSession = () => {
     updateActivity();

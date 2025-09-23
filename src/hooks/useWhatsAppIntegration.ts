@@ -147,9 +147,9 @@ export const useWhatsAppIntegration = () => {
     }
   }, [toast, retryCount]);
 
-  // Get session status with secure authentication
+  // Get session status with secure authentication - FIX: dependências estáveis
   const getSessionStatus = useCallback(async (signal?: AbortSignal) => {
-    if (!user || !whatsappSession) {
+    if (!user?.id || !whatsappSession?.session_id) {
       setSession({ id: null, status: 'desconectado' });
       return;
     }
@@ -196,12 +196,12 @@ export const useWhatsAppIntegration = () => {
       }
       throw error;
     }
-  }, [handleError, user, whatsappSession, makeSecureRequest]);
+  }, [user?.id, whatsappSession?.session_id, whatsappSession?.status, makeSecureRequest]); // FIX: dependências específicas
 
-  // Get QR code from server
+  // Get QR code from server - FIX: dependências estáveis
   const getQRCode = useCallback(async (signal?: AbortSignal) => {
     // Don't make requests if user is not authenticated
-    if (!user) return;
+    if (!user?.id) return;
 
     try {
       console.log('Requesting QR Code from server');
@@ -248,11 +248,11 @@ export const useWhatsAppIntegration = () => {
       }
       return null;
     }
-  }, [user, handleError, makeSecureRequest]);
+  }, [user?.id, makeSecureRequest]); // FIX: dependências específicas (remover handleError)
 
-  // Connect WhatsApp with secure authentication
+  // Connect WhatsApp with secure authentication - FIX: dependências estáveis
   const connectWhatsApp = useCallback(async () => {
-    if (!user || !whatsappSession) {
+    if (!user?.id || !whatsappSession?.session_id) {
       toast({
         title: "Erro",
         description: "Você precisa estar logado para conectar o WhatsApp",
@@ -343,7 +343,7 @@ export const useWhatsAppIntegration = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, toast, getSessionStatus, getQRCode, handleError, retryCount, clearIntervals, user]);
+  }, [loading, user?.id, whatsappSession?.session_id, toast, clearIntervals, makeSecureRequest]); // FIX: dependências específicas
 
   // Disconnect WhatsApp
   const disconnectWhatsApp = useCallback(async () => {

@@ -27,7 +27,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       setSecurityCheck(true);
       setIsLoading(false);
     }
-  }, [authLoading, subLoading, user, currentPlan, location.pathname]);
+  }, [authLoading, subLoading, user?.id, currentPlan, location.pathname]); // FIX: user?.id ao invés de user
 
   if (isLoading || authLoading || subLoading) {
     return (
