@@ -14,6 +14,7 @@ import './utils/codeAudit' // Auto-executa auditoria em desenvolvimento
 import './utils/attributeValidator' // Validador de atributos DOM
 import './utils/importGuard' // Guard para importações circulares
 import './utils/variableConflictDetector' // Detector de conflitos de variáveis
+import './utils/errorDiagnostics' // Diagnóstico detalhado de erros em runtime
 
 // Validar ambiente antes de iniciar
 try {
