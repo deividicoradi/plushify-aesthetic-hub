@@ -314,6 +314,8 @@ export const WhatsAppConversations = () => {
                   
                   <div className="flex gap-2">
                     <Textarea
+                      id="conversation_message"
+                      name="conversation_message"
                       ref={messageInputRef}
                       placeholder="Digite sua mensagem..."
                       value={newMessage}

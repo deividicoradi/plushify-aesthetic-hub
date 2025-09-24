@@ -178,8 +178,14 @@ try {
       
       // Aguardar um pouco mais para componentes React renderizarem
       setTimeout(async () => {
-        const { runFullValidation } = await import('./lib/formValidation');
+        const { runFullValidation, validateFormAccessibility } = await import('./lib/formValidation');
+        console.log('🔍 Executando validação completa...');
         await runFullValidation();
+        
+        // Validação específica de formulários
+        console.log('📝 Validando acessibilidade de formulários...');
+        const formValid = validateFormAccessibility();
+        console.log('📝 Resultado da validação de formulários:', formValid ? '✅ Todos os campos têm id/name' : '❌ Campos sem id/name encontrados');
       }, 2000);
     } catch (e) {
       console.warn('Validation setup failed', e);

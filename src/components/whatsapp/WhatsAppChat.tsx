@@ -255,6 +255,8 @@ export function WhatsAppChat() {
             <div className="p-4 border-t">
               <div className="flex gap-2">
                 <Textarea
+                  id="chat_message"
+                  name="chat_message"
                   placeholder="Digite sua mensagem..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}

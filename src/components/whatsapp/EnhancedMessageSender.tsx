@@ -228,6 +228,8 @@ export default function EnhancedMessageSender({
             </span>
           </div>
           <Textarea
+            id="whatsapp_message"
+            name="whatsapp_message"
             placeholder="Digite sua mensagem aqui..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
