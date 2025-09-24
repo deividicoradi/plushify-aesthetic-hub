@@ -12,6 +12,8 @@ import { initEnvironmentValidation } from './utils/environmentValidator'
 import { logger } from './utils/debugLogger'
 import './utils/codeAudit' // Auto-executa auditoria em desenvolvimento
 import './utils/attributeValidator' // Validador de atributos DOM
+import './utils/importGuard' // Guard para importações circulares
+import './utils/variableConflictDetector' // Detector de conflitos de variáveis
 
 // Validar ambiente antes de iniciar
 try {
@@ -188,8 +190,14 @@ try {
     logger.warn('Multiple React instances detected - potential issue');
   }
   
-  // Expose React globally to help detect duplicate copies during development
-  ;(window as any).__REACT__ = React
+  // Verificar duplicatas React sem exposição global que pode causar conflitos
+  if (import.meta.env.MODE === 'development') {
+    // Usar uma propriedade mais específica para debugging
+    ;(window as any).__REACT_DEV_CHECK__ = {
+      version: React.version,
+      timestamp: Date.now()
+    };
+  }
   
   createRoot(rootElement).render(<App />)
 } catch (err: any) {

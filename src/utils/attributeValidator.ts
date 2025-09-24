@@ -47,18 +47,46 @@ export const safeRemoveAttribute = (element: Element, name: string): void => {
   }
 };
 
-// Monkey patch global setAttribute para prevenir valores inválidos
+// Validador seguro sem monkey patch para evitar conflitos de inicialização
 if (typeof window !== 'undefined') {
-  const originalSetAttribute = Element.prototype.setAttribute;
-  
-  Element.prototype.setAttribute = function(name: string, value: any) {
-    if (!validateAttribute(name, value)) {
-      console.warn(`[ATTRIBUTE] Blocked invalid setAttribute: ${name}=${value}`);
-      return;
+  // Verificar se já foi inicializado para evitar múltiplas execuções
+  if (!(window as any).__ATTRIBUTE_VALIDATOR_INITIALIZED__) {
+    (window as any).__ATTRIBUTE_VALIDATOR_INITIALIZED__ = true;
+    
+    // Observar setAttribute chamadas sem modificar o prototype
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.target instanceof Element) {
+          const target = mutation.target;
+          const attrName = mutation.attributeName;
+          if (attrName) {
+            const attrValue = target.getAttribute(attrName);
+            if (!validateAttribute(attrName, attrValue)) {
+              console.warn(`[ATTRIBUTE] Invalid attribute detected: ${attrName}=${attrValue}`);
+              safeRemoveAttribute(target, attrName);
+            }
+          }
+        }
+      });
+    });
+    
+    // Observar apenas quando DOM estiver carregado
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        observer.observe(document.body, {
+          attributes: true,
+          subtree: true,
+          attributeOldValue: true
+        });
+      });
+    } else {
+      observer.observe(document.body, {
+        attributes: true,
+        subtree: true,
+        attributeOldValue: true
+      });
     }
     
-    return originalSetAttribute.call(this, name, String(value));
-  };
-  
-  console.log('[ATTRIBUTE] ✅ Validador de atributos DOM ativado');
+    console.log('[ATTRIBUTE] ✅ Validador de atributos DOM ativado (observer mode)');
+  }
 }
