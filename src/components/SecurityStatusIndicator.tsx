@@ -106,7 +106,7 @@ export const SecurityStatusIndicator: React.FC<SecurityStatusProps> = ({ classNa
           </div>
         </div>
 
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.MODE === 'development' && (
           <div className="mt-3 p-2 bg-blue-50 rounded-md border border-blue-200">
             <p className="text-xs text-blue-700 font-medium">
               🔧 Modo Desenvolvimento
@@ -117,7 +117,7 @@ export const SecurityStatusIndicator: React.FC<SecurityStatusProps> = ({ classNa
           </div>
         )}
 
-        {process.env.NODE_ENV === 'production' && (
+        {import.meta.env.MODE === 'production' && (
           <div className="mt-3 p-2 bg-green-50 rounded-md border border-green-200">
             <p className="text-xs text-green-700 font-medium">
               🚀 Modo Produção

@@ -45,7 +45,7 @@ export const useAuditLog = () => {
       if (error) {
         console.error('Erro ao criar log de auditoria:', error);
         // Em produção, enviar para serviço de monitoramento
-        if (process.env.NODE_ENV === 'production') {
+        if (import.meta.env.MODE === 'production') {
           console.error('AUDIT LOG FAILED:', { data, error });
         }
       }

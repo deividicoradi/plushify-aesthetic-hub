@@ -235,7 +235,7 @@ export const useErrorHandler = () => {
     console.error('Handled Error:', error);
     
     // Em produção, enviar para serviço de monitoramento
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.MODE === 'production') {
       // Implementar integração com Sentry aqui
     }
   };

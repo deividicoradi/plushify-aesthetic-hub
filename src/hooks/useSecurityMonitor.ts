@@ -112,7 +112,7 @@ export const useSecurityMonitor = () => {
     console.warn('[SECURITY EVENT]', event);
     
     // Log detalhado para desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       console.table({
         Type: event.type,
         Severity: event.severity,

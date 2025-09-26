@@ -184,12 +184,22 @@ export default defineConfig(({ mode }) => ({
   
   // Pré-empacotar deps e deduplicar React para evitar múltiplas cópias e erros de createContext
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
+    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query', '@supabase/supabase-js'],
     exclude: [],
+    force: true
   },
 
   // Configurar variáveis de ambiente para diferentes modos
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || 'dev'),
+    'process.env.NODE_ENV': JSON.stringify(mode),
+  },
+  
+  // Environment variables validation
+  esbuild: {
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(mode)
+    },
+    drop: mode === 'production' ? ['console', 'debugger'] : []
   },
 }));

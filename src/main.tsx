@@ -6,9 +6,9 @@ import { initSentry } from './lib/sentry'
 import { initGA } from './lib/analytics'
 import { initCleanup } from './lib/cleanup'
 import { cleanupConsoleLogsInProduction } from './utils/console-cleanup'
-import { validateEnvironment, checkProductionReadiness } from './lib/environment'
+import { validateEnvironment, checkProductionReadiness } from './utils/environmentNormalizer'
 import { initPerformanceMonitor } from './utils/performanceOptimizer'
-import { initEnvironmentValidation } from './utils/environmentValidator'
+// Removed environmentValidator - consolidated into environmentNormalizer
 import { logger } from './utils/debugLogger'
 import './utils/codeAudit' // Auto-executa auditoria em desenvolvimento
 import './utils/attributeValidator' // Validador de atributos DOM
@@ -21,9 +21,7 @@ import { runAppDiagnostics, checkForCommonIssues } from './utils/appDiagnostics'
 // Validar ambiente antes de iniciar
 try {
   // Inicializar validação robusta do ambiente
-  if (!initEnvironmentValidation()) {
-    throw new Error('Falha na validação das variáveis de ambiente');
-  }
+  validateEnvironment(); // Using consolidated validator
   
   checkProductionReadiness();
   console.log('[BOOT] ✅ Configuração validada com sucesso');
@@ -208,14 +206,16 @@ try {
     logger.warn('Multiple React instances detected - potential issue');
   }
   
-  // Verificar duplicatas React sem exposição global que pode causar conflitos
-  if (import.meta.env.MODE === 'development') {
-    // Usar uma propriedade mais específica para debugging
-    ;(window as any).__REACT_DEV_CHECK__ = {
-      version: React.version,
-      timestamp: Date.now()
-    };
-  }
+  // Initialize comprehensive dead code analysis and optimization
+  setTimeout(async () => {
+    try {
+      const { runCompleteValidation } = await import('./utils/deadCodeAnalyzer');
+      await runCompleteValidation();
+      console.log('🎯 COMPLETE OPTIMIZATION APPLIED');
+    } catch (error) {
+      console.error('❌ Optimization failed:', error);
+    }
+  }, 2000);
   
   // Verificar se todos os chunks estão carregados
   const loadedScripts = document.querySelectorAll('script[src]');
@@ -238,7 +238,6 @@ try {
   // Evidência final de renderização
   console.log('[RENDER] Inicializando React App...');
   createRoot(rootElement).render(<App />)
-  console.log('[RENDER] React App renderizado com sucesso');
   console.log('[RENDER] React App renderizado com sucesso');
 } catch (err: any) {
   if (import.meta.env.MODE === 'development') {

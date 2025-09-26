@@ -151,7 +151,7 @@ export const useSecureWhatsAppAuth = () => {
           user_id: user?.id,
           session_id: sessionId,
           status: 'desconectado',
-          server_url: process.env.NODE_ENV === 'production' ? 'https://31.97.30.241:8787' : 'http://localhost:8787'
+          server_url: import.meta.env.MODE === 'production' ? 'https://31.97.30.241:8787' : 'http://localhost:8787'
         }, {
           onConflict: 'user_id'
         })

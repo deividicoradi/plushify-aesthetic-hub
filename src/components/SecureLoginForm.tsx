@@ -173,7 +173,7 @@ export const SecureLoginForm: React.FC = () => {
           )}
         </div>
 
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.MODE === 'development' && (
           <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded border">
             <strong>Dev Mode:</strong> Sistema de segurança ativo com monitoramento de XSS, rate limiting e auditoria.
           </div>
