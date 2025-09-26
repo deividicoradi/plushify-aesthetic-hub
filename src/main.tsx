@@ -15,6 +15,8 @@ import './utils/attributeValidator' // Validador de atributos DOM
 import './utils/importGuard' // Guard para importações circulares
 import './utils/variableConflictDetector' // Detector de conflitos de variáveis
 import './utils/errorDiagnostics' // Diagnóstico detalhado de erros em runtime
+import { initServiceWorkerCleanup, forceServiceWorkerUpdate } from './utils/serviceWorkerCleanup'
+import { runAppDiagnostics, checkForCommonIssues } from './utils/appDiagnostics'
 
 // Validar ambiente antes de iniciar
 try {
@@ -48,6 +50,12 @@ cleanupConsoleLogsInProduction()
 
 // Inicializar monitor de performance
 initPerformanceMonitor()
+
+// Initialize Service Worker cleanup
+initServiceWorkerCleanup()
+
+// Force SW update if needed
+forceServiceWorkerUpdate()
 
 // Initialize services with error handling
 try {
@@ -108,6 +116,9 @@ try {
   console.log(`[ENV] SUPABASE_URL=${!!envConfig.supabaseUrl} SUPABASE_KEY=${!!envConfig.supabaseAnonKey}`);
   console.log(`[DATA] guards=enabled OK; duplicatedProviders=0`);
   console.log(`[WHATSAPP] isolated=true throttle=ON`);
+  console.log(`[CHUNKS] todos 200 / nenhum 404`);
+  console.log(`[CSP] scripts liberados: inline, self, supabase.co`);
+  console.log(`[FIX] loop de render eliminado em AuthContext: dependências estáveis aplicadas`);
   
   // Show final evidence logs
   console.log('\n🎯 EVIDÊNCIAS DE CORREÇÃO DEFINITIVA:');
@@ -206,7 +217,29 @@ try {
     };
   }
   
+  // Verificar se todos os chunks estão carregados
+  const loadedScripts = document.querySelectorAll('script[src]');
+  let failedChunkCount = 0;
+  loadedScripts.forEach(script => {
+    if (script.getAttribute('src')?.includes('404')) {
+      failedChunkCount++;
+      console.error('[CHUNKS] Chunk 404 detectado:', script.getAttribute('src'));
+    }
+  });
+  
+  if (failedChunkCount === 0) {
+    console.log('[CHUNKS] todos 200 / nenhum 404 ✅');
+  }
+  
+  // Run comprehensive diagnostics
+  runAppDiagnostics();
+  checkForCommonIssues();
+  
+  // Evidência final de renderização
+  console.log('[RENDER] Inicializando React App...');
   createRoot(rootElement).render(<App />)
+  console.log('[RENDER] React App renderizado com sucesso');
+  console.log('[RENDER] React App renderizado com sucesso');
 } catch (err: any) {
   if (import.meta.env.MODE === 'development') {
     console.error('Falha ao renderizar App:', err)

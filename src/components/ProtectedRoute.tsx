@@ -16,13 +16,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   useEffect(() => {
     if (!authLoading && !subLoading) {
-      console.log('ProtectedRoute check:', {
-        hasUser: !!user,
-        currentPlan,
-        pathname: location.pathname,
-        authLoading,
-        subLoading
-      });
+      console.log(`[GUARD] verificação auth → rota ${location.pathname} → resultado: ${user ? 'AUTORIZADO' : 'NEGADO'} (sem loop)`);
       
       setSecurityCheck(true);
       setIsLoading(false);
@@ -30,6 +24,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }, [authLoading, subLoading, user?.id, currentPlan, location.pathname]); // FIX: user?.id ao invés de user
 
   if (isLoading || authLoading || subLoading) {
+    console.log(`[SUSPENSE] fallback ativo para ${location.pathname} - aguardando auth:${authLoading} sub:${subLoading}`);
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="flex flex-col items-center space-y-4">

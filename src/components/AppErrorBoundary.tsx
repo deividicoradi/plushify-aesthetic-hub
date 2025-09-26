@@ -34,12 +34,20 @@ export class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    const currentRoute = window.location.pathname;
+    
     console.group('🚨 App Error Boundary - Critical App Failure');
     console.error('Error:', error);
     console.error('Error Info:', errorInfo);
     console.error('Component Stack:', errorInfo.componentStack);
+    console.error('Current Route:', currentRoute);
     console.error('Error ID:', this.state.errorId);
+    console.error('User Agent:', navigator.userAgent);
+    console.error('Timestamp:', new Date().toISOString());
     console.groupEnd();
+    
+    // Log evidência de captura
+    console.log(`[ERROR_BOUNDARY] Erro capturado na rota ${currentRoute}: ${error.message}`);
     
     this.setState({
       error,
@@ -76,13 +84,21 @@ export class AppErrorBoundary extends Component<Props, State> {
     }
   };
 
-  handleRefresh = () => {
-    // Limpar storage local para evitar estados inconsistentes
+  handleRefresh = async () => {
+    // Limpar storage local e caches para evitar estados inconsistentes
     try {
-      localStorage.removeItem('supabase.auth.token');
-      sessionStorage.clear();
+      console.log('[ERROR_BOUNDARY] Iniciando limpeza completa...');
+      
+      // Import cleanup utility
+      const { clearAllAppData } = await import('@/utils/serviceWorkerCleanup');
+      await clearAllAppData();
+      
+      console.log('[ERROR_BOUNDARY] Limpeza completa finalizada');
     } catch (e) {
-      console.warn('Failed to clear storage:', e);
+      console.warn('Failed to clear app data:', e);
+      // Fallback cleanup
+      localStorage.clear();
+      sessionStorage.clear();
     }
     
     window.location.reload();
