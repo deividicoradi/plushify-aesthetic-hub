@@ -27,9 +27,10 @@ try {
     MODE: import.meta.env.MODE,
   };
   console.info('[ENV@runtime]', has);
+  console.table({ URL: has.URL, ANON: has.ANON, PUB: has.PUB, MODE: has.MODE });
 
   if (import.meta.env.MODE !== 'production') {
-    (window as any).__ENV__ = {
+    (globalThis as any).__ENV__ = {
       url:  import.meta.env.VITE_SUPABASE_URL,
       anon: import.meta.env.VITE_SUPABASE_ANON_KEY,
       pub:  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -46,22 +47,22 @@ try {
 }
 // =========================================
 
-// Carregar script do editor da Lovable somente em preview/editor
-const isLovablePreview =
-  typeof location !== 'undefined' &&
-  (location.hostname.endsWith('lovableproject.com') ||
-   location.hostname.endsWith('lovable.dev'));
-
-if (isLovablePreview) {
-  const s = document.createElement('script');
-  s.src = 'https://cdn.gpteng.co/lovable.js';
-  s.async = true;
-  document.head.appendChild(s);
-}
 
 // Validar ambiente antes de iniciar
 try {
   // Inicializar validação robusta do ambiente
+  // Pre-check required Vite envs before proceeding
+  const __url = import.meta.env.VITE_SUPABASE_URL;
+  const __anon = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const __pub = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const __mode = import.meta.env.MODE;
+  const __ok = !!__url && (!!__anon || !!__pub);
+  console.info('[ENV] booleans', { URL: !!__url, ANON: !!__anon, PUB: !!__pub, MODE: __mode });
+  if (!__ok) {
+    console.warn('[ENV] Missing required Vite envs. Configure VITE_SUPABASE_URL and either VITE_SUPABASE_ANON_KEY or VITE_SUPABASE_PUBLISHABLE_KEY in Lovable Settings > Environment Variables.');
+    throw new Error('Missing Vite envs at runtime');
+  }
+  
   validateEnvironment(); // Using consolidated validator
   
   checkProductionReadiness();
