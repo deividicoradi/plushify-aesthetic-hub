@@ -18,6 +18,47 @@ import './utils/errorDiagnostics' // Diagnóstico detalhado de erros em runtime
 import { initServiceWorkerCleanup, forceServiceWorkerUpdate } from './utils/serviceWorkerCleanup'
 import { runAppDiagnostics, checkForCommonIssues } from './utils/appDiagnostics'
 
+// ==== RUNTIME ENV DIAGNOSTICS (safe) ====
+try {
+  const has = {
+    URL:  !!import.meta.env.VITE_SUPABASE_URL,
+    ANON: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+    PUB:  !!import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    MODE: import.meta.env.MODE,
+  };
+  console.info('[ENV@runtime]', has);
+
+  if (import.meta.env.MODE !== 'production') {
+    (window as any).__ENV__ = {
+      url:  import.meta.env.VITE_SUPABASE_URL,
+      anon: import.meta.env.VITE_SUPABASE_ANON_KEY,
+      pub:  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      mode: import.meta.env.MODE,
+    };
+    console.info('[ENV@runtime] __ENV__ disponível (dev only)');
+  }
+
+  console.info(
+    `[ENV@summary] URL=${has.URL ? 'ok' : 'missing'} ANON=${has.ANON ? 'ok' : 'missing'} PUB=${has.PUB ? 'ok' : 'missing'} MODE=${has.MODE}`
+  );
+} catch (e) {
+  console.warn('[ENV@runtime] import.meta.env indisponível ou fora de módulo', e);
+}
+// =========================================
+
+// Carregar script do editor da Lovable somente em preview/editor
+const isLovablePreview =
+  typeof location !== 'undefined' &&
+  (location.hostname.endsWith('lovableproject.com') ||
+   location.hostname.endsWith('lovable.dev'));
+
+if (isLovablePreview) {
+  const s = document.createElement('script');
+  s.src = 'https://cdn.gpteng.co/lovable.js';
+  s.async = true;
+  document.head.appendChild(s);
+}
+
 // Validar ambiente antes de iniciar
 try {
   // Inicializar validação robusta do ambiente
