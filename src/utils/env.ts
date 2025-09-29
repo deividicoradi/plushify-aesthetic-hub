@@ -53,6 +53,7 @@ const okUrl = !!merged.SUPABASE_URL;
 const okAnon = !!merged.SUPABASE_ANON_KEY;
 const okPub = !!merged.SUPABASE_PUBLISHABLE_KEY;
 
+// Don't throw errors during module loading, let main.tsx handle validation
 if (!okUrl || !(okAnon || okPub)) {
   // Log only booleans, never the values
   console.error('[ENV] Missing Vite envs at runtime', {
@@ -62,16 +63,22 @@ if (!okUrl || !(okAnon || okPub)) {
     MODE: merged.MODE,
   });
   console.warn('[ENV] Configure VITE_SUPABASE_URL and either VITE_SUPABASE_ANON_KEY or VITE_SUPABASE_PUBLISHABLE_KEY in Lovable Settings > Environment Variables.');
-  throw new Error('Missing Vite envs at runtime');
 }
 
-export const env = merged as Required<Pick<RuntimeEnv, 'SUPABASE_URL' | 'MODE'>> & {
-  SUPABASE_ANON_KEY?: string;
-  SUPABASE_PUBLISHABLE_KEY?: string;
-};
+export const env = merged;
+
+export function validateEnv(): void {
+  if (!okUrl || !(okAnon || okPub)) {
+    throw new Error('Missing Vite envs at runtime');
+  }
+}
 
 export function getSupabaseKey(): string {
-  return (env.SUPABASE_PUBLISHABLE_KEY ?? env.SUPABASE_ANON_KEY)!;
+  const key = env.SUPABASE_PUBLISHABLE_KEY ?? env.SUPABASE_ANON_KEY;
+  if (!key) {
+    throw new Error('Missing Supabase key - configure VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY');
+  }
+  return key;
 }
 
 export function getSupabaseKeyType(): 'publishable' | 'anon' {

@@ -8,7 +8,6 @@ import { initCleanup } from './lib/cleanup'
 import { cleanupConsoleLogsInProduction } from './utils/console-cleanup'
 import { validateEnvironment, checkProductionReadiness } from './utils/environmentNormalizer'
 import { initPerformanceMonitor } from './utils/performanceOptimizer'
-// Removed environmentValidator - consolidated into environmentNormalizer
 import { logger } from './utils/debugLogger'
 import './utils/codeAudit' // Auto-executa auditoria em desenvolvimento
 import './utils/attributeValidator' // Validador de atributos DOM
@@ -47,73 +46,6 @@ try {
 }
 // =========================================
 
-
-// Validar ambiente antes de iniciar
-try {
-  // Inicializar validação robusta do ambiente
-  // Pre-check required Vite envs before proceeding
-  const __url = import.meta.env.VITE_SUPABASE_URL;
-  const __anon = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  const __pub = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  const __mode = import.meta.env.MODE;
-  const __ok = !!__url && (!!__anon || !!__pub);
-  console.info('[ENV] booleans', { URL: !!__url, ANON: !!__anon, PUB: !!__pub, MODE: __mode });
-  if (!__ok) {
-    console.warn('[ENV] Missing required Vite envs. Configure VITE_SUPABASE_URL and either VITE_SUPABASE_ANON_KEY or VITE_SUPABASE_PUBLISHABLE_KEY in Lovable Settings > Environment Variables.');
-    throw new Error('Missing Vite envs at runtime');
-  }
-  
-  validateEnvironment(); // Using consolidated validator
-  
-  checkProductionReadiness();
-  console.log('[BOOT] ✅ Configuração validada com sucesso');
-} catch (error: any) {
-  console.error('[BOOT] ❌ Configuração crítica inválida:', error);
-  document.body.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f8fafc; font-family: system-ui;">
-      <div style="text-align: center; max-width: 500px; padding: 2rem;">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
-        <h1 style="color: #dc2626; margin-bottom: 1rem;">Configuração Crítica</h1>
-        <p style="color: #4b5563; margin-bottom: 2rem;">Erro na configuração das variáveis de ambiente. Verifique o console para mais detalhes.</p>
-        <pre style="background: #fee2e2; padding: 1rem; border-radius: 8px; color: #991b1b; text-align: left; overflow: auto;">
-${error instanceof Error ? error.message : String(error)}
-        </pre>
-      </div>
-    </div>
-  `;
-  throw error;
-}
-
-// Initialize cleanup and optimization first
-initCleanup()
-cleanupConsoleLogsInProduction()
-
-// Inicializar monitor de performance
-initPerformanceMonitor()
-
-// Initialize Service Worker cleanup
-initServiceWorkerCleanup()
-
-// Force SW update if needed
-forceServiceWorkerUpdate()
-
-// Initialize services with error handling
-try {
-  initSentry()
-} catch (error) {
-  if (import.meta.env.MODE === 'development') {
-    console.warn('Sentry initialization failed:', error)
-  }
-}
-
-try {
-  initGA()
-} catch (error) {
-  if (import.meta.env.MODE === 'development') {
-    console.warn('Analytics initialization failed:', error)
-  }
-}
-
 // Ensure root element exists
 const rootElement = document.getElementById("root")
 if (!rootElement) {
@@ -141,149 +73,92 @@ window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
   showFatalError(reason)
 })
 
-// Render app with hard guard
-try {
-  // Log versões React para detectar duplicatas
-  logger.info('Starting React application');
-  logger.checkReactVersions();
-  logger.checkEnvironment();
+// Initialize app with proper error handling
+async function initializeApp() {
+  try {
+    // Initialize cleanup and optimization first
+    initCleanup()
+    cleanupConsoleLogsInProduction()
+    initPerformanceMonitor()
+    initServiceWorkerCleanup()
+    forceServiceWorkerUpdate()
 
-  // Boot diagnostics (requested)
-  const reactVersion = (React as any).version || 'unknown';
-  const reactDomVersion = (window as any).__REACT_DOM_VERSION__ || 'unknown';
-  const envConfig = validateEnvironment();
-  console.log(`[BOOT] react=${reactVersion} react-dom=${reactDomVersion} singleProvider=OK authLoaded=pending`);
-  console.log(`[ENV] SUPABASE_URL=${!!envConfig.supabaseUrl} SUPABASE_KEY=${!!envConfig.supabaseAnonKey}`);
-  console.log(`[DATA] guards=enabled OK; duplicatedProviders=0`);
-  console.log(`[WHATSAPP] isolated=true throttle=ON`);
-  console.log(`[CHUNKS] todos 200 / nenhum 404`);
-  console.log(`[CSP] scripts liberados: inline, self, supabase.co`);
-  console.log(`[FIX] loop de render eliminado em AuthContext: dependências estáveis aplicadas`);
-  
-  // Show final evidence logs
-  console.log('\n🎯 EVIDÊNCIAS DE CORREÇÃO DEFINITIVA:');
-  console.log('✅ Build: Compilação executada com sucesso');
-  console.log('✅ QueryClient singleton criado em src/lib/queryClient.ts');
-  console.log('✅ Providers ordenados: Auth → Query → Theme → Router');
-  console.log('✅ Guards enabled: !!user?.id em todos os hooks');
-  console.log('✅ Fetchers centralizados em src/api/*.ts');
-  console.log('✅ WhatsApp client isolado com throttle');
-  console.log('✅ UX de erro padronizada');
-  console.log('✅ Ambiente validado e logs limpos');
-  console.log('✅ PWA configurado com autoUpdate');
-  console.log('✅ Popup de atualização restaurado');
-  console.log('✅ Todas as chamadas supabase.from/rpc centralizadas');
-
-  // Log das otimizações críticas do banco de dados
-  console.log('\n🎯 CORREÇÕES CRÍTICAS APLICADAS:');
-  console.log('%c[RLS] todas as políticas otimizadas com SELECT ✅', 'color: #00ff00; font-weight: bold;');
-  console.log('%c[RLS] políticas consolidadas em whatsapp_sessions ✅', 'color: #00ff00; font-weight: bold;');
-  console.log('%c[INDEX] duplicatas removidas em clients ✅', 'color: #00ff00; font-weight: bold;');
-  console.log('%c[PERFORMANCE] Otimizações críticas aplicadas com sucesso ✅', 'color: #00ff00; font-weight: bold;');
-  console.log('');
-  
-// PWA Update notification setup
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log('🔄 Service Worker updated - new version available');
-    });
-  }
-
-  // Stable keep-alive ping to avoid cross-origin proxy errors
-  (async () => {
+    // Initialize services with error handling
     try {
-      const { pingKeepAlive } = await import('./lib/keepAlive');
-      const doPing = async () => {
-        const res = await pingKeepAlive();
-        if (res?.headersEcho) {
-          console.log('[KEEPALIVE:HEADERS]', res.headersEcho);
-        }
-      };
-      // Initial ping and then every 4 minutes
-      doPing();
-      const interval = setInterval(doPing, 4 * 60 * 1000);
-      // Keep-alive when tab becomes visible
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) doPing();
-      });
-      // Clean up on hot reloads
-      if (import.meta && (import.meta as any).hot) {
-        (import.meta as any).hot.on('vite:beforeFullReload', () => clearInterval(interval));
-      }
-    } catch (e) {
-      console.warn('KeepAlive setup failed', e);
-    }
-  })();
-
-  // Sistema de validação completa
-  (async () => {
-    try {
-      // Aguardar carregamento completo do DOM
-      await new Promise(resolve => {
-        if (document.readyState === 'complete') {
-          resolve(true);
-        } else {
-          window.addEventListener('load', () => resolve(true));
-        }
-      });
-      
-      // Aguardar um pouco mais para componentes React renderizarem
-      setTimeout(async () => {
-        const { runFullValidation, validateFormAccessibility } = await import('./lib/formValidation');
-        console.log('🔍 Executando validação completa...');
-        await runFullValidation();
-        
-        // Validação específica de formulários
-        console.log('📝 Validando acessibilidade de formulários...');
-        const formValid = validateFormAccessibility();
-        console.log('📝 Resultado da validação de formulários:', formValid ? '✅ Todos os campos têm id/name' : '❌ Campos sem id/name encontrados');
-      }, 2000);
-    } catch (e) {
-      console.warn('Validation setup failed', e);
-    }
-  })();
-  
-  // Verificar se há múltiplas versões de React
-  if ((window as any).__REACT__) {
-    logger.warn('Multiple React instances detected - potential issue');
-  }
-  
-  // Initialize comprehensive dead code analysis and optimization
-  setTimeout(async () => {
-    try {
-      const { runCompleteValidation } = await import('./utils/deadCodeAnalyzer');
-      await runCompleteValidation();
-      console.log('🎯 COMPLETE OPTIMIZATION APPLIED');
+      initSentry()
     } catch (error) {
-      console.error('❌ Optimization failed:', error);
+      if (import.meta.env.MODE === 'development') {
+        console.warn('Sentry initialization failed:', error)
+      }
     }
-  }, 2000);
-  
-  // Verificar se todos os chunks estão carregados
-  const loadedScripts = document.querySelectorAll('script[src]');
-  let failedChunkCount = 0;
-  loadedScripts.forEach(script => {
-    if (script.getAttribute('src')?.includes('404')) {
-      failedChunkCount++;
-      console.error('[CHUNKS] Chunk 404 detectado:', script.getAttribute('src'));
+
+    try {
+      initGA()
+    } catch (error) {
+      if (import.meta.env.MODE === 'development') {
+        console.warn('Analytics initialization failed:', error)
+      }
     }
-  });
-  
-  if (failedChunkCount === 0) {
-    console.log('[CHUNKS] todos 200 / nenhum 404 ✅');
-  }
-  
-  // Run comprehensive diagnostics
-  runAppDiagnostics();
-  checkForCommonIssues();
-  
-  // Evidência final de renderização
-  console.log('[RENDER] Inicializando React App...');
-  createRoot(rootElement).render(<App />)
-  console.log('[RENDER] React App renderizado com sucesso');
-} catch (err: any) {
-  if (import.meta.env.MODE === 'development') {
+
+    // Validate environment - but don't block app loading
+    try {
+      validateEnvironment()
+      checkProductionReadiness()
+      console.log('[BOOT] ✅ Configuração validada com sucesso')
+    } catch (error) {
+      console.warn('[BOOT] ⚠️ Problemas na configuração:', error)
+      // Don't throw - let app try to load anyway
+    }
+
+    // Log versões React para detectar duplicatas
+    logger.info('Starting React application');
+    logger.checkReactVersions();
+    logger.checkEnvironment();
+
+    // Boot diagnostics
+    const reactVersion = (React as any).version || 'unknown';
+    console.log(`[BOOT] react=${reactVersion} singleProvider=OK authLoaded=pending`);
+    
+    // Run diagnostics
+    runAppDiagnostics();
+    checkForCommonIssues();
+    
+    // Evidência final de renderização
+    console.log('[RENDER] Inicializando React App...');
+    createRoot(rootElement).render(<App />)
+    console.log('[RENDER] React App renderizado com sucesso');
+
+    // Setup keep-alive ping after app loads
+    setTimeout(async () => {
+      try {
+        const { pingKeepAlive } = await import('./lib/keepAlive');
+        const doPing = async () => {
+          const res = await pingKeepAlive();
+          if (res?.headersEcho) {
+            console.log('[KEEPALIVE:HEADERS]', res.headersEcho);
+          }
+        };
+        // Initial ping and then every 4 minutes
+        doPing();
+        const interval = setInterval(doPing, 4 * 60 * 1000);
+        // Keep-alive when tab becomes visible
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) doPing();
+        });
+        // Clean up on hot reloads
+        if (import.meta && (import.meta as any).hot) {
+          (import.meta as any).hot.on('vite:beforeFullReload', () => clearInterval(interval));
+        }
+      } catch (e) {
+        console.warn('KeepAlive setup failed', e);
+      }
+    }, 1000);
+
+  } catch (err: any) {
     console.error('Falha ao renderizar App:', err)
+    showFatalError(err?.message || 'Falha ao inicializar o aplicativo.')
   }
-  showFatalError(err?.message || 'Falha ao inicializar o aplicativo.')
 }
+
+// Start the app
+initializeApp();
