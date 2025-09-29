@@ -59,7 +59,7 @@ const logSecurityIncident = async (
     
     logStep('Security incident logged', { threat_level: incident.threat_level });
   } catch (error) {
-    logStep('ERROR logging security incident', { error: error.message });
+    logStep('ERROR logging security incident', { error: (error as Error).message });
   }
 };
 

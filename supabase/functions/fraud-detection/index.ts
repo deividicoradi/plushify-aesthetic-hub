@@ -51,8 +51,8 @@ const analyzeUserBehavior = async (
     // Verificar tentativas com valores diferentes
     const uniqueAmounts = new Set(
       recentAttempts
-        .map(attempt => attempt.new_data?.attempted_amount)
-        .filter(amount => amount !== undefined)
+        .map((attempt: any) => attempt.new_data?.attempted_amount)
+        .filter((amount: any) => amount !== undefined)
     );
 
     if (uniqueAmounts.size > 5) {
@@ -62,7 +62,7 @@ const analyzeUserBehavior = async (
 
     // Verificar se há tentativas de valores muito baixos
     const lowValueAttempts = recentAttempts.filter(
-      attempt => attempt.new_data?.attempted_amount && 
+      (attempt: any) => attempt.new_data?.attempted_amount && 
                  attempt.new_data.attempted_amount < 1000 // menos de R$ 10
     );
 

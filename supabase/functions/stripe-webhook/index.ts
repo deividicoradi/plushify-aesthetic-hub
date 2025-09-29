@@ -54,8 +54,8 @@ serve(async (req) => {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
       logStep("Webhook signature verified", { eventType: event.type });
     } catch (err) {
-      logStep("SECURITY ERROR: Webhook signature verification failed", { error: err.message });
-      return new Response(`Webhook signature verification failed: ${err.message}`, {
+      logStep("SECURITY ERROR: Webhook signature verification failed", { error: (err as Error).message });
+      return new Response(`Webhook signature verification failed: ${(err as Error).message}`, {
         status: 400,
         headers: corsHeaders,
       });

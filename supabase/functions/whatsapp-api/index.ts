@@ -1,5 +1,6 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { getErrorMessage } from '../_shared/errorUtils.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -140,7 +141,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
-        message: error.message
+        message: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -325,7 +326,7 @@ async function handleConnect(supabase: any, userId: string, req: Request) {
       JSON.stringify({ 
         success: false,
         error: 'Failed to initiate connection',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -409,7 +410,7 @@ async function handleDisconnect(supabase: any, userId: string) {
       JSON.stringify({ 
         success: false,
         error: 'Failed to disconnect',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -474,7 +475,7 @@ async function handleGetStatus(supabase: any, userId: string) {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to get status',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -580,7 +581,7 @@ async function handleSendMessage(supabase: any, userId: string, req: Request) {
       JSON.stringify({ 
         success: false,
         error: 'Failed to send message',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -624,7 +625,7 @@ async function handleGetStats(supabase: any, userId: string) {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to get stats',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -674,7 +675,7 @@ async function handleGetMessages(supabase: any, userId: string, searchParams: UR
     return new Response(
       JSON.stringify({ 
         error: 'Failed to get messages',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -708,7 +709,7 @@ async function handleGetContacts(supabase: any, userId: string) {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to get contacts',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -745,7 +746,7 @@ async function handleGetQueueStats(supabase: any, userId: string) {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to get queue stats',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -800,7 +801,7 @@ async function handleProcessQueue(supabase: any, userId: string) {
         await supabase.rpc('complete_message_processing', {
           p_queue_id: msg.id,
           p_success: false,
-          p_error_message: processError.message
+          p_error_message: getErrorMessage(processError)
         });
       }
     }
@@ -819,7 +820,7 @@ async function handleProcessQueue(supabase: any, userId: string) {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to process queue',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -862,7 +863,7 @@ async function handleGetPerformanceMetrics(supabase: any, userId: string) {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to get performance metrics',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -964,7 +965,7 @@ async function handleRunLoadTest(supabase: any, userId: string, req: Request) {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to run load test',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -1009,7 +1010,7 @@ async function handleGetSessionIsolation(supabase: any, userId: string) {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to get session isolation data',
-        details: error.message
+        details: getErrorMessage(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

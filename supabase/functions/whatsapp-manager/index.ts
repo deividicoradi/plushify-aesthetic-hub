@@ -1,5 +1,6 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { getErrorMessage, getErrorStack } from '../_shared/errorUtils.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -117,8 +118,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: `Erro interno do servidor: ${error.message}`,
-        stack: error.stack
+        error: `Erro interno do servidor: ${getErrorMessage(error)}`,
+        stack: getErrorStack(error)
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -197,7 +198,7 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
           console.error('Server error details:', errorText);
         }
       } catch (serverError) {
-        console.error('Error connecting to WhatsApp server:', serverError.message);
+        console.error('Error connecting to WhatsApp server:', getErrorMessage(serverError));
         console.log('Servidor WhatsApp não está disponível. Para usar WhatsApp real, configure o servidor conforme documentação.');
         // Se o servidor não responder, usar status do banco mas marcar como desconectado
         if (session) {
@@ -263,7 +264,7 @@ async function getSessionStatus(supabase: any, userId: string, token: string) {
         qrCode: null,
         ready: false,
         serverConnected: false,
-        error: error.message
+        error: getErrorMessage(error)
       }), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -365,7 +366,7 @@ async function initiateConnection(supabase: any, userId: string, token: string) 
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: `Erro ao conectar: ${error.message}` 
+        error: `Erro ao conectar: ${getErrorMessage(error)}` 
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -408,7 +409,7 @@ async function disconnectSession(supabase: any, userId: string, token: string) {
       console.error('Erro ao atualizar status no banco:', error);
     }
 
-    const serverResponse = response.ok ? await response.json() : { success: true };
+    const serverResponse = response?.ok ? await response.json() : { success: true };
 
     return new Response(
       JSON.stringify({ 
@@ -422,7 +423,7 @@ async function disconnectSession(supabase: any, userId: string, token: string) {
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: `Erro ao desconectar: ${error.message}` 
+        error: `Erro ao desconectar: ${getErrorMessage(error)}` 
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -625,7 +626,7 @@ async function sendMessage(supabase: any, userId: string, body: any, token: stri
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: `Erro interno: ${error.message}` 
+        error: `Erro interno: ${getErrorMessage(error)}` 
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -767,7 +768,7 @@ async function getContacts(supabase: any, userId: string, token?: string) {
         );
       }
         } catch (serverError) {
-          console.log('Servidor WhatsApp não disponível, usando dados do banco:', serverError.message);
+          console.log('Servidor WhatsApp não disponível, usando dados do banco:', getErrorMessage(serverError));
         }
       }
     
@@ -795,7 +796,7 @@ async function getContacts(supabase: any, userId: string, token?: string) {
     return new Response(
       JSON.stringify({ 
         contacts: [],
-        error: error.message 
+        error: getErrorMessage(error) 
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -926,7 +927,7 @@ async function getQRCode(supabase: any, userId: string, token: string) {
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: `Erro ao buscar QR Code: ${error.message}` 
+        error: `Erro ao buscar QR Code: ${getErrorMessage(error)}` 
       }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

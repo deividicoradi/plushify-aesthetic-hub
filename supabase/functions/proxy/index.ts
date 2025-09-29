@@ -2,7 +2,7 @@
 // Handles keepAlive and acts as a stable CORS-friendly endpoint
 // IMPORTANT: Do not import app code here.
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 // Robust CORS headers for all requests
 function buildCorsHeaders(origin?: string | null) {
@@ -42,7 +42,7 @@ serve(async (req: Request) => {
       }
     }
   } catch (error) {
-    console.warn("[PROXY] Body parsing warning:", error.message);
+    console.warn("[PROXY] Body parsing warning:", (error as Error).message);
   }
 
   // Detect keepAlive request from multiple sources

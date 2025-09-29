@@ -85,7 +85,7 @@ const validateUserAuth = async (token: string, supabaseClient: any) => {
 
 serve(async (req) => {
   const origin = req.headers.get("origin");
-  const corsHeaders = getCorsHeaders(origin);
+  const corsHeaders = getCorsHeaders(origin ?? undefined);
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
