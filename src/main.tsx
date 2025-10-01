@@ -20,16 +20,33 @@ import { runAppDiagnostics, checkForCommonIssues } from './utils/appDiagnostics'
 // Suprimir erros de WebSocket do ambiente de desenvolvimento Lovable
 if (import.meta.env.MODE === 'development') {
   const originalError = console.error;
+  const originalWarn = console.warn;
+  
   console.error = (...args: any[]) => {
-    const errorString = args.join(' ');
-    // Filtrar erros de WebSocket relacionados ao lovableproject.com (ambiente de dev)
-    if (
-      errorString.includes('WebSocket connection to') &&
-      errorString.includes('lovableproject.com')
-    ) {
-      return; // Suprimir esse erro específico
+    const errorString = String(args[0] || '');
+    
+    // Filtrar erros específicos do ambiente Lovable (não afetam a aplicação)
+    const shouldSuppress = 
+      (errorString.includes('WebSocket connection to') && errorString.includes('lovableproject.com')) ||
+      (errorString.includes('WebSocket') && errorString.includes('failed')) && 
+      args.some(arg => String(arg).includes('lovableproject.com'));
+    
+    if (shouldSuppress) {
+      return; // Suprimir erros do ambiente de dev Lovable
     }
+    
     originalError.apply(console, args);
+  };
+  
+  console.warn = (...args: any[]) => {
+    const warnString = String(args[0] || '');
+    
+    // Filtrar warnings do sandbox iframe
+    if (warnString.includes('sandbox') || warnString.includes('iframe')) {
+      return;
+    }
+    
+    originalWarn.apply(console, args);
   };
 }
 
