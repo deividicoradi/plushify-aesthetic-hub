@@ -14,12 +14,11 @@ export const initSentry = () => {
     dsn,
     environment: import.meta.env.MODE,
     integrations: [
-      // Integração básica do browser
-      Sentry.browserTracingIntegration(),
+      // Removido browserTracingIntegration para evitar conflitos com requisições customizadas
     ],
     
-    // Performance Monitoring
-    tracesSampleRate: import.meta.env.MODE === 'production' ? 0.1 : 1.0,
+    // Performance Monitoring desabilitado para evitar interceptação de requisições
+    tracesSampleRate: 0,
     
     // Configurações para melhor debugging
     beforeSend(event, hint) {
