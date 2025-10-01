@@ -12,6 +12,13 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    hmr: {
+      overlay: true,
+      clientPort: 8080,
+    },
+    watch: {
+      usePolling: false,
+    },
   },
   
   // Configurar source maps para produção (necessário para Sentry)

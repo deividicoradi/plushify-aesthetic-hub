@@ -17,6 +17,22 @@ import './utils/errorDiagnostics' // Diagnóstico detalhado de erros em runtime
 import { initServiceWorkerCleanup, forceServiceWorkerUpdate } from './utils/serviceWorkerCleanup'
 import { runAppDiagnostics, checkForCommonIssues } from './utils/appDiagnostics'
 
+// Suprimir erros de WebSocket do ambiente de desenvolvimento Lovable
+if (import.meta.env.MODE === 'development') {
+  const originalError = console.error;
+  console.error = (...args: any[]) => {
+    const errorString = args.join(' ');
+    // Filtrar erros de WebSocket relacionados ao lovableproject.com (ambiente de dev)
+    if (
+      errorString.includes('WebSocket connection to') &&
+      errorString.includes('lovableproject.com')
+    ) {
+      return; // Suprimir esse erro específico
+    }
+    originalError.apply(console, args);
+  };
+}
+
 // ==== RUNTIME ENV DIAGNOSTICS (safe) ====
 try {
   const has = {
