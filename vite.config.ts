@@ -26,24 +26,7 @@ export default defineConfig(({ mode }) => ({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Keep React core together to prevent createContext issues
-          if (id.includes('node_modules')) {
-            if (id.includes('@sentry')) return 'sentry';
-            // Keep all React-related packages together in one chunk
-            if (id.includes('react') || id.includes('react-dom')) return 'react-vendor';
-            if (id.includes('react-router')) return 'router';
-            if (id.includes('recharts')) return 'charts';
-            if (id.includes('@supabase')) return 'supabase';
-            if (id.includes('@radix-ui')) return 'ui';
-            if (id.includes('date-fns') || id.includes('clsx') || id.includes('tailwind-merge')) return 'utils';
-            if (id.includes('@tanstack/react-query')) return 'query';
-            return 'vendor-misc';
-          }
-          // Separate dashboard and financial components
-          if (id.includes('/dashboard/') || id.includes('/financial/')) return 'dashboard';
-          if (id.includes('/auth/')) return 'auth';
-        },
+        manualChunks: undefined,
         // Configurar nomes de arquivo para cache busting
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -187,14 +170,24 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
     // Deduplicate React to avoid multiple copies that break contexts/hooks
-    dedupe: ['react', 'react-dom', 'react/jsx-runtime'],
+    dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/client'],
   },
   
   // Pré-empacotar deps e deduplicar React para evitar múltiplas cópias e erros de createContext
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query', '@supabase/supabase-js'],
-    exclude: [],
-    force: true
+    include: [
+      'react', 
+      'react-dom', 
+      'react-dom/client',
+      'react/jsx-runtime',
+      'react-router-dom', 
+      '@tanstack/react-query', 
+      '@supabase/supabase-js'
+    ],
+    exclude: ['@vite/client', '@vite/env'],
+    esbuildOptions: {
+      target: 'es2020'
+    }
   },
 
   // Configurar variáveis de ambiente para diferentes modos
