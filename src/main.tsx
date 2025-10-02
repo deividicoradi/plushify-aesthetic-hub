@@ -9,13 +9,6 @@ import { cleanupConsoleLogsInProduction } from './utils/console-cleanup'
 import { validateEnvironment, checkProductionReadiness } from './utils/environmentNormalizer'
 import { initPerformanceMonitor } from './utils/performanceOptimizer'
 import { logger } from './utils/debugLogger'
-import './utils/codeAudit' // Auto-executa auditoria em desenvolvimento
-import './utils/attributeValidator' // Validador de atributos DOM
-import './utils/importGuard' // Guard para importações circulares
-import './utils/variableConflictDetector' // Detector de conflitos de variáveis
-import './utils/errorDiagnostics' // Diagnóstico detalhado de erros em runtime
-import { initServiceWorkerCleanup, forceServiceWorkerUpdate } from './utils/serviceWorkerCleanup'
-import { runAppDiagnostics, checkForCommonIssues } from './utils/appDiagnostics'
 
 // Suprimir erros de WebSocket do ambiente de desenvolvimento Lovable
 if (import.meta.env.MODE === 'development') {
@@ -113,8 +106,6 @@ async function initializeApp() {
     initCleanup()
     cleanupConsoleLogsInProduction()
     initPerformanceMonitor()
-    initServiceWorkerCleanup()
-    forceServiceWorkerUpdate()
 
     // Initialize services with error handling
     try {
@@ -150,11 +141,7 @@ async function initializeApp() {
 
     // Boot diagnostics
     const reactVersion = (React as any).version || 'unknown';
-    console.log(`[BOOT] react=${reactVersion} singleProvider=OK authLoaded=pending`);
-    
-    // Run diagnostics
-    runAppDiagnostics();
-    checkForCommonIssues();
+    console.log(`[BOOT] react=${reactVersion} mode=${import.meta.env.MODE}`);
     
     // Evidência final de renderização
     console.log('[RENDER] Inicializando React App...');
