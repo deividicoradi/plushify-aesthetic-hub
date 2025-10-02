@@ -44,32 +44,7 @@ if (import.meta.env.MODE === 'development') {
 }
 
 // ==== RUNTIME ENV DIAGNOSTICS (safe) ====
-try {
-  const has = {
-    URL:  !!import.meta.env.VITE_SUPABASE_URL,
-    ANON: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
-    PUB:  !!import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    MODE: import.meta.env.MODE,
-  };
-  console.info('[ENV@runtime]', has);
-  console.table({ URL: has.URL, ANON: has.ANON, PUB: has.PUB, MODE: has.MODE });
-
-  if (import.meta.env.MODE !== 'production') {
-    (globalThis as any).__ENV__ = {
-      url:  import.meta.env.VITE_SUPABASE_URL,
-      anon: import.meta.env.VITE_SUPABASE_ANON_KEY,
-      pub:  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      mode: import.meta.env.MODE,
-    };
-    console.info('[ENV@runtime] __ENV__ disponível (dev only)');
-  }
-
-  console.info(
-    `[ENV@summary] URL=${has.URL ? 'ok' : 'missing'} ANON=${has.ANON ? 'ok' : 'missing'} PUB=${has.PUB ? 'ok' : 'missing'} MODE=${has.MODE}`
-  );
-} catch (e) {
-  console.warn('[ENV@runtime] import.meta.env indisponível ou fora de módulo', e);
-}
+console.info('[ENV] Supabase configured and ready');
 // =========================================
 
 // Ensure root element exists
