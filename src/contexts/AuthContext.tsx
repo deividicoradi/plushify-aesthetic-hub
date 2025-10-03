@@ -28,6 +28,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Ref para garantir apenas uma subscription ativa
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   const initializedRef = useRef(false);
+  const lastEventRef = useRef<{ event: string; timestamp: number } | null>(null);
+
+  // De-duplicação de eventos dentro de 1 segundo
+  const isDuplicateEvent = (event: string): boolean => {
+    const now = Date.now();
+    if (lastEventRef.current && 
+        lastEventRef.current.event === event && 
+        now - lastEventRef.current.timestamp < 1000) {
+      return true;
+    }
+    lastEventRef.current = { event, timestamp: now };
+    return false;
+  };
 
   // Função para atualizar a sessão (removida para evitar refresh desnecessário)
   const refreshSession = async () => {
@@ -87,8 +100,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         (event, newSession) => {
           if (!mounted) return;
           
-          // Ignorar evento INITIAL_SESSION (já tratado acima)
+          // Ignorar INITIAL_SESSION (já tratado acima)
           if (event === 'INITIAL_SESSION') return;
+          
+          // Ignorar eventos duplicados dentro de 1 segundo
+          if (isDuplicateEvent(event)) {
+            console.log('[AUTH] Duplicate event ignored:', event);
+            return;
+          }
           
           console.log('[AUTH] Event:', event);
           

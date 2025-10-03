@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, X, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { swManager } from '@/utils/swManager';
 
 interface PWAUpdatePromptProps {
   onUpdate?: () => void;
@@ -16,82 +17,32 @@ export const PWAUpdatePrompt: React.FC<PWAUpdatePromptProps> = ({ onUpdate }) =>
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
-    let reloaded = false;
-    const onControllerChange = () => {
-      if (reloaded) return;
-      reloaded = true;
-      onUpdate?.();
-      window.location.reload();
-    };
-
-    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
-
-    navigator.serviceWorker.ready.then(async (registration) => {
-      try {
-        // Se já houver um SW em "waiting", mostrar prompt imediatamente
-        if (registration.waiting && navigator.serviceWorker.controller) {
-          setUpdateAvailable(true);
-          toast({
-            title: "Atualização Disponível",
-            description: "Uma nova versão do Plushify está disponível!",
-            duration: 5000,
-          });
-        }
-
-        // Monitorar novas atualizações
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                setUpdateAvailable(true);
-                toast({
-                  title: "Atualização Disponível",
-                  description: "Uma nova versão do Plushify está disponível!",
-                  duration: 5000,
-                });
-              }
-            });
-          }
-        });
-
-        // Forçar verificação de atualização
-        registration.update().catch(() => {});
-      } catch {}
+    // Usar o gerenciador centralizado de SW
+    const cleanup = swManager.onUpdateAvailable(() => {
+      setUpdateAvailable(true);
+      toast({
+        title: "Atualização Disponível",
+        description: "Uma nova versão do Plushify está disponível!",
+        duration: 5000,
+      });
     });
 
-    return () => {
-      navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
-    };
-  }, [toast, onUpdate]);
+    return cleanup;
+  }, [toast]);
 
   const handleUpdate = async () => {
-    if (!('serviceWorker' in navigator)) return;
-
     setIsUpdating(true);
     
     try {
-      const registration = await navigator.serviceWorker.ready;
-      const waiting = registration.waiting;
-      
-      if (waiting) {
-        // Enviar mensagem para o service worker pular a espera
-        waiting.postMessage({ type: 'SKIP_WAITING' });
-        
-        // Aguardar o controllerchange para recarregar
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          onUpdate?.();
-          window.location.reload();
-        });
-      }
+      onUpdate?.();
+      await swManager.activateUpdate();
     } catch (error) {
-      console.error('Erro ao atualizar PWA:', error);
+      console.error('[PWA] Update error:', error);
       toast({
         title: "Erro na Atualização",
         description: "Não foi possível atualizar. Tente recarregar a página.",
         variant: "destructive",
       });
-    } finally {
       setIsUpdating(false);
     }
   };

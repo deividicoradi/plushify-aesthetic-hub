@@ -77,7 +77,15 @@ window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
 // Initialize app with proper error handling
 async function initializeApp() {
   try {
-    // Initialize cleanup and optimization first
+    // Initialize SW Manager first (cleanup duplicates + singleton)
+    try {
+      const { swManager } = await import('@/utils/swManager');
+      await swManager.initialize();
+    } catch (error) {
+      console.warn('[SW] Manager initialization skipped:', error);
+    }
+
+    // Initialize cleanup and optimization
     initCleanup()
     cleanupConsoleLogsInProduction()
     initPerformanceMonitor()

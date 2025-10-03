@@ -14,94 +14,42 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ onUpdate
   const { toast } = useToast();
 
   useEffect(() => {
-    // Listen for workbox update events
-    const handleUpdateAvailable = () => {
-      setUpdateAvailable(true);
-      toast({
-        title: 'Nova versão disponível!',
-        description: 'Uma nova versão da aplicação está disponível. Clique para atualizar.',
-        duration: 0, // Don't auto-dismiss
-      });
-    };
-
-    // Listen for service worker update events
+    // Usar gerenciador centralizado de SW ao invés de múltiplos listeners
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('controllerchange', handleUpdateAvailable);
+      const { swManager } = require('@/utils/swManager');
       
-      // Check for updates periodically
-      const checkForUpdates = () => {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          registrations.forEach((registration) => {
-            registration.update();
-          });
+      const cleanup = swManager.onUpdateAvailable(() => {
+        setUpdateAvailable(true);
+        toast({
+          title: 'Nova versão disponível!',
+          description: 'Uma nova versão da aplicação está disponível. Clique para atualizar.',
+          duration: 0,
         });
-      };
+      });
 
-      // Check for updates every 5 minutes
-      const interval = setInterval(checkForUpdates, 5 * 60 * 1000);
-      
-      // Check immediately
-      checkForUpdates();
-
-      return () => {
-        navigator.serviceWorker.removeEventListener('controllerchange', handleUpdateAvailable);
-        clearInterval(interval);
-      };
+      return cleanup;
     }
-
-    // Fallback for development or non-PWA environments
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Simulate update check by comparing timestamps
-        const lastUpdate = localStorage.getItem('app-last-update');
-        const now = Date.now();
-        
-        if (!lastUpdate || now - parseInt(lastUpdate) > 10 * 60 * 1000) { // 10 minutes
-          setUpdateAvailable(true);
-          localStorage.setItem('app-last-update', now.toString());
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, [toast]);
 
   const handleUpdate = async () => {
     setIsLoading(true);
     
     try {
-      // Force update via service worker
       if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        
-        for (const registration of registrations) {
-          if (registration.waiting) {
-            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-          }
-          await registration.update();
-        }
-      }
-      
-      // Call the update callback
-      onUpdate();
-      
-      // Force page reload to get new version
-      setTimeout(() => {
+        const { swManager } = require('@/utils/swManager');
+        await swManager.activateUpdate();
+      } else {
+        // Fallback: apenas recarregar
+        onUpdate();
         window.location.reload();
-      }, 1000);
-      
+      }
     } catch (error) {
-      console.error('Error updating app:', error);
+      console.error('[Update] Error:', error);
       toast({
         title: 'Erro na atualização',
         description: 'Não foi possível atualizar a aplicação. Tente recarregar a página.',
         variant: 'destructive',
       });
-    } finally {
       setIsLoading(false);
     }
   };
