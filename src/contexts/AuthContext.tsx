@@ -24,6 +24,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { setUserContext, addBreadcrumb, captureMessage } = useSentry();
+  
+  // Ref para garantir apenas uma subscription ativa
+  const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const initializedRef = useRef(false);
 
   // Função para atualizar a sessão (removida para evitar refresh desnecessário)
   const refreshSession = async () => {
@@ -31,77 +35,104 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    // Prevenir múltiplas inicializações
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    
     let mounted = true;
     
-    // Configura o listener para mudanças no estado de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!mounted) return;
-        
-        console.log('Auth state change:', event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-        
-        // Adicionar contexto do usuário para Sentry
-        if (session?.user) {
-          setUserContext({
-            id: session.user.id,
-            email: session.user.email,
-          });
-          addBreadcrumb(`User ${event}`, 'auth', 'info');
-          
-          // Analytics: Rastrear login
-          if (event === 'SIGNED_IN') {
-            analytics.login();
-          }
-        } else {
-          setUserContext({ id: '' });
-          addBreadcrumb('User logged out', 'auth', 'info');
-          
-          // Analytics: Rastrear logout
-          if (event === 'SIGNED_OUT') {
-            analytics.logout();
-          }
-        }
-      }
-    );
-
-    // Verifica se há uma sessão existente
-    const getInitialSession = async () => {
+    // 1. PRIMEIRO: Obter sessão inicial
+    const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
         if (!mounted) return;
         
         if (error) {
-          console.error('Error getting initial session:', error);
+          console.error('[AUTH] Error getting initial session:', error);
           setSession(null);
           setUser(null);
+          setLoading(false);
+          return;
+        }
+        
+        // Atualizar estado inicial (sem log repetitivo)
+        if (initialSession?.user) {
+          console.log('[AUTH] Initial session loaded');
+          setSession(initialSession);
+          setUser(initialSession.user);
+          setUserContext({
+            id: initialSession.user.id,
+            email: initialSession.user.email,
+          });
         } else {
-          console.log('Initial session check:', session?.user?.email);
-          setSession(session);
-          setUser(session?.user ?? null);
-        }
-      } catch (error) {
-        console.error('Error in getInitialSession:', error);
-        if (mounted) {
           setSession(null);
           setUser(null);
         }
-      } finally {
+        setLoading(false);
+        
+      } catch (error) {
+        console.error('[AUTH] Error in initialization:', error);
         if (mounted) {
+          setSession(null);
+          setUser(null);
           setLoading(false);
         }
       }
     };
-
-    getInitialSession();
+    
+    // 2. DEPOIS: Registrar listener para mudanças futuras (apenas uma vez)
+    if (!subscriptionRef.current) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, newSession) => {
+          if (!mounted) return;
+          
+          // Ignorar evento INITIAL_SESSION (já tratado acima)
+          if (event === 'INITIAL_SESSION') return;
+          
+          console.log('[AUTH] Event:', event);
+          
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+          
+          // Sentry e Analytics apenas para eventos reais
+          if (newSession?.user) {
+            setUserContext({
+              id: newSession.user.id,
+              email: newSession.user.email,
+            });
+            addBreadcrumb(`User ${event}`, 'auth', 'info');
+            
+            if (event === 'SIGNED_IN') {
+              analytics.login();
+            }
+          } else {
+            setUserContext({ id: '' });
+            addBreadcrumb('User logged out', 'auth', 'info');
+            
+            if (event === 'SIGNED_OUT') {
+              analytics.logout();
+            }
+          }
+        }
+      );
+      
+      subscriptionRef.current = subscription;
+    }
+    
+    // Inicializar
+    initializeAuth();
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      if (subscriptionRef.current) {
+        console.log('[AUTH] Cleanup: unsubscribing');
+        subscriptionRef.current.unsubscribe();
+        subscriptionRef.current = null;
+      }
+      initializedRef.current = false;
     };
-  }, [setUserContext, addBreadcrumb]);
+  }, []); // Sem dependências - roda apenas uma vez
 
   const signOut = async () => {
     try {
@@ -140,7 +171,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       timeRemaining: 30 * 60,
       showWarning: false
     }));
-  }, [user?.id]); // FIX: apenas user.id como dependência
+  }, [user]); // Depende do objeto user completo para estabilidade
 
   // Auto logout por inatividade
   const handleAutoLogout = useCallback(async () => {
@@ -181,7 +212,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         timeRemaining: Math.max(0, remainingTime)
       };
     });
-  }, [user?.id, handleAutoLogout]); // FIX: dependências estáveis
+  }, [user, handleAutoLogout]); // Dependências estáveis
 
   // Configurar listeners de atividade - FIX: usar useCallback e memoização
   useEffect(() => {
@@ -204,7 +235,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [user?.id]); // FIX: apenas user.id como dependência
+  }, [user, updateActivity, checkSessionTime]); // Dependências completas e estáveis
 
   const handleExtendSession = () => {
     updateActivity();
