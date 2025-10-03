@@ -120,7 +120,8 @@ async function initializeApp() {
     
     // Evidência final de renderização
     console.log('[RENDER] Inicializando React App...');
-    createRoot(rootElement).render(<App />)
+    const root = createRoot(rootElement);
+    root.render(<App />);
     console.log('[RENDER] React App renderizado com sucesso');
 
     // Setup keep-alive ping after app loads

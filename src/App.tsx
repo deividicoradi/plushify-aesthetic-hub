@@ -202,31 +202,33 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <AppErrorBoundary>
-    <AuthProvider>
-      <SecurityProvider>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <TooltipProvider>
-              <CacheOptimizerProvider>
-                <PWAProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <PerformanceMonitor />
-                    <ScrollToTop />
-                    <AppContent />
-                  </BrowserRouter>
-                  <CookieConsent />
-                </PWAProvider>
-              </CacheOptimizerProvider>
-            </TooltipProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </SecurityProvider>
-    </AuthProvider>
-  </AppErrorBoundary>
-);
+const App = () => {
+  return (
+    <AppErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AuthProvider>
+            <SecurityProvider>
+              <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                <TooltipProvider>
+                  <CacheOptimizerProvider>
+                    <PWAProvider>
+                      <PerformanceMonitor />
+                      <ScrollToTop />
+                      <AppContent />
+                      <Toaster />
+                      <Sonner />
+                      <CookieConsent />
+                    </PWAProvider>
+                  </CacheOptimizerProvider>
+                </TooltipProvider>
+              </ThemeProvider>
+            </SecurityProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </AppErrorBoundary>
+  );
+};
 
 export default App;
