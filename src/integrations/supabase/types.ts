@@ -877,6 +877,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           created_at: string
@@ -2002,6 +2029,26 @@ export type Database = {
           slot_time: string
         }[]
       }
+      get_client_data_admin: {
+        Args: { p_client_id: string }
+        Returns: {
+          address: string
+          cep: string
+          city: string
+          cpf: string
+          created_at: string
+          email: string
+          id: string
+          last_visit: string
+          name: string
+          neighborhood: string
+          payment_method: string
+          phone: string
+          state: string
+          status: string
+          updated_at: string
+        }[]
+      }
       get_client_data_secure: {
         Args: { p_client_id: string; p_mask_sensitive?: boolean }
         Returns: {
@@ -2121,6 +2168,12 @@ export type Database = {
         Args: { user_uuid?: string }
         Returns: Database["public"]["Enums"]["plan_type"]
       }
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
       get_user_usage_stats: {
         Args: { user_uuid?: string }
         Returns: {
@@ -2181,6 +2234,17 @@ export type Database = {
       has_feature_access: {
         Args: { feature_name: string }
         Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      initialize_first_admin: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
       log_unauthorized_access: {
         Args: {
@@ -2429,6 +2493,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       plan_type: "trial" | "professional" | "premium"
     }
     CompositeTypes: {
@@ -2557,6 +2622,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       plan_type: ["trial", "professional", "premium"],
     },
   },
