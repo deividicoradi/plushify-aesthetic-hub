@@ -91,18 +91,14 @@ class DebugLogger {
   // Verificar variáveis de ambiente críticas
   checkEnvironment() {
     const env = {
-      supabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
-      supabaseKey: !!import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      mode: import.meta.env.MODE,
-      gaId: !!import.meta.env.VITE_GA_MEASUREMENT_ID,
-      sentryDsn: !!import.meta.env.VITE_SENTRY_DSN
+      supabaseUrl: true, // Configurado diretamente no código
+      supabaseKey: true, // Configurado diretamente no código
+      mode: import.meta.env.MODE || 'production',
+      valid: true,
+      sentryDsn: false // Não utilizado
     };
 
     this.info('Environment Check', env);
-
-    if (!env.supabaseUrl || !env.supabaseKey) {
-      this.error('Critical environment variables missing', null, env);
-    }
   }
 
   // Obter logs para debugging
