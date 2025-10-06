@@ -61,17 +61,17 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Produto</TableHead>
-            <TableHead>SKU</TableHead>
-            <TableHead>Categoria</TableHead>
+            <TableHead className="min-w-[150px]">Produto</TableHead>
+            <TableHead className="hidden sm:table-cell">SKU</TableHead>
+            <TableHead className="hidden md:table-cell">Categoria</TableHead>
             <TableHead>Estoque</TableHead>
-            <TableHead>Custo</TableHead>
+            <TableHead className="hidden lg:table-cell">Custo</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+            <TableHead className="text-right min-w-[100px]">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -82,41 +82,46 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
               <TableRow key={product.id}>
                 <TableCell>
                   <div className="space-y-1">
-                    <div className="font-medium">{product.name}</div>
+                    <div className="font-medium text-sm sm:text-base">{product.name}</div>
                     {product.brand && (
-                      <div className="text-sm text-gray-500">{product.brand}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">{product.brand}</div>
                     )}
+                    {/* Mobile: mostrar SKU e categoria inline */}
+                    <div className="sm:hidden text-xs text-muted-foreground space-y-0.5">
+                      {product.sku && <div>SKU: {product.sku}</div>}
+                      {product.category && <div>Cat: {product.category}</div>}
+                    </div>
                   </div>
                 </TableCell>
-                <TableCell>
-                  <span className="text-sm text-gray-600">
+                <TableCell className="hidden sm:table-cell">
+                  <span className="text-sm text-muted-foreground">
                     {product.sku || '-'}
                   </span>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   <span className="text-sm">
                     {product.category || '-'}
                   </span>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium">{product.stock_quantity}</span>
+                  <div className="flex items-center space-x-1 sm:space-x-2">
+                    <span className="font-medium text-sm">{product.stock_quantity}</span>
                     {stockStatus.status !== 'ok' && (
-                      <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                      <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />
                     )}
                   </div>
                   {product.min_stock_level && (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       Mín: {product.min_stock_level}
                     </div>
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden lg:table-cell">
                   <div className="space-y-1">
-                    <div className="font-medium">
+                    <div className="font-medium text-sm">
                       {formatCurrency(product.cost_price || 0)}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       Total: {formatCurrency((product.cost_price || 0) * product.stock_quantity)}
                     </div>
                   </div>
@@ -129,7 +134,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
                     >
                       {stockStatus.label}
                     </Badge>
-                    <div>
+                    <div className="lg:block hidden">
                       <Badge
                         variant={product.active ? "default" : "secondary"}
                         className="text-xs"
@@ -140,20 +145,22 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end space-x-2">
+                  <div className="flex justify-end space-x-1 sm:space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onEdit(product)}
+                      className="h-8 w-8 p-0"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onDelete(product.id)}
+                      className="h-8 w-8 p-0"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
                 </TableCell>

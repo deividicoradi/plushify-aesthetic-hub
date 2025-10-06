@@ -28,14 +28,14 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ products }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
-          <Package className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-xs sm:text-sm font-medium">Total de Produtos</CardTitle>
+          <Package className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalProducts}</div>
+          <div className="text-xl sm:text-2xl font-bold">{totalProducts}</div>
           <p className="text-xs text-muted-foreground">
             {activeProducts} ativos
           </p>
@@ -44,12 +44,12 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ products }) => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Estoque Baixo</CardTitle>
-          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+          <CardTitle className="text-xs sm:text-sm font-medium">Estoque Baixo</CardTitle>
+          <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-yellow-600">{lowStockProducts}</div>
-          <p className="text-xs text-muted-foreground">
+          <div className="text-xl sm:text-2xl font-bold text-yellow-600">{lowStockProducts}</div>
+          <p className="text-xs text-muted-foreground hidden sm:block">
             Produtos com estoque baixo
           </p>
         </CardContent>
@@ -57,27 +57,27 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ products }) => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Sem Estoque</CardTitle>
-          <TrendingDown className="h-4 w-4 text-red-500" />
+          <CardTitle className="text-xs sm:text-sm font-medium">Sem Estoque</CardTitle>
+          <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-red-600">{outOfStockProducts}</div>
-          <p className="text-xs text-muted-foreground">
+          <div className="text-xl sm:text-2xl font-bold text-red-600">{outOfStockProducts}</div>
+          <p className="text-xs text-muted-foreground hidden sm:block">
             Produtos zerados
           </p>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="col-span-2 lg:col-span-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Valor do Inventário</CardTitle>
-          <DollarSign className="h-4 w-4 text-green-500" />
+          <CardTitle className="text-xs sm:text-sm font-medium">Valor do Inventário</CardTitle>
+          <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-600">
+          <div className="text-lg sm:text-2xl font-bold text-green-600">
             {formatCurrency(totalInventoryValue)}
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground hidden sm:block">
             Valor total em estoque
           </p>
         </CardContent>
