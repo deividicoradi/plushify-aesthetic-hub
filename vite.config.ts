@@ -58,114 +58,33 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' && componentTagger(),
     VitePWA({
       registerType: 'prompt',
-      injectRegister: null, // Gerenciado manualmente pelo swManager
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'robots.txt', 'lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png'],
+      injectRegister: null,
+      includeAssets: ['favicon.ico', 'lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png'],
       manifest: {
-        name: 'Plushify - Plataforma para Profissionais de Estética',
+        name: 'Plushify',
         short_name: 'Plushify',
-        description: 'Gerencie agendamentos, clientes, pagamentos, serviços, relatórios financeiros e programa de fidelidade',
+        description: 'Gerencie agendamentos, clientes, pagamentos e serviços',
         theme_color: '#D65E9A',
         background_color: '#ffffff',
         display: 'standalone',
-        orientation: 'portrait-primary',
         start_url: '/',
-        scope: '/',
-        lang: 'pt-BR',
-        categories: ['business', 'productivity', 'medical'],
         icons: [
           {
             src: '/lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png',
             sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any maskable'
-          },
-          {
-            src: '/lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
+            type: 'image/png'
           }
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,woff,ttf,eot}'],
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
         cleanupOutdatedCaches: true,
-        skipWaiting: false, // Controle manual via modal
-        clientsClaim: false, // Controle manual via modal
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
-        // Adicionar listener para SKIP_WAITING no SW gerado
-        additionalManifestEntries: [],
-        // Permitir mensagens no SW
-        importScripts: [],
-        runtimeCaching: [
-          // API Cache Strategy
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-api-cache',
-              networkTimeoutSeconds: 10,
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 5 // 5 minutes
-              }
-            }
-          },
-          // Static Assets Cache
-          {
-            urlPattern: /^https:\/\/.*\.(js|css|png|jpg|jpeg|svg|gif|woff|woff2|ttf|eot)$/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'static-assets-cache',
-              expiration: {
-                maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-              }
-            }
-          },
-          // Google Fonts
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'google-fonts-stylesheets',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-webfonts',
-              expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              }
-            }
-          },
-          // Images Cache
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-              }
-            }
-          }
-        ]
+        skipWaiting: false,
+        clientsClaim: false,
+        runtimeCaching: []
       },
       devOptions: {
-        enabled: false, // Desabilitar PWA em desenvolvimento
-        suppressWarnings: true,
-        type: 'module'
+        enabled: false,
+        suppressWarnings: true
       }
     })
   ].filter(Boolean),

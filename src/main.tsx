@@ -77,13 +77,8 @@ window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
 // Initialize app with proper error handling
 async function initializeApp() {
   try {
-    // Initialize SW Manager first (cleanup duplicates + singleton)
-    try {
-      const { swManager } = await import('@/utils/swManager');
-      await swManager.initialize();
-    } catch (error) {
-      console.warn('[SW] Manager initialization skipped:', error);
-    }
+    // Skip SW initialization to prevent Firestore calls
+    console.log('[APP] Service Worker disabled to prevent external API calls');
 
     // Initialize cleanup and optimization
     initCleanup()
