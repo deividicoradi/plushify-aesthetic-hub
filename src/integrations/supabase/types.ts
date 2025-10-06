@@ -2249,6 +2249,19 @@ export type Database = {
           plan_name: string
         }[]
       }
+      get_whatsapp_contatos_secure: {
+        Args: { p_mask_sensitive?: boolean }
+        Returns: {
+          atualizado_em: string
+          cliente_id: string
+          criado_em: string
+          id: string
+          nome: string
+          telefone: string
+          ultima_interacao: string
+          user_id: string
+        }[]
+      }
       get_whatsapp_messages_secure: {
         Args: { p_limit?: number; p_offset?: number; p_session_id?: string }
         Returns: {
