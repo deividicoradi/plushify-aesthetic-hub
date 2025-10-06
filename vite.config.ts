@@ -10,11 +10,12 @@ export default defineConfig(({ mode }) => ({
   base: "./",
   envPrefix: 'VITE_',
   server: {
-    host: "::",
-    port: 8080,
+    host: true,
+    port: 443,
     hmr: {
       overlay: true,
-      clientPort: 8080,
+      clientPort: 443,
+      protocol: 'wss'
     },
     watch: {
       usePolling: false,
