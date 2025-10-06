@@ -60,9 +60,6 @@ export default defineConfig(({ mode }) => ({
       registerType: 'prompt',
       injectRegister: null, // Gerenciado manualmente pelo swManager
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'robots.txt', 'lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png'],
-      strategies: 'injectManifest',
-      srcDir: 'public',
-      filename: 'sw.js',
       manifest: {
         name: 'Plushify - Plataforma para Profissionais de Estética',
         short_name: 'Plushify',
@@ -94,10 +91,14 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,woff,ttf,eot}'],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
         cleanupOutdatedCaches: true,
-        skipWaiting: false, // NÃO forçar skip waiting automaticamente
-        clientsClaim: false, // NÃO tentar claim automaticamente (causa erro)
+        skipWaiting: false, // Controle manual via modal
+        clientsClaim: false, // Controle manual via modal
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
+        // Adicionar listener para SKIP_WAITING no SW gerado
+        additionalManifestEntries: [],
+        // Permitir mensagens no SW
+        importScripts: [],
         runtimeCaching: [
           // API Cache Strategy
           {
