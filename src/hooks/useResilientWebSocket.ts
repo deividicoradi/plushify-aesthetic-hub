@@ -136,9 +136,10 @@ export function useResilientWebSocket(
     [readyState]
   );
 
-  // Conectar automaticamente ao montar
+  // Desabilitar autoConnect para evitar tentativas de conexão não solicitadas
   useEffect(() => {
-    if (autoConnect && url) {
+    // Auto-connect desabilitado por padrão para evitar erros de WebSocket
+    if (autoConnect && url && false) {
       connect();
     }
 

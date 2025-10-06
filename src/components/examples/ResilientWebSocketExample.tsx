@@ -41,7 +41,7 @@ export function ResilientWebSocketExample() {
     connect,
     disconnect,
     readyState,
-  } = useResilientWebSocket(wsUrl, {
+  } = useResilientWebSocket(null, { // Desabilitar WebSocket por padrão
     maxReconnects: 5,
     initialRetryDelay: 1000,
     maxRetryDelay: 30000,
