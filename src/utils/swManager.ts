@@ -135,17 +135,22 @@ class ServiceWorkerManager {
     }
 
     try {
-      // Enviar mensagem para skip waiting
-      this.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      console.log('[SW] Activating update...');
       
-      // Aguardar controller change e recarregar
-      const reloadPromise = new Promise<void>((resolve) => {
+      // Configurar listener de controllerchange ANTES de enviar SKIP_WAITING
+      const controllerChangePromise = new Promise<void>((resolve) => {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('[SW] Controller changed, reloading...');
           resolve();
         }, { once: true });
       });
 
-      await reloadPromise;
+      // Enviar mensagem para skip waiting
+      this.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      console.log('[SW] SKIP_WAITING message sent');
+      
+      // Aguardar controller change e recarregar apenas uma vez
+      await controllerChangePromise;
       window.location.reload();
     } catch (error) {
       console.error('[SW] Activation error:', error);

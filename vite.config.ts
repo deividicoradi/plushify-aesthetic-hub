@@ -57,9 +57,12 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      registerType: 'prompt',
+      injectRegister: null, // Gerenciado manualmente pelo swManager
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'robots.txt', 'lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png'],
+      strategies: 'injectManifest',
+      srcDir: 'public',
+      filename: 'sw.js',
       manifest: {
         name: 'Plushify - Plataforma para Profissionais de Estética',
         short_name: 'Plushify',
