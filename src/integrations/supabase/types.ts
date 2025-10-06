@@ -75,6 +75,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_basic"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appointments_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -1027,6 +1034,13 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_whatsapp_contatos_cliente_id"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clients_basic"
+            referencedColumns: ["id"]
+          },
         ]
       }
       whatsapp_health_status: {
@@ -1854,6 +1868,30 @@ export type Database = {
           status?: string | null
           updated_at?: string | null
           user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      clients_basic: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          name: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          name?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          name?: string | null
+          status?: string | null
           user_id?: string | null
         }
         Relationships: []
