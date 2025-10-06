@@ -56,7 +56,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
-    mode === 'production' && VitePWA({
+    ...(mode === 'production' ? [VitePWA({
       registerType: 'prompt',
       injectRegister: null,
       includeAssets: ['favicon.ico', 'lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png'],
@@ -77,17 +77,19 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
+        globPatterns: [],
         cleanupOutdatedCaches: true,
         skipWaiting: false,
         clientsClaim: false,
         runtimeCaching: [],
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+        navigateFallback: null
       },
       devOptions: {
         enabled: false,
         suppressWarnings: true
       }
-    })
+    })] : [])
   ].filter(Boolean),
   resolve: {
     alias: {
