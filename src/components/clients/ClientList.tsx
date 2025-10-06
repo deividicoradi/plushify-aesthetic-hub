@@ -47,49 +47,33 @@ const ClientList: React.FC<{
 
     setLoading(true);
     try {
-      let query = supabase
-        .from('clients')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      // Apply status filter
-      if (filters.status !== "Todos") {
-        query = query.eq('status', filters.status);
-      }
-
-      const { data, error } = await query;
+      // Use secure RPC function with audit logging
+      const { data, error } = await supabase.rpc('get_clients_masked', {
+        p_mask_sensitive: false
+      });
 
       if (error) throw error;
 
-      // Apply search filter
+      // Apply filters client-side (data already secured and audited)
       let filteredData = data || [];
+      
+      // Apply status filter
+      if (filters.status !== "Todos") {
+        filteredData = filteredData.filter(client => client.status === filters.status);
+      }
+
+      // Apply search filter
       if (searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase();
         filteredData = filteredData.filter(client => 
-          client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          client.name.toLowerCase().includes(searchLower) ||
+          (client.email && client.email.toLowerCase().includes(searchLower)) ||
           (client.phone && client.phone.includes(searchTerm)) ||
           (client.cpf && client.cpf.includes(searchTerm.replace(/\D/g, '')))
         );
       }
 
-      // Explicitly cast the data to match our Client type
-      setClients(filteredData.map(client => ({
-        id: client.id,
-        name: client.name,
-        email: client.email,
-        phone: client.phone,
-        cpf: client.cpf,
-        cep: client.cep,
-        address: client.address,
-        neighborhood: client.neighborhood,
-        city: client.city,
-        state: client.state,
-        payment_method: client.payment_method,
-        status: client.status || 'Ativo',
-        created_at: client.created_at,
-        last_visit: client.last_visit
-      })));
+      setClients(filteredData);
     } catch (error: any) {
       toast({
         title: "Erro",

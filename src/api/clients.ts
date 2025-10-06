@@ -1,15 +1,22 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Client } from '@/hooks/useClients';
 
-export async function fetchClients(userId: string): Promise<Client[]> {
-  const { data, error } = await supabase
-    .from('clients')
-    .select('id, name, email, phone, status')
-    .eq('user_id', userId)
-    .order('name');
+export async function fetchClients(userId: string, maskSensitive = false): Promise<Client[]> {
+  // Use secure RPC function with audit logging
+  const { data, error } = await supabase.rpc('get_clients_masked', {
+    p_mask_sensitive: maskSensitive
+  });
 
   if (error) throw error;
-  return (data || []) as Client[];
+  
+  // Map to Client interface (only return necessary fields)
+  return (data || []).map(client => ({
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    phone: client.phone,
+    status: client.status
+  })) as Client[];
 }
 
 export async function createClient(userId: string, clientData: Omit<Client, 'id'>): Promise<Client> {

@@ -35,7 +35,7 @@ export const useReportsMetrics = () => {
       const { start: lastMonthStart, end: lastMonthEnd } = getDateRange('month');
       lastMonthEnd.setTime(currentMonthStart.getTime() - 1);
 
-      // Optimized parallel queries
+      // Optimized parallel queries using secure RPC for clients
       const [
         clientsResult,
         paymentsResult,
@@ -45,7 +45,8 @@ export const useReportsMetrics = () => {
         currentMonthData,
         lastMonthData
       ] = await Promise.all([
-        supabase.from('clients').select('id').eq('user_id', user.id),
+        // Use secure RPC for clients data
+        supabase.rpc('get_clients_masked', { p_mask_sensitive: false }),
         supabase.from('payments').select('paid_amount, status').eq('user_id', user.id),
         supabase.from('appointments').select('id').eq('user_id', user.id),
         supabase.from('products').select('id, stock_quantity, min_stock_level').eq('user_id', user.id),
@@ -54,14 +55,21 @@ export const useReportsMetrics = () => {
         // Current month aggregated data
         Promise.all([
           supabase.from('payments').select('paid_amount, status').eq('user_id', user.id).gte('payment_date', currentMonthStart.toISOString()),
-          supabase.from('clients').select('id').eq('user_id', user.id).gte('created_at', currentMonthStart.toISOString()),
+          supabase.rpc('get_clients_masked', { p_mask_sensitive: false }).then(r => ({ 
+            data: r.data?.filter(c => new Date(c.created_at) >= currentMonthStart) || [] 
+          })),
           supabase.from('appointments').select('id').eq('user_id', user.id).gte('created_at', currentMonthStart.toISOString())
         ]),
         
         // Last month aggregated data
         Promise.all([
           supabase.from('payments').select('paid_amount, status').eq('user_id', user.id).gte('payment_date', lastMonthStart.toISOString()).lte('payment_date', lastMonthEnd.toISOString()),
-          supabase.from('clients').select('id').eq('user_id', user.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString()),
+          supabase.rpc('get_clients_masked', { p_mask_sensitive: false }).then(r => ({ 
+            data: r.data?.filter(c => {
+              const created = new Date(c.created_at);
+              return created >= lastMonthStart && created <= lastMonthEnd;
+            }) || [] 
+          })),
           supabase.from('appointments').select('id').eq('user_id', user.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString())
         ])
       ]);
