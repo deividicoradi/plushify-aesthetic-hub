@@ -3,29 +3,32 @@ import React from 'react';
 import { HelpCircle, ExternalLink, Mail, MessageCircle, Clock, BookOpen, Video, FileText, Rss } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import DashboardSidebar from '@/components/layout/DashboardSidebar';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 const Help = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardSidebar />
-      <div className="ml-64 min-h-screen flex flex-col">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="flex items-center gap-4 border-b bg-background px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <HelpCircle className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Central de Ajuda</h1>
-              <p className="text-muted-foreground">Encontre respostas e suporte para suas dúvidas</p>
+        <header className="flex items-center gap-4 border-b bg-background px-6 py-8 mt-16">
+          <div className="max-w-7xl mx-auto w-full">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <HelpCircle className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Central de Ajuda</h1>
+                <p className="text-muted-foreground">Encontre respostas e suporte para suas dúvidas</p>
+              </div>
             </div>
           </div>
         </header>
         
         {/* Main Content */}
         <main className="flex-1 p-6">
-          <div className="max-w-4xl mx-auto space-y-6">
+          <div className="max-w-7xl mx-auto space-y-6">
             {/* Support Cards Grid */}
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="border shadow-sm">
@@ -345,7 +348,8 @@ const Help = () => {
           </div>
         </main>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 
