@@ -127,31 +127,8 @@ async function initializeApp() {
     root.render(<App />);
     console.log('[RENDER] React App renderizado com sucesso');
 
-    // Setup keep-alive ping after app loads
-    setTimeout(async () => {
-      try {
-        const { pingKeepAlive } = await import('./lib/keepAlive');
-        const doPing = async () => {
-          const res = await pingKeepAlive();
-          if (res?.headersEcho) {
-            console.log('[KEEPALIVE:HEADERS]', res.headersEcho);
-          }
-        };
-        // Initial ping and then every 4 minutes
-        doPing();
-        const interval = setInterval(doPing, 4 * 60 * 1000);
-        // Keep-alive when tab becomes visible
-        document.addEventListener('visibilitychange', () => {
-          if (!document.hidden) doPing();
-        });
-        // Clean up on hot reloads
-        if (import.meta && (import.meta as any).hot) {
-          (import.meta as any).hot.on('vite:beforeFullReload', () => clearInterval(interval));
-        }
-      } catch (e) {
-        console.warn('KeepAlive setup failed', e);
-      }
-    }, 1000);
+    // Keep-alive desabilitado para evitar erros SSL na porta 8080
+    console.log('[APP] Keep-alive ping disabled to prevent SSL errors');
 
   } catch (err: any) {
     console.error('Falha ao renderizar App:', err)
