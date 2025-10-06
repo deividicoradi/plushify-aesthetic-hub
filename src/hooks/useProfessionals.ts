@@ -21,11 +21,11 @@ export const useProfessionals = () => {
   const fetchProfessionals = async () => {
     try {
       setIsLoading(true);
+      // Usar função RPC segura com auditoria automática
       const { data, error } = await supabase
-        .from('professionals')
-        .select('*')
-        .eq('active', true)
-        .order('name');
+        .rpc('get_professionals_secure', {
+          p_mask_sensitive: false
+        });
 
       if (error) throw error;
       setProfessionals(data || []);

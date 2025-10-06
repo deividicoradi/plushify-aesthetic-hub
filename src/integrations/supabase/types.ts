@@ -2152,6 +2152,20 @@ export type Database = {
           plan_name: string
         }[]
       }
+      get_professional_secure: {
+        Args: { p_mask_sensitive?: boolean; p_professional_id: string }
+        Returns: {
+          active: boolean
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string
+          specialties: string[]
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_professionals_by_service: {
         Args: { p_service_id: string; p_user_id: string }
         Returns: {
@@ -2160,6 +2174,20 @@ export type Database = {
           name: string
           phone: string
           specialties: string[]
+        }[]
+      }
+      get_professionals_secure: {
+        Args: { p_mask_sensitive?: boolean }
+        Returns: {
+          active: boolean
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string
+          specialties: string[]
+          updated_at: string
+          user_id: string
         }[]
       }
       get_public_available_slots: {
