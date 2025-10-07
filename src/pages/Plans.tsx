@@ -2,22 +2,22 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PlansPage } from '@/components/plans/PlansPage';
-import DashboardSidebar from '@/components/layout/DashboardSidebar';
+import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
+import { Sparkles } from 'lucide-react';
 
 const Plans = () => {
   const { user } = useAuth();
 
-  // Se o usuário estiver logado, mostrar com sidebar
+  // Se o usuário estiver logado, mostrar com ResponsiveLayout
   if (user) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
-        <DashboardSidebar />
-        <main className="ml-64 min-h-screen">
-          <div className="p-6">
-            <PlansPage />
-          </div>
-        </main>
-      </div>
+      <ResponsiveLayout
+        title="Planos"
+        subtitle="Escolha o plano ideal para o seu negócio"
+        icon={Sparkles}
+      >
+        <PlansPage />
+      </ResponsiveLayout>
     );
   }
 
