@@ -86,26 +86,28 @@ const Inventory = () => {
       title="Controle de Produtos"
       subtitle="Gerencie seu estoque e produtos"
       icon={Package}
-      actions={
-        <Button onClick={handleCreateProduct} className="gap-2" size="sm">
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">Novo Produto</span>
-        </Button>
-      }
     >
       {/* Limit Alert */}
       <LimitAlert type="products" currentCount={products.length} action="adicionar" />
       
       {/* Search */}
-      <div className="flex items-center space-x-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar produtos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
+            className="pl-10 h-11 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200"
           />
+        </div>
+        
+        <div className="flex gap-2 w-full justify-end">
+          <Button onClick={handleCreateProduct} className="gap-2 touch-target">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Novo Produto</span>
+            <span className="sm:hidden">Novo</span>
+          </Button>
         </div>
       </div>
       
