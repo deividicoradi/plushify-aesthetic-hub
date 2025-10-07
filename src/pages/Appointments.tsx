@@ -40,37 +40,33 @@ const Appointments = () => {
         {/* Limit Alert */}
         <LimitAlert type="appointments" currentCount={appointments.length} action="criar" />
         
-        <Tabs defaultValue="agenda" className="mt-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="agenda">Agenda</TabsTrigger>
-            <TabsTrigger value="config">Configurações</TabsTrigger>
+        <Tabs defaultValue="agenda" className="mt-4 sm:mt-6">
+          <TabsList className="grid w-full grid-cols-2 h-11 sm:h-10">
+            <TabsTrigger value="agenda" className="text-sm sm:text-base">Agenda</TabsTrigger>
+            <TabsTrigger value="config" className="text-sm sm:text-base">Configurações</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="agenda" className="space-y-6">
-            {/* Search and Filters Bar */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-              <div className="relative flex-1 max-w-md">
+          <TabsContent value="agenda" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+            {/* Search and Filters Bar - Mobile Optimized */}
+            <div className="flex flex-col gap-3 sm:gap-4">
+              {/* Search Bar - Full Width on Mobile */}
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   placeholder="Buscar por cliente, serviço..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-11 sm:h-10"
                 />
               </div>
-              <div className="flex gap-2">
+              
+              {/* Filter Button - Full Width on Mobile */}
+              <div className="w-full sm:w-auto">
                 <AppointmentFiltersAdvanced
                   filters={filters}
                   onFiltersChange={setFilters}
                   onClearFilters={() => setFilters({})}
                 />
-                <Button 
-                  onClick={() => setIsCreateDialogOpen(true)} 
-                  className="bg-plush-600 hover:bg-plush-700 sm:hidden touch-target"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo
-                </Button>
               </div>
             </div>
             
@@ -82,7 +78,7 @@ const Appointments = () => {
             />
           </TabsContent>
           
-          <TabsContent value="config" className="space-y-6">
+          <TabsContent value="config" className="space-y-6 mt-4 sm:mt-6">
             <WorkingHoursSetup />
           </TabsContent>
         </Tabs>

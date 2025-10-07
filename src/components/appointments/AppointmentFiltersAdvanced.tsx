@@ -110,15 +110,15 @@ export const AppointmentFiltersAdvanced = ({
   const activeFiltersDisplay = getActiveFiltersDisplay();
 
   return (
-    <div className="space-y-3">
+    <div className="w-full sm:w-auto">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button 
             variant={activeFiltersCount > 0 ? "default" : "outline"} 
-            className="flex items-center gap-2 transition-all duration-200"
+            className="w-full sm:w-auto h-11 sm:h-10 flex items-center justify-center gap-2 transition-all duration-200 touch-target"
           >
             <Filter className="w-4 h-4" />
-            <span className="hidden sm:inline">Filtros</span>
+            <span>Filtros</span>
             {activeFiltersCount > 0 && (
               <Badge variant={activeFiltersCount > 0 ? "secondary" : "default"} className="bg-white/20 text-white border-white/30">
                 {activeFiltersCount}

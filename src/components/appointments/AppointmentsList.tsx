@@ -309,20 +309,18 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
         </div>
       )}
       
-      {/* Compact Filter Controls */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <Input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-auto text-sm"
-            placeholder="Data específica"
-          />
-        </div>
+      {/* Compact Filter Controls - Mobile Optimized */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <Input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="w-full sm:w-auto h-11 sm:h-10 text-sm touch-target"
+          placeholder="Data específica"
+        />
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-full sm:w-40 h-11 sm:h-10 touch-target">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -335,9 +333,9 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
         </Select>
       </div>
 
-      {/* Bulk Actions - More Elegant */}
+      {/* Bulk Actions - Mobile Optimized */}
       {selectedAppointments.length > 0 && (
-        <div className="sticky top-4 z-10 flex flex-wrap items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 rounded-lg border border-blue-200 dark:border-blue-800 shadow-lg backdrop-blur-sm">
+        <div className="sticky top-4 z-10 flex flex-col sm:flex-row sm:items-center gap-3 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 rounded-lg border border-blue-200 dark:border-blue-800 shadow-lg backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
             <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
@@ -345,53 +343,65 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
             </span>
           </div>
           
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full sm:w-auto">
             <Button
               size="sm"
               variant="outline"
               onClick={() => handleBulkAction('confirmar')}
-              className="text-green-700 border-green-300 bg-green-50 hover:bg-green-100 dark:text-green-400 dark:border-green-700 dark:bg-green-950/50 dark:hover:bg-green-950/70 transition-all"
+              className="h-11 sm:h-9 text-green-700 border-green-300 bg-green-50 hover:bg-green-100 dark:text-green-400 dark:border-green-700 dark:bg-green-950/50 dark:hover:bg-green-950/70 transition-all touch-target"
             >
-              <Check className="w-3 h-3 mr-1" />
-              Confirmar
+              <Check className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
+              <span className="hidden sm:inline">Confirmar</span>
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={() => handleBulkAction('cancelar')}
-              className="text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100 dark:text-amber-400 dark:border-amber-700 dark:bg-amber-950/50 dark:hover:bg-amber-950/70 transition-all"
+              className="h-11 sm:h-9 text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100 dark:text-amber-400 dark:border-amber-700 dark:bg-amber-950/50 dark:hover:bg-amber-950/70 transition-all touch-target"
             >
-              <X className="w-3 h-3 mr-1" />
-              Cancelar
+              <X className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
+              <span className="hidden sm:inline">Cancelar</span>
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={() => handleBulkAction('concluir')}
-              className="text-blue-700 border-blue-300 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:border-blue-700 dark:bg-blue-950/50 dark:hover:bg-blue-950/70 transition-all"
+              className="h-11 sm:h-9 text-blue-700 border-blue-300 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:border-blue-700 dark:bg-blue-950/50 dark:hover:bg-blue-950/70 transition-all touch-target"
             >
-              <Clock className="w-3 h-3 mr-1" />
-              Concluir
+              <Clock className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
+              <span className="hidden sm:inline">Concluir</span>
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={() => handleBulkAction('excluir')}
-              className="text-red-700 border-red-300 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:border-red-700 dark:bg-red-950/50 dark:hover:bg-red-950/70 transition-all"
+              className="h-11 sm:h-9 text-red-700 border-red-300 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:border-red-700 dark:bg-red-950/50 dark:hover:bg-red-950/70 transition-all touch-target"
             >
-              <Trash2 className="w-3 h-3 mr-1" />
-              Excluir
+              <Trash2 className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
+              <span className="hidden sm:inline">Excluir</span>
             </Button>
           </div>
         </div>
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="hoje">Hoje ({todayAppointments.length})</TabsTrigger>
-          <TabsTrigger value="amanha">Amanhã ({tomorrowAppointments.length})</TabsTrigger>
-          <TabsTrigger value="todos">Todos ({filteredAppointments.length})</TabsTrigger>
-          <TabsTrigger value="data">Por Data</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 h-auto sm:h-10 p-1">
+          <TabsTrigger value="hoje" className="text-xs sm:text-sm px-2 sm:px-3 py-2.5 sm:py-2 touch-target">
+            <span className="hidden sm:inline">Hoje ({todayAppointments.length})</span>
+            <span className="sm:hidden">Hoje<br/>({todayAppointments.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="amanha" className="text-xs sm:text-sm px-2 sm:px-3 py-2.5 sm:py-2 touch-target">
+            <span className="hidden sm:inline">Amanhã ({tomorrowAppointments.length})</span>
+            <span className="sm:hidden">Amanhã<br/>({tomorrowAppointments.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="todos" className="text-xs sm:text-sm px-2 sm:px-3 py-2.5 sm:py-2 touch-target">
+            <span className="hidden sm:inline">Todos ({filteredAppointments.length})</span>
+            <span className="sm:hidden">Todos<br/>({filteredAppointments.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="data" className="text-xs sm:text-sm px-2 sm:px-3 py-2.5 sm:py-2 touch-target">
+            <span className="hidden sm:inline">Por Data</span>
+            <span className="sm:hidden">Data</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="hoje" className="space-y-4 mt-6">
