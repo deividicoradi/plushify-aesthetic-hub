@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -155,11 +156,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+      
+      // Limpar estado local
+      setSession(null);
+      setUser(null);
+      
       toast({
         title: "Logout realizado",
         description: "Você saiu da sua conta com sucesso"
       });
+      
+      // Redirecionar para página de login
+      window.location.href = '/auth';
     } catch (error: any) {
       console.error('Erro ao fazer logout:', error.message);
       toast({
