@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- Enhanced Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://checkout.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://tagmanager.google.com https://lovable.dev https://*.lovable.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://tagmanager.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://wmoylybbwikkqbxiqwbq.supabase.co wss://wmoylybbwikkqbxiqwbq.supabase.co https://api.stripe.com https://checkout.stripe.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://tagmanager.google.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     
@@ -39,6 +40,52 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@plushify" />
     <meta name="twitter:image" content="/lovable-uploads/08b4c043-d7b4-4b36-a153-f9612191c581.png" />
+    <script>
+      (function(){
+        try{
+          var isDev = false; // preview/prod only
+          var host = location.hostname;
+          var onPreview = /\.lovableproject\.com$/i.test(host);
+          var block8080 = onPreview && !isDev;
+          var isBlocked8080 = function(u){ return block8080 && /https?:\/\/[^/]+\.lovableproject\.com:8080(\/|$)/i.test(u); };
+          // Patch fetch early so any script capturing window.fetch sees the patched one
+          var originalFetch = window.fetch.bind(window);
+          window.fetch = function(input, init){
+            try{
+              var url = (typeof input === 'string') ? input : (input && input.url) ? input.url : String(input);
+              if(url && isBlocked8080(url)){
+                return Promise.resolve(new Response('', {status:204, statusText:'No Content'}));
+              }
+            }catch(e){}
+            return originalFetch(input, init);
+          };
+          // Patch WebSocket
+          var OriginalWS = window.WebSocket;
+          window.WebSocket = function(url, protocols){
+            try{
+              var u = (typeof url === 'string') ? url : String(url);
+              if(isBlocked8080(u)){
+                return { url: u, readyState: 3, close: function(){}, send: function(){}, addEventListener: function(){}, removeEventListener: function(){}, dispatchEvent: function(){return false;}, onopen:null, onmessage:null, onerror:null, onclose:null };
+              }
+            }catch(e){}
+            return new OriginalWS(url, protocols);
+          };
+          // Patch EventSource
+          var OriginalES = window.EventSource;
+          if (OriginalES) {
+            window.EventSource = function(url, opts){
+              try{
+                var u = (typeof url === 'string') ? url : String(url);
+                if(isBlocked8080(u)){
+                  return { url: u, readyState: 2, close: function(){}, addEventListener: function(){}, removeEventListener: function(){}, dispatchEvent: function(){return false;}, onopen:null, onmessage:null, onerror:null };
+                }
+              }catch(e){}
+              return new OriginalES(url, opts);
+            };
+          }
+        }catch(_e){}
+      })();
+    </script>
   </head>
 
   <body>
