@@ -195,18 +195,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout>();
 
-  // Atualizar última atividade - FIX: callback estável
+  // Atualizar última atividade - FIX: callback estável sem dependência de user
   const updateActivity = useCallback(() => {
-    if (!user) return;
-    
-    const now = new Date();
-    setSessionState(prev => ({
-      ...prev,
-      lastActivity: now,
-      timeRemaining: 30 * 60,
-      showWarning: false
-    }));
-  }, [user]); // Depende do objeto user completo para estabilidade
+    setSessionState(prev => {
+      // Se não temos sessão, não atualizar
+      if (!prev.lastActivity) return prev;
+      
+      const now = new Date();
+      return {
+        ...prev,
+        lastActivity: now,
+        timeRemaining: 30 * 60,
+        showWarning: false
+      };
+    });
+  }, []); // Sem dependências para evitar re-criação
 
   // Auto logout por inatividade
   const handleAutoLogout = useCallback(async () => {
@@ -218,11 +221,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await signOut();
   }, [toast]);
 
-  // Verificar tempo de sessão - FIX: callback estável
+  // Verificar tempo de sessão - FIX: callback estável sem dependência de user
   const checkSessionTime = useCallback(() => {
-    if (!user) return;
-
     setSessionState(prev => {
+      // Se não temos sessão ativa, não verificar
+      if (!prev.lastActivity) return prev;
+      
       const now = new Date();
       const timeSinceActivity = Math.floor((now.getTime() - prev.lastActivity.getTime()) / 1000);
       const remainingTime = (30 * 60) - timeSinceActivity;
@@ -247,11 +251,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         timeRemaining: Math.max(0, remainingTime)
       };
     });
-  }, [user, handleAutoLogout]); // Dependências estáveis
+  }, [handleAutoLogout]); // Apenas handleAutoLogout como dependência
 
-  // Configurar listeners de atividade - FIX: usar useCallback e memoização
+  // Configurar listeners de atividade - FIX: remover dependência de user para evitar loop
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      // Limpar se não há usuário
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      return;
+    }
 
     const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     
@@ -270,7 +280,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [user, updateActivity, checkSessionTime]); // Dependências completas e estáveis
+  }, [user?.id, updateActivity, checkSessionTime]); // Usar user?.id ao invés de user completo
 
   const handleExtendSession = () => {
     updateActivity();
