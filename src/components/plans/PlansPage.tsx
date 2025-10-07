@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useStripeCheckoutIndividual } from '@/hooks/useStripeCheckoutIndividual';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { PlansHero } from './PlansHero';
 import { PlanAlerts } from './PlanAlerts';
 import { BillingToggle } from './BillingToggle';
@@ -16,6 +17,7 @@ import Footer from '../Footer';
 
 export const PlansPage: React.FC = () => {
   const [isAnnual, setIsAnnual] = useState(false);
+  const { user } = useAuth();
   const { currentPlan, subscription, loading, checkSubscriptionStatus } = useSubscription();
   const { createCheckout, openCustomerPortal, isLoading } = useStripeCheckoutIndividual();
   const { toast } = useToast();
@@ -61,6 +63,59 @@ export const PlansPage: React.FC = () => {
 
   const plans = createPlansData(currentPlan);
 
+  // Conteúdo principal dos planos (sem navbar/footer quando logado)
+  const plansContent = (
+    <>
+      {/* Current Plan Alert */}
+      <PlanAlerts 
+        currentPlan={currentPlan}
+        onPlanSelection={handlePlanSelection}
+        onManageSubscription={handleManageSubscription}
+        isLoading={isLoading}
+        isAnnual={isAnnual}
+      />
+
+      {/* Billing Toggle */}
+      <div className="flex justify-center">
+        <BillingToggle
+          isAnnual={isAnnual}
+          onToggle={setIsAnnual}
+        />
+      </div>
+
+      {/* Plans Grid */}
+      <PlansGrid
+        plans={plans}
+        isAnnual={isAnnual}
+        onPlanSelection={handlePlanSelection}
+        isLoading={isLoading}
+      />
+
+      {/* FAQ Section */}
+      <div className="pt-8">
+        <FAQSection />
+      </div>
+    </>
+  );
+
+  // Se estiver logado, retornar apenas o conteúdo (sem navbar/footer)
+  if (user) {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-8">
+        {plansContent}
+      </div>
+    );
+  }
+
+  // Layout público (não logado) com navbar e footer
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -89,30 +144,7 @@ export const PlansPage: React.FC = () => {
         {/* Main Content */}
         <section className="py-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-            {/* Current Plan Alert */}
-            <PlanAlerts 
-              currentPlan={currentPlan}
-              onPlanSelection={handlePlanSelection}
-              onManageSubscription={handleManageSubscription}
-              isLoading={isLoading}
-              isAnnual={isAnnual}
-            />
-
-            {/* Billing Toggle */}
-            <div className="flex justify-center">
-              <BillingToggle
-                isAnnual={isAnnual}
-                onToggle={setIsAnnual}
-              />
-            </div>
-
-            {/* Plans Grid */}
-            <PlansGrid
-              plans={plans}
-              isAnnual={isAnnual}
-              onPlanSelection={handlePlanSelection}
-              isLoading={isLoading}
-            />
+            {plansContent}
           </div>
         </section>
 
