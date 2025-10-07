@@ -9,17 +9,21 @@ interface InstallmentsHeaderProps {
 
 const InstallmentsHeader = ({ onCreateNew }: InstallmentsHeaderProps) => {
   return (
-    <div className="flex justify-between items-center">
+    <div className="space-y-4">
       <div>
         <h2 className="text-2xl font-bold">Parcelamentos</h2>
         <p className="text-muted-foreground">
           Gerencie parcelas e adiantamentos
         </p>
       </div>
-      <Button onClick={onCreateNew}>
-        <Plus className="w-4 h-4 mr-2" />
-        Novo Parcelamento
-      </Button>
+      
+      <div className="flex gap-2 w-full justify-end">
+        <Button onClick={onCreateNew} className="gap-2 touch-target">
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Novo Parcelamento</span>
+          <span className="sm:hidden">Novo</span>
+        </Button>
+      </div>
     </div>
   );
 };
