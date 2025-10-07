@@ -1,34 +1,18 @@
 
 import React from 'react';
-import { HelpCircle, ExternalLink, Mail, MessageCircle, Clock, BookOpen, Video, FileText, Rss } from 'lucide-react';
+import { HelpCircle, ExternalLink, Mail, MessageCircle, Clock, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 
 const Help = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      {/* Header */}
-      <header className="flex items-center gap-4 border-b bg-background px-6 py-8 mt-16">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <HelpCircle className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Central de Ajuda</h1>
-              <p className="text-muted-foreground">Encontre respostas e suporte para suas dúvidas</p>
-            </div>
-          </div>
-        </div>
-      </header>
-      
-      {/* Main Content */}
-      <main className="p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
+    <ResponsiveLayout
+      title="Central de Ajuda"
+      subtitle="Encontre respostas e suporte para suas dúvidas"
+      icon={HelpCircle}
+    >
+      <div className="space-y-6">
             {/* Support Cards Grid */}
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="border shadow-sm">
@@ -341,15 +325,12 @@ const Help = () => {
                     <li>• Definir níveis mínimos de estoque</li>
                     <li>• Receber alertas de produtos em falta</li>
                     <li>• Acompanhar custos e margens de lucro</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </main>
-      
-      <Footer />
-    </div>
+                   </ul>
+                 </CardContent>
+               </Card>
+             </div>
+      </div>
+    </ResponsiveLayout>
   );
 };
 
