@@ -24,7 +24,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { setUserContext, addBreadcrumb, captureMessage } = useSentry();
+  const { setUserContext, addBreadcrumb } = useSentry();
+  const navigate = useNavigate();
   
   // Ref para garantir apenas uma subscription ativa
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
@@ -154,23 +155,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []); // Sem dependências - roda apenas uma vez
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) throw error;
-      
-      // Limpar estado local
+      // 1. Limpar estado local primeiro (instantâneo)
       setSession(null);
       setUser(null);
+      setUserContext({ id: '' });
       
+      // 2. Navegar imediatamente (não espera o Supabase)
+      navigate('/auth', { replace: true });
+      
+      // 3. Mostrar toast
       toast({
         title: "Logout realizado",
         description: "Você saiu da sua conta com sucesso"
       });
       
-      // Redirecionar para página de login
-      window.location.href = '/auth';
+      // 4. Fazer signOut do Supabase em background
+      supabase.auth.signOut().catch(error => {
+        console.error('Erro ao fazer logout no Supabase:', error);
+      });
+      
     } catch (error: any) {
       console.error('Erro ao fazer logout:', error.message);
       toast({
@@ -179,7 +184,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: "destructive"
       });
     }
-  };
+  }, [navigate, toast, setUserContext]);
 
   // Sistema de timeout de sessão integrado
   const [sessionState, setSessionState] = useState({
