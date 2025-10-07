@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { Users, UserPlus, Shield } from 'lucide-react';
+import { Users, UserPlus, Shield, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useTeamMembers, TeamMember } from '@/hooks/useTeamMembers';
 import { useTeamLimits } from '@/hooks/useTeamLimits';
 import { TeamMemberCard } from '@/components/team/TeamMemberCard';
@@ -18,9 +19,17 @@ export const TeamManagement = () => {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   
   const limitInfo = getUserLimitInfo();
+
+  // Filtrar membros baseado na busca
+  const filteredMembers = teamMembers.filter(member =>
+    member.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.role?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleAddMember = () => {
     // Verificar se pode adicionar mais usuários
@@ -88,38 +97,65 @@ export const TeamManagement = () => {
       {/* Display de limite de usuários */}
       <UserLimitDisplay variant="inline" />
       
+      {/* Barra de busca e botão */}
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar membros..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 h-11 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200"
+          />
+        </div>
+        
+        <div className="flex gap-2 w-full justify-end">
+          <Button 
+            onClick={handleAddMember}
+            disabled={!limitInfo.canAdd}
+            className="gap-2 touch-target"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span className="hidden sm:inline">Adicionar Membro</span>
+            <span className="sm:hidden">Adicionar</span>
+          </Button>
+        </div>
+      </div>
+      
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Gestão de Equipe
-            </CardTitle>
-            <Button 
-              onClick={handleAddMember}
-              disabled={!limitInfo.canAdd}
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              Adicionar Membro
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Gestão de Equipe
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {teamMembers.length === 0 ? (
+          {filteredMembers.length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Nenhum membro cadastrado</h3>
-              <p className="text-muted-foreground mb-4">
-                Comece adicionando membros à sua equipe para gerenciar melhor seu negócio.
-              </p>
-              <Button onClick={handleAddMember}>
-                <UserPlus className="w-4 h-4 mr-2" />
-                Adicionar Primeiro Membro
-              </Button>
+              {searchTerm ? (
+                <>
+                  <h3 className="text-lg font-semibold mb-2">Nenhum membro encontrado</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Não encontramos membros com o termo "{searchTerm}".
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-semibold mb-2">Nenhum membro cadastrado</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Comece adicionando membros à sua equipe para gerenciar melhor seu negócio.
+                  </p>
+                  <Button onClick={handleAddMember} disabled={!limitInfo.canAdd}>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Adicionar Primeiro Membro
+                  </Button>
+                </>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {teamMembers.map((member) => (
+              {filteredMembers.map((member) => (
                 <TeamMemberCard
                   key={member.id}
                   member={member}
