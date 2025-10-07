@@ -120,22 +120,11 @@ const Services = () => {
       : 0
   };
 
-  const headerActions = (
-    <Button 
-      onClick={() => setIsFormOpen(true)}
-      className="gap-2"
-    >
-      <Plus className="w-4 h-4" />
-      Novo Serviço
-    </Button>
-  );
-
   return (
     <ResponsiveLayout
       title="Serviços"
       subtitle="Gerencie os serviços oferecidos"
       icon={Wrench}
-      actions={headerActions}
     >
       {/* Limit Alert */}
       <LimitAlert type="services" currentCount={services.length} action="criar" />
@@ -144,6 +133,7 @@ const Services = () => {
       <ServicesSearchAndFilters
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
+        onNewClick={() => setIsFormOpen(true)}
       />
       
       {/* Stats Cards */}
