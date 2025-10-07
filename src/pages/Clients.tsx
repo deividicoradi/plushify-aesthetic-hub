@@ -23,24 +23,12 @@ const Clients = () => {
     refetch();
   };
 
-  const headerActions = (
-    <Button 
-      onClick={() => setDrawerOpen(true)} 
-      className="gap-2 touch-target"
-    >
-      <Plus className="w-4 h-4" />
-      <span className="hidden sm:inline">Novo Cliente</span>
-      <span className="sm:hidden">Novo</span>
-    </Button>
-  );
-
   return (
     <>
       <ResponsiveLayout
         title="Clientes"
         subtitle="Gerencie seus clientes e histórico"
         icon={Users}
-        actions={headerActions}
       >
         {/* Limit Alert */}
         <LimitAlert type="clients" currentCount={totalClients} action="adicionar" />
@@ -51,6 +39,7 @@ const Clients = () => {
           onSearchChange={setSearchTerm}
           filters={filters}
           onFiltersChange={setFilters}
+          onNewClick={() => setDrawerOpen(true)}
         />
 
         {/* Stats Cards */}
