@@ -47,10 +47,8 @@ const Hero = () => {
 
             {/* Enhanced Description */}
             <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Gerencie <span className="font-semibold text-primary">agendamentos</span>, 
-              <span className="font-semibold text-primary"> clientes</span>, 
-              <span className="font-semibold text-primary"> campanhas</span> e 
-              <span className="font-semibold text-primary"> cursos</span> com o sistema mais completo do mercado.
+              Gerencie <span className="font-semibold text-primary">agendamentos</span> e 
+              <span className="font-semibold text-primary"> clientes</span> com o sistema mais completo do mercado.
             </p>
             
             {/* CTA Buttons */}
