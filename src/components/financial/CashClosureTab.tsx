@@ -103,28 +103,9 @@ const CashClosureTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div>
         <h2 className="text-2xl font-bold">Controle de Caixa</h2>
-        <div className="flex gap-2">
-          <Button 
-            onClick={handleCreateOpening} 
-            className="gap-2"
-            disabled={!canOpenCash}
-            variant={canOpenCash ? "default" : "secondary"}
-          >
-            <FolderOpen className="w-4 h-4" />
-            {canOpenCash ? 'Abrir Caixa' : 'Caixa Aberto'}
-          </Button>
-          <Button 
-            onClick={handleCreateClosure} 
-            variant="outline" 
-            className="gap-2"
-            disabled={!canCloseCash}
-          >
-            <Plus className="w-4 h-4" />
-            {canCloseCash ? 'Fechar Caixa' : 'Abra o Caixa Primeiro'}
-          </Button>
-        </div>
+        <p className="text-gray-600 dark:text-gray-400">Gerencie aberturas e fechamentos de caixa</p>
       </div>
 
       <CashSearchAndFilters
@@ -132,6 +113,10 @@ const CashClosureTab = () => {
         onSearchChange={setSearchTerm}
         filters={filters}
         onFiltersChange={setFilters}
+        onOpenCash={handleCreateOpening}
+        onCloseCash={handleCreateClosure}
+        canOpenCash={canOpenCash}
+        canCloseCash={canCloseCash}
       />
 
       {loadingClosures || loadingOpenings ? (
