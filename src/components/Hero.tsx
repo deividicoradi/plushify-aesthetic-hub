@@ -50,7 +50,7 @@ const Hero = () => {
               Gerencie <span className="font-semibold text-primary">agendamentos</span>, 
               <span className="font-semibold text-primary"> clientes</span>, 
               <span className="font-semibold text-primary"> estoque</span> e 
-              <span className="font-semibold text-primary"> WhatsApp</span> com o sistema mais completo do mercado.
+              <span className="font-semibold text-primary"> financeiro</span> com o sistema mais completo do mercado.
             </p>
             
             {/* CTA Buttons */}
