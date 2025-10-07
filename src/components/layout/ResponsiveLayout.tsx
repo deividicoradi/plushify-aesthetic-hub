@@ -42,16 +42,16 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
         !isMobile && "ml-64"
       )}>
         {/* Header */}
-        <header className="flex items-center gap-4 border-b bg-background px-4 py-3 sticky top-0 z-30">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-3">
+        <header className="flex items-center gap-2 sm:gap-4 border-b bg-background px-3 sm:px-4 py-3 sticky top-0 z-30">
+          <div className="flex items-center justify-between w-full gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               {/* Mobile menu button */}
               {isMobile && (
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsMobileSidebarOpen(true)}
-                  className="touch-target md:hidden"
+                  className="touch-target md:hidden flex-shrink-0"
                   aria-label="Abrir menu"
                 >
                   <Menu className="h-5 w-5" />
@@ -60,9 +60,9 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
               
               {/* Title and icon */}
               {(title || Icon) && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   {Icon && (
-                    <div className="p-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 ring-1 ring-primary/10 hidden sm:block">
+                    <div className="p-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 ring-1 ring-primary/10 hidden sm:block flex-shrink-0">
                       <Icon className="w-6 h-6 text-primary" />
                     </div>
                   )}
@@ -73,7 +73,7 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
                       </h1>
                     )}
                     {subtitle && (
-                      <p className="text-sm text-muted-foreground hidden sm:block">
+                      <p className="text-sm text-muted-foreground hidden sm:block truncate">
                         {subtitle}
                       </p>
                     )}
@@ -83,7 +83,7 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
             </div>
             
             {/* Actions and Global Header */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               {actions}
               <GlobalHeader />
             </div>
