@@ -18,24 +18,12 @@ const Appointments = () => {
   const [filters, setFilters] = useState<AppointmentFilters>({});
   const { appointments } = useAppointments();
 
-  const headerActions = (
-    <Button 
-      onClick={() => setIsCreateDialogOpen(true)} 
-      className="gap-2 touch-target"
-    >
-      <Plus className="w-4 h-4" />
-      <span className="hidden sm:inline">Novo Agendamento</span>
-      <span className="sm:hidden">Novo</span>
-    </Button>
-  );
-
   return (
     <>
       <ResponsiveLayout
         title="Agendamentos"
         subtitle="Gerencie agendamentos e configurações"
         icon={Calendar}
-        actions={headerActions}
       >
         {/* Limit Alert */}
         <LimitAlert type="appointments" currentCount={appointments.length} action="criar" />
@@ -60,13 +48,23 @@ const Appointments = () => {
                 />
               </div>
               
-              {/* Filter Button - Full Width on Mobile */}
-              <div className="w-full sm:w-auto">
-                <AppointmentFiltersAdvanced
-                  filters={filters}
-                  onFiltersChange={setFilters}
-                  onClearFilters={() => setFilters({})}
-                />
+              {/* Filter and Novo Button Row */}
+              <div className="flex gap-2 w-full">
+                <div className="flex-1">
+                  <AppointmentFiltersAdvanced
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                    onClearFilters={() => setFilters({})}
+                  />
+                </div>
+                <Button 
+                  onClick={() => setIsCreateDialogOpen(true)} 
+                  className="gap-2 touch-target"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Novo</span>
+                  <span className="sm:hidden">Novo</span>
+                </Button>
               </div>
             </div>
             
