@@ -66,9 +66,9 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
                       <Icon className="w-6 h-6 text-primary" />
                     </div>
                   )}
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     {title && (
-                      <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">
+                      <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">
                         {title}
                       </h1>
                     )}
