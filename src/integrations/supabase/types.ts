@@ -2363,7 +2363,7 @@ export type Database = {
               p_user_agent?: string
               p_user_id: string
             }
-        Returns: undefined
+        Returns: string
       }
       log_whatsapp_rate_limit: {
         Args: {
