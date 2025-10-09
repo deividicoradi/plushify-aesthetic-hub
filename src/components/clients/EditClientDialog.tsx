@@ -165,11 +165,14 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({ client, open, onOpe
           city: form.city || null,
           state: form.state || null,
           payment_method: form.payment_method || null,
-          status: form.status
+          status: form.status,
+          updated_at: new Date().toISOString()
         })
-        .eq('id', client.id);
+        .eq('id', client.id)
+        .eq('user_id', user.id); // CRITICAL: RLS requires user_id filter
 
       if (error) {
+        console.error('Update error:', error);
         if (error.code === '23505' && error.message.includes('cpf')) {
           toast.error("CPF já cadastrado no sistema");
           return;
