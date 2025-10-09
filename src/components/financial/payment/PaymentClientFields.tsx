@@ -18,14 +18,18 @@ const PaymentClientFields = ({ clientId, onFieldChange, disabled = false }: Paym
   const { data: clients } = useQuery({
     queryKey: ['clients', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id, name')
-        .eq('user_id', user?.id)
-        .order('name');
+      // Use secure RPC function for SELECT with audit logging
+      const { data, error } = await supabase.rpc('get_clients_masked', {
+        p_mask_sensitive: false
+      });
 
       if (error) throw error;
-      return data;
+      
+      // Map to only id and name for dropdown
+      return (data || []).map((client: any) => ({
+        id: client.id,
+        name: client.name
+      }));
     },
     enabled: !!user?.id,
   });
