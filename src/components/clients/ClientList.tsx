@@ -46,11 +46,15 @@ const ClientList: React.FC<{
     }
 
     setLoading(true);
+    console.log('🔄 Fetching clients for user:', user.id);
+    
     try {
       // Use secure RPC function with audit logging
       const { data, error } = await supabase.rpc('get_clients_masked', {
         p_mask_sensitive: false
       });
+
+      console.log('📥 Clients fetched:', { count: data?.length, error });
 
       if (error) throw error;
 
@@ -73,8 +77,10 @@ const ClientList: React.FC<{
         );
       }
 
+      console.log('✅ Clients after filters:', filteredData.length);
       setClients(filteredData);
     } catch (error: any) {
+      console.error('❌ Error fetching clients:', error);
       toast({
         title: "Erro",
         description: "Erro ao carregar clientes: " + error.message,

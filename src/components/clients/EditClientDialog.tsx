@@ -150,42 +150,91 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({ client, open, onOpe
     }
 
     setSubmitting(true);
+    console.log('🔄 Updating client:', client.id);
+    console.log('📝 Form data:', form);
+    console.log('👤 User ID:', user.id);
 
     try {
-      const { error } = await supabase
+      const updateData = {
+        name: form.name.trim(),
+        email: form.email?.trim() || null,
+        phone: form.phone?.trim() || null,
+        cpf: form.cpf.trim(),
+        cep: form.cep?.trim() || null,
+        address: form.address?.trim() || null,
+        neighborhood: form.neighborhood?.trim() || null,
+        city: form.city?.trim() || null,
+        state: form.state?.trim() || null,
+        payment_method: form.payment_method || null,
+        status: form.status,
+      };
+
+      console.log('📤 Sending update:', updateData);
+      console.log('🔑 Client ID:', client.id);
+      console.log('👤 User ID:', user.id);
+
+      // First, verify the client exists and belongs to this user
+      const { data: existingClient, error: checkError } = await supabase
         .from('clients')
-        .update({
-          name: form.name,
-          email: form.email || null,
-          phone: form.phone || null,
-          cpf: form.cpf,
-          cep: form.cep || null,
-          address: form.address || null,
-          neighborhood: form.neighborhood || null,
-          city: form.city || null,
-          state: form.state || null,
-          payment_method: form.payment_method || null,
-          status: form.status,
-          updated_at: new Date().toISOString()
-        })
+        .select('id, user_id, name')
         .eq('id', client.id)
-        .eq('user_id', user.id); // CRITICAL: RLS requires user_id filter
+        .single();
+
+      console.log('🔍 Existing client check:', { existingClient, checkError });
+
+      if (checkError) {
+        console.error('❌ Client not found:', checkError);
+        toast.error("Cliente não encontrado");
+        return;
+      }
+
+      if (existingClient.user_id !== user.id) {
+        console.error('⛔ Permission denied: user_id mismatch');
+        toast.error("Você não tem permissão para editar este cliente");
+        return;
+      }
+
+      // Now perform the update
+      const { data: result, error } = await supabase
+        .from('clients')
+        .update(updateData)
+        .eq('id', client.id)
+        .eq('user_id', user.id)
+        .select();
+
+      console.log('📥 Update result:', { result, error });
 
       if (error) {
-        console.error('Update error:', error);
-        if (error.code === '23505' && error.message.includes('cpf')) {
-          toast.error("CPF já cadastrado no sistema");
+        console.error('❌ Update error:', error);
+        if (error.code === '23505') {
+          if (error.message.includes('cpf')) {
+            toast.error("CPF já cadastrado no sistema");
+          } else if (error.message.includes('email')) {
+            toast.error("Email já cadastrado no sistema");
+          } else {
+            toast.error("Dados duplicados encontrados");
+          }
           return;
         }
         throw error;
       }
 
+      if (!result || result.length === 0) {
+        console.error('⚠️ No rows updated - RLS policy may have blocked the update');
+        toast.error("Não foi possível atualizar. Verifique suas permissões.");
+        return;
+      }
+
+      console.log('✅ Client updated successfully:', result[0]);
       toast.success("Cliente atualizado com sucesso!");
       
+      // Force reload the list
+      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to ensure DB is updated
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      toast.error("Erro ao atualizar cliente: " + error.message);
+      console.error('💥 Exception during update:', error);
+      toast.error("Erro ao atualizar cliente: " + (error.message || 'Erro desconhecido'));
     } finally {
       setSubmitting(false);
     }
