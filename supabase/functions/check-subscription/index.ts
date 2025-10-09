@@ -72,14 +72,15 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
-      logStep("No customer found, updating unsubscribed state");
-      await supabaseClient.from("user_subscriptions").upsert({
-        user_id: user.id,
-        plan_type: 'trial',
-        status: 'active',
-        trial_ends_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
+      logStep("No customer found, creating trial via RPC");
+      
+      // Usar RPC para criar trial
+      await supabaseClient.rpc('start_subscription', {
+        p_user_id: user.id,
+        p_plan_code: 'trial',
+        p_billing_interval: 'month',
+        p_trial_days: 3
+      });
       
       return new Response(JSON.stringify({ 
         subscribed: false, 
@@ -101,6 +102,7 @@ serve(async (req) => {
     
     const hasActiveSub = subscriptions.data.length > 0;
     let planType = 'trial';
+    let billingInterval = 'month';
     let subscriptionEnd = null;
 
     if (hasActiveSub) {
@@ -108,34 +110,55 @@ serve(async (req) => {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
       
-      // Determine plan type from price amount
-      const priceId = subscription.items.data[0].price.id;
-      const price = await stripe.prices.retrieve(priceId);
-      const amount = price.unit_amount || 0;
+      // Extrair plan do metadata se disponível
+      planType = subscription.metadata?.plan_type || 'trial';
+      billingInterval = subscription.metadata?.billing_period === 'annual' ? 'year' : 'month';
       
-      if (amount >= 17900) {
-        planType = "premium";
-      } else if (amount >= 8900) {
-        planType = "professional";
-      } else {
-        planType = "trial";
+      // Fallback: determinar por preço se metadata não disponível
+      if (!subscription.metadata?.plan_type) {
+        const priceId = subscription.items.data[0].price.id;
+        const price = await stripe.prices.retrieve(priceId);
+        const amount = price.unit_amount || 0;
+        
+        if (amount >= 17900) {
+          planType = "premium";
+        } else if (amount >= 8900) {
+          planType = "professional";
+        }
+        
+        billingInterval = price.recurring?.interval === 'year' ? 'year' : 'month';
       }
-      logStep("Determined plan type", { priceId, amount, planType });
+      
+      logStep("Determined plan", { planType, billingInterval });
     } else {
       logStep("No active subscription found");
     }
 
-    // Update user subscription in database
-    await supabaseClient.from("user_subscriptions").upsert({
-      user_id: user.id,
-      plan_type: planType as 'trial' | 'professional' | 'premium',
-      status: hasActiveSub ? 'active' : 'inactive',
-      expires_at: subscriptionEnd,
-      trial_ends_at: planType === 'trial' ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() : null,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' });
+    // Atualizar via update direto (mais eficiente)
+    const { error: updateError } = await supabaseClient
+      .from("user_subscriptions")
+      .update({
+        plan_type: planType as 'trial' | 'professional' | 'premium',
+        billing_interval: billingInterval,
+        status: hasActiveSub ? 'active' : 'expired',
+        current_period_end: subscriptionEnd,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', user.id);
 
-    logStep("Updated database with subscription info", { subscribed: hasActiveSub, planType });
+    if (updateError) {
+      logStep("Update failed, creating via RPC", { error: updateError });
+      
+      // Se update falhar (não existe), criar via RPC
+      await supabaseClient.rpc('start_subscription', {
+        p_user_id: user.id,
+        p_plan_code: planType,
+        p_billing_interval: billingInterval,
+        p_trial_days: planType === 'trial' ? 3 : 0
+      });
+    }
+
+    logStep("Updated database with subscription info", { subscribed: hasActiveSub, planType, billingInterval });
 
     // Store result in cache
     subscriptionCache.set(user.email, {

@@ -13,6 +13,11 @@ export interface UserSubscription {
   started_at: string;
   expires_at?: string;
   trial_ends_at?: string;
+  billing_interval?: string;
+  stripe_subscription_id?: string;
+  stripe_customer_id?: string;
+  current_period_end?: string;
+  cancel_at_period_end?: boolean;
   created_at: string;
   updated_at: string;
 }

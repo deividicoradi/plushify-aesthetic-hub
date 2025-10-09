@@ -713,6 +713,48 @@ export type Database = {
           },
         ]
       }
+      plan_catalog: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          id: string
+          interval: string
+          is_active: boolean
+          plan_code: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          trial_days: number
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          id?: string
+          interval: string
+          is_active?: boolean
+          plan_code: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          trial_days?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          interval?: string
+          is_active?: boolean
+          plan_code?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          trial_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           acquisition_date: string | null
@@ -949,34 +991,49 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
+          billing_interval: string | null
+          cancel_at_period_end: boolean | null
           created_at: string
+          current_period_end: string | null
           expires_at: string | null
           id: string
           plan_type: Database["public"]["Enums"]["plan_type"]
           started_at: string
           status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           trial_ends_at: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean | null
           created_at?: string
+          current_period_end?: string | null
           expires_at?: string | null
           id?: string
           plan_type?: Database["public"]["Enums"]["plan_type"]
           started_at?: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           trial_ends_at?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean | null
           created_at?: string
+          current_period_end?: string | null
           expires_at?: string | null
           id?: string
           plan_type?: Database["public"]["Enums"]["plan_type"]
           started_at?: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           trial_ends_at?: string | null
           updated_at?: string
           user_id?: string
@@ -2079,6 +2136,12 @@ export type Database = {
         }
         Returns: string
       }
+      expire_trial_subscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          expired_count: number
+        }[]
+      }
       get_active_session_for_user: {
         Args: { p_user_id: string }
         Returns: {
@@ -2472,6 +2535,13 @@ export type Database = {
           session_id: string
         }[]
       }
+      report_subscription_backfill: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          action: string
+          count: number
+        }[]
+      }
       revoke_all_user_tokens: {
         Args: { p_reason?: string; p_user_id: string }
         Returns: number
@@ -2522,6 +2592,18 @@ export type Database = {
       set_authorization_password: {
         Args: { p_password: string }
         Returns: boolean
+      }
+      start_subscription: {
+        Args: {
+          p_billing_interval?: string
+          p_current_period_end?: string
+          p_plan_code: string
+          p_stripe_customer_id?: string
+          p_stripe_subscription_id?: string
+          p_trial_days?: number
+          p_user_id: string
+        }
+        Returns: string
       }
       update_session_isolation: {
         Args: {
