@@ -13,8 +13,12 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 60_000, // 1 min
       gcTime: 5 * 60_000, // 5 min
-      refetchOnWindowFocus: false,
-      retry: 2,
+      refetchOnWindowFocus: false, // Evitar refetch automático
+      retry: 1, // Reduzido de 2 para 1 (requestManager já faz retry)
+      refetchOnReconnect: false, // Evitar refetch em reconexão
+    },
+    mutations: {
+      retry: 1, // Apenas 1 retry para mutations
     },
   },
 });
