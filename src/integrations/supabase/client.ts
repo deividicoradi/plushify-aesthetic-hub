@@ -6,10 +6,8 @@ import { env, getSupabaseKey, getSupabaseKeyType } from '@/utils/env';
 
 const supabaseUrl = env.SUPABASE_URL;
 const supabaseKey = getSupabaseKey();
-console.info('[ENV] using key:', getSupabaseKeyType());
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
-console.info('[SUPABASE] client initialized');

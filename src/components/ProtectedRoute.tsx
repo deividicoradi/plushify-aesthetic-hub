@@ -88,13 +88,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     console.log('SECURITY: Trial user accessing paid features with limitations');
   }
 
-  if (isTestUser) {
-    console.log('SECURITY: Test user granted full access', {
-      userId: user.id,
-      email: user.email,
-      route: location.pathname
-    });
-  }
+  // Test user has full access - no additional logging needed
 
   return <>{children}</>;
 }
