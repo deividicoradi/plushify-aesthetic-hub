@@ -32,16 +32,16 @@ export const useInstallmentsDataByClient = () => {
         throw error;
       }
 
-      // Buscar dados dos clientes
-      const { data: clients, error: clientsError } = await supabase
-        .from('clients')
-        .select('id, name, email, phone')
-        .eq('user_id', user?.id);
+      // Buscar dados dos clientes (via RPC seguro com auditoria)
+      const { data: clientsRpc, error: clientsError } = await supabase
+        .rpc('get_clients_masked', { p_mask_sensitive: false });
 
       if (clientsError) {
         console.error('❌ Erro ao buscar clientes:', clientsError);
         throw clientsError;
       }
+
+      const clients = (clientsRpc || []).map((c: any) => ({ id: c.id, name: c.name, email: c.email, phone: c.phone }));
 
       console.log('📋 Parcelamentos encontrados:', installments?.length || 0);
       console.log('👥 Clientes encontrados:', clients?.length || 0);

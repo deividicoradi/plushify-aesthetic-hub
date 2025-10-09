@@ -118,13 +118,14 @@ const ClientList: React.FC<{
         return;
       }
 
-      // Buscar dados do cliente para auditoria
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('id', clientId)
-        .eq('user_id', user.id)
-        .single();
+      // Buscar dados do cliente para auditoria (via RPC seguro com auditoria)
+      const { data: clientDataArr, error: clientError } = await supabase
+        .rpc('get_client_data_secure', {
+          p_client_id: clientId,
+          p_mask_sensitive: false
+        });
+
+      const clientData = clientDataArr?.[0] || null;
 
       if (clientError) throw clientError;
 
