@@ -37,7 +37,11 @@ export const PlansGrid: React.FC<PlansGridProps> = ({
       </div>
 
       {/* Plans grid with staggered animation */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
+      <div className={`grid grid-cols-1 gap-8 relative ${
+        filteredPlans.length === 2 
+          ? 'lg:grid-cols-2 max-w-5xl mx-auto' 
+          : 'lg:grid-cols-3'
+      }`}>
         {filteredPlans.map((plan, index) => (
           <div
             key={plan.id}
