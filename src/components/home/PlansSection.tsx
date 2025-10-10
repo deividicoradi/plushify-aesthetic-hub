@@ -13,7 +13,8 @@ export const PlansSection = () => {
 
   // Usar dados centralizados dos planos
   const plansData = createPlansData('none'); // Não há plano atual na home
-  const plans = plansData.map(plan => ({
+  const sourcePlans = isAnnual ? plansData.filter(p => p.id !== 'trial') : plansData;
+  const plans = sourcePlans.map(plan => ({
     ...plan,
     buttonText: plan.id === 'trial' ? 'Começar Grátis' : 
                 plan.id === 'professional' ? 'Escolher Professional' : 
@@ -66,7 +67,9 @@ export const PlansSection = () => {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className={`grid grid-cols-1 gap-8 max-w-6xl mx-auto ${
+          plans.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'
+        }`}>
           {plans.map((plan) => {
             const IconComponent = plan.icon;
             const currentPrice = isAnnual ? plan.annualPrice : plan.price;
