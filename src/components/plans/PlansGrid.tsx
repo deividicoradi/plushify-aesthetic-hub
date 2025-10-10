@@ -16,6 +16,11 @@ export const PlansGrid: React.FC<PlansGridProps> = ({
   onPlanSelection,
   isLoading
 }) => {
+  // Filtrar Trial quando estiver na aba Anual
+  const filteredPlans = isAnnual 
+    ? plans.filter(plan => plan.id !== 'trial')
+    : plans;
+
   return (
     <div className="relative">
       {/* Background decoration */}
@@ -33,7 +38,7 @@ export const PlansGrid: React.FC<PlansGridProps> = ({
 
       {/* Plans grid with staggered animation */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
-        {plans.map((plan, index) => (
+        {filteredPlans.map((plan, index) => (
           <div
             key={plan.id}
             className="animate-fade-in"

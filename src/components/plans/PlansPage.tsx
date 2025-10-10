@@ -4,6 +4,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useStripeCheckoutIndividual } from '@/hooks/useStripeCheckoutIndividual';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { PlansHero } from './PlansHero';
 import { PlanAlerts } from './PlanAlerts';
 import { BillingToggle } from './BillingToggle';
@@ -49,7 +50,44 @@ export const PlansPage: React.FC = () => {
   }, [toast, checkSubscriptionStatus]);
 
   const handlePlanSelection = async (planId: string) => {
-    if (planId === 'trial') return;
+    if (planId === 'trial') {
+      // Trial: chamar start_subscription no frontend
+      if (!user?.id) {
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar logado para começar o trial.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('start_subscription', {
+          p_user_id: user.id,
+          p_plan_code: 'trial',
+          p_billing_interval: 'month',
+          p_trial_days: 3
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Trial ativado com sucesso!",
+          description: "Você tem 3 dias para explorar a plataforma.",
+        });
+
+        // Atualizar status da assinatura
+        await checkSubscriptionStatus();
+      } catch (error: any) {
+        console.error('Erro ao ativar trial:', error);
+        toast({
+          title: "Erro ao ativar trial",
+          description: error.message || "Tente novamente mais tarde.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
     
     if (planId === 'professional' || planId === 'premium') {
       const billingPeriod = isAnnual ? 'annual' : 'monthly';

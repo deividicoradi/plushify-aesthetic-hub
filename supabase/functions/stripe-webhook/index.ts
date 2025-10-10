@@ -61,58 +61,97 @@ serve(async (req) => {
       });
     }
 
+    // Catálogo de price_id → {plan_code, billing_interval}
+    const PRICE_CATALOG: Record<string, { plan_code: string; billing_interval: string }> = {
+      // Professional
+      'price_professional_monthly': { plan_code: 'professional', billing_interval: 'month' },
+      'price_professional_annual': { plan_code: 'professional', billing_interval: 'year' },
+      // Enterprise (premium no DB)
+      'price_premium_monthly': { plan_code: 'premium', billing_interval: 'month' },
+      'price_premium_annual': { plan_code: 'premium', billing_interval: 'year' },
+    };
+
+    const mapPriceToSubscription = (priceId: string) => {
+      const mapping = PRICE_CATALOG[priceId];
+      if (!mapping) {
+        logStep('AVISO: price_id não encontrado no catálogo', { priceId });
+        return null;
+      }
+      return mapping;
+    };
+
+    // Dedupe: verificar se já processamos este evento
+    const dedupeKey = `stripe_event_${event.id}`;
+    const { data: existingEvent } = await supabaseClient
+      .from('audit_logs')
+      .select('id')
+      .eq('reason', dedupeKey)
+      .maybeSingle();
+
+    if (existingEvent) {
+      logStep('Evento já processado (dedupe)', { eventId: event.id });
+      return new Response(JSON.stringify({ received: true, dedupe: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         logStep("Processing checkout.session.completed", { sessionId: session.id });
         
-        if (session.mode === 'subscription' && session.customer && session.metadata?.user_id) {
+        if (session.mode === 'subscription' && session.customer && session.subscription) {
+          const subscriptionId = typeof session.subscription === 'string' 
+            ? session.subscription 
+            : session.subscription.id;
+          
+          // Buscar subscription no Stripe
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const priceId = subscription.items.data[0]?.price.id;
+          
+          const mapping = mapPriceToSubscription(priceId);
+          if (!mapping) {
+            logStep('ERRO: Não foi possível mapear price_id', { priceId });
+            throw new Error(`price_id não mapeado: ${priceId}`);
+          }
+
+          const userId = session.client_reference_id || session.metadata?.user_id;
+          if (!userId) {
+            throw new Error('user_id não encontrado no session');
+          }
+
           const customerId = typeof session.customer === 'string' 
             ? session.customer 
             : session.customer.id;
-          
-          // Get subscription details
-          const subscriptions = await stripe.subscriptions.list({
-            customer: customerId,
-            status: 'active',
-            limit: 1
+
+          // Chamar start_subscription
+          logStep('Chamando start_subscription', {
+            userId,
+            planCode: mapping.plan_code,
+            billingInterval: mapping.billing_interval,
+            stripeSubscriptionId: subscriptionId,
+            stripeCustomerId: customerId,
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
           });
 
-          if (subscriptions.data.length > 0) {
-            const subscription = subscriptions.data[0];
-            const priceId = subscription.items.data[0].price.id;
-            const price = await stripe.prices.retrieve(priceId);
-            const amount = price.unit_amount || 0;
-            
-            // Extrair plan_type e billing do metadata
-            const planType = session.metadata.plan_type as 'professional' | 'premium';
-            const billingInterval = session.metadata.billing_period === 'annual' ? 'year' : 'month';
+          const { error: rpcError } = await supabaseClient.rpc('start_subscription', {
+            p_user_id: userId,
+            p_plan_code: mapping.plan_code,
+            p_billing_interval: mapping.billing_interval,
+            p_trial_days: 0,
+            p_stripe_subscription_id: subscriptionId,
+            p_stripe_customer_id: customerId,
+            p_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+          });
 
-            const subscriptionEnd = new Date(subscription.current_period_end * 1000);
-
-            // Usar a função start_subscription para persistir
-            const { error: rpcError } = await supabaseClient.rpc('start_subscription', {
-              p_user_id: session.metadata.user_id,
-              p_plan_code: planType,
-              p_billing_interval: billingInterval,
-              p_trial_days: 0,
-              p_stripe_subscription_id: subscription.id,
-              p_stripe_customer_id: customerId,
-              p_current_period_end: subscriptionEnd.toISOString()
-            });
-
-            if (rpcError) {
-              logStep("ERROR: Failed to create subscription via RPC", { error: rpcError });
-            } else {
-              logStep("SUCCESS: Subscription created", { 
-                planType,
-                billingInterval,
-                subscriptionId: subscription.id,
-                expiresAt: subscriptionEnd.toISOString()
-              });
-            }
+          if (rpcError) {
+            logStep('ERRO ao chamar start_subscription', rpcError);
+            throw rpcError;
           }
+
+          logStep('Assinatura criada/atualizada via start_subscription');
         }
         break;
       }
@@ -121,41 +160,47 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         logStep("Processing customer.subscription.updated", { subscriptionId: subscription.id });
         
-        if (!subscription.metadata?.user_id) {
-          logStep("ERROR: No user_id in subscription metadata");
+        const priceId = subscription.items.data[0]?.price.id;
+        const mapping = mapPriceToSubscription(priceId);
+        
+        if (!mapping) {
+          logStep('ERRO: Não foi possível mapear price_id', { priceId });
+          throw new Error(`price_id não mapeado: ${priceId}`);
+        }
+
+        // Buscar user_id pela stripe_subscription_id
+        const { data: existingSub } = await supabaseClient
+          .from('user_subscriptions')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscription.id)
+          .maybeSingle();
+
+        if (!existingSub) {
+          logStep('AVISO: Assinatura não encontrada no DB', { subscriptionId: subscription.id });
           break;
         }
 
-        // Extrair plan type e billing do metadata
-        const planType = subscription.metadata.plan_type as 'professional' | 'premium';
-        const billingInterval = subscription.metadata.billing_period === 'annual' ? 'year' : 'month';
-        const subscriptionEnd = new Date(subscription.current_period_end * 1000);
-        
-        // Mapear status do Stripe para nosso status
-        let dbStatus = 'active';
-        if (subscription.status === 'past_due') dbStatus = 'past_due';
-        if (subscription.status === 'canceled') dbStatus = 'canceled';
-        if (subscription.status === 'unpaid') dbStatus = 'past_due';
+        const customerId = typeof subscription.customer === 'string' 
+          ? subscription.customer 
+          : subscription.customer.id;
 
-        // Atualizar via update direto (já existe)
-        const { error: updateError } = await supabaseClient
-          .from('user_subscriptions')
-          .update({
-            plan_type: planType,
-            billing_interval: billingInterval,
-            status: dbStatus,
-            current_period_end: subscriptionEnd.toISOString(),
-            stripe_subscription_id: subscription.id,
-            cancel_at_period_end: subscription.cancel_at_period_end || false,
-            updated_at: new Date().toISOString()
-          })
-          .eq('stripe_subscription_id', subscription.id);
+        // Atualizar via start_subscription (ON CONFLICT fará UPDATE)
+        const { error: rpcError } = await supabaseClient.rpc('start_subscription', {
+          p_user_id: existingSub.user_id,
+          p_plan_code: mapping.plan_code,
+          p_billing_interval: mapping.billing_interval,
+          p_trial_days: 0,
+          p_stripe_subscription_id: subscription.id,
+          p_stripe_customer_id: customerId,
+          p_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+        });
 
-        if (updateError) {
-          logStep("ERROR: Failed to update subscription", { error: updateError });
-        } else {
-          logStep("SUCCESS: Subscription updated", { planType, billingInterval, status: dbStatus });
+        if (rpcError) {
+          logStep('ERRO ao atualizar assinatura', rpcError);
+          throw rpcError;
         }
+
+        logStep('Assinatura atualizada via start_subscription');
         break;
       }
 
@@ -163,24 +208,23 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         logStep("Processing customer.subscription.deleted", { subscriptionId: subscription.id });
         
-        if (!subscription.metadata?.user_id) {
-          logStep("ERROR: No user_id in subscription metadata");
-          break;
+        // Atualizar apenas o status, sem recriar registro
+        const { error: updateError } = await supabaseClient
+          .from('user_subscriptions')
+          .update({
+            status: 'canceled',
+            cancel_at_period_end: true,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('stripe_subscription_id', subscription.id)
+          .in('status', ['active', 'trial_active']);
+
+        if (updateError) {
+          logStep('ERRO ao cancelar assinatura', updateError);
+          throw updateError;
         }
 
-        // Downgrade to trial usando RPC
-        const { error: downgradeError } = await supabaseClient.rpc('start_subscription', {
-          p_user_id: subscription.metadata.user_id,
-          p_plan_code: 'trial',
-          p_billing_interval: 'month',
-          p_trial_days: 3
-        });
-
-        if (downgradeError) {
-          logStep("ERROR: Failed to downgrade subscription", { error: downgradeError });
-        } else {
-          logStep("SUCCESS: User downgraded to trial with 3 days");
-        }
+        logStep('Assinatura cancelada');
         break;
       }
 
@@ -188,11 +232,7 @@ serve(async (req) => {
         const invoice = event.data.object as Stripe.Invoice;
         logStep("Processing invoice.payment_failed", { invoiceId: invoice.id });
         
-        // Here you would typically:
-        // 1. Send notification email to user
-        // 2. Update subscription status to 'past_due'
-        // 3. Log the failed payment for retry logic
-        
+        // TODO: Notificar usuário sobre falha no pagamento
         logStep("Payment failed - notification needed", { 
           customerEmail: invoice.customer_email,
           amount: invoice.amount_due 
@@ -203,6 +243,16 @@ serve(async (req) => {
       default:
         logStep("Unhandled event type", { eventType: event.type });
     }
+
+    // Registrar evento processado (dedupe)
+    await supabaseClient.from('audit_logs').insert({
+      user_id: '00000000-0000-0000-0000-000000000000',
+      table_name: 'stripe_webhook',
+      record_id: '00000000-0000-0000-0000-000000000000',
+      action: 'CREATE',
+      reason: dedupeKey,
+      new_data: { event_type: event.type, event_id: event.id },
+    });
 
     logStep("Webhook processed successfully");
     return new Response(JSON.stringify({ received: true }), {
