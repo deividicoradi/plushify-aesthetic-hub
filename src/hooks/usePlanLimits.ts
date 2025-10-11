@@ -69,7 +69,27 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     appointments: -1, // unlimited
     products: -1, // unlimited
     services: -1, // unlimited
-    activeUsers: 5, // Enterprise permite até 5 usuários
+    activeUsers: 5, // Premium permite até 5 usuários
+    hasFinancialManagement: true,
+    hasAdvancedReports: true,
+    hasAdvancedAnalytics: true,
+    hasTeamManagement: true,
+    hasAutomaticBackup: true,
+    hasPrioritySupport: true,
+    has24_7Support: true,
+    hasInventoryAdvanced: true,
+    hasReportsDetailed: true,
+    hasExportReports: true,
+    hasCashFlow: true,
+    hasRecurringPayments: true,
+    hasMultiplePaymentMethods: true,
+  },
+  enterprise: {
+    clients: -1, // unlimited
+    appointments: -1, // unlimited
+    products: -1, // unlimited
+    services: -1, // unlimited
+    activeUsers: -1, // Enterprise permite usuários ilimitados
     hasFinancialManagement: true,
     hasAdvancedReports: true,
     hasAdvancedAnalytics: true,

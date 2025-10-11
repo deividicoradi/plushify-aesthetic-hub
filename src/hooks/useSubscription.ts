@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export type PlanType = 'trial' | 'professional' | 'premium';
+export type PlanType = 'trial' | 'professional' | 'premium' | 'enterprise';
 
 export interface UserSubscription {
   id: string;

@@ -200,7 +200,7 @@ export const PlansPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Final CTA Section */}
+        {/* Final CTA Section - apenas para não logados */}
         <section className="bg-gradient-to-r from-primary/10 to-secondary/10 py-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <CTASection 
