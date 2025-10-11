@@ -57,7 +57,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
   },
   {
     id: 'professional',
-    name: 'Professional',
+    name: 'Profissional',
     price: 'R$ 89',
     period: '/mês',
     originalPrice: 'R$ 127',
@@ -91,7 +91,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
   },
   {
     id: 'premium',
-    name: 'Enterprise',
+    name: 'Premium',
     price: 'R$ 179',
     period: '/mês',
     originalPrice: 'R$ 249',
@@ -105,7 +105,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
     mostComplete: true,
     features: [
       'Até 5 usuários com acesso simultâneo',
-      'TUDO do plano Professional',
+      'TUDO do plano Profissional',
       'Serviços e produtos ilimitados',
       'Analytics avançados e preditivos',
       'Relatórios completos com exportação',

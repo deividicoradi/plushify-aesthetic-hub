@@ -30,7 +30,7 @@ export const PlanInfoBanner = () => {
   const getPlanLabel = (plan: string) => {
     switch (plan) {
       case 'trial': return 'Gratuito';
-      case 'professional': return 'Professional';
+      case 'professional': return 'Profissional';
       case 'premium': return 'Premium';
       default: return 'Desconhecido';
     }
