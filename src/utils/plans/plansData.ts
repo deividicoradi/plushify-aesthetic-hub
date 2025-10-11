@@ -25,10 +25,10 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
   {
     id: 'trial',
     name: 'Teste Grátis',
-    price: 'R$ 0',
+    price: 'GRÁTIS',
     period: '',
     originalPrice: '',
-    annualPrice: 'R$ 0',
+    annualPrice: 'GRÁTIS',
     annualPeriod: '',
     annualOriginalPrice: '',
     description: 'Para teste da plataforma',

@@ -23,7 +23,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   const currentPeriod = isAnnual ? plan.annualPeriod : plan.period;
   const currentOriginalPrice = isAnnual ? plan.annualOriginalPrice : plan.originalPrice;
   
-  const installmentPrice = isAnnual && plan.annualPrice !== 'Gratuito' 
+  const installmentPrice = isAnnual && plan.annualPrice !== 'Gratuito' && plan.annualPrice !== 'GRÁTIS'
     ? (() => {
         try {
           const cleanPrice = plan.annualPrice.replace(/[R$\s\.]/g, '').replace(',', '.');
