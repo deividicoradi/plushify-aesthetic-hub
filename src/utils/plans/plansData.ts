@@ -24,11 +24,11 @@ export interface PlanFeature {
 export const createPlansData = (currentPlan: string): PlanFeature[] => [
   {
     id: 'trial',
-    name: 'Trial Gratuito',
-    price: 'Gratuito',
+    name: 'Teste Grátis',
+    price: 'R$ 0',
     period: '',
     originalPrice: '',
-    annualPrice: 'Gratuito',
+    annualPrice: 'R$ 0',
     annualPeriod: '',
     annualOriginalPrice: '',
     description: 'Para teste da plataforma',
