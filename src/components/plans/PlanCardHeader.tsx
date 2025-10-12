@@ -81,15 +81,19 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
             {currentOriginalPrice && (
               <span className="text-lg text-muted-foreground line-through">{currentOriginalPrice}</span>
             )}
-            <span className={`${
-              currentPrice === 'GRÁTIS' 
-                ? 'text-4xl font-black text-green-600 dark:text-green-500 tracking-wide' 
-                : plan.mostComplete 
+            {currentPrice === 'GRÁTIS' ? (
+              <span className="text-5xl font-black tracking-wide bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:from-green-500 dark:to-emerald-500">
+                {currentPrice}
+              </span>
+            ) : (
+              <span className={`${
+                plan.mostComplete 
                   ? 'text-4xl text-primary' 
                   : 'text-3xl'
-            } font-bold`}>
-              {currentPrice || 'Indisponível'}
-            </span>
+              } font-bold`}>
+                {currentPrice || 'Indisponível'}
+              </span>
+            )}
             {currentPeriod && <span className="text-muted-foreground">{currentPeriod}</span>}
           </div>
           {currentOriginalPrice && (
