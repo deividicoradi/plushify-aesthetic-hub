@@ -66,7 +66,7 @@ export const PlanLimitsDisplay = () => {
         <CardTitle className="text-lg flex items-center justify-between">
           Limites do Plano
           <Badge variant={currentPlan === 'premium' ? 'default' : 'secondary'}>
-            {currentPlan === 'trial' ? 'Gratuito' : 
+            {currentPlan === 'trial' ? 'GRÁTIS' : 
              currentPlan === 'professional' ? 'Professional' : 'Premium'}
           </Badge>
         </CardTitle>
