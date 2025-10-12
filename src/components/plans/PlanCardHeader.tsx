@@ -82,7 +82,7 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
               <span className="text-lg text-muted-foreground line-through">{currentOriginalPrice}</span>
             )}
             {currentPrice === 'GRÁTIS' ? (
-              <span className="text-5xl font-black tracking-wide bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:from-green-500 dark:to-emerald-500">
+              <span className="text-5xl font-black tracking-wide text-green-600 dark:text-green-400">
                 {currentPrice}
               </span>
             ) : (
