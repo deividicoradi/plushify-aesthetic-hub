@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X, MessageCircle, ArrowLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings as SettingsIcon, User, Shield, Save, X, MessageCircle, ArrowLeft, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,27 @@ const Settings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  
+  // Mock data - replace with actual user data
+  const [profileData, setProfileData] = useState({
+    name: 'João Silva',
+    phone: '(11) 99999-9999',
+    profession: 'Designer'
+  });
+  
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
       title: "Perfil atualizado",
       description: "Suas informações foram salvas com sucesso.",
     });
+    setIsEditingProfile(false);
+  };
+
+  const handleCancelProfile = () => {
+    setIsEditingProfile(false);
   };
 
   const handleSavePassword = (e: React.FormEvent) => {
@@ -30,6 +45,11 @@ const Settings = () => {
       title: "Senha alterada",
       description: "Sua senha foi alterada com sucesso.",
     });
+    setIsEditingPassword(false);
+  };
+
+  const handleCancelPassword = () => {
+    setIsEditingPassword(false);
   };
 
   return (
@@ -73,68 +93,106 @@ const Settings = () => {
           <TabsContent value="profile" className="space-y-6">
             <Card className="border shadow-sm">
               <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <User className="w-5 h-5 text-primary" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <User className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base sm:text-lg">Informações do Perfil</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">
+                        {isEditingProfile ? 'Atualize suas informações pessoais e profissionais' : 'Visualize suas informações pessoais e profissionais'}
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="text-base sm:text-lg">Informações do Perfil</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
-                      Atualize suas informações pessoais e profissionais
-                    </CardDescription>
-                  </div>
+                  {!isEditingProfile && (
+                    <Button
+                      onClick={() => setIsEditingProfile(true)}
+                      className="gap-2"
+                      size="sm"
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span className="hidden sm:inline">Editar</span>
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <form id="profile-form" onSubmit={handleSaveProfile} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-sm font-medium">Nome Completo</Label>
-                      <Input 
-                        id="name" 
-                        placeholder="Seu nome completo"
-                        className="bg-background"
-                      />
+                {isEditingProfile ? (
+                  <form id="profile-form" onSubmit={handleSaveProfile} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="text-sm font-medium">Nome Completo</Label>
+                        <Input 
+                          id="name" 
+                          placeholder="Seu nome completo"
+                          defaultValue={profileData.name}
+                          className="bg-background"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          value={user?.email || ''} 
+                          disabled 
+                          className="bg-muted"
+                        />
+                        <p className="text-xs text-muted-foreground">O e-mail não pode ser alterado</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="text-sm font-medium">Telefone</Label>
+                        <Input 
+                          id="phone" 
+                          placeholder="(00) 00000-0000"
+                          defaultValue={profileData.phone}
+                          className="bg-background"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="profession" className="text-sm font-medium">Profissão</Label>
+                        <Input 
+                          id="profession" 
+                          placeholder="Sua profissão"
+                          defaultValue={profileData.profession}
+                          className="bg-background"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        value={user?.email || ''} 
-                        disabled 
-                        className="bg-muted"
-                      />
-                      <p className="text-xs text-muted-foreground">O e-mail não pode ser alterado</p>
+                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                      <Button variant="outline" type="button" onClick={handleCancelProfile} className="gap-2 w-full sm:w-auto">
+                        <X className="w-4 h-4" />
+                        Cancelar
+                      </Button>
+                      <Button type="submit" className="gap-2 bg-primary hover:bg-primary/90 w-full sm:w-auto">
+                        <Save className="w-4 h-4" />
+                        Salvar alterações
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm font-medium">Telefone</Label>
-                      <Input 
-                        id="phone" 
-                        placeholder="(00) 00000-0000"
-                        className="bg-background"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="profession" className="text-sm font-medium">Profissão</Label>
-                      <Input 
-                        id="profession" 
-                        placeholder="Sua profissão"
-                        className="bg-background"
-                      />
+                  </form>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-muted-foreground">Nome Completo</Label>
+                        <p className="text-base font-medium">{profileData.name}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-muted-foreground">E-mail</Label>
+                        <p className="text-base font-medium">{user?.email || 'Não informado'}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-muted-foreground">Telefone</Label>
+                        <p className="text-base font-medium">{profileData.phone || 'Não informado'}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-muted-foreground">Profissão</Label>
+                        <p className="text-base font-medium">{profileData.profession || 'Não informado'}</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-                    <Button variant="outline" type="button" className="gap-2 w-full sm:w-auto">
-                      <X className="w-4 h-4" />
-                      Cancelar
-                    </Button>
-                    <Button type="submit" className="gap-2 bg-primary hover:bg-primary/90 w-full sm:w-auto">
-                      <Save className="w-4 h-4" />
-                      Salvar alterações
-                    </Button>
-                  </div>
-                </form>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -142,45 +200,71 @@ const Settings = () => {
           <TabsContent value="account" className="space-y-6">
             <Card className="border shadow-sm">
               <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Shield className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base sm:text-lg">Segurança da Conta</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
-                      Gerencie suas preferências de conta e segurança
-                    </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Shield className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base sm:text-lg">Segurança da Conta</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">
+                        Gerencie suas preferências de conta e segurança
+                      </CardDescription>
+                    </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0 space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-base sm:text-lg font-semibold">Alterar Senha</h3>
-                  <form onSubmit={handleSavePassword} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="current-password">Senha Atual</Label>
-                      <Input id="current-password" type="password" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password">Nova Senha</Label>
-                      <Input id="new-password" type="password" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-                      <Input id="confirm-password" type="password" />
-                    </div>
-                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-                      <Button variant="outline" type="button" className="gap-2 w-full sm:w-auto">
-                        <X className="w-4 h-4" />
-                        Cancelar
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base sm:text-lg font-semibold">Senha</h3>
+                    {!isEditingPassword && (
+                      <Button
+                        onClick={() => setIsEditingPassword(true)}
+                        className="gap-2"
+                        size="sm"
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span className="hidden sm:inline">Alterar Senha</span>
                       </Button>
-                      <Button type="submit" className="gap-2 bg-primary hover:bg-primary/90 w-full sm:w-auto">
-                        <Save className="w-4 h-4" />
-                        Alterar Senha
-                      </Button>
+                    )}
+                  </div>
+                  
+                  {isEditingPassword ? (
+                    <form onSubmit={handleSavePassword} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="current-password">Senha Atual</Label>
+                        <Input id="current-password" type="password" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="new-password">Nova Senha</Label>
+                        <Input id="new-password" type="password" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+                        <Input id="confirm-password" type="password" />
+                      </div>
+                      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                        <Button variant="outline" type="button" onClick={handleCancelPassword} className="gap-2 w-full sm:w-auto">
+                          <X className="w-4 h-4" />
+                          Cancelar
+                        </Button>
+                        <Button type="submit" className="gap-2 bg-primary hover:bg-primary/90 w-full sm:w-auto">
+                          <Save className="w-4 h-4" />
+                          Alterar Senha
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Sua senha está protegida. Clique em "Alterar Senha" para atualizar.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Última alteração: Nunca
+                      </p>
                     </div>
-                  </form>
+                  )}
                 </div>
               </CardContent>
             </Card>
