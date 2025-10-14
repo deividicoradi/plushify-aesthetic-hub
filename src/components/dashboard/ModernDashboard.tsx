@@ -3,6 +3,7 @@ import React from 'react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useInteractiveChartData } from '@/hooks/useInteractiveChartData';
 import { useFinancialData } from '@/hooks/useFinancialData';
+import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 import { Card, CardContent } from '@/components/ui/card';
 import { KPICards } from './KPICards';
 import { FinancialEvolutionChart } from './FinancialEvolutionChart';
@@ -13,7 +14,8 @@ import { ExpensesByCategoryChart } from './ExpensesByCategoryChart';
 export const ModernDashboard = () => {
   const dashboardStats = useDashboardStats();
   const chartDataHook = useInteractiveChartData();
-  const { metrics, monthlyData, expensesByCategory, revenueByMethod, loading } = useFinancialData();
+  const { dateRange } = usePeriodFilter('6m');
+  const { metrics, monthlyData, expensesByCategory, revenueByMethod, loading } = useFinancialData(dateRange);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

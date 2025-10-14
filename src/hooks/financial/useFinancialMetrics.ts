@@ -16,7 +16,13 @@ export interface FinancialMetrics {
   ticketMedio: number;
 }
 
-export const useFinancialMetrics = () => {
+interface DateRange {
+  startDate: Date;
+  endDate: Date;
+  period: string;
+}
+
+export const useFinancialMetrics = (dateRange: DateRange) => {
   const { user } = useAuth();
   const [metrics, setMetrics] = useState<FinancialMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,6 +32,7 @@ export const useFinancialMetrics = () => {
     if (!user) return;
 
     try {
+      const { startDate, endDate } = dateRange;
       const now = new Date();
       const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -33,27 +40,35 @@ export const useFinancialMetrics = () => {
 
       console.log('🔍 Buscando métricas financeiras para usuário:', user.id);
 
-      // Buscar dados em paralelo
+      // Buscar dados em paralelo com filtro de período
       const [paymentsResult, cashClosuresResult, expensesResult, installmentsResult] = await Promise.all([
         supabase
           .from('payments')
           .select('amount, paid_amount, created_at, status, payment_date')
-          .eq('user_id', user.id),
+          .eq('user_id', user.id)
+          .gte('payment_date', startDate.toISOString())
+          .lte('payment_date', endDate.toISOString()),
         
         supabase
           .from('cash_closures')
           .select('total_income, closure_date')
-          .eq('user_id', user.id),
+          .eq('user_id', user.id)
+          .gte('closure_date', startDate.toISOString().split('T')[0])
+          .lte('closure_date', endDate.toISOString().split('T')[0]),
 
         supabase
           .from('expenses')
           .select('amount, expense_date, category')
-          .eq('user_id', user.id),
+          .eq('user_id', user.id)
+          .gte('expense_date', startDate.toISOString())
+          .lte('expense_date', endDate.toISOString()),
 
         supabase
           .from('installments')
           .select('amount, due_date, status, payment_date')
           .eq('user_id', user.id)
+          .gte('due_date', startDate.toISOString())
+          .lte('due_date', endDate.toISOString())
       ]);
 
       console.log('💰 Pagamentos encontrados:', paymentsResult.data);
@@ -179,7 +194,7 @@ export const useFinancialMetrics = () => {
       setLoading(true);
       fetchFinancialMetrics().finally(() => setLoading(false));
     }
-  }, [user]);
+  }, [user, dateRange.startDate, dateRange.endDate]);
 
   return {
     metrics,

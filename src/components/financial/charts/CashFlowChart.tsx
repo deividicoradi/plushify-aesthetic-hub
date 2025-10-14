@@ -9,13 +9,14 @@ interface CashFlowChartProps {
   data: MonthlyFinancialData[];
   formatCurrency: (value: number) => string;
   chartConfig: any;
+  periodLabel: string;
 }
 
-export const CashFlowChart = ({ data, formatCurrency, chartConfig }: CashFlowChartProps) => {
+export const CashFlowChart = ({ data, formatCurrency, chartConfig, periodLabel }: CashFlowChartProps) => {
   return (
     <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-card-foreground">Fluxo de Caixa - Últimos 6 Meses</CardTitle>
+        <CardTitle className="text-card-foreground">Fluxo de Caixa - {periodLabel}</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-80">

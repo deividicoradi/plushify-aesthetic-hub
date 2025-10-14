@@ -9,7 +9,13 @@ export interface CategoryData {
   color: string;
 }
 
-export const useCategoryData = () => {
+interface DateRange {
+  startDate: Date;
+  endDate: Date;
+  period: string;
+}
+
+export const useCategoryData = (dateRange: DateRange) => {
   const { user } = useAuth();
   const [expensesByCategory, setExpensesByCategory] = useState<CategoryData[]>([]);
   const [revenueByMethod, setRevenueByMethod] = useState<CategoryData[]>([]);
@@ -19,11 +25,15 @@ export const useCategoryData = () => {
     if (!user) return;
 
     try {
+      const { startDate, endDate } = dateRange;
+      
       // Despesas por categoria
       const { data: expenses } = await supabase
         .from('expenses')
         .select('amount, category')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .gte('expense_date', startDate.toISOString())
+        .lte('expense_date', endDate.toISOString());
 
       const expenseCategoryMap = new Map<string, number>();
       expenses?.forEach(e => {
@@ -48,6 +58,8 @@ export const useCategoryData = () => {
           payment_methods(name)
         `)
         .eq('user_id', user.id)
+        .gte('payment_date', startDate.toISOString())
+        .lte('payment_date', endDate.toISOString())
         .not('payment_methods', 'is', null);
 
       const revenueMethodMap = new Map<string, number>();
@@ -75,7 +87,7 @@ export const useCategoryData = () => {
       setLoading(true);
       fetchCategoryData().finally(() => setLoading(false));
     }
-  }, [user]);
+  }, [user, dateRange.startDate, dateRange.endDate]);
 
   return {
     expensesByCategory,

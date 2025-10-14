@@ -7,9 +7,13 @@ import { useFinancialData } from '@/hooks/useFinancialData';
 import { MetricsCards } from '@/components/financial/MetricsCards';
 import { FinancialCharts } from '@/components/financial/FinancialCharts';
 import { FinancialAlerts } from '@/components/financial/FinancialAlerts';
+import { PeriodFilter } from '@/components/dashboard/PeriodFilter';
+import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 import { toast } from "@/hooks/use-toast";
 
 const FinancialDashboard = () => {
+  const { selectedPeriod, setSelectedPeriod, dateRange } = usePeriodFilter('6m');
+  
   const { 
     metrics, 
     monthlyData, 
@@ -18,7 +22,7 @@ const FinancialDashboard = () => {
     loading, 
     error, 
     refetch 
-  } = useFinancialData();
+  } = useFinancialData(dateRange);
 
   const handleRefresh = () => {
     refetch();
@@ -60,6 +64,10 @@ const FinancialDashboard = () => {
       icon={TrendingUp}
       actions={
         <div className="flex items-center gap-2">
+          <PeriodFilter 
+            value={selectedPeriod}
+            onChange={setSelectedPeriod}
+          />
           <Button onClick={handleRefresh} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Atualizar</span>
@@ -87,6 +95,7 @@ const FinancialDashboard = () => {
         expensesByCategory={expensesByCategory}
         revenueByMethod={revenueByMethod}
         loading={loading}
+        selectedPeriod={selectedPeriod}
       />
     </ResponsiveLayout>
   );

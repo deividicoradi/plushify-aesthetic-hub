@@ -5,26 +5,32 @@ import { useCategoryData, CategoryData } from './financial/useCategoryData';
 
 export type { FinancialMetrics, MonthlyFinancialData, CategoryData };
 
-export const useFinancialData = () => {
+interface DateRange {
+  startDate: Date;
+  endDate: Date;
+  period: string;
+}
+
+export const useFinancialData = (dateRange: DateRange) => {
   const { 
     metrics, 
     loading: metricsLoading, 
     error, 
     refetch: refetchMetrics 
-  } = useFinancialMetrics();
+  } = useFinancialMetrics(dateRange);
 
   const { 
     monthlyData, 
     loading: monthlyLoading, 
     refetch: refetchMonthly 
-  } = useMonthlyFinancialData();
+  } = useMonthlyFinancialData(dateRange);
 
   const { 
     expensesByCategory, 
     revenueByMethod, 
     loading: categoryLoading, 
     refetch: refetchCategory 
-  } = useCategoryData();
+  } = useCategoryData(dateRange);
 
   const loading = metricsLoading || monthlyLoading || categoryLoading;
 

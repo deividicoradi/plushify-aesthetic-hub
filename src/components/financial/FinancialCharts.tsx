@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { MonthlyFinancialData, CategoryData } from '@/hooks/useFinancialData';
+import { PeriodOption } from '@/components/dashboard/PeriodFilter';
 import { CashFlowChart } from './charts/CashFlowChart';
 import { RevenueExpensesChart } from './charts/RevenueExpensesChart';
 import { CategoryPieChart } from './charts/CategoryPieChart';
@@ -12,6 +13,7 @@ interface FinancialChartsProps {
   expensesByCategory: CategoryData[];
   revenueByMethod: CategoryData[];
   loading?: boolean;
+  selectedPeriod: PeriodOption;
 }
 
 const chartConfig = {
@@ -33,13 +35,25 @@ export const FinancialCharts = ({
   monthlyData, 
   expensesByCategory, 
   revenueByMethod, 
-  loading = false 
+  loading = false,
+  selectedPeriod 
 }: FinancialChartsProps) => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
+  };
+
+  const getPeriodLabel = () => {
+    switch (selectedPeriod) {
+      case '7d': return 'Últimos 7 Dias';
+      case '30d': return 'Últimos 30 Dias';
+      case '90d': return 'Últimos 3 Meses';
+      case '6m': return 'Últimos 6 Meses';
+      case '1y': return 'Último Ano';
+      default: return 'Período Selecionado';
+    }
   };
 
   if (loading) {
@@ -53,6 +67,7 @@ export const FinancialCharts = ({
         data={monthlyData}
         formatCurrency={formatCurrency}
         chartConfig={chartConfig}
+        periodLabel={getPeriodLabel()}
       />
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">

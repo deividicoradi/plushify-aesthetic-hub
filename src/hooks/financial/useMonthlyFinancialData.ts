@@ -10,7 +10,13 @@ export interface MonthlyFinancialData {
   saldoLiquido: number;
 }
 
-export const useMonthlyFinancialData = () => {
+interface DateRange {
+  startDate: Date;
+  endDate: Date;
+  period: string;
+}
+
+export const useMonthlyFinancialData = (dateRange: DateRange) => {
   const { user } = useAuth();
   const [monthlyData, setMonthlyData] = useState<MonthlyFinancialData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,30 +25,32 @@ export const useMonthlyFinancialData = () => {
     if (!user) return;
 
     try {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      const { startDate, endDate } = dateRange;
 
-      // Buscar dados em paralelo
+      // Buscar dados em paralelo com filtro de período
       const [paymentsResult, cashClosuresResult, expensesResult] = await Promise.all([
         supabase
           .from('payments')
           .select('paid_amount, payment_date')
           .eq('user_id', user.id)
           .eq('status', 'pago')
-          .gte('payment_date', sixMonthsAgo.toISOString())
+          .gte('payment_date', startDate.toISOString())
+          .lte('payment_date', endDate.toISOString())
           .not('payment_date', 'is', null),
 
         supabase
           .from('cash_closures')
           .select('total_income, closure_date')
           .eq('user_id', user.id)
-          .gte('closure_date', sixMonthsAgo.toISOString().split('T')[0]),
+          .gte('closure_date', startDate.toISOString().split('T')[0])
+          .lte('closure_date', endDate.toISOString().split('T')[0]),
 
         supabase
           .from('expenses')
           .select('amount, expense_date')
           .eq('user_id', user.id)
-          .gte('expense_date', sixMonthsAgo.toISOString())
+          .gte('expense_date', startDate.toISOString())
+          .lte('expense_date', endDate.toISOString())
       ]);
 
       const payments = paymentsResult.data || [];
@@ -51,9 +59,13 @@ export const useMonthlyFinancialData = () => {
 
       const monthlyDataMap = new Map<string, MonthlyFinancialData>();
 
-      // Inicializar últimos 6 meses
-      for (let i = 5; i >= 0; i--) {
-        const date = new Date();
+      // Calcular número de períodos baseado no range
+      const monthsDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+      const periods = Math.min(monthsDiff, 12); // Máximo de 12 períodos
+
+      // Inicializar períodos baseados no filtro
+      for (let i = periods - 1; i >= 0; i--) {
+        const date = new Date(endDate);
         date.setMonth(date.getMonth() - i);
         const monthKey = date.toISOString().slice(0, 7);
         const monthName = date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
@@ -112,7 +124,7 @@ export const useMonthlyFinancialData = () => {
       setLoading(true);
       fetchMonthlyData().finally(() => setLoading(false));
     }
-  }, [user]);
+  }, [user, dateRange.startDate, dateRange.endDate]);
 
   return {
     monthlyData,
