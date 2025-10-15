@@ -48,8 +48,16 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
         appointment.service_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
-      // Status filter (aplicado apenas nas abas Hoje, Amanhã e Todos - NÃO na aba Por Data)
+      // Status filter (global)
       const matchesStatus = !statusFilter || statusFilter === 'all' || appointment.status === statusFilter;
+
+      // Date filter (aplica quando uma data específica é escolhida)
+      let matchesSelectedDate = true;
+      if (selectedDate) {
+        const appointmentDate = parseISO(appointment.appointment_date);
+        const filterDate = parseISO(selectedDate);
+        matchesSelectedDate = format(appointmentDate, 'yyyy-MM-dd') === format(filterDate, 'yyyy-MM-dd');
+      }
 
       // Advanced filters
       const matchesAdvancedStatus = !filters.status || appointment.status === filters.status;
@@ -85,14 +93,14 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
         }
       }
 
-      return matchesSearch && matchesStatus && 
+      return matchesSearch && matchesStatus && matchesSelectedDate &&
              matchesAdvancedStatus && matchesClientName && 
              matchesServiceName && matchesDateRange && matchesTimeRange;
     });
 
     console.log('Filtered appointments:', filtered.length);
     return filtered;
-  }, [appointments, searchQuery, statusFilter, filters]);
+  }, [appointments, searchQuery, statusFilter, selectedDate, filters]);
 
   const todayAppointments = useMemo(() => {
     return filteredAppointments.filter(apt => {
