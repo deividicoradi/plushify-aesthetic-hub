@@ -46,8 +46,7 @@ export const AppointmentFiltersAdvanced = ({
   }, [filters]);
 
   const updateFilter = (key: keyof AppointmentFilters, value: string) => {
-    const newFilters = { ...localFilters, [key]: value || undefined };
-    setLocalFilters(newFilters);
+    setLocalFilters(prev => ({ ...prev, [key]: value || undefined }));
   };
 
   const applyFilters = () => {
@@ -146,6 +145,8 @@ export const AppointmentFiltersAdvanced = ({
                     type="date"
                     value={localFilters.dateFrom || ''}
                     onChange={(e) => updateFilter('dateFrom', e.target.value)}
+                    className="pointer-events-auto"
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </div>
                 <div>
@@ -154,6 +155,8 @@ export const AppointmentFiltersAdvanced = ({
                     type="date"
                     value={localFilters.dateTo || ''}
                     onChange={(e) => updateFilter('dateTo', e.target.value)}
+                    className="pointer-events-auto"
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </div>
               </div>
@@ -172,6 +175,8 @@ export const AppointmentFiltersAdvanced = ({
                     type="time"
                     value={localFilters.timeFrom || ''}
                     onChange={(e) => updateFilter('timeFrom', e.target.value)}
+                    className="pointer-events-auto"
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </div>
                 <div>
@@ -180,6 +185,8 @@ export const AppointmentFiltersAdvanced = ({
                     type="time"
                     value={localFilters.timeTo || ''}
                     onChange={(e) => updateFilter('timeTo', e.target.value)}
+                    className="pointer-events-auto"
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </div>
               </div>
@@ -191,11 +198,14 @@ export const AppointmentFiltersAdvanced = ({
                 <CheckCircle className="w-4 h-4" />
                 <Label className="font-medium">Status</Label>
               </div>
-              <Select value={localFilters.status || ''} onValueChange={(value) => updateFilter('status', value === 'all' ? '' : value)}>
-                <SelectTrigger>
+              <Select 
+                value={localFilters.status || 'all'} 
+                onValueChange={(value) => updateFilter('status', value === 'all' ? '' : value)}
+              >
+                <SelectTrigger className="pointer-events-auto">
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background z-50">
                   <SelectItem value="all">Todos os status</SelectItem>
                   {STATUS_OPTIONS.map(status => (
                     <SelectItem key={status.value} value={status.value}>
@@ -219,6 +229,7 @@ export const AppointmentFiltersAdvanced = ({
                 placeholder="Nome do cliente"
                 value={localFilters.clientName || ''}
                 onChange={(e) => updateFilter('clientName', e.target.value)}
+                className="pointer-events-auto"
               />
             </div>
 
@@ -229,6 +240,7 @@ export const AppointmentFiltersAdvanced = ({
                 placeholder="Nome do serviço"
                 value={localFilters.serviceName || ''}
                 onChange={(e) => updateFilter('serviceName', e.target.value)}
+                className="pointer-events-auto"
               />
             </div>
 
