@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Activity, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
@@ -12,8 +12,6 @@ interface WeeklyChartsProps {
     faturamento: number;
   }>;
   formatCurrency: (value: number) => string;
-  selectedPeriod: PeriodOption;
-  onPeriodChange: (period: PeriodOption) => void;
 }
 
 const getPeriodLabel = (period: PeriodOption) => {
@@ -27,8 +25,13 @@ const getPeriodLabel = (period: PeriodOption) => {
   }
 };
 
-export const WeeklyCharts = ({ chartData, formatCurrency, selectedPeriod, onPeriodChange }: WeeklyChartsProps) => {
-  const periodLabel = getPeriodLabel(selectedPeriod);
+export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) => {
+  // Estado independente para cada gráfico
+  const [appointmentsPeriod, setAppointmentsPeriod] = useState<PeriodOption>('7d');
+  const [revenuePeriod, setRevenuePeriod] = useState<PeriodOption>('7d');
+
+  const appointmentsLabel = getPeriodLabel(appointmentsPeriod);
+  const revenueLabel = getPeriodLabel(revenuePeriod);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Agendamentos */}
@@ -37,11 +40,11 @@ export const WeeklyCharts = ({ chartData, formatCurrency, selectedPeriod, onPeri
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Activity className="w-5 h-5 text-indigo-600" />
-              Agendamentos - {periodLabel}
+              Agendamentos - {appointmentsLabel}
             </CardTitle>
             <PeriodFilter 
-              value={selectedPeriod} 
-              onChange={onPeriodChange}
+              value={appointmentsPeriod} 
+              onChange={setAppointmentsPeriod}
             />
           </div>
         </CardHeader>
@@ -85,11 +88,11 @@ export const WeeklyCharts = ({ chartData, formatCurrency, selectedPeriod, onPeri
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-emerald-600" />
-              Faturamento - {periodLabel}
+              Faturamento - {revenueLabel}
             </CardTitle>
             <PeriodFilter 
-              value={selectedPeriod} 
-              onChange={onPeriodChange}
+              value={revenuePeriod} 
+              onChange={setRevenuePeriod}
             />
           </div>
         </CardHeader>

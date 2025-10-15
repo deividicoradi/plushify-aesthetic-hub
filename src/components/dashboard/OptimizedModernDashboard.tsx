@@ -8,7 +8,7 @@ import { WeeklyCharts } from './WeeklyCharts';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const OptimizedModernDashboard = () => {
-  const { selectedPeriod, setSelectedPeriod, dateRange } = usePeriodFilter('30d');
+  const { dateRange } = usePeriodFilter('30d');
   const { data, isLoading, error } = useOptimizedDashboardData(dateRange);
 
   const formatCurrency = (value: number) => {
@@ -90,8 +90,6 @@ export const OptimizedModernDashboard = () => {
       <WeeklyCharts 
         chartData={data.chartData}
         formatCurrency={formatCurrency}
-        selectedPeriod={selectedPeriod}
-        onPeriodChange={setSelectedPeriod}
       />
     </div>
   );
