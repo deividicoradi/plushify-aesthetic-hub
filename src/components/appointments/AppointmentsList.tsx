@@ -234,9 +234,9 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
     );
   }
 
-  const hasActiveFilters = Object.values(filters).some(value => value && value !== '');
+  const hasActiveFilters = !!(selectedDate || statusFilter || Object.values(filters).some(value => value && value !== ''));
 
-  if (filteredAppointments.length === 0) {
+  if (filteredAppointments.length === 0 && !hasActiveFilters && !searchQuery) {
     return (
       <AppointmentsEmptyState
         searchQuery={searchQuery}
@@ -474,19 +474,62 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
         </TabsContent>
 
         <TabsContent value="todos" className="space-y-4 mt-6">
-          {renderAppointmentsList(filteredAppointments, 'all')}
+          {filteredAppointments.length === 0 ? (
+            <div className="text-center py-12">
+              <CalendarDays className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg font-medium mb-2">Nenhum agendamento encontrado</p>
+              <p className="text-gray-400 text-sm">
+                {hasActiveFilters 
+                  ? 'Tente ajustar os filtros para encontrar agendamentos' 
+                  : 'Não há agendamentos cadastrados'}
+              </p>
+              {hasActiveFilters && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setSelectedDate('');
+                    setStatusFilter('');
+                    onClearFilters?.();
+                  }}
+                  className="mt-4"
+                >
+                  Limpar Filtros
+                </Button>
+              )}
+            </div>
+          ) : (
+            renderAppointmentsList(filteredAppointments, 'all')
+          )}
         </TabsContent>
 
         <TabsContent value="data" className="space-y-4 mt-6">
           {selectedDate ? (
-            renderAppointmentsList(
-              filteredAppointments.filter(apt => {
+            (() => {
+              const dateFilteredAppointments = filteredAppointments.filter(apt => {
                 const appointmentDate = parseISO(apt.appointment_date);
                 const filterDate = parseISO(selectedDate);
                 return format(appointmentDate, 'yyyy-MM-dd') === format(filterDate, 'yyyy-MM-dd');
-              }),
-              'date'
-            )
+              });
+              
+              return dateFilteredAppointments.length === 0 ? (
+                <div className="text-center py-12">
+                  <CalendarDays className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg font-medium mb-2">Nenhum agendamento nesta data</p>
+                  <p className="text-gray-400 text-sm">
+                    Não há agendamentos para {format(parseISO(selectedDate), 'dd/MM/yyyy', { locale: ptBR })}
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setSelectedDate('')}
+                    className="mt-4"
+                  >
+                    Limpar Data
+                  </Button>
+                </div>
+              ) : (
+                renderAppointmentsList(dateFilteredAppointments, 'date')
+              );
+            })()
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-500">Selecione uma data específica para ver os agendamentos</p>
