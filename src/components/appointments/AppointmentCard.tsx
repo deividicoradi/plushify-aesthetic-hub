@@ -82,7 +82,13 @@ export const AppointmentCard = ({ appointment, isSelected = false, onSelect }: A
     }
 
     console.log('Changing status to:', newStatus);
-    await updateAppointment(appointment.id, { status: newStatus });
+    try {
+      await updateAppointment(appointment.id, { status: newStatus });
+    } catch (error: any) {
+      console.error('Erro ao mudar status do agendamento:', error);
+      const msg = error?.message || error?.error?.message || error?.data?.message || 'Não foi possível atualizar o status.';
+      toast({ title: 'Erro', description: msg, variant: 'destructive' });
+    }
   };
 
   const handleDeleteClick = () => {

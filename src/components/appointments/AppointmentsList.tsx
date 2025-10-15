@@ -213,11 +213,12 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
       }
 
       setSelectedAppointments([]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao processar ação em massa:', error);
+      const msg = error?.message || error?.error?.message || error?.data?.message || 'Ocorreu um erro ao processar a ação.';
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao processar a ação.",
+        description: msg,
         variant: "destructive"
       });
     }
