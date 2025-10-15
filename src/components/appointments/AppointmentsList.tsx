@@ -48,16 +48,8 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
         appointment.service_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
-      // Status filter
+      // Status filter (aplicado apenas nas abas Hoje, Amanhã e Todos - NÃO na aba Por Data)
       const matchesStatus = !statusFilter || statusFilter === 'all' || appointment.status === statusFilter;
-
-      // Date filter
-      let matchesSelectedDate = true;
-      if (selectedDate) {
-        const appointmentDate = parseISO(appointment.appointment_date);
-        const filterDate = parseISO(selectedDate);
-        matchesSelectedDate = format(appointmentDate, 'yyyy-MM-dd') === format(filterDate, 'yyyy-MM-dd');
-      }
 
       // Advanced filters
       const matchesAdvancedStatus = !filters.status || appointment.status === filters.status;
@@ -93,14 +85,14 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
         }
       }
 
-      return matchesSearch && matchesStatus && matchesSelectedDate && 
+      return matchesSearch && matchesStatus && 
              matchesAdvancedStatus && matchesClientName && 
              matchesServiceName && matchesDateRange && matchesTimeRange;
     });
 
     console.log('Filtered appointments:', filtered.length);
     return filtered;
-  }, [appointments, searchQuery, statusFilter, selectedDate, filters]);
+  }, [appointments, searchQuery, statusFilter, filters]);
 
   const todayAppointments = useMemo(() => {
     return filteredAppointments.filter(apt => {
@@ -505,25 +497,36 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
         <TabsContent value="data" className="space-y-4 mt-6">
           {selectedDate ? (
             (() => {
+              // Filtra por data E status (se selecionado)
               const dateFilteredAppointments = filteredAppointments.filter(apt => {
                 const appointmentDate = parseISO(apt.appointment_date);
                 const filterDate = parseISO(selectedDate);
-                return format(appointmentDate, 'yyyy-MM-dd') === format(filterDate, 'yyyy-MM-dd');
+                const matchesDate = format(appointmentDate, 'yyyy-MM-dd') === format(filterDate, 'yyyy-MM-dd');
+                const matchesStatus = !statusFilter || statusFilter === 'all' || apt.status === statusFilter;
+                return matchesDate && matchesStatus;
               });
               
               return dateFilteredAppointments.length === 0 ? (
                 <div className="text-center py-12">
                   <CalendarDays className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg font-medium mb-2">Nenhum agendamento nesta data</p>
+                  <p className="text-gray-500 text-lg font-medium mb-2">Nenhum agendamento encontrado</p>
                   <p className="text-gray-400 text-sm">
                     Não há agendamentos para {format(parseISO(selectedDate), 'dd/MM/yyyy', { locale: ptBR })}
+                    {statusFilter && statusFilter !== 'all' && (
+                      <> com status "{statusFilter === 'agendado' ? 'Agendado' : 
+                       statusFilter === 'confirmado' ? 'Confirmado' : 
+                       statusFilter === 'concluido' ? 'Concluído' : 'Cancelado'}"</>
+                    )}
                   </p>
                   <Button 
                     variant="outline" 
-                    onClick={() => setSelectedDate('')}
+                    onClick={() => {
+                      setSelectedDate('');
+                      setStatusFilter('');
+                    }}
                     className="mt-4"
                   >
-                    Limpar Data
+                    Limpar Filtros
                   </Button>
                 </div>
               ) : (
