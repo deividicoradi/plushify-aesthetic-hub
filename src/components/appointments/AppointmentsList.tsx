@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Calendar, Loader2, CalendarDays, Check, X, Trash2, Clock } from 'lucide-react';
+import { Calendar, Loader2, CalendarDays, Check, X, Trash2, Clock, CalendarIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +14,7 @@ import { AppointmentsEmptyState } from './AppointmentsEmptyState';
 import { useAppointments } from '@/hooks/useAppointments';
 import { format, isToday, isTomorrow, parseISO, isWithinInterval, differenceInHours } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 import { AppointmentFilters } from './AppointmentFiltersAdvanced';
 
 interface AppointmentsListProps {
@@ -29,11 +32,10 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
   const { appointments, updateAppointment, deleteAppointment, isLoading } = useAppointments();
 
   // Local buffered states to avoid applying filters while typing/selecting
-  const [dateInput, setDateInput] = useState('');
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [statusInput, setStatusInput] = useState('');
   const [statusOpen, setStatusOpen] = useState(false);
 
-  useEffect(() => { setDateInput(selectedDate); }, [selectedDate]);
   useEffect(() => { setStatusInput(statusFilter); }, [statusFilter]);
 
   console.log('AppointmentsList render - Total appointments:', appointments.length);
@@ -324,15 +326,37 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
       
       {/* Compact Filter Controls - Mobile Optimized */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <Input
-          type="date"
-          value={dateInput}
-          onChange={(e) => setDateInput(e.target.value)}
-          onBlur={() => setSelectedDate(dateInput)}
-          onKeyDown={(e) => { if (e.key === 'Enter') { setSelectedDate(dateInput); } }}
-          className="w-full sm:w-auto h-11 sm:h-10 text-sm touch-target pointer-events-auto"
-          placeholder="Data"
-        />
+        <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full sm:w-auto h-11 sm:h-10 justify-start text-left font-normal",
+                !selectedDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {selectedDate ? format(parseISO(selectedDate), "dd/MM/yyyy", { locale: ptBR }) : <span>Selecionar data</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate ? parseISO(selectedDate) : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  setSelectedDate(format(date, 'yyyy-MM-dd'));
+                } else {
+                  setSelectedDate('');
+                }
+                setDatePickerOpen(false);
+              }}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+              locale={ptBR}
+            />
+          </PopoverContent>
+        </Popover>
 
         <Select 
           value={statusInput} 
