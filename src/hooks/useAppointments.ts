@@ -60,7 +60,6 @@ export const useAppointments = () => {
       appointmentsApi.updateAppointment(user!.id, id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments', user?.id] });
-      toast({ title: "Sucesso", description: "Agendamento atualizado com sucesso!" });
     },
     onError: (error: any) => {
       console.error('Erro ao atualizar agendamento:', error);
@@ -82,7 +81,6 @@ export const useAppointments = () => {
     mutationFn: (id: string) => appointmentsApi.deleteAppointment(user!.id, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments', user?.id] });
-      toast({ title: "Sucesso", description: "Agendamento excluído com sucesso!" });
     },
     onError: (error: any) => {
       console.error('Erro ao excluir agendamento:', error);

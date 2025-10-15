@@ -185,9 +185,11 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
 
     try {
       if (action === 'excluir') {
-        for (const appointmentId of selectedAppointments) {
-          await deleteAppointment(appointmentId);
-        }
+        const deletePromises = selectedAppointments.map(appointmentId => 
+          deleteAppointment(appointmentId)
+        );
+        await Promise.all(deletePromises);
+        
         toast({
           title: "Agendamentos excluídos",
           description: `${selectedAppointments.length} agendamento(s) excluído(s) com sucesso.`
@@ -199,9 +201,10 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
           concluir: 'concluido'
         };
         
-        for (const appointmentId of selectedAppointments) {
-          await updateAppointment(appointmentId, { status: statusMap[action] });
-        }
+        const updatePromises = selectedAppointments.map(appointmentId => 
+          updateAppointment(appointmentId, { status: statusMap[action] })
+        );
+        await Promise.all(updatePromises);
         
         toast({
           title: `Agendamentos ${action === 'confirmar' ? 'confirmados' : action === 'cancelar' ? 'cancelados' : 'concluídos'}`,
@@ -211,6 +214,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
 
       setSelectedAppointments([]);
     } catch (error) {
+      console.error('Erro ao processar ação em massa:', error);
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao processar a ação.",
