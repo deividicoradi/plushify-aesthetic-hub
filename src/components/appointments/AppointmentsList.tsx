@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Calendar, Loader2, CalendarDays, Check, X, Trash2, Clock } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,14 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedAppointments, setSelectedAppointments] = useState<string[]>([]);
   const { appointments, updateAppointment, deleteAppointment, isLoading } = useAppointments();
+
+  // Local buffered states to avoid applying filters while typing/selecting
+  const [dateInput, setDateInput] = useState('');
+  const [statusInput, setStatusInput] = useState('');
+  const [statusOpen, setStatusOpen] = useState(false);
+
+  useEffect(() => { setDateInput(selectedDate); }, [selectedDate]);
+  useEffect(() => { setStatusInput(statusFilter); }, [statusFilter]);
 
   console.log('AppointmentsList render - Total appointments:', appointments.length);
 
@@ -313,17 +321,29 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <Input
           type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="w-full sm:w-auto h-11 sm:h-10 text-sm touch-target"
-          placeholder="Data específica"
+          value={dateInput}
+          onChange={(e) => setDateInput(e.target.value)}
+          onBlur={() => setSelectedDate(dateInput)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { setSelectedDate(dateInput); } }}
+          className="w-full sm:w-auto h-11 sm:h-10 text-sm touch-target pointer-events-auto"
+          placeholder="Data"
         />
 
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select 
+          value={statusInput} 
+          onValueChange={setStatusInput}
+          open={statusOpen}
+          onOpenChange={(o) => {
+            setStatusOpen(o);
+            if (!o) {
+              setStatusFilter(statusInput || '');
+            }
+          }}
+        >
           <SelectTrigger className="w-full sm:w-40 h-11 sm:h-10 touch-target">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-50 bg-background">
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="agendado">Agendado</SelectItem>
             <SelectItem value="confirmado">Confirmado</SelectItem>
