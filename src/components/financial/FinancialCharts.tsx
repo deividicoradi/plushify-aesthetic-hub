@@ -1,14 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { MonthlyFinancialData, CategoryData } from '@/hooks/useFinancialData';
 import { PeriodOption } from '@/components/dashboard/PeriodFilter';
-import { usePeriodFilter } from '@/hooks/usePeriodFilter';
-import { useExpensesByType } from '@/hooks/financial/useExpensesByType';
 import { CashFlowChart } from './charts/CashFlowChart';
 import { RevenueExpensesChart } from './charts/RevenueExpensesChart';
 import { CategoryPieChart } from './charts/CategoryPieChart';
 import { CashFlowForecastChart } from './charts/CashFlowForecastChart';
-import { ExpenseComparisonCharts } from './charts/ExpenseComparisonCharts';
 import { LoadingCharts } from './charts/LoadingCharts';
 
 interface FinancialChartsProps {
@@ -41,19 +38,6 @@ export const FinancialCharts = ({
   loading = false,
   selectedPeriod 
 }: FinancialChartsProps) => {
-  // Filtros independentes para despesas fixas e variáveis
-  const { dateRange: fixedDateRange } = usePeriodFilter('30d');
-  const { dateRange: variableDateRange } = usePeriodFilter('30d');
-  
-  const [fixedPeriod, setFixedPeriod] = useState<PeriodOption>('30d');
-  const [variablePeriod, setVariablePeriod] = useState<PeriodOption>('30d');
-
-  // Hook para buscar despesas por tipo
-  const { fixedExpenses, variableExpenses, loading: expensesLoading } = useExpensesByType(
-    fixedDateRange,
-    variableDateRange
-  );
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -115,13 +99,6 @@ export const FinancialCharts = ({
           chartConfig={chartConfig}
         />
       </div>
-
-      {/* Gráficos de Despesas Fixas e Variáveis com Filtros */}
-      <ExpenseComparisonCharts 
-        fixedExpenses={fixedExpenses}
-        variableExpenses={variableExpenses}
-        formatCurrency={formatCurrency}
-      />
     </div>
   );
 };
