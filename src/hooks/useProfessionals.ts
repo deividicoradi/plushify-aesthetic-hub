@@ -130,17 +130,31 @@ export const useProfessionals = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data, error } = await supabase
-        .rpc('get_professionals_by_service', {
-          p_user_id: user.id,
-          p_service_id: serviceId
-        });
+      // Buscar relações service_professionals
+      const { data: serviceProfessionals, error: spError } = await supabase
+        .from('service_professionals')
+        .select('professional_id')
+        .eq('service_id', serviceId)
+        .eq('user_id', user.id);
 
-      if (error) throw error;
-      return data || [];
+      if (spError) {
+        console.error('Error fetching service professionals:', spError);
+        // Se não há relação específica, retornar todos os profissionais ativos
+        return professionals.filter(p => p.active);
+      }
+
+      if (!serviceProfessionals || serviceProfessionals.length === 0) {
+        // Se não há profissionais específicos para o serviço, retornar todos os profissionais ativos
+        return professionals.filter(p => p.active);
+      }
+
+      // Retornar apenas os profissionais vinculados ao serviço
+      const professionalIds = serviceProfessionals.map(sp => sp.professional_id);
+      return professionals.filter(p => professionalIds.includes(p.id) && p.active);
     } catch (error) {
       console.error('Error fetching professionals by service:', error);
-      return [];
+      // Em caso de erro, retornar todos os profissionais ativos
+      return professionals.filter(p => p.active);
     }
   };
 
