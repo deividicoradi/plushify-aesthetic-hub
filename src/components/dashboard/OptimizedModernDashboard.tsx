@@ -1,5 +1,6 @@
 import React from 'react';
 import { useOptimizedDashboardData } from '@/hooks/useOptimizedDashboardData';
+import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 import { Card, CardContent } from '@/components/ui/card';
 import { KPICards } from './KPICards';
 import { FinancialEvolutionChart } from './FinancialEvolutionChart';
@@ -7,7 +8,8 @@ import { WeeklyCharts } from './WeeklyCharts';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const OptimizedModernDashboard = () => {
-  const { data, isLoading, error } = useOptimizedDashboardData();
+  const { selectedPeriod, setSelectedPeriod, dateRange } = usePeriodFilter('30d');
+  const { data, isLoading, error } = useOptimizedDashboardData(dateRange);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -88,6 +90,8 @@ export const OptimizedModernDashboard = () => {
       <WeeklyCharts 
         chartData={data.chartData}
         formatCurrency={formatCurrency}
+        selectedPeriod={selectedPeriod}
+        onPeriodChange={setSelectedPeriod}
       />
     </div>
   );

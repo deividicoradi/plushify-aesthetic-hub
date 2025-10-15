@@ -7,17 +7,23 @@ interface DashboardData {
   chartData: dashboardApi.ChartData[];
 }
 
-export const useOptimizedDashboardData = () => {
+interface DateRange {
+  startDate: Date;
+  endDate: Date;
+  period: string;
+}
+
+export const useOptimizedDashboardData = (dateRange: DateRange) => {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['dashboard-data', user?.id],
+    queryKey: ['dashboard-data', user?.id, dateRange.startDate, dateRange.endDate],
     queryFn: async (): Promise<DashboardData> => {
       if (!user) throw new Error('User not authenticated');
 
       const [stats, chartData] = await Promise.all([
         dashboardApi.fetchDashboardStats(user.id),
-        dashboardApi.fetchChartData(user.id)
+        dashboardApi.fetchChartData(user.id, dateRange.startDate, dateRange.endDate)
       ]);
 
       return {

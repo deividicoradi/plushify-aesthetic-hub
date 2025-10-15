@@ -85,36 +85,43 @@ export async function fetchDashboardStats(userId: string): Promise<DashboardStat
   };
 }
 
-export async function fetchChartData(userId: string): Promise<ChartData[]> {
-  const today = new Date();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - 6);
-  startOfWeek.setHours(0, 0, 0, 0);
-  const endOfWeek = new Date(today);
-  endOfWeek.setHours(23, 59, 59, 999);
+export async function fetchChartData(
+  userId: string, 
+  startDate?: Date, 
+  endDate?: Date
+): Promise<ChartData[]> {
+  // Se não passar datas, usar últimos 7 dias
+  const today = endDate || new Date();
+  const start = startDate || new Date(today);
+  if (!startDate) {
+    start.setDate(today.getDate() - 6);
+  }
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(today);
+  end.setHours(23, 59, 59, 999);
 
   const [appointmentsResult, paymentsResult, clientsResult] = await Promise.all([
     supabase
       .from('appointments')
       .select('appointment_date')
       .eq('user_id', userId)
-      .gte('appointment_date', startOfWeek.toISOString().split('T')[0])
-      .lte('appointment_date', endOfWeek.toISOString().split('T')[0]),
+      .gte('appointment_date', start.toISOString().split('T')[0])
+      .lte('appointment_date', end.toISOString().split('T')[0]),
     
     supabase
       .from('payments')
       .select('amount, payment_date')
       .eq('user_id', userId)
       .eq('status', 'pago')
-      .gte('payment_date', startOfWeek.toISOString())
-      .lte('payment_date', endOfWeek.toISOString()),
+      .gte('payment_date', start.toISOString())
+      .lte('payment_date', end.toISOString()),
       
     supabase
       .from('clients')
       .select('created_at')
       .eq('user_id', userId)
-      .gte('created_at', startOfWeek.toISOString())
-      .lte('created_at', endOfWeek.toISOString())
+      .gte('created_at', start.toISOString())
+      .lte('created_at', end.toISOString())
   ]);
 
   if (appointmentsResult.error) throw appointmentsResult.error;
@@ -124,9 +131,13 @@ export async function fetchChartData(userId: string): Promise<ChartData[]> {
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const chartData: ChartData[] = [];
 
-  for (let i = 0; i < 7; i++) {
-    const currentDay = new Date(startOfWeek);
-    currentDay.setDate(startOfWeek.getDate() + i);
+  // Calcular número de dias no período
+  const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const daysToShow = Math.min(daysDiff, 30); // Máximo 30 dias no gráfico
+
+  for (let i = 0; i < daysToShow; i++) {
+    const currentDay = new Date(start);
+    currentDay.setDate(start.getDate() + i);
     const dayString = currentDay.toISOString().split('T')[0];
 
     const agendamentos = appointmentsResult.data?.filter(a => 

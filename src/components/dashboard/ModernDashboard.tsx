@@ -12,9 +12,9 @@ import { WeeklyCharts } from './WeeklyCharts';
 import { ExpensesByCategoryChart } from './ExpensesByCategoryChart';
 
 export const ModernDashboard = () => {
+  const { selectedPeriod, setSelectedPeriod, dateRange } = usePeriodFilter('30d');
   const dashboardStats = useDashboardStats();
   const chartDataHook = useInteractiveChartData();
-  const { dateRange } = usePeriodFilter('6m');
   const { metrics, monthlyData, expensesByCategory, revenueByMethod, loading } = useFinancialData(dateRange);
 
   const formatCurrency = (value: number) => {
@@ -70,6 +70,8 @@ export const ModernDashboard = () => {
       <WeeklyCharts 
         chartData={chartDataHook.data || []}
         formatCurrency={formatCurrency}
+        selectedPeriod={selectedPeriod}
+        onPeriodChange={setSelectedPeriod}
       />
 
       {/* Gráfico de Despesas por Categoria */}
