@@ -58,46 +58,72 @@ export const useAppointments = () => {
   const updateAppointmentMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Appointment> }) => 
       appointmentsApi.updateAppointment(user!.id, id, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments', user?.id] });
+    onMutate: async ({ id, updates }: { id: string; updates: Partial<Appointment> }) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments', user?.id] });
+      const previous = queryClient.getQueryData<Appointment[]>(['appointments', user?.id]);
+      if (previous) {
+        queryClient.setQueryData<Appointment[]>(
+          ['appointments', user?.id],
+          previous.map((a) => (a.id === id ? ({ ...a, ...updates } as Appointment) : a))
+        );
+      }
+      return { previous } as { previous?: Appointment[] };
     },
-    onError: (error: any) => {
+    onError: (error: any, _vars, context: any) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['appointments', user?.id], context.previous);
+      }
       console.error('Erro ao atualizar agendamento:', error);
       toast({ title: "Erro", description: "Não foi possível atualizar o agendamento.", variant: "destructive" });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments', user?.id] });
     }
   });
 
   const updateAppointment = async (id: string, updates: Partial<Appointment>) => {
-    if (!user) return null;
+    if (!user) throw new Error('Usuário não autenticado');
     try {
       const result = await updateAppointmentMutation.mutateAsync({ id, updates });
       return result;
-    } catch {
-      return null;
+    } catch (err) {
+      throw err;
     }
   };
-
   const deleteAppointmentMutation = useMutation({
     mutationFn: (id: string) => appointmentsApi.deleteAppointment(user!.id, id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments', user?.id] });
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments', user?.id] });
+      const previous = queryClient.getQueryData<Appointment[]>(['appointments', user?.id]);
+      if (previous) {
+        queryClient.setQueryData<Appointment[]>(
+          ['appointments', user?.id],
+          previous.filter((a) => a.id !== id)
+        );
+      }
+      return { previous } as { previous?: Appointment[] };
     },
-    onError: (error: any) => {
+    onError: (error: any, _id, context: any) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['appointments', user?.id], context.previous);
+      }
       console.error('Erro ao excluir agendamento:', error);
       toast({ title: "Erro", description: "Não foi possível excluir o agendamento.", variant: "destructive" });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments', user?.id] });
     }
   });
 
   const deleteAppointment = async (id: string) => {
-    if (!user) return false;
+    if (!user) throw new Error('Usuário não autenticado');
     try {
       await deleteAppointmentMutation.mutateAsync(id);
       return true;
-    } catch {
-      return false;
+    } catch (err) {
+      throw err;
     }
   };
-
   return {
     appointments,
     isLoading,
