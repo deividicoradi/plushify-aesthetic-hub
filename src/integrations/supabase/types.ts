@@ -1079,6 +1079,51 @@ export type Database = {
         }
         Relationships: []
       }
+      wa_audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          endpoint: string
+          error_message: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          request_data: Json | null
+          response_status: number | null
+          success: boolean
+          tenant_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          endpoint: string
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          request_data?: Json | null
+          response_status?: number | null
+          success?: boolean
+          tenant_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          endpoint?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          request_data?: Json | null
+          response_status?: number | null
+          success?: boolean
+          tenant_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       wa_contacts: {
         Row: {
           client_id: string | null
@@ -1201,6 +1246,87 @@ export type Database = {
           },
         ]
       }
+      wa_rate_limits: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          ip_address: unknown | null
+          last_request_at: string
+          request_count: number
+          tenant_id: string
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip_address?: unknown | null
+          last_request_at?: string
+          request_count?: number
+          tenant_id: string
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip_address?: unknown | null
+          last_request_at?: string
+          request_count?: number
+          tenant_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      wa_security_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          created_at: string
+          description: string
+          endpoint: string | null
+          id: string
+          metadata: Json | null
+          resolved: boolean | null
+          resolved_at: string | null
+          severity: string
+          tenant_id: string | null
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          created_at?: string
+          description: string
+          endpoint?: string | null
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity?: string
+          tenant_id?: string | null
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string
+          description?: string
+          endpoint?: string | null
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity?: string
+          tenant_id?: string | null
+        }
+        Relationships: []
+      }
       wa_threads: {
         Row: {
           contact_id: string
@@ -1232,6 +1358,56 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "wa_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_token_refresh: {
+        Row: {
+          account_id: string
+          created_at: string
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          new_token_hash: string | null
+          old_token_hash: string | null
+          refresh_reason: string
+          scheduled_at: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          new_token_hash?: string | null
+          old_token_hash?: string | null
+          refresh_reason: string
+          scheduled_at?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          new_token_hash?: string | null
+          old_token_hash?: string | null
+          refresh_reason?: string
+          scheduled_at?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_token_refresh_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "wa_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -2231,6 +2407,20 @@ export type Database = {
           severity: string
         }[]
       }
+      check_wa_rate_limit: {
+        Args: {
+          p_endpoint: string
+          p_ip_address?: unknown
+          p_max_requests?: number
+          p_tenant_id: string
+          p_window_minutes?: number
+        }
+        Returns: {
+          allowed: boolean
+          remaining: number
+          reset_at: string
+        }[]
+      }
       cleanup_expired_refresh_tokens: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2267,6 +2457,10 @@ export type Database = {
           cleaned_sessions: number
         }[]
       }
+      cleanup_wa_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       complete_message_processing: {
         Args: {
           p_error_message?: string
@@ -2293,6 +2487,17 @@ export type Database = {
           p_client_phone: string
           p_notes?: string
           p_service_id: string
+        }
+        Returns: string
+      }
+      create_wa_security_alert: {
+        Args: {
+          p_alert_type: string
+          p_description: string
+          p_endpoint?: string
+          p_metadata?: Json
+          p_severity: string
+          p_tenant_id?: string
         }
         Returns: string
       }
@@ -2632,6 +2837,21 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_wa_audit: {
+        Args: {
+          p_action: string
+          p_endpoint: string
+          p_error_message?: string
+          p_ip_address?: unknown
+          p_metadata?: Json
+          p_request_data?: Json
+          p_response_status?: number
+          p_success?: boolean
+          p_tenant_id: string
+          p_user_agent?: string
+        }
+        Returns: string
+      }
       log_whatsapp_event: {
         Args: {
           p_event_type?: string
@@ -2772,6 +2992,15 @@ export type Database = {
       }
       sanitize_input: {
         Args: { input_text: string }
+        Returns: string
+      }
+      schedule_wa_token_rotation: {
+        Args: {
+          p_account_id: string
+          p_reason?: string
+          p_scheduled_at?: string
+          p_tenant_id: string
+        }
         Returns: string
       }
       search_clients: {

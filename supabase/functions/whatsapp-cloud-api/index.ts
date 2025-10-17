@@ -18,6 +18,10 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  let userId: string | null = null;
+  let endpoint = '';
+
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -41,15 +45,85 @@ serve(async (req) => {
       );
     }
 
+    userId = user.id;
     const url = new URL(req.url);
     const path = url.pathname.replace('/whatsapp-cloud-api', '');
+    endpoint = `${req.method} ${path}`;
+
+    // Extract client info
+    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0] || 
+                      req.headers.get('cf-connecting-ip') || null;
+    const userAgent = req.headers.get('user-agent') || null;
+
+    // Rate limiting check
+    const { data: rateLimitCheck } = await supabaseClient.rpc('check_wa_rate_limit', {
+      p_tenant_id: user.id,
+      p_endpoint: endpoint,
+      p_max_requests: 60,
+      p_window_minutes: 1,
+      p_ip_address: ipAddress
+    }).single();
+
+    if (rateLimitCheck && !rateLimitCheck.allowed) {
+      // Log rate limit exceeded
+      await supabaseClient.rpc('log_wa_audit', {
+        p_tenant_id: user.id,
+        p_action: 'RATE_LIMIT_EXCEEDED',
+        p_endpoint: endpoint,
+        p_response_status: 429,
+        p_ip_address: ipAddress,
+        p_user_agent: userAgent,
+        p_success: false,
+        p_error_message: 'Rate limit exceeded',
+        p_metadata: { reset_at: rateLimitCheck.reset_at }
+      });
+
+      return new Response(
+        JSON.stringify({ 
+          error: 'Rate limit exceeded',
+          reset_at: rateLimitCheck.reset_at,
+          remaining: 0
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'X-RateLimit-Limit': '60',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(rateLimitCheck.reset_at).toISOString()
+          } 
+        }
+      );
+    }
 
     // Route: POST /send - Send message via WhatsApp Cloud API
     if (req.method === 'POST' && path === '/send') {
-      const { to, message, type = 'text' }: SendMessageRequest = await req.json();
+      const requestBody = await req.json();
+      const { to, message, type = 'text' }: SendMessageRequest = requestBody;
+
+      // Log request
+      const auditLogPromise = supabaseClient.rpc('log_wa_audit', {
+        p_tenant_id: user.id,
+        p_action: 'SEND_MESSAGE',
+        p_endpoint: endpoint,
+        p_request_data: { to: to.substring(0, 5) + '***', message_length: message.length },
+        p_ip_address: ipAddress,
+        p_user_agent: userAgent
+      });
 
       // Validate inputs
       if (!to || !message) {
+        await auditLogPromise;
+        await supabaseClient.rpc('log_wa_audit', {
+          p_tenant_id: user.id,
+          p_action: 'SEND_MESSAGE',
+          p_endpoint: endpoint,
+          p_response_status: 400,
+          p_success: false,
+          p_error_message: 'Missing required fields'
+        });
+        
         return new Response(
           JSON.stringify({ error: 'Missing required fields: to, message' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -65,6 +139,16 @@ serve(async (req) => {
         .single();
 
       if (accountError || !account) {
+        await auditLogPromise;
+        await supabaseClient.rpc('log_wa_audit', {
+          p_tenant_id: user.id,
+          p_action: 'SEND_MESSAGE',
+          p_endpoint: endpoint,
+          p_response_status: 404,
+          p_success: false,
+          p_error_message: 'No active WhatsApp account found'
+        });
+        
         return new Response(
           JSON.stringify({ error: 'No active WhatsApp account found. Please configure your WhatsApp Business Account first.' }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -94,6 +178,18 @@ serve(async (req) => {
 
       if (!waResponse.ok) {
         console.error('WhatsApp API Error:', waData);
+        
+        await auditLogPromise;
+        await supabaseClient.rpc('log_wa_audit', {
+          p_tenant_id: user.id,
+          p_action: 'SEND_MESSAGE',
+          p_endpoint: endpoint,
+          p_response_status: waResponse.status,
+          p_success: false,
+          p_error_message: 'WhatsApp API error',
+          p_metadata: { wa_error: waData }
+        });
+        
         return new Response(
           JSON.stringify({ error: 'Failed to send message', details: waData }),
           { status: waResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -192,9 +288,36 @@ serve(async (req) => {
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', threadId);
 
+      // Log successful send
+      await auditLogPromise;
+      await supabaseClient.rpc('log_wa_audit', {
+        p_tenant_id: user.id,
+        p_action: 'SEND_MESSAGE',
+        p_endpoint: endpoint,
+        p_response_status: 200,
+        p_success: true,
+        p_metadata: { 
+          message_id: waData.messages?.[0]?.id,
+          duration_ms: Date.now() - startTime
+        }
+      });
+
       return new Response(
-        JSON.stringify({ success: true, data: waData }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          success: true, 
+          data: waData,
+          rate_limit: {
+            remaining: rateLimitCheck?.remaining || 0
+          }
+        }),
+        { 
+          status: 200, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'X-RateLimit-Remaining': String(rateLimitCheck?.remaining || 0)
+          } 
+        }
       );
     }
 
@@ -294,6 +417,28 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error:', error);
+
+    // Log error
+    if (userId) {
+      try {
+        const supabaseClient = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        );
+        
+        await supabaseClient.rpc('log_wa_audit', {
+          p_tenant_id: userId,
+          p_action: 'ERROR',
+          p_endpoint: endpoint || 'unknown',
+          p_response_status: 500,
+          p_success: false,
+          p_error_message: error.message
+        });
+      } catch (logError) {
+        console.error('Failed to log error:', logError);
+      }
+    }
+    
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

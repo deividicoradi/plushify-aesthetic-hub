@@ -6,6 +6,41 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to verify webhook signature
+async function verifyWebhookSignature(payload: string, signature: string): Promise<boolean> {
+  const appSecret = Deno.env.get('WHATSAPP_APP_SECRET');
+  if (!appSecret) {
+    console.warn('WHATSAPP_APP_SECRET not configured - signature verification skipped');
+    return true; // Allow if not configured (for backward compatibility)
+  }
+
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(appSecret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const signatureBuffer = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(payload)
+    );
+
+    const expectedSignature = 'sha256=' + Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    return expectedSignature === signature;
+  } catch (error) {
+    console.error('Signature verification error:', error);
+    return false;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -40,8 +75,34 @@ serve(async (req) => {
 
     // POST request - Incoming webhook from Meta
     if (req.method === 'POST') {
-      const payload = await req.json();
+      const rawBody = await req.text();
+      const signature = req.headers.get('x-hub-signature-256') || '';
 
+      // Verify webhook signature
+      const isValid = await verifyWebhookSignature(rawBody, signature);
+      
+      if (!isValid) {
+        console.error('Invalid webhook signature');
+        
+        // Create security alert
+        await supabaseAdmin.rpc('create_wa_security_alert', {
+          p_alert_type: 'WEBHOOK_SIGNATURE_FAILED',
+          p_severity: 'high',
+          p_description: 'Webhook signature verification failed',
+          p_endpoint: '/whatsapp-webhook',
+          p_metadata: {
+            signature_provided: signature ? 'yes' : 'no',
+            timestamp: new Date().toISOString()
+          }
+        });
+
+        return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      const payload = JSON.parse(rawBody);
       console.log('Received webhook:', JSON.stringify(payload, null, 2));
 
       // Save raw event
@@ -77,6 +138,17 @@ serve(async (req) => {
         }
 
         const tenantId = account.tenant_id;
+
+        // Log webhook received
+        await supabaseAdmin.rpc('log_wa_audit', {
+          p_tenant_id: tenantId,
+          p_action: 'WEBHOOK_RECEIVED',
+          p_endpoint: '/whatsapp-webhook',
+          p_request_data: { message_count: value.messages.length },
+          p_response_status: 200,
+          p_success: true,
+          p_metadata: { phone_number_id: value.metadata.phone_number_id }
+        });
 
         // Process each message
         for (const message of value.messages) {
@@ -200,6 +272,19 @@ serve(async (req) => {
             .from('wa_threads')
             .update({ last_message_at: timestamp })
             .eq('id', threadId);
+
+          // Log message received
+          await supabaseAdmin.rpc('log_wa_audit', {
+            p_tenant_id: tenantId,
+            p_action: 'MESSAGE_RECEIVED',
+            p_endpoint: '/whatsapp-webhook',
+            p_success: true,
+            p_metadata: {
+              message_id: messageId,
+              message_type: messageType,
+              from: fromPhone.substring(0, 5) + '***'
+            }
+          });
 
           console.log('Message processed successfully:', messageId);
         }
