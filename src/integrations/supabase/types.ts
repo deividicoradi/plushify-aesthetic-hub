@@ -1040,6 +1040,199 @@ export type Database = {
         }
         Relationships: []
       }
+      wa_accounts: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          phone_number_id: string
+          status: string | null
+          tenant_id: string
+          token_encrypted: string
+          updated_at: string
+          waba_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone_number_id: string
+          status?: string | null
+          tenant_id: string
+          token_encrypted: string
+          updated_at?: string
+          waba_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone_number_id?: string
+          status?: string | null
+          tenant_id?: string
+          token_encrypted?: string
+          updated_at?: string
+          waba_id?: string
+        }
+        Relationships: []
+      }
+      wa_contacts: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          id: string
+          last_interaction: string | null
+          name: string | null
+          tenant_id: string
+          updated_at: string
+          wa_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          last_interaction?: string | null
+          name?: string | null
+          tenant_id: string
+          updated_at?: string
+          wa_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          last_interaction?: string | null
+          name?: string | null
+          tenant_id?: string
+          updated_at?: string
+          wa_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_basic"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_incoming_events: {
+        Row: {
+          id: string
+          payload: Json
+          phone_number_id: string
+          received_at: string
+        }
+        Insert: {
+          id?: string
+          payload: Json
+          phone_number_id: string
+          received_at?: string
+        }
+        Update: {
+          id?: string
+          payload?: Json
+          phone_number_id?: string
+          received_at?: string
+        }
+        Relationships: []
+      }
+      wa_messages: {
+        Row: {
+          created_at: string
+          direction: string
+          id: string
+          raw_json: Json | null
+          status: string
+          tenant_id: string
+          text_body: string | null
+          thread_id: string
+          timestamp: string
+          type: string
+          updated_at: string
+          wa_message_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          id?: string
+          raw_json?: Json | null
+          status?: string
+          tenant_id: string
+          text_body?: string | null
+          thread_id: string
+          timestamp?: string
+          type?: string
+          updated_at?: string
+          wa_message_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          id?: string
+          raw_json?: Json | null
+          status?: string
+          tenant_id?: string
+          text_body?: string | null
+          thread_id?: string
+          timestamp?: string
+          type?: string
+          updated_at?: string
+          wa_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "wa_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_threads: {
+        Row: {
+          contact_id: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_threads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "wa_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_alerts_legacy: {
         Row: {
           acknowledged: boolean | null
