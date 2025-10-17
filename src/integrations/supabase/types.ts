@@ -2687,6 +2687,10 @@ export type Database = {
         Args: { input_text: string; mask_type?: string }
         Returns: string
       }
+      normalize_phone: {
+        Args: { phone: string }
+        Returns: string
+      }
       process_message_queue: {
         Args: { p_batch_size?: number }
         Returns: {

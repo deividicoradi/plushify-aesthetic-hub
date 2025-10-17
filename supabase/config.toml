@@ -13,8 +13,17 @@ verify_jwt = true
 [functions.customer-portal]
 verify_jwt = true
 
+# DEPRECATED - Use whatsapp-cloud-api instead
 [functions.whatsapp-manager]
 verify_jwt = true
+
+# WhatsApp Cloud API - New implementation
+[functions.whatsapp-cloud-api]
+verify_jwt = true
+
+# WhatsApp Webhook - Receives events from Meta
+[functions.whatsapp-webhook]
+verify_jwt = false
 
 # Public proxy with CORS for keepAlive
 [functions.proxy]
