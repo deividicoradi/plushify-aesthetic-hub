@@ -1040,7 +1040,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_alerts: {
+      whatsapp_alerts_legacy: {
         Row: {
           acknowledged: boolean | null
           acknowledged_at: string | null
@@ -1088,7 +1088,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_contatos: {
+      whatsapp_contatos_legacy: {
         Row: {
           atualizado_em: string
           cliente_id: string | null
@@ -1136,7 +1136,7 @@ export type Database = {
           },
         ]
       }
-      whatsapp_health_status: {
+      whatsapp_health_status_legacy: {
         Row: {
           created_at: string | null
           error_rate: number | null
@@ -1175,7 +1175,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_load_tests: {
+      whatsapp_load_tests_legacy: {
         Row: {
           avg_response_time: number | null
           concurrent_users: number
@@ -1235,7 +1235,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_login_attempts: {
+      whatsapp_login_attempts_legacy: {
         Row: {
           attempt_time: string
           blocked_until: string | null
@@ -1268,7 +1268,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_logs: {
+      whatsapp_logs_legacy: {
         Row: {
           created_at: string | null
           event_type: string
@@ -1310,7 +1310,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_mensagens: {
+      whatsapp_mensagens_legacy: {
         Row: {
           contato_id: string
           conteudo: string
@@ -1352,19 +1352,19 @@ export type Database = {
             foreignKeyName: "fk_whatsapp_mensagens_contato_id"
             columns: ["contato_id"]
             isOneToOne: false
-            referencedRelation: "whatsapp_contatos"
+            referencedRelation: "whatsapp_contatos_legacy"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "fk_whatsapp_mensagens_sessao_id"
             columns: ["sessao_id"]
             isOneToOne: false
-            referencedRelation: "whatsapp_sessoes"
+            referencedRelation: "whatsapp_sessoes_legacy"
             referencedColumns: ["id"]
           },
         ]
       }
-      whatsapp_mensagens_temp: {
+      whatsapp_mensagens_temp_legacy: {
         Row: {
           contato_id: string
           conteudo: string
@@ -1403,12 +1403,12 @@ export type Database = {
             foreignKeyName: "whatsapp_mensagens_temp_contato_id_fkey"
             columns: ["contato_id"]
             isOneToOne: false
-            referencedRelation: "whatsapp_contatos"
+            referencedRelation: "whatsapp_contatos_legacy"
             referencedColumns: ["id"]
           },
         ]
       }
-      whatsapp_message_queue: {
+      whatsapp_message_queue_legacy: {
         Row: {
           contact_name: string | null
           created_at: string | null
@@ -1468,7 +1468,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_messages: {
+      whatsapp_messages_legacy: {
         Row: {
           contact_name: string | null
           contact_phone: string | null
@@ -1510,7 +1510,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_metrics: {
+      whatsapp_metrics_legacy: {
         Row: {
           created_at: string | null
           id: string
@@ -1540,7 +1540,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_performance_metrics: {
+      whatsapp_performance_metrics_legacy: {
         Row: {
           created_at: string | null
           id: string
@@ -1576,7 +1576,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_rate_limits: {
+      whatsapp_rate_limits_legacy: {
         Row: {
           created_at: string
           endpoint: string
@@ -1603,7 +1603,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_refresh_tokens: {
+      whatsapp_refresh_tokens_legacy: {
         Row: {
           created_at: string
           encrypted_refresh_token: string
@@ -1648,7 +1648,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_security_logs: {
+      whatsapp_security_logs_legacy: {
         Row: {
           acknowledged: boolean | null
           acknowledged_at: string | null
@@ -1696,7 +1696,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_session_isolation: {
+      whatsapp_session_isolation_legacy: {
         Row: {
           connection_count: number | null
           cpu_usage: number | null
@@ -1738,7 +1738,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_session_logs: {
+      whatsapp_session_logs_legacy: {
         Row: {
           created_at: string
           event: string
@@ -1771,7 +1771,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_session_stats: {
+      whatsapp_session_stats_legacy: {
         Row: {
           created_at: string
           id: string
@@ -1804,7 +1804,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_sessions: {
+      whatsapp_sessions_legacy: {
         Row: {
           created_at: string
           expires_at: string | null
@@ -1852,7 +1852,7 @@ export type Database = {
         }
         Relationships: []
       }
-      whatsapp_sessoes: {
+      whatsapp_sessoes_legacy: {
         Row: {
           atualizado_em: string
           criado_em: string
@@ -1920,7 +1920,7 @@ export type Database = {
       }
     }
     Views: {
-      active_whatsapp_sessions: {
+      active_whatsapp_sessions_legacy: {
         Row: {
           created_at: string | null
           expires_at: string | null
