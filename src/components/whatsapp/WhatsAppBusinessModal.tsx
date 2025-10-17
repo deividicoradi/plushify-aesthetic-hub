@@ -11,7 +11,7 @@ import {
   QrCode,
   Wifi
 } from 'lucide-react';
-import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
+import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
 import { WhatsAppConnectionCard } from './WhatsAppConnectionCard';
 import { WhatsAppConversations } from './WhatsAppConversations';
 
@@ -20,7 +20,7 @@ interface WhatsAppBusinessModalProps {
 }
 
 export const WhatsAppBusinessModal = ({ trigger }: WhatsAppBusinessModalProps) => {
-  const { session, connectWhatsApp } = useWhatsAppIntegration();
+  const { session, connectWhatsApp } = useWhatsAppRESTAPI();
   const [open, setOpen] = useState(false);
 
   const getStatusBadge = () => {

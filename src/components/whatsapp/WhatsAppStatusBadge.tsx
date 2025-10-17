@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Wifi, WifiOff, Loader2 } from 'lucide-react';
-import { WhatsAppSession } from '@/hooks/useWhatsAppIntegration';
+import { WhatsAppSession } from '@/hooks/useWhatsAppRESTAPI';
 
 interface WhatsAppStatusBadgeProps {
   session: WhatsAppSession;

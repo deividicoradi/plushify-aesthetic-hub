@@ -7,84 +7,53 @@ export interface WhatsAppStats {
   last_activity: string | null;
 }
 
+/**
+ * Fetch WhatsApp statistics from new Cloud API tables
+ */
 export async function fetchWhatsAppStats(userId: string): Promise<WhatsAppStats> {
-  const { data, error } = await supabase.rpc('get_whatsapp_stats', {
-    p_user_id: userId
-  });
+  try {
+    // Count contacts
+    const { count: contactsCount } = await supabase
+      .from('wa_contacts')
+      .select('*', { count: 'exact', head: true })
+      .eq('tenant_id', userId);
 
-  if (error) throw error;
-  
-  return data[0] || {
-    total_contacts: 0,
-    messages_sent: 0,
-    messages_received: 0,
-    last_activity: null
-  };
-}
+    // Count sent messages
+    const { count: sentCount } = await supabase
+      .from('wa_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('tenant_id', userId)
+      .eq('direction', 'out');
 
-export async function recordPerformanceMetric(
-  userId: string,
-  sessionId: string,
-  metricType: string,
-  metricValue: number,
-  metricUnit: string = 'count',
-  tags: Record<string, any> = {}
-) {
-  const { error } = await supabase.rpc('record_performance_metric', {
-    p_user_id: userId,
-    p_session_id: sessionId,
-    p_metric_type: metricType,
-    p_metric_value: metricValue,
-    p_metric_unit: metricUnit,
-    p_tags: tags
-  });
+    // Count received messages
+    const { count: receivedCount } = await supabase
+      .from('wa_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('tenant_id', userId)
+      .eq('direction', 'in');
 
-  if (error) throw error;
-}
+    // Get last activity
+    const { data: lastMessage } = await supabase
+      .from('wa_messages')
+      .select('timestamp')
+      .eq('tenant_id', userId)
+      .order('timestamp', { ascending: false })
+      .limit(1)
+      .single();
 
-export async function fetchWhatsAppSessionLogs(userId: string) {
-  const { data, error } = await supabase
-    .from('whatsapp_session_logs')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(10);
-  
-  if (error) throw error;
-  return data;
-}
-
-export async function getActiveSessionForUser(userId: string) {
-  const { data, error } = await supabase
-    .rpc('get_active_session_for_user', { p_user_id: userId });
-  
-  if (error) throw error;
-  return data;
-}
-
-export async function cleanupExpiredSessions() {
-  const { data, error } = await supabase.rpc('cleanup_expired_whatsapp_sessions');
-  if (error) throw error;
-  return data;
-}
-
-export async function enqueueMessage(
-  userId: string,
-  sessionId: string,
-  phone: string,
-  message: string,
-  contactName?: string,
-  priority: number = 0
-) {
-  const { data, error } = await supabase.rpc('enqueue_whatsapp_message', {
-    p_user_id: userId,
-    p_session_id: sessionId,
-    p_phone: phone,
-    p_message: message,
-    p_contact_name: contactName,
-    p_priority: priority
-  });
-
-  if (error) throw error;
-  return data;
+    return {
+      total_contacts: contactsCount || 0,
+      messages_sent: sentCount || 0,
+      messages_received: receivedCount || 0,
+      last_activity: lastMessage?.timestamp || null,
+    };
+  } catch (error) {
+    console.error('Error fetching WhatsApp stats:', error);
+    return {
+      total_contacts: 0,
+      messages_sent: 0,
+      messages_received: 0,
+      last_activity: null,
+    };
+  }
 }

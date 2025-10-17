@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WhatsAppConnectionCard } from '@/components/whatsapp/WhatsAppConnectionCard';
 import { WhatsAppConversations } from '@/components/whatsapp/WhatsAppConversations';
 import { WhatsAppQuickSend } from '@/components/whatsapp/WhatsAppQuickSend';
-import { SecureWhatsAppConnection } from '@/components/whatsapp/SecureWhatsAppConnection';
-import { WhatsAppSecurityDashboard } from '@/components/whatsapp/WhatsAppSecurityDashboard';
+// Removed: SecureWhatsAppConnection - replaced with Cloud API
+// Removed: WhatsAppSecurityDashboard - replaced with Cloud API
 import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
 import { WhatsAppStatsPanel } from '@/components/whatsapp/WhatsAppStatsPanel';
 import { MessageCircle, Users, Send, Activity } from 'lucide-react';
@@ -133,7 +133,6 @@ export default function WhatsApp() {
 
         <TabsContent value="connection" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SecureWhatsAppConnection />
             <WhatsAppConnectionCard />
           </div>
         </TabsContent>

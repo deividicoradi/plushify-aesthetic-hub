@@ -1,10 +1,10 @@
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WhatsAppBusinessModal } from './WhatsAppBusinessModal';
-import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
+import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
 
 export const WhatsAppHeaderButton = () => {
-  const { session } = useWhatsAppIntegration();
+  const { session } = useWhatsAppRESTAPI();
 
   const getStatusColor = () => {
     switch (session.status) {

@@ -6,11 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Send, Plus, X, Phone } from 'lucide-react';
-import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
+import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
 import { useToast } from '@/hooks/use-toast';
 
 export function WhatsAppQuickSend() {
-  const { session, sendMessage, contacts } = useWhatsAppIntegration();
+  const { session, sendMessage, contacts } = useWhatsAppRESTAPI();
   const { toast } = useToast();
   
   const [phone, setPhone] = useState('');

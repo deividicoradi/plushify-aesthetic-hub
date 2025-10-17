@@ -4,10 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { WhatsAppConnectionCard } from '@/components/whatsapp/WhatsAppConnectionCard';
 import { WhatsAppConversations } from '@/components/whatsapp/WhatsAppConversations';
 import { WhatsAppStatusBadge } from '@/components/whatsapp/WhatsAppStatusBadge';
-import WhatsAppScalabilityDashboard from '@/components/whatsapp/WhatsAppScalabilityDashboard';
-import { WhatsAppMonitoringDashboard } from '@/components/whatsapp/WhatsAppMonitoringDashboard';
-// import { WhatsAppMetricsCollector } from '@/components/whatsapp/WhatsAppMetricsCollector';
-import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration';
+// Removed: WhatsAppScalabilityDashboard - replaced with Cloud API
+// Removed: WhatsAppMonitoringDashboard - replaced with Cloud API
+// Removed: WhatsAppMetricsCollector - replaced with Cloud API
+import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   MessageCircle, 
@@ -20,14 +20,14 @@ import {
 } from 'lucide-react';
 
 export default function WhatsAppDashboard() {
-  const { session, contacts, messages } = useWhatsAppIntegration();
+  const { session, contacts, messages } = useWhatsAppRESTAPI();
   const { user } = useAuth();
 
   // Calculate stats
-  const totalContacts = contacts.length;
-  const sentMessages = messages.filter(m => m.direcao === 'enviada').length;
-  const receivedMessages = messages.filter(m => m.direcao === 'recebida').length;
-  const totalMessages = messages.length;
+  const totalContacts = contacts?.length || 0;
+  const sentMessages = messages?.filter(m => m.direction === 'sent').length || 0;
+  const receivedMessages = messages?.filter(m => m.direction === 'received').length || 0;
+  const totalMessages = messages?.length || 0;
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -139,14 +139,6 @@ export default function WhatsAppDashboard() {
                 <MessageCircle className="w-4 h-4" />
                 Conversas
               </TabsTrigger>
-              <TabsTrigger value="scalability" className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Escalabilidade
-              </TabsTrigger>
-              <TabsTrigger value="monitoring" className="flex items-center gap-2">
-                <Activity className="w-4 h-4" />
-                Monitoramento
-              </TabsTrigger>
               <TabsTrigger value="settings" className="flex items-center gap-2">
                 <Settings className="w-4 h-4" />
                 Configurações
@@ -155,14 +147,6 @@ export default function WhatsAppDashboard() {
 
             <TabsContent value="conversations">
               <WhatsAppConversations />
-            </TabsContent>
-
-            <TabsContent value="scalability">
-              <WhatsAppScalabilityDashboard />
-            </TabsContent>
-
-            <TabsContent value="monitoring">
-              <WhatsAppMonitoringDashboard />
             </TabsContent>
 
             <TabsContent value="settings">
