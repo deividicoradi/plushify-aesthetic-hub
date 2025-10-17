@@ -1050,6 +1050,7 @@ export type Database = {
           tenant_id: string
           token_encrypted: string
           updated_at: string
+          vault_secret_name: string | null
           waba_id: string
         }
         Insert: {
@@ -1061,6 +1062,7 @@ export type Database = {
           tenant_id: string
           token_encrypted: string
           updated_at?: string
+          vault_secret_name?: string | null
           waba_id: string
         }
         Update: {
@@ -1072,6 +1074,7 @@ export type Database = {
           tenant_id?: string
           token_encrypted?: string
           updated_at?: string
+          vault_secret_name?: string | null
           waba_id?: string
         }
         Relationships: []
@@ -2602,6 +2605,10 @@ export type Database = {
           total_contacts: number
         }[]
       }
+      get_whatsapp_token: {
+        Args: { p_tenant_id: string }
+        Returns: string
+      }
       has_feature_access: {
         Args: { feature_name: string }
         Returns: boolean
@@ -2800,6 +2807,10 @@ export type Database = {
           p_trial_days?: number
           p_user_id: string
         }
+        Returns: string
+      }
+      store_whatsapp_token: {
+        Args: { p_tenant_id: string; p_token: string }
         Returns: string
       }
       update_session_isolation: {
