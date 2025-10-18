@@ -35,15 +35,18 @@ export const useSubscription = () => {
     }
 
     try {
+      // Fetch the most recent active subscription
       const { data, error } = await supabase
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle(); // Use maybeSingle ao invés de single
+        .in('status', ['active', 'trial_active'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (error) {
         console.error('Erro ao buscar assinatura:', error);
-        // Em caso de erro, definir como trial sem tentar criar
         setCurrentPlan('trial');
         setLoading(false);
         return;
@@ -53,8 +56,7 @@ export const useSubscription = () => {
         setSubscription(data);
         setCurrentPlan(data.plan_type);
       } else {
-        // Se não encontrar assinatura, apenas definir como trial
-        // Não tentar criar automaticamente para evitar erros de RLS
+        // No active subscription found, default to trial
         setCurrentPlan('trial');
         console.log('Nenhuma assinatura encontrada, usando trial');
       }
