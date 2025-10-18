@@ -266,38 +266,81 @@ export const useWhatsAppRESTAPI = () => {
   // GET /whatsapp/stats
   const loadStats = useCallback(async () => {
     if (!user) return;
-    
     try {
-      const response = await makeAPIRequest('getStats');
-      setStats(response);
+      // Compute stats directly from Supabase tables (multi-tenant via RLS)
+      const [contactsCountRes, sentCountRes, recvCountRes, lastMsgRes] = await Promise.all([
+        supabase.from('wa_contacts').select('id', { count: 'exact', head: true }),
+        supabase.from('wa_messages').select('id', { count: 'exact', head: true }).eq('direction', 'sent'),
+        supabase.from('wa_messages').select('id', { count: 'exact', head: true }).eq('direction', 'received'),
+        supabase.from('wa_messages').select('timestamp').order('timestamp', { ascending: false }).limit(1)
+      ]);
+
+      const total_contacts = contactsCountRes.count ?? 0;
+      const messages_sent = sentCountRes.count ?? 0;
+      const messages_received = recvCountRes.count ?? 0;
+      const last_activity = lastMsgRes.data && lastMsgRes.data[0] ? (lastMsgRes.data[0] as any).timestamp : null;
+      const response_rate = messages_received > 0 ? Math.min(100, Math.round((messages_sent / messages_received) * 100)) : 0;
+
+      setStats({ total_contacts, messages_sent, messages_received, last_activity, response_rate });
     } catch (error) {
-      console.error('Load stats error:', error);
+      console.error('Load stats error (Supabase):', error);
     }
-  }, [user, makeAPIRequest]);
+  }, [user]);
 
   // GET /whatsapp/messages
   const loadMessages = useCallback(async (contactPhone?: string, limit = 50, offset = 0) => {
     if (!user) return;
-    
     try {
-      const response = await makeAPIRequest('getMessages', contactPhone, limit, offset);
-      setMessages(response.messages || []);
+      let query = supabase
+        .from('wa_messages')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      // Optional filter by contact could be implemented via threads; ignored for now
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const mapped: WhatsAppMessage[] = (data || []).map((m: any) => ({
+        id: m.id,
+        user_id: user.id,
+        session_id: m.thread_id,
+        direction: m.direction,
+        content: m.text_body || '',
+        status: m.status,
+        timestamp: m.timestamp,
+        created_at: m.created_at,
+      }));
+
+      setMessages(mapped);
     } catch (error) {
-      console.error('Load messages error:', error);
+      console.error('Load messages error (Supabase):', error);
     }
-  }, [user, makeAPIRequest]);
+  }, [user]);
 
   // GET /whatsapp/contacts
   const loadContacts = useCallback(async () => {
     if (!user) return;
-    
     try {
-      const response = await makeAPIRequest('getContacts');
-      setContacts(response.contacts || []);
+      const { data, error } = await supabase
+        .from('wa_contacts')
+        .select('id,name,wa_id,last_interaction,client_id')
+        .order('last_interaction', { ascending: false, nullsFirst: false });
+      if (error) throw error;
+
+      const mapped: WhatsAppContact[] = (data || []).map((c: any) => ({
+        id: c.id,
+        nome: c.name ?? c.wa_id,
+        telefone: c.wa_id,
+        ultima_interacao: c.last_interaction,
+        cliente_id: c.client_id,
+      }));
+
+      setContacts(mapped);
     } catch (error) {
-      console.error('Load contacts error:', error);
+      console.error('Load contacts error (Supabase):', error);
     }
-  }, [user, makeAPIRequest]);
+  }, [user]);
 
   // Start status polling with exponential backoff
   const startStatusPolling = useCallback(() => {
