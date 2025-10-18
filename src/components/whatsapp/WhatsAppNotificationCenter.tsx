@@ -138,14 +138,14 @@ export default function WhatsAppNotificationCenter() {
     }
 
     const channel = supabase
-      .channel('whatsapp_session_notifications')
+      .channel('wa_accounts_notifications')
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'whatsapp_sessions',
-          filter: `user_id=eq.${user.id}`
+          table: 'wa_accounts',
+          filter: `tenant_id=eq.${user.id}`
         },
         (payload) => {
           const oldStatus = payload.old?.status;
@@ -184,21 +184,21 @@ export default function WhatsAppNotificationCenter() {
 
     // Monitorar novas mensagens
     const messagesChannel = supabase
-      .channel('whatsapp_messages_notifications')
+      .channel('wa_messages_notifications')
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'whatsapp_messages',
-          filter: `user_id=eq.${user.id}`
+          table: 'wa_messages',
+          filter: `tenant_id=eq.${user.id}`
         },
         (payload) => {
-          if (payload.new?.direction === 'received') {
+          if (payload.new?.direction === 'in') {
             addNotification({
               type: 'new_message',
               title: 'Nova Mensagem',
-              description: `Mensagem recebida de ${payload.new.contact_name || payload.new.contact_phone}`,
+              description: `Nova mensagem WhatsApp recebida`,
               data: { messageId: payload.new.id }
             });
           }

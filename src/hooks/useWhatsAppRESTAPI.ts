@@ -29,11 +29,11 @@ export interface WhatsAppSession {
   id: string | null;
   session_id?: string;
   status: 'conectado' | 'desconectado' | 'pareando' | 'conectando' | 'expirado';
-  qr_code?: string;
   last_activity?: string;
   expires_at?: string;
-  server_url?: string;
   created_at?: string;
+  account_id?: string;
+  phone_number_id?: string;
 }
 
 export interface WhatsAppStats {
@@ -104,13 +104,14 @@ export const useWhatsAppRESTAPI = () => {
       
       const response = await makeAPIRequest('connect');
 
-      if (response.success) {
+      if (response.success && response.connected) {
         setSession({
-          id: response.session.id,
-          session_id: response.session.session_id,
-          status: response.session.status,
-          qr_code: response.session.qr_code,
-          expires_at: response.session.expires_at
+          id: response.account?.id || null,
+          session_id: response.account?.id,
+          status: 'conectado',
+          account_id: response.account?.id,
+          phone_number_id: response.account?.phone_number_id,
+          created_at: response.account?.created_at
         });
 
         toast({
@@ -201,13 +202,12 @@ export const useWhatsAppRESTAPI = () => {
       
       setSession(prevSession => ({
         ...prevSession,
-        status: response.status,
-        session_id: response.session_id,
-        qr_code: response.qr_code,
-        last_activity: response.last_activity,
-        expires_at: response.expires_at,
-        server_url: response.server_url,
-        created_at: response.created_at
+        status: response.connected ? 'conectado' : 'desconectado',
+        session_id: response.account?.id,
+        account_id: response.account?.id,
+        phone_number_id: response.account?.phone_number_id,
+        last_activity: response.account?.updated_at,
+        created_at: response.account?.created_at
       }));
       
     } catch (error) {
@@ -325,29 +325,30 @@ export const useWhatsAppRESTAPI = () => {
       }, 2000);
     };
 
-    // Subscribe to session changes - USE RPC FOR SECURITY
+    // Subscribe to WhatsApp account changes
     const sessionChannel = supabase
-      .channel(`whatsapp_session_${user.id}`)
+      .channel(`wa_accounts_${user.id}`)
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'whatsapp_sessions',
-          filter: `user_id=eq.${user.id}`
+          table: 'wa_accounts',
+          filter: `tenant_id=eq.${user.id}`
         },
         (payload) => {
           if (payload.new) {
             const newData = payload.new as any;
             setSession(prevSession => ({
               ...prevSession,
-              status: newData.status,
-              qr_code: newData.qr_code,
-              last_activity: newData.last_activity
+              status: newData.status === 'active' ? 'conectado' : 'desconectado',
+              account_id: newData.id,
+              phone_number_id: newData.phone_number_id,
+              last_activity: newData.updated_at
             }));
 
             // Stop polling if session is connected
-            if (newData.status === 'conectado' && pollIntervalRef.current) {
+            if (newData.status === 'active' && pollIntervalRef.current) {
               clearInterval(pollIntervalRef.current);
               pollIntervalRef.current = null;
             }
@@ -358,14 +359,14 @@ export const useWhatsAppRESTAPI = () => {
 
     // Subscribe to new messages (debounced)
     const messagesChannel = supabase
-      .channel(`whatsapp_messages_${user.id}`)
+      .channel(`wa_messages_${user.id}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'whatsapp_messages',
-          filter: `user_id=eq.${user.id}`
+          table: 'wa_messages',
+          filter: `tenant_id=eq.${user.id}`
         },
         (payload) => {
           if (payload.new) {

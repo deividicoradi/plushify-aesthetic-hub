@@ -59,15 +59,23 @@ export const WhatsAppConnectionCard: React.FC = () => {
 
       {/* Connection Controls */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* QR Code / Connection */}
+        {/* Connection / Status */}
         <div>
-          {session.status === 'pareando' || session.status === 'conectando' ? (
-            <EnhancedQRCodeDisplay
-              qrCode={session.qr_code}
-              status={session.status}
-              onRefresh={getSessionStatus}
-              isLoading={loading}
-            />
+          {session.status === 'conectando' ? (
+            <Card>
+              <CardHeader className="text-center">
+                <CardTitle>Verificando Conexão</CardTitle>
+                <CardDescription>
+                  Testando credenciais do WhatsApp Cloud API
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-center py-8">
+                <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wifi className="w-8 h-8 text-yellow-600 dark:text-yellow-400 animate-pulse" />
+                </div>
+                <p className="text-muted-foreground">Aguarde...</p>
+              </CardContent>
+            </Card>
           ) : (
             <Card>
               <CardHeader className="text-center">

@@ -23,9 +23,6 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
 
   console.log('WhatsApp Connection Panel - Session:', session);
   console.log('WhatsApp Connection Panel - Status:', session.status);
-  if (session.qr_code) {
-    console.log('WhatsApp Connection Panel - QR Code URL:', session.qr_code);
-  }
 
   // Manter o QR Code e status atualizados durante o pareamento
   useEffect(() => {
@@ -75,81 +72,7 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
     }
   };
 
-  if (session.status === 'pareando' && session.qr_code) {
-    return (
-      <div className="flex-1 p-6 flex flex-col items-center justify-center space-y-6">
-        <Card className="w-full max-w-sm">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <QrCode className="w-8 h-8 text-green-600 dark:text-green-400" />
-            </div>
-            <CardTitle>Escaneie o QR Code</CardTitle>
-            <CardDescription>
-              Use o WhatsApp no seu celular para escanear o código
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="bg-white dark:bg-gray-100 p-4 rounded-lg mb-4 border">
-              {session.qr_code ? (
-                <img 
-                  src={session.qr_code} 
-                  alt="QR Code WhatsApp" 
-                  className="w-full h-auto max-w-[200px] mx-auto"
-                  onLoad={() => console.log('QR Code carregado com sucesso')}
-                  onError={(e) => {
-                    console.error('Erro ao carregar QR Code:', session.qr_code);
-                    e.currentTarget.src = '/lovable-uploads/ff398e71-2a2a-4da0-9e55-7039622dc732.png';
-                  }}
-                />
-              ) : (
-                <div className="w-[200px] h-[200px] mx-auto bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <QrCode className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                    <p className="text-gray-500 text-sm">Gerando QR Code...</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2 justify-center">
-                <Smartphone className="w-4 h-4" />
-                <span>Abra o WhatsApp no seu celular</span>
-              </div>
-              <div className="flex items-center gap-2 justify-center">
-                <QrCode className="w-4 h-4" />
-                <span>Toque em Menu → Dispositivos conectados</span>
-              </div>
-              <div className="flex items-center gap-2 justify-center">
-                <Wifi className="w-4 h-4" />
-                <span>Escaneie este código QR</span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Aguardando pareamento...</span>
-                <span>{progress}%</span>
-              </div>
-              <Progress value={progress} className="w-full" />
-            </div>
-
-            <div className="flex justify-center">
-              <Button
-                onClick={connectWhatsApp}
-                disabled={loading}
-                variant="outline"
-                size="sm"
-              >
-                {loading ? 'Gerando...' : 'Gerar novo QR Code'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
+  // WhatsApp Cloud API não usa QR Code - conexão automática via credenciais
   if (session.status === 'conectando') {
     return (
       <div className="flex-1 p-6 flex flex-col items-center justify-center space-y-6">
@@ -158,8 +81,8 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
             <Wifi className="w-8 h-8 text-yellow-600 dark:text-yellow-400 animate-pulse" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">Conectando...</h3>
-            <p className="text-muted-foreground">Estabelecendo conexão com WhatsApp</p>
+            <h3 className="text-lg font-semibold">Verificando Credenciais...</h3>
+            <p className="text-muted-foreground">Testando conexão com WhatsApp Cloud API</p>
           </div>
           <Progress value={30} className="w-full max-w-xs mx-auto" />
         </div>
@@ -167,6 +90,7 @@ export const WhatsAppConnectionPanel: React.FC<PanelProps> = ({ session: session
     );
   }
 
+  // Main connection screen
   return (
     <div className="flex-1 bg-background">
       {/* Conteúdo principal */}

@@ -160,15 +160,6 @@ export const WhatsAppStatsPanel = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               
-              {session.server_url && (
-                <div>
-                  <div className="font-medium">Servidor</div>
-                  <div className="text-muted-foreground font-mono text-xs">
-                    {session.server_url}
-                  </div>
-                </div>
-              )}
-              
               {session.created_at && (
                 <div>
                   <div className="font-medium">Criada em</div>
