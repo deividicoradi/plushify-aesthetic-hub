@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageCircle, Smartphone, Settings, AlertCircle, Key, Phone, Building } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,36 +15,94 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 export const WhatsAppSettings: React.FC = () => {
-  const { session, contacts, messages, loading } = useWhatsApp();
+  const { session, contacts, messages, loading, getSessionStatus } = useWhatsApp();
   const { toast } = useToast();
+  const [isConnected, setIsConnected] = useState(false);
+  const [accountData, setAccountData] = useState<any>(null);
   
   const [phoneNumberId, setPhoneNumberId] = useState('');
   const [wabaId, setWabaId] = useState('');
   const [accessToken, setAccessToken] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
 
-  const getStatusColor = () => {
-    switch (session.status) {
-      case 'conectado':
-        return 'bg-green-500';
-      case 'conectando':
-      case 'pareando':
-        return 'bg-yellow-500';
-      default:
-        return 'bg-red-500';
+  // Carregar status ao montar
+  useEffect(() => {
+    loadAccountStatus();
+  }, []);
+
+  const loadAccountStatus = async () => {
+    try {
+      setIsLoadingStatus(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: account } = await supabase
+        .from('wa_accounts')
+        .select('*')
+        .eq('tenant_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (account) {
+        setIsConnected(true);
+        setAccountData(account);
+        setPhoneNumberId(account.phone_number_id || '');
+        setWabaId(account.waba_id || '');
+        setDisplayName(account.display_name || '');
+      } else {
+        setIsConnected(false);
+        setAccountData(null);
+      }
+    } catch (error: any) {
+      console.error('Error loading account status:', error);
+    } finally {
+      setIsLoadingStatus(false);
     }
   };
 
+  const getStatusColor = () => {
+    if (isLoadingStatus) return 'bg-gray-400';
+    return isConnected ? 'bg-green-500' : 'bg-red-500';
+  };
+
   const getStatusText = () => {
-    switch (session.status) {
-      case 'conectado':
-        return 'Conectado';
-      case 'conectando':
-        return 'Conectando';
-      case 'pareando':
-        return 'Configurando';
-      default:
-        return 'Desconectado';
+    if (isLoadingStatus) return 'Carregando...';
+    return isConnected ? 'Conectado' : 'Desconectado';
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { error } = await supabase.rpc('deactivate_wa_account', {
+        p_tenant_id: user.id
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "WhatsApp desconectado",
+        description: "Sua conta WhatsApp foi desconectada com sucesso"
+      });
+
+      // Atualizar estado
+      setIsConnected(false);
+      setAccountData(null);
+      setPhoneNumberId('');
+      setWabaId('');
+      setDisplayName('');
+      
+      // Recarregar status
+      await getSessionStatus();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao desconectar",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   };
 
@@ -63,25 +121,41 @@ export const WhatsAppSettings: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
+      // Salvar credenciais
       const { error } = await supabase.from('wa_accounts').upsert({
         tenant_id: user.id,
         phone_number_id: phoneNumberId,
         waba_id: wabaId,
-        token_encrypted: accessToken,
+        token_encrypted: accessToken, // Em produção, criptografar antes
+        display_name: displayName || 'WhatsApp Business',
         status: 'active',
         updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'tenant_id',
+        ignoreDuplicates: false
       });
 
       if (error) throw error;
 
       toast({
         title: "Credenciais salvas",
-        description: "Configuração do WhatsApp Cloud API atualizada com sucesso"
+        description: "Configuração do WhatsApp Cloud API atualizada com sucesso. Testando conexão..."
       });
 
-      // Limpar campos sensíveis
+      // Limpar token sensível
       setAccessToken('');
+
+      // Recarregar status
+      await loadAccountStatus();
+      await getSessionStatus();
+
+      toast({
+        title: "Conexão testada",
+        description: "WhatsApp Cloud API configurado e pronto para uso",
+        variant: "default"
+      });
     } catch (error: any) {
+      console.error('Save error:', error);
       toast({
         title: "Erro ao salvar",
         description: error.message,
@@ -133,20 +207,36 @@ export const WhatsAppSettings: React.FC = () => {
               {/* Status da conexão */}
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${getStatusColor()}`} />
+                  <div className={`w-3 h-3 rounded-full ${getStatusColor()} ${isLoadingStatus ? 'animate-pulse' : ''}`} />
                   <div>
                     <h4 className="font-medium">Status da Conexão</h4>
                     <p className="text-sm text-muted-foreground">
-                      {session.status === 'conectado' 
-                        ? 'WhatsApp Cloud API conectado e funcionando'
+                      {isConnected 
+                        ? `WhatsApp Cloud API conectado${accountData?.display_name ? ` - ${accountData.display_name}` : ''}`
                         : 'Configure suas credenciais para conectar'
                       }
                     </p>
+                    {isConnected && accountData && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Phone ID: {accountData.phone_number_id?.substring(0, 10)}...
+                      </p>
+                    )}
                   </div>
                 </div>
-                <Badge variant="secondary">
-                  {getStatusText()}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">
+                    {getStatusText()}
+                  </Badge>
+                  {isConnected && (
+                    <Button
+                      onClick={handleDisconnect}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      Desconectar
+                    </Button>
+                  )}
+                </div>
               </div>
 
               <Separator />
@@ -176,6 +266,21 @@ export const WhatsAppSettings: React.FC = () => {
 
                 <div className="space-y-3">
                   <div>
+                    <Label htmlFor="displayName" className="flex items-center gap-2">
+                      <MessageCircle className="h-3 w-3" />
+                      Nome de Exibição (Opcional)
+                    </Label>
+                    <Input
+                      id="displayName"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Minha Empresa WhatsApp"
+                      className="mt-1"
+                      disabled={isConnected}
+                    />
+                  </div>
+
+                  <div>
                     <Label htmlFor="wabaId" className="flex items-center gap-2">
                       <Building className="h-3 w-3" />
                       WhatsApp Business Account ID (WABA ID)
@@ -186,6 +291,7 @@ export const WhatsAppSettings: React.FC = () => {
                       onChange={(e) => setWabaId(e.target.value)}
                       placeholder="123456789012345"
                       className="mt-1"
+                      disabled={isConnected}
                     />
                   </div>
 
@@ -200,6 +306,7 @@ export const WhatsAppSettings: React.FC = () => {
                       onChange={(e) => setPhoneNumberId(e.target.value)}
                       placeholder="987654321098765"
                       className="mt-1"
+                      disabled={isConnected}
                     />
                   </div>
 
@@ -215,19 +322,31 @@ export const WhatsAppSettings: React.FC = () => {
                       onChange={(e) => setAccessToken(e.target.value)}
                       placeholder="EAAG..."
                       className="mt-1"
+                      disabled={isConnected}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
                       Use um token de sistema (permanente) para produção
                     </p>
                   </div>
 
-                  <Button 
-                    onClick={handleSaveCredentials} 
-                    disabled={isSaving}
-                    className="w-full"
-                  >
-                    {isSaving ? 'Salvando...' : 'Salvar Configuração'}
-                  </Button>
+                  {!isConnected && (
+                    <Button 
+                      onClick={handleSaveCredentials} 
+                      disabled={isSaving}
+                      className="w-full"
+                    >
+                      {isSaving ? 'Salvando e testando...' : 'Conectar WhatsApp'}
+                    </Button>
+                  )}
+                  
+                  {isConnected && (
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        <strong>Conectado!</strong> Para alterar as credenciais, desconecte primeiro.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               </div>
 

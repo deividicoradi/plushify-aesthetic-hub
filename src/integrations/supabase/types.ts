@@ -2522,6 +2522,10 @@ export type Database = {
         }
         Returns: string
       }
+      deactivate_wa_account: {
+        Args: { p_tenant_id: string }
+        Returns: boolean
+      }
       detect_sql_injection: {
         Args: { input_text: string }
         Returns: boolean
@@ -3041,6 +3045,10 @@ export type Database = {
       store_whatsapp_token: {
         Args: { p_tenant_id: string; p_token: string }
         Returns: string
+      }
+      test_wa_cloud_api_connection: {
+        Args: { p_access_token: string; p_phone_number_id: string }
+        Returns: Json
       }
       update_session_isolation: {
         Args: {
