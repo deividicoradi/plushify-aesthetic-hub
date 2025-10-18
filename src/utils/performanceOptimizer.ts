@@ -91,12 +91,12 @@ export const optimizedSetTimeout = (callback: () => void, delay: number = 0) => 
 export const initPerformanceMonitor = () => {
   if (typeof window === 'undefined') return;
   
-  // Observer para Long Tasks
-  if ('PerformanceObserver' in window && 'PerformanceLongTaskTiming' in window) {
+  // Observer para Long Tasks (desabilitado em dev para reduzir ruído)
+  if (import.meta.env.MODE === 'production' && 'PerformanceObserver' in window && 'PerformanceLongTaskTiming' in window) {
     try {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (entry.duration > 50) { // Tasks > 50ms
+          if (entry.duration > 100) { // Apenas tasks muito longas > 100ms
             console.warn(`[PERFORMANCE] Long task detectada: ${entry.duration.toFixed(2)}ms`);
           }
         }
@@ -107,8 +107,8 @@ export const initPerformanceMonitor = () => {
     }
   }
   
-  // Monitor de Layout Shifts
-  if ('PerformanceObserver' in window) {
+  // Monitor de Layout Shifts (apenas em produção)
+  if (import.meta.env.MODE === 'production' && 'PerformanceObserver' in window) {
     try {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
