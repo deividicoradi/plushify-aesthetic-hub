@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WhatsAppConnectionCard } from '@/components/whatsapp/WhatsAppConnectionCard';
 import { WhatsAppConversations } from '@/components/whatsapp/WhatsAppConversations';
 import { WhatsAppQuickSend } from '@/components/whatsapp/WhatsAppQuickSend';
+import { WhatsAppFeatureGuard } from '@/components/whatsapp/WhatsAppFeatureGuard';
 // Removed: SecureWhatsAppConnection - replaced with Cloud API
 // Removed: WhatsAppSecurityDashboard - replaced with Cloud API
 import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
@@ -49,7 +50,8 @@ export default function WhatsApp() {
   const responseRate = stats.response_rate;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <WhatsAppFeatureGuard>
+      <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -228,5 +230,6 @@ export default function WhatsApp() {
         </TabsContent>
       </Tabs>
     </div>
+    </WhatsAppFeatureGuard>
   );
 }

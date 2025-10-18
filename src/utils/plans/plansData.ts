@@ -106,6 +106,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
     features: [
       'Até 5 usuários com acesso simultâneo',
       'TUDO do plano Profissional',
+      '✨ WhatsApp Business integrado',
       'Serviços e produtos ilimitados',
       'Analytics avançados e preditivos',
       'Relatórios completos com exportação',

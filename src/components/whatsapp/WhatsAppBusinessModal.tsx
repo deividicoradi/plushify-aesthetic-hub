@@ -3,15 +3,20 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   MessageCircle, 
   Smartphone, 
   MessageSquare, 
   Archive,
   QrCode,
-  Wifi
+  Wifi,
+  Crown,
+  Lock
 } from 'lucide-react';
 import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
+import { useSubscription } from '@/hooks/useSubscription';
+import { useNavigate } from 'react-router-dom';
 import { WhatsAppConnectionCard } from './WhatsAppConnectionCard';
 import { WhatsAppConversations } from './WhatsAppConversations';
 
@@ -21,6 +26,8 @@ interface WhatsAppBusinessModalProps {
 
 export const WhatsAppBusinessModal = ({ trigger }: WhatsAppBusinessModalProps) => {
   const { session, connectWhatsApp } = useWhatsAppRESTAPI();
+  const { currentPlan, loading } = useSubscription();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   const getStatusBadge = () => {
@@ -43,13 +50,48 @@ export const WhatsAppBusinessModal = ({ trigger }: WhatsAppBusinessModalProps) =
     </Button>
   );
 
+  // Verificar se tem acesso ao WhatsApp
+  const hasWhatsAppAccess = currentPlan === 'premium';
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || <DefaultTrigger />}
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
-        <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+        {!hasWhatsAppAccess ? (
+          /* Sem acesso - Mostrar upgrade */
+          <div className="p-6">
+            <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10">
+              <Lock className="h-5 w-5 text-yellow-600" />
+              <AlertDescription className="ml-2">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                      <Crown className="w-5 h-5 text-yellow-600" />
+                      WhatsApp Business é um recurso Premium
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Faça upgrade para o <strong>Plano Premium</strong> e tenha acesso completo ao WhatsApp Business integrado.
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => {
+                      setOpen(false);
+                      navigate('/planos');
+                    }}
+                    className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700"
+                  >
+                    <Crown className="w-4 h-4 mr-2" />
+                    Ver Planos Premium
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        ) : (
+          /* Com acesso - Mostrar WhatsApp normal */
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white">
           {/* Header */}
           <div className="p-6 border-b border-slate-700">
             <div className="flex items-center justify-between">
@@ -170,6 +212,7 @@ export const WhatsAppBusinessModal = ({ trigger }: WhatsAppBusinessModalProps) =
             )}
           </div>
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );

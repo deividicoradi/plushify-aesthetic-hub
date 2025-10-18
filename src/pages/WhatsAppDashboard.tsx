@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { WhatsAppConnectionCard } from '@/components/whatsapp/WhatsAppConnectionCard';
 import { WhatsAppConversations } from '@/components/whatsapp/WhatsAppConversations';
 import { WhatsAppStatusBadge } from '@/components/whatsapp/WhatsAppStatusBadge';
+import { WhatsAppFeatureGuard } from '@/components/whatsapp/WhatsAppFeatureGuard';
 // Removed: WhatsAppScalabilityDashboard - replaced with Cloud API
 // Removed: WhatsAppMonitoringDashboard - replaced with Cloud API
 // Removed: WhatsAppMetricsCollector - replaced with Cloud API
@@ -30,7 +31,8 @@ export default function WhatsAppDashboard() {
   const totalMessages = messages?.length || 0;
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <WhatsAppFeatureGuard>
+      <div className="flex min-h-screen bg-background">
         <DashboardSidebar />
         
         <main className="flex-1 p-6 lg:p-8">
@@ -209,5 +211,6 @@ export default function WhatsAppDashboard() {
           </div>
         </main>
       </div>
+    </WhatsAppFeatureGuard>
   );
 }
