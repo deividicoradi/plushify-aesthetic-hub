@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { MessageCircle, Smartphone, Wifi, WifiOff, Settings, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { MessageCircle, Smartphone, Settings, AlertCircle, Key, Phone, Building } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,15 +11,17 @@ import { Label } from '@/components/ui/label';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
 import { WhatsAppMonitoring } from './WhatsAppMonitoring';
 import { WhatsAppChat } from './WhatsAppChat';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const WhatsAppSettings: React.FC = () => {
-  const { session, contacts, messages, connectWhatsApp, disconnectWhatsApp, loading } = useWhatsApp();
+  const { session, contacts, messages, loading } = useWhatsApp();
+  const { toast } = useToast();
   
-  console.log('WhatsApp Settings - Session:', session);
-  console.log('WhatsApp Settings - Status:', session.status);
-  if (session.qr_code) {
-    console.log('WhatsApp Settings - QR Code disponível:', session.qr_code);
-  }
+  const [phoneNumberId, setPhoneNumberId] = useState('');
+  const [wabaId, setWabaId] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const getStatusColor = () => {
     switch (session.status) {
@@ -40,9 +42,53 @@ export const WhatsAppSettings: React.FC = () => {
       case 'conectando':
         return 'Conectando';
       case 'pareando':
-        return 'Pareando';
+        return 'Configurando';
       default:
         return 'Desconectado';
+    }
+  };
+
+  const handleSaveCredentials = async () => {
+    if (!phoneNumberId || !wabaId || !accessToken) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha todos os campos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { error } = await supabase.from('wa_accounts').upsert({
+        tenant_id: user.id,
+        phone_number_id: phoneNumberId,
+        waba_id: wabaId,
+        token_encrypted: accessToken,
+        status: 'active',
+        updated_at: new Date().toISOString()
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Credenciais salvas",
+        description: "Configuração do WhatsApp Cloud API atualizada com sucesso"
+      });
+
+      // Limpar campos sensíveis
+      setAccessToken('');
+    } catch (error: any) {
+      toast({
+        title: "Erro ao salvar",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -77,10 +123,10 @@ export const WhatsAppSettings: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5 text-green-600" />
-                Status do WhatsApp
+                Status do WhatsApp Cloud API
               </CardTitle>
               <CardDescription>
-                Configurações e informações da conexão com WhatsApp
+                Configurações e informações da conexão com WhatsApp Business
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -92,10 +138,8 @@ export const WhatsAppSettings: React.FC = () => {
                     <h4 className="font-medium">Status da Conexão</h4>
                     <p className="text-sm text-muted-foreground">
                       {session.status === 'conectado' 
-                        ? 'WhatsApp conectado e funcionando'
-                        : session.status === 'pareando' 
-                        ? 'Pareando com WhatsApp - Escaneie o QR Code'
-                        : 'WhatsApp não está conectado'
+                        ? 'WhatsApp Cloud API conectado e funcionando'
+                        : 'Configure suas credenciais para conectar'
                       }
                     </p>
                   </div>
@@ -105,64 +149,86 @@ export const WhatsAppSettings: React.FC = () => {
                 </Badge>
               </div>
 
-              {/* QR Code quando estiver pareando */}
-              {session.status === 'pareando' && session.qr_code && typeof session.qr_code === 'string' && (
-                <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-green-300 rounded-lg bg-green-50 dark:bg-green-900/20">
-                  <h3 className="text-lg font-semibold mb-4 text-green-800 dark:text-green-200">
-                    QR Code Gerado
-                  </h3>
-                  <div className="bg-white p-4 rounded-lg shadow-md">
-                    <img 
-                      src={session.qr_code} 
-                      alt="QR Code do WhatsApp" 
-                      className="w-64 h-64 mx-auto"
+              <Separator />
+
+              {/* Configuração da Cloud API */}
+              <div className="space-y-4">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Key className="h-4 w-4" />
+                  Credenciais WhatsApp Cloud API
+                </h4>
+                
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Obtenha suas credenciais:</strong> Acesse o{' '}
+                    <a 
+                      href="https://developers.facebook.com/apps" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="underline text-primary"
+                    >
+                      Meta for Developers
+                    </a>
+                    {' '}e crie um app WhatsApp Business.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="wabaId" className="flex items-center gap-2">
+                      <Building className="h-3 w-3" />
+                      WhatsApp Business Account ID (WABA ID)
+                    </Label>
+                    <Input
+                      id="wabaId"
+                      value={wabaId}
+                      onChange={(e) => setWabaId(e.target.value)}
+                      placeholder="123456789012345"
+                      className="mt-1"
                     />
                   </div>
-                  <p className="text-sm text-center text-green-700 dark:text-green-300 mt-4 max-w-md">
-                    <strong>Escaneie o QR Code com seu WhatsApp para conectar</strong>
-                    <br />
-                    1. Abra o WhatsApp no seu celular
-                    <br />
-                    2. Vá em Menu → Dispositivos conectados
-                    <br />
-                    3. Toque em "Conectar um dispositivo"
-                    <br />
-                    4. Aponte a câmera para este QR Code
-                  </p>
-                </div>
-              )}
 
-              {/* Indicador de carregamento do QR Code */}
-              {session.status === 'pareando' && !session.qr_code && (
-                <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-yellow-300 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600 mb-4"></div>
-                  <p className="text-sm text-center text-yellow-700 dark:text-yellow-300">
-                    Gerando QR Code... Aguarde um momento.
-                  </p>
-                </div>
-              )}
+                  <div>
+                    <Label htmlFor="phoneNumberId" className="flex items-center gap-2">
+                      <Phone className="h-3 w-3" />
+                      Phone Number ID
+                    </Label>
+                    <Input
+                      id="phoneNumberId"
+                      value={phoneNumberId}
+                      onChange={(e) => setPhoneNumberId(e.target.value)}
+                      placeholder="987654321098765"
+                      className="mt-1"
+                    />
+                  </div>
 
-              {/* Ações */}
-              <div className="flex gap-2">
-                {session.status === 'conectado' ? (
-                  <Button
-                    onClick={disconnectWhatsApp}
-                    disabled={loading}
-                    variant="destructive"
+                  <div>
+                    <Label htmlFor="accessToken" className="flex items-center gap-2">
+                      <Key className="h-3 w-3" />
+                      Access Token (Permanente)
+                    </Label>
+                    <Input
+                      id="accessToken"
+                      type="password"
+                      value={accessToken}
+                      onChange={(e) => setAccessToken(e.target.value)}
+                      placeholder="EAAG..."
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Use um token de sistema (permanente) para produção
+                    </p>
+                  </div>
+
+                  <Button 
+                    onClick={handleSaveCredentials} 
+                    disabled={isSaving}
+                    className="w-full"
                   >
-                    <WifiOff className="h-4 w-4 mr-2" />
-                    Desconectar
+                    {isSaving ? 'Salvando...' : 'Salvar Configuração'}
                   </Button>
-                ) : (
-                  <Button
-                    onClick={connectWhatsApp}
-                    disabled={loading}
-                    className="bg-green-500 hover:bg-green-600"
-                  >
-                    <Wifi className="h-4 w-4 mr-2" />
-                    {loading ? 'Conectando...' : 'Conectar WhatsApp'}
-                  </Button>
-                )}
+                </div>
               </div>
 
               <Separator />
@@ -195,25 +261,23 @@ export const WhatsAppSettings: React.FC = () => {
                 <Alert>
                   <Smartphone className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>Celular conectado:</strong> Mantenha seu celular com WhatsApp conectado à internet para que o sistema funcione corretamente.
+                    <strong>API Oficial:</strong> Usa a WhatsApp Business Cloud API oficial do Meta.
                   </AlertDescription>
                 </Alert>
                 
                 <Alert>
                   <Settings className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>Sessão única:</strong> Apenas um dispositivo pode estar conectado por vez. Desconectar aqui não afeta seu WhatsApp principal.
+                    <strong>Webhooks:</strong> Configure webhooks para receber mensagens em tempo real.
                   </AlertDescription>
                 </Alert>
                 
-                {session.status !== 'conectado' && (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      <strong>Funcionalidade limitada:</strong> Para enviar e receber mensagens, é necessário conectar o WhatsApp primeiro.
-                    </AlertDescription>
-                  </Alert>
-                )}
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Segurança:</strong> Tokens são armazenados de forma segura no Vault do Supabase.
+                  </AlertDescription>
+                </Alert>
               </div>
             </CardContent>
           </Card>
