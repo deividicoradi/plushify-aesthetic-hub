@@ -218,49 +218,12 @@ export const WhatsAppSettings: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Informações sobre o servidor */}
+          {/* Recursos da API WhatsApp Cloud */}
           <Card>
             <CardHeader>
-              <CardTitle>Servidor WhatsApp VPS</CardTitle>
-              <CardDescription>Configuração do servidor externo WhatsApp</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Servidor VPS Configurado</p>
-                  </div>
-                  <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-                    URL do servidor: <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded text-xs font-mono">http://31.97.30.241:8787</code>
-                  </p>
-                  <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded">
-                    <p className="text-xs text-amber-700 dark:text-amber-300">
-                      <strong>📁 Localização da configuração:</strong> Esta URL está definida no arquivo:
-                      <br />
-                      <code className="font-mono">src/hooks/useWhatsAppIntegration.ts</code> (linha 38)
-                      <br />
-                      <br />
-                      <strong>Para alterar o servidor:</strong> Modifique a constante <code>WHATSAPP_SERVER_URL</code> neste arquivo.
-                    </p>
-                  </div>
-                </div>
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Servidor externo:</strong> Este sistema usa um servidor Node.js rodando em VPS para gerenciar as conexões WhatsApp Web.
-                  </AlertDescription>
-                </Alert>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recursos Disponíveis */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recursos Disponíveis</CardTitle>
+              <CardTitle>WhatsApp Business Cloud API</CardTitle>
               <CardDescription>
-                Funcionalidades da integração WhatsApp direta
+                Recursos e funcionalidades disponíveis
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -269,20 +232,35 @@ export const WhatsAppSettings: React.FC = () => {
                   ✅ Recursos Implementados
                 </h4>
                 <ul className="text-xs text-green-700 dark:text-green-300 space-y-1">
-                  <li>• Conexão direta com WhatsApp Web</li>
+                  <li>• Envio e recebimento de mensagens em tempo real</li>
                   <li>• Interface de chat integrada na aplicação</li>
-                  <li>• Gerenciamento de contatos automático</li>
-                  <li>• Histórico completo de mensagens</li>
-                  <li>• Envio e recebimento em tempo real</li>
-                  <li>• Monitoramento de status da conexão</li>
+                  <li>• Gerenciamento automático de contatos</li>
+                  <li>• Histórico completo de conversas</li>
+                  <li>• Limitação de taxa (60 req/min)</li>
+                  <li>• Auditoria completa de operações</li>
+                  <li>• Verificação de assinatura de webhooks</li>
+                  <li>• Alertas de segurança automáticos</li>
+                </ul>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <h4 className="font-semibold text-sm mb-2 text-blue-800 dark:text-blue-200">
+                  🔒 Segurança
+                </h4>
+                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                  <li>• Tokens armazenados no Vault do Supabase</li>
+                  <li>• Verificação HMAC-SHA256 em webhooks</li>
+                  <li>• Rate limiting por tenant</li>
+                  <li>• Logs de auditoria detalhados</li>
+                  <li>• Rotação automática de tokens</li>
                 </ul>
               </div>
 
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Vantagem:</strong> Esta solução é mais simples que usar Chatwoot, 
-                  pois integra o chat diretamente na sua aplicação sem depender de sistemas externos.
+                  <strong>API Oficial:</strong> Sistema integrado diretamente com a API oficial do WhatsApp Business Cloud, 
+                  garantindo estabilidade, segurança e conformidade com as políticas do WhatsApp.
                 </AlertDescription>
               </Alert>
             </CardContent>
