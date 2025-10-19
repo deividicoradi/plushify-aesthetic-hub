@@ -162,21 +162,15 @@ export const WhatsAppSettings: React.FC = () => {
                 </div>
               </div>
 
-              <Separator />
-
-              {/* Configuração do Servidor */}
+              {/* Informações importantes */}
               <div className="space-y-3">
-                <h4 className="font-medium">Configuração do Servidor</h4>
+                <h4 className="font-medium">Informações Importantes</h4>
                 
                 <Alert>
                   <Server className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>Variáveis de Ambiente:</strong> Configure os segredos nas Edge Functions do Supabase:
-                    <ul className="mt-2 space-y-1 text-xs">
-                      <li>• <code className="bg-muted px-1 py-0.5 rounded">WPP_SERVER_URL</code> - URL do servidor WPPConnect</li>
-                      <li>• <code className="bg-muted px-1 py-0.5 rounded">WPP_SERVER_TOKEN</code> - Token de autenticação do servidor</li>
-                      <li>• <code className="bg-muted px-1 py-0.5 rounded">QR_WEBHOOK_VERIFY_TOKEN</code> - Token para verificar webhook</li>
-                    </ul>
+                    <strong>WPPConnect:</strong> A integração usa um servidor WPPConnect externo para 
+                    manter a sessão do WhatsApp ativa e funcionando.
                   </AlertDescription>
                 </Alert>
               </div>
