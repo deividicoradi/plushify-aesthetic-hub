@@ -28,3 +28,8 @@ verify_jwt = false
 # Public proxy with CORS for keepAlive
 [functions.proxy]
 verify_jwt = false
+
+# WhatsApp WPPConnect session management (must require JWT)
+[functions.sessao-de-whatsapp]
+verify_jwt = true
+

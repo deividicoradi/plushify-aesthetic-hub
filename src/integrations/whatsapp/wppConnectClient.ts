@@ -31,7 +31,8 @@ class WPPConnectClient {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${session.access_token}`
-        }
+        },
+        body: { user_id: session.user.id }
       });
 
       if (error) throw error;

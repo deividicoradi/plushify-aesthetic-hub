@@ -94,7 +94,14 @@ export const useWhatsAppRESTAPI = () => {
 
   // POST /whatsapp/connect
   const connectWhatsApp = useCallback(async () => {
-    if (!user) return false;
+    if (!user) {
+      toast({
+        title: 'Faça login para continuar',
+        description: 'Você precisa estar autenticado para conectar o WhatsApp.',
+        variant: 'destructive',
+      });
+      return false;
+    }
     
     setLoading(true);
     setError(null);

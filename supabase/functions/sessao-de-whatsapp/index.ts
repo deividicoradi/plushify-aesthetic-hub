@@ -23,14 +23,26 @@ serve(async (req) => {
       }
     );
 
-    // Authenticate user
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
+    // Authenticate user using JWT from Authorization header
+    const authHeader = req.headers.get('Authorization') || '';
+    const hasBearer = authHeader.toLowerCase().startsWith('bearer ');
+    if (!hasBearer) {
+      console.warn('Unauthorized: missing Authorization Bearer header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', reason: 'missing_bearer' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+    if (authError) {
+      console.warn('Unauthorized: invalid JWT', authError.message);
+    }
 
     if (!user) {
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Unauthorized', reason: 'invalid_jwt' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
