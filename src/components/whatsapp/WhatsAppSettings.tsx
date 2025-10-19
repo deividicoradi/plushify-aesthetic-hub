@@ -1,169 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { MessageCircle, Smartphone, Settings, AlertCircle, Key, Phone, Building } from 'lucide-react';
+import React, { useState } from 'react';
+import { MessageCircle, Settings, AlertCircle, Server, Zap } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
 import { WhatsAppMonitoring } from './WhatsAppMonitoring';
 import { WhatsAppChat } from './WhatsAppChat';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 export const WhatsAppSettings: React.FC = () => {
-  const { session, contacts, messages, loading, getSessionStatus } = useWhatsApp();
-  const { toast } = useToast();
-  const [isConnected, setIsConnected] = useState(false);
-  const [accountData, setAccountData] = useState<any>(null);
+  const { session, contacts, messages } = useWhatsApp();
   
-  const [phoneNumberId, setPhoneNumberId] = useState('');
-  const [wabaId, setWabaId] = useState('');
-  const [accessToken, setAccessToken] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
-
-  // Carregar status ao montar
-  useEffect(() => {
-    loadAccountStatus();
-  }, []);
-
-  const loadAccountStatus = async () => {
-    try {
-      setIsLoadingStatus(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: account } = await supabase
-        .from('wa_accounts')
-        .select('*')
-        .eq('tenant_id', user.id)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      if (account) {
-        setIsConnected(true);
-        setAccountData(account);
-        setPhoneNumberId(account.phone_number_id || '');
-        setWabaId(account.waba_id || '');
-        setDisplayName(account.display_name || '');
-      } else {
-        setIsConnected(false);
-        setAccountData(null);
-      }
-    } catch (error: any) {
-      console.error('Error loading account status:', error);
-    } finally {
-      setIsLoadingStatus(false);
-    }
-  };
+  const isConnected = session.status === 'conectado';
+  const isPairing = session.status === 'pareando';
+  const isConnecting = session.status === 'conectando';
 
   const getStatusColor = () => {
-    if (isLoadingStatus) return 'bg-gray-400';
-    return isConnected ? 'bg-green-500' : 'bg-red-500';
+    if (isConnected) return 'bg-green-500';
+    if (isPairing || isConnecting) return 'bg-yellow-500';
+    return 'bg-gray-500';
   };
 
   const getStatusText = () => {
-    if (isLoadingStatus) return 'Carregando...';
-    return isConnected ? 'Conectado' : 'Desconectado';
-  };
-
-  const handleDisconnect = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
-
-      const { error } = await supabase.rpc('deactivate_wa_account', {
-        p_tenant_id: user.id
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "WhatsApp desconectado",
-        description: "Sua conta WhatsApp foi desconectada com sucesso"
-      });
-
-      // Atualizar estado
-      setIsConnected(false);
-      setAccountData(null);
-      setPhoneNumberId('');
-      setWabaId('');
-      setDisplayName('');
-      
-      // Recarregar status
-      await getSessionStatus();
-    } catch (error: any) {
-      toast({
-        title: "Erro ao desconectar",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleSaveCredentials = async () => {
-    if (!phoneNumberId || !wabaId || !accessToken) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
-
-      // Salvar credenciais
-      const { error } = await supabase.from('wa_accounts').upsert({
-        tenant_id: user.id,
-        phone_number_id: phoneNumberId,
-        waba_id: wabaId,
-        token_encrypted: accessToken, // Em produção, criptografar antes
-        display_name: displayName || 'WhatsApp Business',
-        status: 'active',
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'tenant_id',
-        ignoreDuplicates: false
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Credenciais salvas",
-        description: "Configuração do WhatsApp Cloud API atualizada com sucesso. Testando conexão..."
-      });
-
-      // Limpar token sensível
-      setAccessToken('');
-
-      // Recarregar status
-      await loadAccountStatus();
-      await getSessionStatus();
-
-      toast({
-        title: "Conexão testada",
-        description: "WhatsApp Cloud API configurado e pronto para uso",
-        variant: "default"
-      });
-    } catch (error: any) {
-      console.error('Save error:', error);
-      toast({
-        title: "Erro ao salvar",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
-    }
+    if (isConnected) return 'Conectado';
+    if (isPairing) return 'Pareando';
+    if (isConnecting) return 'Conectando';
+    return 'Desconectado';
   };
 
   const totalMessages = messages.length;
@@ -197,156 +61,83 @@ export const WhatsAppSettings: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5 text-green-600" />
-                Status do WhatsApp Cloud API
+                Status do WPPConnect
               </CardTitle>
               <CardDescription>
-                Configurações e informações da conexão com WhatsApp Business
+                Informações da conexão com WhatsApp via WPPConnect
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Status da conexão */}
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${getStatusColor()} ${isLoadingStatus ? 'animate-pulse' : ''}`} />
+                  <div className={`w-3 h-3 rounded-full ${getStatusColor()}`} />
                   <div>
                     <h4 className="font-medium">Status da Conexão</h4>
                     <p className="text-sm text-muted-foreground">
                       {isConnected 
-                        ? `WhatsApp Cloud API conectado${accountData?.display_name ? ` - ${accountData.display_name}` : ''}`
-                        : 'Configure suas credenciais para conectar'
+                        ? 'WhatsApp conectado via WPPConnect'
+                        : isPairing
+                        ? 'Escaneie o QR Code para conectar'
+                        : isConnecting
+                        ? 'Iniciando conexão com servidor'
+                        : 'Clique em "Conectar WhatsApp" na aba Conexão'
                       }
                     </p>
-                    {isConnected && accountData && (
+                    {session.last_activity && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Phone ID: {accountData.phone_number_id?.substring(0, 10)}...
+                        Última atividade: {new Date(session.last_activity).toLocaleString('pt-BR')}
                       </p>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">
-                    {getStatusText()}
-                  </Badge>
-                  {isConnected && (
-                    <Button
-                      onClick={handleDisconnect}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      Desconectar
-                    </Button>
-                  )}
-                </div>
+                <Badge variant="secondary">
+                  {getStatusText()}
+                </Badge>
               </div>
 
               <Separator />
 
-              {/* Configuração da Cloud API */}
+              {/* Informações do WPPConnect */}
               <div className="space-y-4">
                 <h4 className="font-medium flex items-center gap-2">
-                  <Key className="h-4 w-4" />
-                  Credenciais WhatsApp Cloud API
+                  <Server className="h-4 w-4" />
+                  Como Funciona
                 </h4>
                 
                 <Alert>
-                  <AlertCircle className="h-4 w-4" />
+                  <Zap className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>Obtenha suas credenciais:</strong> Acesse o{' '}
-                    <a 
-                      href="https://developers.facebook.com/apps" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="underline text-primary"
-                    >
-                      Meta for Developers
-                    </a>
-                    {' '}e crie um app WhatsApp Business.
+                    <strong>WPPConnect:</strong> Integração com servidor WPPConnect hospedado externamente.
+                    A conexão é feita via QR Code, similar ao WhatsApp Web.
                   </AlertDescription>
                 </Alert>
 
-                <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="displayName" className="flex items-center gap-2">
-                      <MessageCircle className="h-3 w-3" />
-                      Nome de Exibição (Opcional)
-                    </Label>
-                    <Input
-                      id="displayName"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Minha Empresa WhatsApp"
-                      className="mt-1"
-                      disabled={isConnected}
-                    />
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                    <div>
+                      <strong>Servidor WPPConnect:</strong> Hospedado externamente, mantém a sessão do WhatsApp
+                    </div>
                   </div>
-
-                  <div>
-                    <Label htmlFor="wabaId" className="flex items-center gap-2">
-                      <Building className="h-3 w-3" />
-                      WhatsApp Business Account ID (WABA ID)
-                    </Label>
-                    <Input
-                      id="wabaId"
-                      value={wabaId}
-                      onChange={(e) => setWabaId(e.target.value)}
-                      placeholder="123456789012345"
-                      className="mt-1"
-                      disabled={isConnected}
-                    />
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                    <div>
+                      <strong>Edge Functions:</strong> Supabase Edge Functions fazem a comunicação segura com o servidor
+                    </div>
                   </div>
-
-                  <div>
-                    <Label htmlFor="phoneNumberId" className="flex items-center gap-2">
-                      <Phone className="h-3 w-3" />
-                      Phone Number ID
-                    </Label>
-                    <Input
-                      id="phoneNumberId"
-                      value={phoneNumberId}
-                      onChange={(e) => setPhoneNumberId(e.target.value)}
-                      placeholder="987654321098765"
-                      className="mt-1"
-                      disabled={isConnected}
-                    />
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                    <div>
+                      <strong>Webhooks:</strong> QR Code e eventos são recebidos automaticamente via webhook
+                    </div>
                   </div>
-
-                  <div>
-                    <Label htmlFor="accessToken" className="flex items-center gap-2">
-                      <Key className="h-3 w-3" />
-                      Access Token (Permanente)
-                    </Label>
-                    <Input
-                      id="accessToken"
-                      type="password"
-                      value={accessToken}
-                      onChange={(e) => setAccessToken(e.target.value)}
-                      placeholder="EAAG..."
-                      className="mt-1"
-                      disabled={isConnected}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Use um token de sistema (permanente) para produção
-                    </p>
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                    <div>
+                      <strong>Banco de Dados:</strong> Mensagens e contatos armazenados no Supabase
+                    </div>
                   </div>
-
-                  {!isConnected && (
-                    <Button 
-                      onClick={handleSaveCredentials} 
-                      disabled={isSaving}
-                      className="w-full"
-                    >
-                      {isSaving ? 'Salvando e testando...' : 'Conectar WhatsApp'}
-                    </Button>
-                  )}
-                  
-                  {isConnected && (
-                    <Alert>
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Conectado!</strong> Para alterar as credenciais, desconecte primeiro.
-                      </AlertDescription>
-                    </Alert>
-                  )}
                 </div>
               </div>
 
@@ -373,38 +164,29 @@ export const WhatsAppSettings: React.FC = () => {
 
               <Separator />
 
-              {/* Informações importantes */}
+              {/* Configuração do Servidor */}
               <div className="space-y-3">
-                <h4 className="font-medium">Informações Importantes</h4>
+                <h4 className="font-medium">Configuração do Servidor</h4>
                 
                 <Alert>
-                  <Smartphone className="h-4 w-4" />
+                  <Server className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>API Oficial:</strong> Usa a WhatsApp Business Cloud API oficial do Meta.
-                  </AlertDescription>
-                </Alert>
-                
-                <Alert>
-                  <Settings className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Webhooks:</strong> Configure webhooks para receber mensagens em tempo real.
-                  </AlertDescription>
-                </Alert>
-                
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Segurança:</strong> Tokens são armazenados de forma segura no Vault do Supabase.
+                    <strong>Variáveis de Ambiente:</strong> Configure os segredos nas Edge Functions do Supabase:
+                    <ul className="mt-2 space-y-1 text-xs">
+                      <li>• <code className="bg-muted px-1 py-0.5 rounded">WPP_SERVER_URL</code> - URL do servidor WPPConnect</li>
+                      <li>• <code className="bg-muted px-1 py-0.5 rounded">WPP_SERVER_TOKEN</code> - Token de autenticação do servidor</li>
+                      <li>• <code className="bg-muted px-1 py-0.5 rounded">QR_WEBHOOK_VERIFY_TOKEN</code> - Token para verificar webhook</li>
+                    </ul>
                   </AlertDescription>
                 </Alert>
               </div>
             </CardContent>
           </Card>
 
-          {/* Recursos da API WhatsApp Cloud */}
+          {/* Recursos do WPPConnect */}
           <Card>
             <CardHeader>
-              <CardTitle>WhatsApp Business Cloud API</CardTitle>
+              <CardTitle>Integração WPPConnect</CardTitle>
               <CardDescription>
                 Recursos e funcionalidades disponíveis
               </CardDescription>
@@ -415,14 +197,14 @@ export const WhatsAppSettings: React.FC = () => {
                   ✅ Recursos Implementados
                 </h4>
                 <ul className="text-xs text-green-700 dark:text-green-300 space-y-1">
-                  <li>• Envio e recebimento de mensagens em tempo real</li>
-                  <li>• Interface de chat integrada na aplicação</li>
-                  <li>• Gerenciamento automático de contatos</li>
+                  <li>• Conexão via QR Code com WPPConnect</li>
+                  <li>• Envio e recebimento de mensagens de texto</li>
+                  <li>• Interface de chat integrada</li>
+                  <li>• Gerenciamento de contatos</li>
                   <li>• Histórico completo de conversas</li>
-                  <li>• Limitação de taxa (60 req/min)</li>
-                  <li>• Auditoria completa de operações</li>
-                  <li>• Verificação de assinatura de webhooks</li>
-                  <li>• Alertas de segurança automáticos</li>
+                  <li>• Webhooks para QR code e eventos</li>
+                  <li>• Sessão mantida no servidor WPPConnect</li>
+                  <li>• Estatísticas em tempo real</li>
                 </ul>
               </div>
 
@@ -431,19 +213,32 @@ export const WhatsAppSettings: React.FC = () => {
                   🔒 Segurança
                 </h4>
                 <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-                  <li>• Tokens armazenados no Vault do Supabase</li>
-                  <li>• Verificação HMAC-SHA256 em webhooks</li>
-                  <li>• Rate limiting por tenant</li>
-                  <li>• Logs de auditoria detalhados</li>
-                  <li>• Rotação automática de tokens</li>
+                  <li>• Token seguro para comunicação com servidor</li>
+                  <li>• Webhook verificado com token</li>
+                  <li>• Row Level Security (RLS) ativo</li>
+                  <li>• Dados isolados por usuário</li>
+                  <li>• Comunicação via Edge Functions seguras</li>
+                </ul>
+              </div>
+
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                <h4 className="font-semibold text-sm mb-2 text-yellow-800 dark:text-yellow-200">
+                  ⚙️ Arquitetura
+                </h4>
+                <ul className="text-xs text-yellow-700 dark:text-yellow-300 space-y-1">
+                  <li>• Servidor WPPConnect externo mantém a sessão</li>
+                  <li>• Edge Functions: sessao-de-whatsapp, enviar-mensagem-whatsapp</li>
+                  <li>• Webhook: whatsapp-qr-webhook (recebe QR e eventos)</li>
+                  <li>• Tabela whatsapp_sessions armazena estado da conexão</li>
+                  <li>• Realtime via Supabase para atualização do QR</li>
                 </ul>
               </div>
 
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>API Oficial:</strong> Sistema integrado diretamente com a API oficial do WhatsApp Business Cloud, 
-                  garantindo estabilidade, segurança e conformidade com as políticas do WhatsApp.
+                  <strong>WPPConnect:</strong> Solução baseada em Puppeteer que automatiza o WhatsApp Web,
+                  mantendo compatibilidade com as funcionalidades do WhatsApp oficial.
                 </AlertDescription>
               </Alert>
             </CardContent>
