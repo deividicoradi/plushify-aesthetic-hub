@@ -59,6 +59,7 @@ serve(async (req) => {
     }
 
     const sessionName = `user_${user.id}`;
+    console.log('Authorized user:', user.id);
     console.log('Creating/starting session:', sessionName);
 
     // Call WPPConnect to start session
