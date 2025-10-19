@@ -154,41 +154,40 @@ export default function WhatsApp() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Configurações Avançadas</CardTitle>
+                  <CardTitle>Status do WPPConnect</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <h3 className="text-lg font-medium">Recursos Disponíveis</h3>
                     <ul className="text-sm space-y-1 list-disc list-inside">
-                      <li>✅ Conexão via QR Code segura</li>
-                      <li>✅ Envio e recebimento de mensagens</li>
+                      <li>✅ Conexão via QR Code com WPPConnect</li>
+                      <li>✅ Envio e recebimento de mensagens de texto</li>
                       <li>✅ Gerenciamento de contatos</li>
                       <li>✅ Histórico de conversas</li>
-                      <li>✅ Tokens criptografados</li>
-                      <li>✅ Rate limiting (30 req/min)</li>
-                      <li>✅ Auditoria completa</li>
+                      <li>✅ Sessão persistente no servidor</li>
+                      <li>✅ Webhooks para QR code e eventos</li>
                       <li>✅ Estatísticas em tempo real</li>
                     </ul>
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="text-lg font-medium">Limitações Atuais</h3>
+                    <h3 className="text-lg font-medium">Como Funciona</h3>
                     <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
-                      <li>Apenas mensagens de texto</li>
-                      <li>Uma sessão ativa por usuário</li>
-                      <li>Sessão expira em 24 horas</li>
-                      <li>Dependente da conexão do celular</li>
+                      <li>Servidor WPPConnect hospedado externamente</li>
+                      <li>Conexão via Edge Functions do Supabase</li>
+                      <li>QR Code atualizado via webhook</li>
+                      <li>Sessão mantida no servidor WPPConnect</li>
+                      <li>Dados salvos no banco Supabase</li>
                     </ul>
                   </div>
 
                   <div className="space-y-2">
                     <h3 className="text-lg font-medium">Segurança</h3>
                     <ul className="text-sm space-y-1 list-disc list-inside text-green-600">
-                      <li>🔒 Tokens criptografados com pgcrypto</li>
+                      <li>🔒 Token seguro para comunicação com servidor</li>
                       <li>🔒 Row Level Security (RLS) ativo</li>
-                      <li>🔒 Rate limiting por usuário</li>
-                      <li>🔒 Auditoria de todas as ações</li>
-                      <li>🔒 Isolamento total entre usuários</li>
+                      <li>🔒 Webhook verificado com token</li>
+                      <li>🔒 Dados isolados por usuário</li>
                     </ul>
                   </div>
                 </CardContent>
@@ -196,7 +195,7 @@ export default function WhatsApp() {
               
               <Card>
                 <CardHeader>
-                  <CardTitle>Informações Técnicas</CardTitle>
+                  <CardTitle>Informações da Sessão</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-3 text-sm">
@@ -205,8 +204,8 @@ export default function WhatsApp() {
                       <Badge variant="outline">{getStatusText(session.status)}</Badge>
                     </div>
                     <div className="flex justify-between">
-                      <span>Servidor API:</span>
-                      <span className="font-mono text-xs">Supabase Edge Function</span>
+                      <span>Tipo de Integração:</span>
+                      <span className="font-mono text-xs">WPPConnect</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Contatos:</span>
@@ -222,6 +221,19 @@ export default function WhatsApp() {
                         <span className="text-xs">{new Date(session.last_activity).toLocaleString()}</span>
                       </div>
                     )}
+                  </div>
+                  
+                  <div className="pt-4 border-t space-y-2">
+                    <h4 className="font-medium text-sm">Observações Importantes</h4>
+                    <p className="text-xs text-muted-foreground">
+                      • A sessão é mantida no servidor WPPConnect
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      • O QR Code é atualizado automaticamente via webhook
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      • Configure os segredos WPP_SERVER_URL e WPP_SERVER_TOKEN nas Edge Functions
+                    </p>
                   </div>
                 </CardContent>
               </Card>
