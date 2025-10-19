@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { whatsappClient, WhatsAppError } from '@/integrations/whatsapp/client';
+import { wppConnectClient as whatsappClient, WhatsAppError } from '@/integrations/whatsapp/wppConnectClient';
 
 export interface WhatsAppContact {
   id: string;
@@ -267,18 +267,42 @@ export const useWhatsAppRESTAPI = () => {
   const loadStats = useCallback(async () => {
     if (!user) return;
     try {
-      // Compute stats directly from Supabase tables (multi-tenant via RLS)
-      const [contactsCountRes, sentCountRes, recvCountRes, lastMsgRes] = await Promise.all([
-        supabase.from('wa_contacts').select('id', { count: 'exact', head: true }),
-        supabase.from('wa_messages').select('id', { count: 'exact', head: true }).eq('direction', 'sent'),
-        supabase.from('wa_messages').select('id', { count: 'exact', head: true }).eq('direction', 'received'),
-        supabase.from('wa_messages').select('timestamp').order('timestamp', { ascending: false }).limit(1)
-      ]);
+      // Set default stats
+      let total_contacts = 0;
+      let messages_sent = 0;
+      let messages_received = 0;
+      let last_activity = null;
 
-      const total_contacts = contactsCountRes.count ?? 0;
-      const messages_sent = sentCountRes.count ?? 0;
-      const messages_received = recvCountRes.count ?? 0;
-      const last_activity = lastMsgRes.data && lastMsgRes.data[0] ? (lastMsgRes.data[0] as any).timestamp : null;
+      // Try to get contacts count (fallback safe)
+      try {
+        const contactsRes = await supabase.from('wa_contacts' as any).select('id', { count: 'exact', head: true });
+        total_contacts = contactsRes.count ?? 0;
+      } catch (e) {
+        console.warn('Contacts table unavailable');
+      }
+
+      // Try to get message counts (fallback safe)
+      try {
+        const sentRes = await supabase.from('whatsapp_messages' as any).select('id', { count: 'exact', head: true }).eq('direction', 'sent');
+        messages_sent = sentRes.count ?? 0;
+      } catch (e) {
+        console.warn('Messages table unavailable for sent count');
+      }
+
+      try {
+        const recvRes = await supabase.from('whatsapp_messages' as any).select('id', { count: 'exact', head: true }).eq('direction', 'received');
+        messages_received = recvRes.count ?? 0;
+      } catch (e) {
+        console.warn('Messages table unavailable for received count');
+      }
+
+      try {
+        const lastRes = await supabase.from('whatsapp_messages' as any).select('timestamp').order('timestamp', { ascending: false }).limit(1);
+        last_activity = lastRes.data && lastRes.data[0] ? (lastRes.data[0] as any).timestamp : null;
+      } catch (e) {
+        console.warn('Messages table unavailable for last activity');
+      }
+
       const response_rate = messages_received > 0 ? Math.min(100, Math.round((messages_sent / messages_received) * 100)) : 0;
 
       setStats({ total_contacts, messages_sent, messages_received, last_activity, response_rate });
@@ -291,22 +315,26 @@ export const useWhatsAppRESTAPI = () => {
   const loadMessages = useCallback(async (contactPhone?: string, limit = 50, offset = 0) => {
     if (!user) return;
     try {
+      // Try legacy table first
       let query = supabase
-        .from('wa_messages')
+        .from('whatsapp_messages' as any)
         .select('*')
         .order('timestamp', { ascending: false })
         .range(offset, offset + limit - 1);
 
-      // Optional filter by contact could be implemented via threads; ignored for now
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        console.warn('Legacy messages table not available:', error);
+        setMessages([]);
+        return;
+      }
 
       const mapped: WhatsAppMessage[] = (data || []).map((m: any) => ({
         id: m.id,
         user_id: user.id,
-        session_id: m.thread_id,
+        session_id: m.session_id || '',
         direction: m.direction,
-        content: m.text_body || '',
+        content: m.content || '',
         status: m.status,
         timestamp: m.timestamp,
         created_at: m.created_at,
@@ -323,10 +351,15 @@ export const useWhatsAppRESTAPI = () => {
     if (!user) return;
     try {
       const { data, error } = await supabase
-        .from('wa_contacts')
+        .from('wa_contacts' as any)
         .select('id,name,wa_id,last_interaction,client_id')
         .order('last_interaction', { ascending: false, nullsFirst: false });
-      if (error) throw error;
+      
+      if (error) {
+        console.warn('Contacts table not available:', error);
+        setContacts([]);
+        return;
+      }
 
       const mapped: WhatsAppContact[] = (data || []).map((c: any) => ({
         id: c.id,
@@ -368,30 +401,31 @@ export const useWhatsAppRESTAPI = () => {
       }, 2000);
     };
 
-    // Subscribe to WhatsApp account changes
+    // Subscribe to WhatsApp session changes (WPPConnect)
     const sessionChannel = supabase
-      .channel(`wa_accounts_${user.id}`)
+      .channel(`whatsapp_sessions_${user.id}`)
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'wa_accounts',
-          filter: `tenant_id=eq.${user.id}`
+          table: 'whatsapp_sessions',
+          filter: `user_id=eq.${user.id}`
         },
         (payload) => {
           if (payload.new) {
             const newData = payload.new as any;
             setSession(prevSession => ({
               ...prevSession,
-              status: newData.status === 'active' ? 'conectado' : 'desconectado',
-              account_id: newData.id,
-              phone_number_id: newData.phone_number_id,
-              last_activity: newData.updated_at
+              id: newData.id,
+              session_id: newData.session_id,
+              status: newData.status,
+              last_activity: newData.last_activity,
+              created_at: newData.created_at
             }));
 
             // Stop polling if session is connected
-            if (newData.status === 'active' && pollIntervalRef.current) {
+            if (newData.status === 'conectado' && pollIntervalRef.current) {
               clearInterval(pollIntervalRef.current);
               pollIntervalRef.current = null;
             }
@@ -400,16 +434,16 @@ export const useWhatsAppRESTAPI = () => {
       )
       .subscribe();
 
-    // Subscribe to new messages (debounced)
+    // Subscribe to new messages (debounced) - using legacy table if exists
     const messagesChannel = supabase
-      .channel(`wa_messages_${user.id}`)
+      .channel(`whatsapp_messages_${user.id}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'wa_messages',
-          filter: `tenant_id=eq.${user.id}`
+          table: 'whatsapp_messages',
+          filter: `user_id=eq.${user.id}`
         },
         (payload) => {
           if (payload.new) {

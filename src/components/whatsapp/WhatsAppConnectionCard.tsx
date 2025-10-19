@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useWhatsAppRESTAPI } from '@/hooks/useWhatsAppRESTAPI';
-import EnhancedQRCodeDisplay from './EnhancedQRCodeDisplay';
+import { WPPConnectQRDisplay } from './WPPConnectQRDisplay';
 import EnhancedStatusIndicator from './EnhancedStatusIndicator';
 import EnhancedMessageSender from './EnhancedMessageSender';
 import WhatsAppNotificationCenter from './WhatsAppNotificationCenter';
@@ -57,6 +57,14 @@ export const WhatsAppConnectionCard: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* QR Code Display for Pairing */}
+      {session.status === 'pareando' && (
+        <WPPConnectQRDisplay 
+          sessionStatus={session.status}
+          onRefresh={connectWhatsApp}
+        />
+      )}
+
       {/* Connection Controls */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Connection / Status */}
@@ -64,9 +72,9 @@ export const WhatsAppConnectionCard: React.FC = () => {
           {session.status === 'conectando' ? (
             <Card>
               <CardHeader className="text-center">
-                <CardTitle>Verificando Conexão</CardTitle>
+                <CardTitle>Iniciando Conexão</CardTitle>
                 <CardDescription>
-                  Testando credenciais do WhatsApp Cloud API
+                  Conectando com servidor WPPConnect
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-center py-8">
