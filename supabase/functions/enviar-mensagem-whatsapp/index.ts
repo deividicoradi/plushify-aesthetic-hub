@@ -29,121 +29,110 @@ serve(async (req) => {
       }
     );
 
-    // Authenticate user
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
 
-    if (!user) {
+    if (authError || !user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const WPP_SERVER_URL = Deno.env.get('WPP_SERVER_URL');
-    const WPP_SERVER_TOKEN = Deno.env.get('WPP_SERVER_TOKEN');
-
-    if (!WPP_SERVER_URL || !WPP_SERVER_TOKEN) {
-      console.error('WPPConnect credentials not configured');
-      return new Response(
-        JSON.stringify({ error: 'WPPConnect não configurado no servidor' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const { phone, message, contactName }: SendMessageRequest = await req.json();
 
-    // Validate inputs
     if (!phone || !message) {
       return new Response(
-        JSON.stringify({ error: 'Phone and message are required' }),
+        JSON.stringify({ error: 'Phone e message são obrigatórios' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check if user has an active session
+    // Get session from database
     const { data: session, error: sessionError } = await supabaseClient
       .from('whatsapp_sessions')
       .select('*')
       .eq('user_id', user.id)
       .single();
 
-    if (sessionError || !session || session.status !== 'conectado') {
+    if (sessionError || !session) {
       return new Response(
-        JSON.stringify({ 
-          error: 'WhatsApp não conectado',
-          message: 'Por favor, conecte seu WhatsApp primeiro'
-        }),
-        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Sessão WhatsApp não encontrada. Conecte primeiro.' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const sessionName = session.session_id;
-
-    // Format phone number (remove special characters, keep only digits)
-    const formattedPhone = phone.replace(/[^\\d]/g, '');
-    
-    // Add country code if not present (assuming Brazil +55)
-    let fullPhone = formattedPhone;
-    if (!fullPhone.startsWith('55') && fullPhone.length <= 11) {
-      fullPhone = '55' + fullPhone;
+    if (session.status !== 'conectado') {
+      return new Response(
+        JSON.stringify({ error: 'WhatsApp não está conectado' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log('Sending message via WPPConnect:', { sessionName, phone: fullPhone });
+    const WPP_SERVER_URL = session.server_url || Deno.env.get('WPP_SERVER_URL') || 'http://127.0.0.1:21465';
 
-    // Send message via WPPConnect
-    const wppResponse = await fetch(`${WPP_SERVER_URL}/api/${sessionName}/send-text`, {
+    // Format phone number (add 55 if needed)
+    let formattedPhone = phone.replace(/\D/g, '');
+    if (!formattedPhone.startsWith('55')) {
+      formattedPhone = '55' + formattedPhone;
+    }
+
+    console.log('Sending message to:', formattedPhone);
+
+    // Try send-message endpoint first
+    let sendResponse = await fetch(`${WPP_SERVER_URL}/api/${session.session_id}/send-message`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${WPP_SERVER_TOKEN}`,
+        'Authorization': `Bearer ${session.token_bcrypt}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        phone: fullPhone,
-        message: message,
-        isGroup: false
+        phone: formattedPhone,
+        message: message
       })
     });
 
-    const wppData = await wppResponse.json();
-    console.log('WPPConnect send response:', wppData);
+    // If send-message fails, try send-text endpoint
+    if (!sendResponse.ok) {
+      console.log('Trying send-text endpoint...');
+      sendResponse = await fetch(`${WPP_SERVER_URL}/api/${session.session_id}/send-text`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.token_bcrypt}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: `${formattedPhone}@c.us`,
+          message: message
+        })
+      });
+    }
 
-    if (!wppResponse.ok) {
+    if (!sendResponse.ok) {
+      const sendError = await sendResponse.text();
+      console.error('Send failed:', sendError);
       return new Response(
-        JSON.stringify({ 
-          error: 'Erro ao enviar mensagem',
-          details: wppData 
-        }),
-        { status: wppResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Falha ao enviar mensagem', details: sendError }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Save message to database (using legacy whatsapp_messages if exists, or create simple log)
-    try {
-      // Try to save to whatsapp_messages table
-      await supabaseClient
-        .from('whatsapp_messages')
-        .insert({
-          user_id: user.id,
-          session_id: sessionName,
-          direction: 'sent',
-          content: message,
-          status: 'delivered',
-          timestamp: new Date().toISOString(),
-          contact_phone: fullPhone,
-          contact_name: contactName || fullPhone
-        });
-    } catch (dbError) {
-      console.error('Error saving message to DB (non-critical):', dbError);
-      // Continue even if DB save fails
-    }
+    const sendData = await sendResponse.json();
+    console.log('Message sent successfully:', sendData);
+
+    // Update last_activity
+    await supabaseClient
+      .from('whatsapp_sessions')
+      .update({
+        last_activity: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', user.id);
 
     return new Response(
       JSON.stringify({
         success: true,
         message: 'Mensagem enviada com sucesso',
-        data: wppData
+        data: sendData
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

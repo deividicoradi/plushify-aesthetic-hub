@@ -63,23 +63,24 @@ class WPPConnectClient {
    */
   async disconnect(): Promise<any> {
     try {
-      // Update local session status to disconnected
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (user) {
-        await (supabase
-          .from('whatsapp_sessions' as any)
-          .update({ 
-            status: 'desconectado',
-            qr_code: null,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id) as any);
+      if (!session?.access_token) {
+        throw new WhatsAppError('Usuário não autenticado', 'AUTH_REQUIRED', 401);
       }
+
+      const { data, error } = await supabase.functions.invoke('whatsapp-disconnect', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (error) throw error;
 
       return {
         success: true,
-        message: 'WhatsApp desconectado com sucesso'
+        message: data?.message || 'WhatsApp desconectado com sucesso'
       };
     } catch (error: any) {
       console.error('WPPConnect disconnect error:', error);
@@ -92,42 +93,57 @@ class WPPConnectClient {
   }
 
   /**
-   * Get session status from database
+   * Get session status from database (with polling via Edge Function)
    */
   async getStatus(): Promise<any> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!user) {
-        throw new WhatsAppError('User not authenticated', 'AUTH_REQUIRED');
+      if (!session?.access_token) {
+        return {
+          connected: false,
+          status: 'desconectado',
+          session: null
+        };
       }
 
-      // Direct query with type assertion to bypass type checking
-      const response = await supabase
-        .from('whatsapp_sessions' as any)
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      const { data, error } = await supabase.functions.invoke('whatsapp-status', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
 
-      const session = response.data as any;
-      const error = response.error;
+      if (error || !data) {
+        // Fallback to database if Edge Function fails
+        const response = await supabase
+          .from('whatsapp_sessions' as any)
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
-        throw error;
+        const dbSession = response.data as any;
+        
+        return {
+          connected: dbSession?.status === 'conectado',
+          session: dbSession || null,
+          status: dbSession?.status || 'desconectado'
+        };
       }
 
       return {
-        connected: session?.status === 'conectado',
-        session: session || null,
-        status: session?.status || 'desconectado'
+        connected: data.status === 'conectado',
+        status: data.status,
+        qrcode: data.qrcode,
+        session: data
       };
     } catch (error: any) {
       console.error('WPPConnect get status error:', error);
-      throw new WhatsAppError(
-        error.message || 'Erro ao obter status',
-        'STATUS_ERROR',
-        error.status
-      );
+      return {
+        connected: false,
+        status: 'desconectado',
+        session: null
+      };
     }
   }
 

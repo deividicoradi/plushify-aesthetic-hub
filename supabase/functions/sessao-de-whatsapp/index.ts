@@ -7,7 +7,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -23,72 +22,69 @@ serve(async (req) => {
       }
     );
 
-    // Authenticate user using JWT from Authorization header
-    const authHeader = req.headers.get('Authorization') || '';
-    const hasBearer = authHeader.toLowerCase().startsWith('bearer ');
-    if (!hasBearer) {
-      console.warn('Unauthorized: missing Authorization Bearer header');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized', reason: 'missing_bearer' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
 
-    if (authError) {
-      console.warn('Unauthorized: invalid JWT', authError.message);
-    }
-
-    if (!user) {
+    if (authError || !user) {
+      console.warn('Unauthorized: invalid JWT');
       return new Response(
-        JSON.stringify({ error: 'Unauthorized', reason: 'invalid_jwt' }),
+        JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const WPP_SERVER_URL = Deno.env.get('WPP_SERVER_URL');
-    const WPP_SERVER_TOKEN = Deno.env.get('WPP_SERVER_TOKEN');
+    console.log('Authorized user:', user.id);
 
-    if (!WPP_SERVER_URL || !WPP_SERVER_TOKEN) {
-      console.error('WPPConnect credentials not configured');
+    const WPP_SERVER_URL = Deno.env.get('WPP_SERVER_URL') || 'http://127.0.0.1:21465';
+    const WPP_SECRET_TOKEN = Deno.env.get('WPP_SECRET_TOKEN') || 'THISISMYSECURETOKEN';
+
+    const sessionName = `plushify-${user.id}`;
+    console.log('Creating session:', sessionName);
+
+    // Step 1: Generate bcrypt token
+    const tokenResponse = await fetch(`${WPP_SERVER_URL}/api/${sessionName}/${WPP_SECRET_TOKEN}/generate-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!tokenResponse.ok) {
+      const tokenError = await tokenResponse.text();
+      console.error('Token generation failed:', tokenError);
       return new Response(
-        JSON.stringify({ error: 'WPPConnect não configurado no servidor' }),
+        JSON.stringify({ error: 'Falha ao gerar token', details: tokenError }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const sessionName = `user_${user.id}`;
-    console.log('Authorized user:', user.id);
-    console.log('Creating/starting session:', sessionName);
+    const tokenData = await tokenResponse.json();
+    const bcryptToken = tokenData.token;
+    console.log('Token generated successfully');
 
-    // Call WPPConnect to start session
-    const wppResponse = await fetch(`${WPP_SERVER_URL}/api/${sessionName}/start-session`, {
+    // Step 2: Start session with bcrypt token
+    const startResponse = await fetch(`${WPP_SERVER_URL}/api/${sessionName}/start-session`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${WPP_SERVER_TOKEN}`,
+        'Authorization': `Bearer ${bcryptToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        webhook: `${Deno.env.get('SUPABASE_URL')}/functions/v1/whatsapp-qr-webhook`,
+        webhook: null,
         waitQrCode: true
       })
     });
 
-    const wppData = await wppResponse.json();
-    console.log('WPPConnect response:', wppData);
-
-    if (!wppResponse.ok) {
+    if (!startResponse.ok) {
+      const startError = await startResponse.text();
+      console.error('Session start failed:', startError);
       return new Response(
-        JSON.stringify({ 
-          error: 'Erro ao iniciar sessão no WPPConnect',
-          details: wppData 
-        }),
-        { status: wppResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Falha ao iniciar sessão', details: startError }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check if session already exists
+    const startData = await startResponse.json();
+    console.log('Session started:', startData.state);
+
+    // Step 3: Save to database
     const { data: existingSession } = await supabaseClient
       .from('whatsapp_sessions')
       .select('*')
@@ -98,21 +94,20 @@ serve(async (req) => {
     const sessionData = {
       user_id: user.id,
       session_id: sessionName,
-      status: wppData.state === 'CONNECTED' ? 'conectado' : 'pareando',
-      qr_code: wppData.qrcode || null,
+      token_bcrypt: bcryptToken,
+      status: startData.state === 'CONNECTED' ? 'conectado' : 'pareando',
+      qr_code: startData.qrcode || null,
       server_url: WPP_SERVER_URL,
       last_activity: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
 
     if (existingSession) {
-      // Update existing session
       await supabaseClient
         .from('whatsapp_sessions')
         .update(sessionData)
         .eq('user_id', user.id);
     } else {
-      // Create new session
       await supabaseClient
         .from('whatsapp_sessions')
         .insert(sessionData);
@@ -124,10 +119,10 @@ serve(async (req) => {
         session: {
           session_id: sessionName,
           status: sessionData.status,
-          qr_code: wppData.qrcode,
-          state: wppData.state
+          qr_code: startData.qrcode,
+          state: startData.state
         },
-        message: wppData.state === 'CONNECTED' 
+        message: startData.state === 'CONNECTED' 
           ? 'WhatsApp já conectado' 
           : 'Escaneie o QR Code para conectar'
       }),

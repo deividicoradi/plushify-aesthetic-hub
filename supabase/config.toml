@@ -29,7 +29,16 @@ verify_jwt = false
 [functions.proxy]
 verify_jwt = false
 
-# WhatsApp WPPConnect session management (must require JWT)
+# WhatsApp WPPConnect - Integração completa
 [functions.sessao-de-whatsapp]
+verify_jwt = true
+
+[functions.whatsapp-status]
+verify_jwt = true
+
+[functions.enviar-mensagem-whatsapp]
+verify_jwt = true
+
+[functions.whatsapp-disconnect]
 verify_jwt = true
 

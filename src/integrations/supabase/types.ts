@@ -2176,6 +2176,48 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_sessions: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          last_activity: string | null
+          qr_code: string | null
+          server_url: string | null
+          session_id: string
+          status: string
+          token_bcrypt: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          last_activity?: string | null
+          qr_code?: string | null
+          server_url?: string | null
+          session_id: string
+          status?: string
+          token_bcrypt?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          last_activity?: string | null
+          qr_code?: string | null
+          server_url?: string | null
+          session_id?: string
+          status?: string
+          token_bcrypt?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_sessions_legacy: {
         Row: {
           created_at: string
