@@ -20,8 +20,18 @@ class WPPConnectClient {
    */
   async connect(): Promise<any> {
     try {
+      // Get current session to send JWT token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new WhatsAppError('Usuário não autenticado. Faça login novamente.', 'AUTH_REQUIRED', 401);
+      }
+
       const { data, error } = await supabase.functions.invoke('sessao-de-whatsapp', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
 
       if (error) throw error;
@@ -125,8 +135,18 @@ class WPPConnectClient {
    */
   async sendMessage(phone: string, message: string, contactName?: string): Promise<any> {
     try {
+      // Get current session to send JWT token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new WhatsAppError('Usuário não autenticado. Faça login novamente.', 'AUTH_REQUIRED', 401);
+      }
+
       const { data, error } = await supabase.functions.invoke('enviar-mensagem-whatsapp', {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        },
         body: {
           phone,
           message,
