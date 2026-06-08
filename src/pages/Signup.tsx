@@ -83,6 +83,11 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
+      <SEO
+        title="Criar Conta - Plushify"
+        description="Crie sua conta Plushify e comece a gerenciar seu negócio de estética com agendamentos, clientes e financeiro integrados."
+        path="/signup"
+      />
       <div className="max-w-md mx-auto bg-white dark:bg-card rounded-xl shadow-sm border border-plush-100 p-6 md:p-8">
         <div className="flex items-center gap-2 mb-6">
           <UserPlus className="w-6 h-6 text-plush-600" />
