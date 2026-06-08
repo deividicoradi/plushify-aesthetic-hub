@@ -15,7 +15,7 @@ interface ChartsSectionProps {
 
 export const ChartsSection = ({ monthlyData, revenueByCategory, loading }: ChartsSectionProps) => {
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
       <Card className="bg-card border-border shadow-sm">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
