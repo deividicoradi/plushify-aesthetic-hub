@@ -16,8 +16,6 @@
   const originalFetch = window.fetch.bind(window);
   const OriginalWebSocket = window.WebSocket;
 
-  // Reentrancy flag to avoid logging our own logs accidentally
-  const NO_LOG_HEADER = 'x-no-log';
   const LOG_URL_HINT = '/__telemetry'; // not used, but reserved
 
   // Helper: should block 8080 pings?
@@ -36,10 +34,6 @@
         log('Blocked request to :8080', url);
         return new Response('', { status: 204, statusText: 'No Content' });
       }
-
-      // Reentrancy guard: skip logging if header present or our own telemetry endpoint
-      const headers = new Headers((init && init.headers) || (input instanceof Request ? input.headers : undefined));
-      if (!headers.has(NO_LOG_HEADER)) headers.set(NO_LOG_HEADER, '1');
 
       const isTelemetry = url.includes(LOG_URL_HINT);
 
@@ -66,9 +60,7 @@
         requestBodyInfo = 'Could not serialize request body';
       }
 
-      // Build args with our header injected
-      const patchedInit: RequestInit | undefined = init ? { ...init, headers } : undefined;
-      const res = await originalFetch(input as any, patchedInit as any);
+      const res = await originalFetch(input as any, init as any);
 
       // Try to clone response body (best-effort, text only and small bodies)
       let responseBodyInfo = '';
