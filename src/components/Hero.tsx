@@ -190,9 +190,9 @@ const Hero = () => {
         {/* Trust Indicators */}
         <div className="mt-20 text-center">
           <p className="text-muted-foreground mb-8 text-lg">Confiado por milhares de profissionais em todo o Brasil</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
+          <div className="flex flex-wrap justify-center items-center gap-8">
             {["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador"].map((city, index) => (
-              <div key={index} className="px-6 py-3 bg-muted/50 rounded-lg border text-muted-foreground font-medium">
+              <div key={index} className="px-6 py-3 bg-muted/50 rounded-lg border text-foreground font-medium">
                 {city}
               </div>
             ))}
