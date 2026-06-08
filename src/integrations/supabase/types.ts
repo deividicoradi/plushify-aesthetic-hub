@@ -25,6 +25,7 @@ export type Database = {
           id: string
           notes: string | null
           price: number
+          professional_id: string | null
           service_id: string | null
           service_name: string
           status: string
@@ -41,6 +42,7 @@ export type Database = {
           id?: string
           notes?: string | null
           price?: number
+          professional_id?: string | null
           service_id?: string | null
           service_name: string
           status?: string
@@ -57,6 +59,7 @@ export type Database = {
           id?: string
           notes?: string | null
           price?: number
+          professional_id?: string | null
           service_id?: string | null
           service_name?: string
           status?: string
@@ -250,34 +253,55 @@ export type Database = {
       }
       clients: {
         Row: {
+          address: string | null
+          cep: string | null
+          city: string | null
+          cpf: string | null
           created_at: string
           email: string | null
           id: string
           last_visit: string | null
           name: string
+          neighborhood: string | null
+          payment_method: string | null
           phone: string | null
+          state: string | null
           status: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          address?: string | null
+          cep?: string | null
+          city?: string | null
+          cpf?: string | null
           created_at?: string
           email?: string | null
           id?: string
           last_visit?: string | null
           name: string
+          neighborhood?: string | null
+          payment_method?: string | null
           phone?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          address?: string | null
+          cep?: string | null
+          city?: string | null
+          cpf?: string | null
           created_at?: string
           email?: string | null
           id?: string
           last_visit?: string | null
           name?: string
+          neighborhood?: string | null
+          payment_method?: string | null
           phone?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string
@@ -539,6 +563,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           active: boolean
@@ -636,6 +693,7 @@ export type Database = {
       }
       products: {
         Row: {
+          acquisition_date: string | null
           active: boolean
           barcode: string | null
           brand: string | null
@@ -651,8 +709,10 @@ export type Database = {
           stock_quantity: number
           updated_at: string
           user_id: string
+          validity_date: string | null
         }
         Insert: {
+          acquisition_date?: string | null
           active?: boolean
           barcode?: string | null
           brand?: string | null
@@ -668,8 +728,10 @@ export type Database = {
           stock_quantity?: number
           updated_at?: string
           user_id: string
+          validity_date?: string | null
         }
         Update: {
+          acquisition_date?: string | null
           active?: boolean
           barcode?: string | null
           brand?: string | null
@@ -685,8 +747,84 @@ export type Database = {
           stock_quantity?: number
           updated_at?: string
           user_id?: string
+          validity_date?: string | null
         }
         Relationships: []
+      }
+      professionals: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          specialties: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      service_professionals: {
+        Row: {
+          created_at: string
+          id: string
+          professional_id: string
+          service_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          professional_id: string
+          service_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          professional_id?: string
+          service_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_professionals_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_professionals_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       services: {
         Row: {
@@ -813,6 +951,8 @@ export type Database = {
       }
       working_hours: {
         Row: {
+          auto_complete_appointments: boolean
+          auto_confirm_appointments: boolean
           created_at: string
           day_of_week: number
           end_time: string
@@ -823,6 +963,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_complete_appointments?: boolean
+          auto_confirm_appointments?: boolean
           created_at?: string
           day_of_week: number
           end_time: string
@@ -833,6 +975,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_complete_appointments?: boolean
+          auto_confirm_appointments?: boolean
           created_at?: string
           day_of_week?: number
           end_time?: string
@@ -857,6 +1001,10 @@ export type Database = {
           p_exclude_appointment_id?: string
           p_user_id: string
         }
+        Returns: boolean
+      }
+      check_pending_appointments_for_day: {
+        Args: { p_day_of_week: number; p_user_id: string }
         Returns: boolean
       }
       create_public_booking: {
@@ -884,6 +1032,80 @@ export type Database = {
           slot_time: string
         }[]
       }
+      get_client_data_secure: {
+        Args: { p_client_id: string; p_mask_sensitive?: boolean }
+        Returns: {
+          address: string | null
+          cep: string | null
+          city: string | null
+          cpf: string | null
+          created_at: string
+          email: string | null
+          id: string
+          last_visit: string | null
+          name: string
+          neighborhood: string | null
+          payment_method: string | null
+          phone: string | null
+          state: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "clients"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_clients_masked: {
+        Args: { p_mask_sensitive?: boolean }
+        Returns: {
+          address: string | null
+          cep: string | null
+          city: string | null
+          cpf: string | null
+          created_at: string
+          email: string | null
+          id: string
+          last_visit: string | null
+          name: string
+          neighborhood: string | null
+          payment_method: string | null
+          phone: string | null
+          state: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "clients"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_professionals_secure: {
+        Args: { p_mask_sensitive?: boolean }
+        Returns: {
+          active: boolean
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          specialties: string[] | null
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "professionals"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_public_available_slots: {
         Args: { p_date: string; p_service_id: string }
         Returns: {
@@ -908,8 +1130,28 @@ export type Database = {
       }
       has_feature_access: { Args: { feature_name: string }; Returns: boolean }
       sanitize_input: { Args: { input_text: string }; Returns: string }
+      set_authorization_password: {
+        Args: { p_password: string }
+        Returns: boolean
+      }
+      start_subscription: {
+        Args: {
+          p_billing_interval?: string
+          p_current_period_end?: string
+          p_plan_code: string
+          p_stripe_customer_id?: string
+          p_stripe_subscription_id?: string
+          p_trial_days?: number
+          p_user_id: string
+        }
+        Returns: string
+      }
       validate_email: { Args: { email: string }; Returns: boolean }
       validate_phone: { Args: { phone: string }; Returns: boolean }
+      verify_authorization_password: {
+        Args: { p_password: string }
+        Returns: boolean
+      }
     }
     Enums: {
       plan_type: "trial" | "professional" | "premium"
