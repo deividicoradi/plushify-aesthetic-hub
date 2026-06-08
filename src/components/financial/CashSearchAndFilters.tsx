@@ -32,8 +32,8 @@ const CashSearchAndFilters: React.FC<CashSearchAndFiltersProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:gap-4">
-        <div className="relative w-full">
+      <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
+        <div className="relative w-full lg:flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por observações..."
@@ -42,38 +42,36 @@ const CashSearchAndFilters: React.FC<CashSearchAndFiltersProps> = ({
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
-        
+
         {(onOpenCash || onCloseCash) && (
-          <div className="flex gap-2 w-full justify-end">
+          <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
             {onOpenCash && (
-              <Button 
-                onClick={onOpenCash} 
-                className="gap-2 touch-target"
+              <Button
+                onClick={onOpenCash}
+                className="gap-2 h-11 sm:h-10 w-full sm:w-auto"
                 disabled={!canOpenCash}
                 variant={canOpenCash ? "default" : "secondary"}
               >
                 <FolderOpen className="w-4 h-4" />
-                <span className="hidden sm:inline">{canOpenCash ? 'Abrir Caixa' : 'Caixa Aberto'}</span>
-                <span className="sm:hidden">{canOpenCash ? 'Abrir' : 'Aberto'}</span>
+                <span>{canOpenCash ? 'Abrir Caixa' : 'Caixa Aberto'}</span>
               </Button>
             )}
             {onCloseCash && (
-              <Button 
-                onClick={onCloseCash} 
-                variant="outline" 
-                className="gap-2 touch-target"
+              <Button
+                onClick={onCloseCash}
+                variant="outline"
+                className="gap-2 h-11 sm:h-10 w-full sm:w-auto"
                 disabled={!canCloseCash}
               >
                 <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">{canCloseCash ? 'Fechar Caixa' : 'Abra o Caixa'}</span>
-                <span className="sm:hidden">{canCloseCash ? 'Fechar' : 'Abra'}</span>
+                <span>{canCloseCash ? 'Fechar Caixa' : 'Abra o Caixa'}</span>
               </Button>
             )}
           </div>
         )}
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         <div className="space-y-2">
           <Label htmlFor="dateFrom">Data Inicial</Label>
           <Input

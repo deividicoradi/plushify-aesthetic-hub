@@ -15,10 +15,10 @@ const ReportsTab = () => {
   const { data: reportData, isLoading } = useReportsData(dateFrom, dateTo, reportType);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Relatórios Financeiros</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-xl sm:text-2xl font-bold">Relatórios Financeiros</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Gere relatórios detalhados em PDF com filtros personalizados
         </p>
       </div>
