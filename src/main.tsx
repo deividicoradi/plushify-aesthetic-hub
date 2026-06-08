@@ -10,7 +10,7 @@ import { cleanupConsoleLogsInProduction } from './utils/console-cleanup'
 import { validateEnvironment, checkProductionReadiness } from './utils/environmentNormalizer'
 import { initPerformanceMonitor } from './utils/performanceOptimizer'
 import { logger } from './utils/debugLogger'
-import { ensureFreshBundleBeforeBoot, initStaleBundleGuard, isRecoverableBootError, recoverFromStaleBundle } from './utils/staleBundleGuard'
+import { ensureFreshBundleBeforeBoot, initStaleBundleGuard, isRecoverableBootError, preRenderServiceWorkerSweep, recoverFromStaleBundle } from './utils/staleBundleGuard'
 
 initStaleBundleGuard();
 
@@ -97,6 +97,12 @@ async function initializeApp() {
 
     const canBoot = await ensureFreshBundleBeforeBoot();
     if (!canBoot) return;
+
+    // Varredura extra: detecta SW antigo controlando a página e limpa
+    // caches ANTES de qualquer rota renderizar. Se um SW estiver no
+    // controle, a função dispara recovery + reload e devolve false.
+    const sweepOk = await preRenderServiceWorkerSweep();
+    if (!sweepOk) return;
 
     // Initialize cleanup and optimization
     initCleanup()
