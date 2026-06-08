@@ -102,10 +102,10 @@ const CashClosureTab = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Controle de Caixa</h2>
-        <p className="text-gray-600 dark:text-gray-400">Gerencie aberturas e fechamentos de caixa</p>
+        <h2 className="text-xl sm:text-2xl font-bold">Controle de Caixa</h2>
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Gerencie aberturas e fechamentos de caixa</p>
       </div>
 
       <CashSearchAndFilters
