@@ -13,6 +13,11 @@ import { WhatsAppFloatingChat } from '../components/whatsapp/WhatsAppFloatingCha
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Plushify - Gestão para Profissionais de Estética"
+        description="Plataforma completa para profissionais de estética: agendamentos, clientes, financeiro, estoque e WhatsApp em um só lugar."
+        path="/"
+      />
       <Navbar />
       <main>
         <Hero />

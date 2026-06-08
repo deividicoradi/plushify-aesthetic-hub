@@ -1,4 +1,5 @@
 import React from 'react';
+import { SEO } from '@/components/SEO';
 import { Logo } from '@/components/ui/Logo';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
