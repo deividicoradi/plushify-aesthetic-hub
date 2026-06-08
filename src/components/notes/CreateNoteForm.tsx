@@ -37,11 +37,11 @@ export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
   };
 
   return (
-    <Card className="mb-8 shadow-md animate-in fade-in duration-300">
-      <CardHeader>
-        <CardTitle>Nova Nota</CardTitle>
+    <Card className="mb-6 sm:mb-8 shadow-md animate-in fade-in duration-300">
+      <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-2">
+        <CardTitle className="text-base sm:text-lg">Nova Nota</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0 sm:pt-0">
         <div className="space-y-2">
           <Input
             id="create-note-title"
@@ -66,10 +66,10 @@ export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
           />
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col sm:flex-row gap-2 p-4 sm:p-6 pt-2 sm:pt-2">
         <Button 
           onClick={handleSubmit}
-          className="bg-plush-600 hover:bg-plush-700 transition-colors"
+          className="bg-plush-600 hover:bg-plush-700 transition-colors w-full sm:w-auto order-2 sm:order-1"
           disabled={isSubmitting}
         >
           {isSubmitting ? (
@@ -82,7 +82,7 @@ export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
         <Button 
           variant="outline" 
           onClick={onCancel}
-          className="ml-2 transition-colors"
+          className="transition-colors w-full sm:w-auto order-1 sm:order-2"
           disabled={isSubmitting}
         >
           <X className="mr-2 h-4 w-4" />
