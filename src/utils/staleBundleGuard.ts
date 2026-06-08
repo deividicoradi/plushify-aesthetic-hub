@@ -153,15 +153,51 @@ async function recoverFromStaleBundle(reason: string): Promise<void> {
   }, 650);
 }
 
-function isChunkLoadError(message: string): boolean {
+function isRecoverableBootError(message: string): boolean {
   if (!message) return false;
   return (
     /Failed to fetch dynamically imported module/i.test(message) ||
     /Importing a module script failed/i.test(message) ||
     /ChunkLoadError/i.test(message) ||
     /Loading chunk \d+ failed/i.test(message) ||
-    /Unable to preload CSS/i.test(message)
+    /Unable to preload CSS/i.test(message) ||
+    /supabaseUrl is required/i.test(message) ||
+    /supabaseKey is required/i.test(message) ||
+    /Supabase configuration missing/i.test(message)
   );
+}
+
+export async function ensureFreshBundleBeforeBoot(): Promise<boolean> {
+  if (typeof window === 'undefined' || isPreviewOrIframe()) return true;
+
+  try {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('reset-cache') === '1') {
+      url.searchParams.delete('reset-cache');
+      showRecoveryOverlay();
+      await purgeClientCaches();
+      localStorage.setItem(BUILD_ID_KEY, currentBuildId);
+      window.location.replace(url.toString());
+      return false;
+    }
+  } catch {
+    /* noop */
+  }
+
+  try {
+    const storedBuildId = localStorage.getItem(BUILD_ID_KEY);
+    if (storedBuildId && storedBuildId !== currentBuildId) {
+      await recoverFromStaleBundle('pre-boot-version-mismatch');
+      return false;
+    }
+    if (!storedBuildId) {
+      localStorage.setItem(BUILD_ID_KEY, currentBuildId);
+    }
+  } catch {
+    /* noop */
+  }
+
+  return true;
 }
 
 export function initStaleBundleGuard(): void {
@@ -202,9 +238,9 @@ export function initStaleBundleGuard(): void {
   // 2. Listener global para erros de chunk
   window.addEventListener('error', (event) => {
     const msg = event?.message || (event?.error && event.error.message) || '';
-    if (isChunkLoadError(msg)) {
+    if (isRecoverableBootError(msg)) {
       event.preventDefault?.();
-      void recoverFromStaleBundle('chunk-load-error');
+      void recoverFromStaleBundle('recoverable-window-error');
     }
   });
 
@@ -212,9 +248,9 @@ export function initStaleBundleGuard(): void {
     const reason: any = event?.reason;
     const msg =
       (reason && (reason.message || (typeof reason === 'string' ? reason : ''))) || '';
-    if (isChunkLoadError(msg)) {
+    if (isRecoverableBootError(msg)) {
       event.preventDefault?.();
-      void recoverFromStaleBundle('chunk-load-rejection');
+      void recoverFromStaleBundle('recoverable-promise-rejection');
     }
   });
 
@@ -233,6 +269,7 @@ export function checkManualResetFlag(): void {
     const url = new URL(window.location.href);
     if (url.searchParams.get('reset-cache') === '1') {
       url.searchParams.delete('reset-cache');
+      showRecoveryOverlay();
       void purgeClientCaches().then(() => {
         window.location.replace(url.toString());
       });
