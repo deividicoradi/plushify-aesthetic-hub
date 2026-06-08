@@ -25,22 +25,22 @@ const AnalyticsPipelineCharts: React.FC<AnalyticsPipelineChartsProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
       {/* Pipeline por Valor */}
       <Card>
-        <CardHeader>
-          <CardTitle>Pipeline por Valor e Serviço</CardTitle>
-          <CardDescription>Distribuição da receita por tipo de serviço</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Pipeline por Valor e Serviço</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Distribuição da receita por tipo de serviço</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+        <CardContent className="p-2 sm:p-6 pt-0 sm:pt-0">
+          <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
                 data={pipelineByAmountData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={120}
+                innerRadius="40%"
+                outerRadius="80%"
                 paddingAngle={5}
                 dataKey="value"
               >
@@ -56,19 +56,19 @@ const AnalyticsPipelineCharts: React.FC<AnalyticsPipelineChartsProps> = ({
 
       {/* Pipeline por Quantidade */}
       <Card>
-        <CardHeader>
-          <CardTitle>Pipeline por Quantidade e Serviço</CardTitle>
-          <CardDescription>Distribuição dos agendamentos por tipo de serviço</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Pipeline por Quantidade e Serviço</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Distribuição dos agendamentos por tipo de serviço</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+        <CardContent className="p-2 sm:p-6 pt-0 sm:pt-0">
+          <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
                 data={pipelineByCountData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={120}
+                innerRadius="40%"
+                outerRadius="80%"
                 paddingAngle={5}
                 dataKey="value"
               >
