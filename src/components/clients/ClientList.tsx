@@ -47,15 +47,15 @@ const ClientList: React.FC<{
 
     setLoading(true);
     try {
-      // Use secure RPC function with audit logging
-      const { data, error } = await supabase.rpc('get_clients_masked', {
-        p_mask_sensitive: false
-      });
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, email, phone, cpf, cep, address, neighborhood, city, state, payment_method, status, created_at, last_visit')
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
       // Apply filters client-side (data already secured and audited)
-      let filteredData = data || [];
+      let filteredData = (data || []) as Client[];
       
       // Apply status filter
       if (filters.status !== "Todos") {
@@ -68,8 +68,7 @@ const ClientList: React.FC<{
         filteredData = filteredData.filter(client => 
           client.name.toLowerCase().includes(searchLower) ||
           (client.email && client.email.toLowerCase().includes(searchLower)) ||
-          (client.phone && client.phone.includes(searchTerm)) ||
-          (client.cpf && client.cpf.includes(searchTerm.replace(/\D/g, '')))
+          (client.phone && client.phone.includes(searchTerm))
         );
       }
 
@@ -118,14 +117,13 @@ const ClientList: React.FC<{
         return;
       }
 
-      // Buscar dados do cliente para auditoria (via RPC seguro com auditoria)
-      const { data: clientDataArr, error: clientError } = await supabase
-        .rpc('get_client_data_secure', {
-          p_client_id: clientId,
-          p_mask_sensitive: false
-        });
-
-      const clientData = clientDataArr?.[0] || null;
+      // Buscar dados do cliente para auditoria
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', clientId)
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       if (clientError) throw clientError;
 
