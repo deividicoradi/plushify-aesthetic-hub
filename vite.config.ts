@@ -6,7 +6,7 @@ import { componentTagger } from "lovable-tagger";
 
 const LOVABLE_CLOUD_URL = 'https://iqpldxwwvnlloefqfhoo.supabase.co';
 const LOVABLE_CLOUD_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIc3VwYWJhc2UiLCJyZWYiOiJpcXBsZHh3d3ZubGxvZWZxZmhvbyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzgwOTMxNDY3LCJleHAiOjIwOTY1MDc0Njd9.CC7iWCl_8tp0K_2lZxRvDTLjhYvn85Tn2WYLzOFS3qs';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxcGxkeHd3dm5sbG9lZnFmaG9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzE0NjcsImV4cCI6MjA5NjUwNzQ2N30.CC7iWCl_8tp0K_2lZxRvDTLjhYvn85Tn2WYLzOFS3qs';
 
 const backendUrl = process.env.VITE_SUPABASE_URL || LOVABLE_CLOUD_URL;
 const backendAnonKey =
