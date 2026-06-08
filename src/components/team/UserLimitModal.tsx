@@ -37,15 +37,15 @@ export const UserLimitModal = ({ open, onOpenChange, onCancel }: UserLimitModalP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md p-4 sm:p-6">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/20">
-              <AlertTriangle className="w-5 h-5 text-orange-600" />
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-orange-100 dark:bg-orange-900/20">
+              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
             </div>
-            <DialogTitle>Limite de usuários atingido</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">Limite de usuários atingido</DialogTitle>
           </div>
-          <DialogDescription className="text-left">
+          <DialogDescription className="text-left text-xs sm:text-sm">
             Seu plano {upgradeInfo.currentPlan} permite até{' '}
             <span className="font-semibold">{limitInfo.limit} usuário{limitInfo.limit !== 1 ? 's' : ''}</span>.
             Para adicionar mais profissionais à equipe, migre para o plano{' '}
@@ -53,39 +53,43 @@ export const UserLimitModal = ({ open, onOpenChange, onCancel }: UserLimitModalP
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4">
-          <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg border">
-            <Users className="w-8 h-8 text-muted-foreground" />
+        <div className="py-3 sm:py-4">
+          <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg border">
+            <Users className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
             <div className="flex-1">
-              <p className="font-medium">Usuários ativos</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-medium text-sm">Usuários ativos</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {limitInfo.current} / {limitInfo.limit} permitidos pelo seu plano
               </p>
             </div>
           </div>
 
           {upgradeInfo.suggestedPlan && (
-            <div className="mt-4 p-4 bg-primary/10 rounded-lg border border-primary/20">
+            <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-primary/10 rounded-lg border border-primary/20">
               <div className="flex items-center gap-2 mb-2">
-                <Crown className="w-4 h-4 text-primary" />
-                <p className="font-medium text-primary">Plano {upgradeInfo.suggestedPlan}</p>
+                <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+                <p className="font-medium text-sm text-primary">Plano {upgradeInfo.suggestedPlan}</p>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {upgradeInfo.suggestedLimit} • Gestão de equipe avançada
               </p>
             </div>
           )}
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
           <Button
             variant="outline"
             onClick={handleCancel}
+            className="w-full sm:w-auto"
           >
             Cancelar
           </Button>
           {upgradeInfo.suggestedPlan && (
-            <Button onClick={handleUpgrade}>
+            <Button 
+              onClick={handleUpgrade}
+              className="w-full sm:w-auto"
+            >
               <Crown className="w-4 h-4 mr-2" />
               Migrar para {upgradeInfo.suggestedPlan}
             </Button>

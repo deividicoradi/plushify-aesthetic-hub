@@ -14,12 +14,12 @@ const TeamManagement = () => {
       <FeatureGuard 
         planFeature="hasTeamManagement"
         fallback={
-          <div className="text-center py-12">
-            <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-foreground mb-2">
+          <div className="text-center py-8 sm:py-12">
+            <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-1 sm:mb-2">
               Gestão de Equipe
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Esta funcionalidade está disponível apenas para assinantes Premium.
             </p>
           </div>
