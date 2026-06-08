@@ -51,14 +51,14 @@ const Clients = () => {
         />
 
         {/* Client List with Modern Card */}
-        <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 shadow-sm overflow-hidden">
+        <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 shadow-sm overflow-hidden mt-4 sm:mt-6">
           <div className="p-4 sm:p-6 border-b border-border/50">
-            <h2 className="text-lg font-semibold text-foreground">Lista de Clientes</h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h2 className="text-base sm:text-lg font-semibold text-foreground">Lista de Clientes</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               Visualize e gerencie todos os seus clientes
             </p>
           </div>
-          <div className="p-4 sm:p-6 overflow-x-auto">
+          <div className="p-3 sm:p-4 lg:p-6">
             <ClientList filters={filters} searchTerm={searchTerm} onClientUpdate={refetch} />
           </div>
         </div>
