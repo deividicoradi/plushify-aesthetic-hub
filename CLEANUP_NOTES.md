@@ -41,3 +41,24 @@ Limpeza completa executada em 3 fases. Total: **~45 arquivos removidos**, **2 de
 
 ### 5. `src/components/PerformanceMonitor.tsx` vs `src/components/performance/PerformanceMonitor.tsx`
 - Ambos existem. O primeiro está montado em `App.tsx`. Não consolidados nesta passada — verificar se o segundo é dead code em auditoria futura.
+---
+
+## Estratégia anti-tela-branca (Stale Bundle Guard)
+
+Após relatos de tela em branco em URLs publicadas (ex.: `supabaseUrl is required` vindo de bundle antigo cacheado), foi implementada uma estratégia em camadas em `src/utils/staleBundleGuard.ts`, inicializada em `src/main.tsx` antes do React montar.
+
+### Camadas
+
+1. **Build ID único** — `vite.config.ts` injeta `__BUILD_ID__ = Date.now()` a cada build. O guard compara com `localStorage['plushify:build-id']`; se diferente → limpa SW + Cache Storage + reload com `?_v={buildId}`.
+2. **Listener global de chunk errors** — intercepta `Failed to fetch dynamically imported module`, `ChunkLoadError`, `Loading chunk X failed`. Dispara mesma recuperação.
+3. **PWA `autoUpdate` + `skipWaiting` + `clientsClaim`** — qualquer SW antigo ainda registrado em navegadores de usuários ativa imediatamente a nova versão no próximo load.
+4. **Kill switch manual** — `?reset-cache=1` na URL força limpeza completa (suporte/debug).
+
+### Salvaguardas
+
+- `sessionStorage['plushify:stale-bundle-recovery']` impede loop infinito (reload acontece no máximo 1x por sessão; flag é limpa após 5s de boot bem-sucedido).
+- Guard NÃO roda em `id-preview--*`, `preview--*`, iframes ou domínios Lovable internos (editor já gerencia hot reload).
+
+### Por que não removemos o SW totalmente?
+
+Apesar do `main.tsx` não chamar `register()`, navegadores de usuários antigos podem ter SWs registrados de deploys anteriores. Mantendo `vite-plugin-pwa` com `skipWaiting:true` garantimos que esses SWs sejam substituídos por uma versão atualizada que se auto-limpa, em vez de ficarem servindo HTML obsoleto indefinidamente.
