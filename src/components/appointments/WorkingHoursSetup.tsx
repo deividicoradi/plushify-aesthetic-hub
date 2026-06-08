@@ -46,12 +46,11 @@ export const WorkingHoursSetup = () => {
     setHasChanges(true);
   };
 
-  const handleToggleActive = async (index: number, checked: boolean) => {
+  const handleToggleActive = async (dayOfWeek: number, checked: boolean) => {
     if (!checked) {
       // Verificar se há agendamentos pendentes antes de desativar
-      const dayOfWeek = editedHours[index].day_of_week;
       const hasPending = await checkPendingAppointments(dayOfWeek);
-      
+
       if (hasPending) {
         toast({
           title: "Não é possível desativar",
@@ -61,8 +60,28 @@ export const WorkingHoursSetup = () => {
         return;
       }
     }
-    
-    updateHour(index, 'is_active', checked);
+
+    setEditedHours((prev) => {
+      const idx = prev.findIndex((h) => h.day_of_week === dayOfWeek);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { ...next[idx], is_active: checked };
+        return next;
+      }
+      // Dia ainda não existe no estado — cria entrada completa
+      return [
+        ...prev,
+        {
+          day_of_week: dayOfWeek,
+          start_time: '09:00',
+          end_time: '18:00',
+          is_active: checked,
+          auto_confirm_appointments: false,
+          auto_complete_appointments: false,
+        },
+      ];
+    });
+    setHasChanges(true);
   };
 
   const handleSaveAll = async () => {
@@ -190,8 +209,8 @@ export const WorkingHoursSetup = () => {
                   
                   <div className="flex items-center gap-2">
                     <Switch
-                      checked={hour.is_active}
-                      onCheckedChange={(checked) => handleToggleActive(hourIndex >= 0 ? hourIndex : editedHours.length, checked)}
+                      checked={!!hour.is_active}
+                      onCheckedChange={(checked) => handleToggleActive(day.value, checked)}
                     />
                     <span className="text-sm text-muted-foreground">Ativo</span>
                   </div>
