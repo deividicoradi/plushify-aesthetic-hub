@@ -61,7 +61,83 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
   }
 
   return (
-    <div className="rounded-md border overflow-x-auto">
+    <>
+      {/* Mobile/Tablet card view */}
+      <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {products.map((product) => {
+          const stockStatus = getStockStatus(product);
+          return (
+            <div
+              key={product.id}
+              className="rounded-lg border border-border bg-card p-3 sm:p-4 shadow-sm flex flex-col gap-3"
+            >
+              <div className="flex items-start justify-between gap-2 min-w-0">
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-sm sm:text-base truncate">{product.name}</div>
+                  {product.brand && (
+                    <div className="text-xs text-muted-foreground truncate">{product.brand}</div>
+                  )}
+                </div>
+                <Badge variant={stockStatus.color as any} className="text-[10px] shrink-0">
+                  {stockStatus.label}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <div className="text-muted-foreground">SKU</div>
+                  <div className="truncate">{product.sku || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Categoria</div>
+                  <div className="truncate">{product.category || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Estoque</div>
+                  <div className="flex items-center gap-1 font-medium">
+                    {product.stock_quantity}
+                    {stockStatus.status !== 'ok' && (
+                      <AlertTriangle className="h-3 w-3 text-yellow-500" />
+                    )}
+                    {product.min_stock_level ? (
+                      <span className="text-muted-foreground font-normal">
+                        (mín {product.min_stock_level})
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Custo</div>
+                  <div className="truncate">{formatCurrency(product.cost_price || 0)}</div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1 border-t border-border/50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(product)}
+                  className="h-8 px-3"
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  <span className="text-xs">Editar</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onDelete(product.id)}
+                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop table view */}
+      <div className="hidden md:block rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -169,6 +245,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
           })}
         </TableBody>
       </Table>
-    </div>
+      </div>
+    </>
   );
 };
