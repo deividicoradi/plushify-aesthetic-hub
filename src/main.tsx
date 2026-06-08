@@ -1,5 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
+import { HelmetProvider } from 'react-helmet-async'
 import App from './App'
 import './index.css'
 import './utils/networkInstrumentation'
@@ -125,7 +126,7 @@ async function initializeApp() {
     // Evidência final de renderização
     console.log('[RENDER] Inicializando React App...');
     const root = createRoot(rootElement);
-    root.render(<App />);
+    root.render(<HelmetProvider><App /></HelmetProvider>);
     console.log('[RENDER] React App renderizado com sucesso');
 
     // Keep-alive desabilitado para evitar erros SSL na porta 8080
