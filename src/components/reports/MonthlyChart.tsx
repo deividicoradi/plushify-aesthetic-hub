@@ -62,19 +62,19 @@ export const MonthlyChart = ({ data, loading = false }: MonthlyChartProps) => {
           />
           <Bar 
             dataKey="revenue" 
-            fill="hsl(var(--primary))" 
+            fill="#D65E9A"
             name="revenue"
             radius={[4, 4, 0, 0]}
           />
           <Bar 
             dataKey="appointments" 
-            fill="hsl(var(--accent-foreground))" 
+            fill="#F5F5F5"
             name="appointments"
             radius={[4, 4, 0, 0]}
           />
           <Bar 
             dataKey="newClients" 
-            fill="hsl(var(--muted))" 
+            fill="#7B3FA0"
             name="newClients"
             radius={[4, 4, 0, 0]}
           />
