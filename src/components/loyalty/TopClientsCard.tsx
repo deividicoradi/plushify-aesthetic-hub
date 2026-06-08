@@ -47,63 +47,63 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
 
   return (
     <Card className="bg-card/80 backdrop-blur-sm border-border/50">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-3 sm:pb-4 p-4 sm:p-6">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg">
-            <Trophy className="w-5 h-5 text-white" />
+          <div className="p-1.5 sm:p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg">
+            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
           <div>
-            <CardTitle className="text-lg">🏆 Hall da Fama VIP</CardTitle>
-            <CardDescription>Os guerreiros da beleza mais dedicados</CardDescription>
+            <CardTitle className="text-base sm:text-lg">🏆 Hall da Fama VIP</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Os guerreiros da beleza mais dedicados</CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
         {topClients.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {topClients.map((client, index) => {
               const nextTier = getNextTierProgress(client.totalSpent, client.tier);
               const isTop3 = index < 3;
               
               return (
-                <div key={client.id} className={`p-4 rounded-xl transition-all hover:scale-[1.02] ${isTop3 ? 'bg-gradient-to-r from-yellow-50/80 to-orange-50/80 dark:from-yellow-950/30 dark:to-orange-950/30 border-2 border-yellow-200/50 dark:border-yellow-800/30' : 'bg-muted/30 hover:bg-muted/50 dark:bg-muted/20 dark:hover:bg-muted/40'}`}>
-                  <div className="flex items-center gap-3 mb-3">
+                <div key={client.id} className={`p-3 sm:p-4 rounded-xl transition-all hover:scale-[1.01] sm:hover:scale-[1.02] ${isTop3 ? 'bg-gradient-to-r from-yellow-50/80 to-orange-50/80 dark:from-yellow-950/30 dark:to-orange-950/30 border-2 border-yellow-200/50 dark:border-yellow-800/30' : 'bg-muted/30 hover:bg-muted/50 dark:bg-muted/20 dark:hover:bg-muted/40'}`}>
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                     <div className="relative">
-                      <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm ${isTop3 ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white' : 'bg-primary text-primary-foreground'}`}>
+                      <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full font-bold text-xs sm:text-sm ${isTop3 ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white' : 'bg-primary text-primary-foreground'}`}>
                         {index + 1}
                       </div>
-                      {index === 0 && <Crown className="w-4 h-4 text-yellow-500 absolute -top-1 -right-1" />}
-                      {index === 1 && <Flame className="w-4 h-4 text-orange-500 absolute -top-1 -right-1" />}
-                      {index === 2 && <Star className="w-4 h-4 text-amber-500 absolute -top-1 -right-1" />}
+                      {index === 0 && <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 absolute -top-1 -right-1" />}
+                      {index === 1 && <Flame className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500 absolute -top-1 -right-1" />}
+                      {index === 2 && <Star className="w-3 h-3 sm:w-4 sm:h-4 text-amber-500 absolute -top-1 -right-1" />}
                     </div>
-                    <Avatar className="w-12 h-12 border-2 border-white/50 dark:border-gray-700 shadow-md">
-                      <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-bold">
+                    <Avatar className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-white/50 dark:border-gray-700 shadow-md">
+                      <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-bold text-xs sm:text-sm">
                         {getInitials(client.name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold truncate text-sm">{client.name}</h3>
-                        <Badge className={`${getTierColor(client.tier)} text-xs shrink-0`}>
+                      <div className="flex items-center gap-1 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
+                        <h3 className="font-bold truncate text-xs sm:text-sm">{client.name}</h3>
+                        <Badge className={`${getTierColor(client.tier)} text-[10px] sm:text-xs shrink-0`}>
                           {getTierIcon(client.tier)}
                           <span className="ml-1">{client.tier}</span>
                         </Badge>
                         {isTop3 && (
-                          <Badge className="bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs">
+                          <Badge className="bg-gradient-to-r from-pink-400 to-purple-500 text-white text-[10px] sm:text-xs">
                             VIP
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
                         {client.email || client.phone || 'Sem contato'}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 justify-end">
                         <Sparkles className="w-3 h-3 text-yellow-500" />
-                        <span className="text-lg font-bold text-primary">{client.totalPoints}</span>
+                        <span className="text-base sm:text-lg font-bold text-primary">{client.totalPoints}</span>
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-[11px] sm:text-xs text-muted-foreground">
                         {new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
                           currency: 'BRL'
@@ -113,8 +113,8 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
                   </div>
                   
                   {client.tier !== 'Diamante' && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <div className="flex items-center justify-between text-[11px] sm:text-xs">
                         <span className="text-muted-foreground flex items-center gap-1">
                           <TrendingUp className="w-3 h-3" />
                           Próximo nível: {nextTier.next}
@@ -124,7 +124,7 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
                         </span>
                       </div>
                       <Progress value={Math.min(nextTier.progress, 100)} className="h-1.5" />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[11px] sm:text-xs text-muted-foreground">
                         Faltam R$ {(nextTier.required - (client.totalSpent % nextTier.required)).toFixed(0)} para {nextTier.next}
                       </p>
                     </div>
@@ -134,10 +134,10 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
             })}
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <Trophy className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">🎯 Hall da Fama Vazio</h3>
-            <p className="text-sm">Complete agendamentos para ver seus clientes VIP aparecerem aqui!</p>
+          <div className="text-center py-6 sm:py-8 text-muted-foreground">
+            <Trophy className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 opacity-50" />
+            <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">🎯 Hall da Fama Vazio</h3>
+            <p className="text-xs sm:text-sm">Complete agendamentos para ver seus clientes VIP aparecerem aqui!</p>
           </div>
         )}
       </CardContent>

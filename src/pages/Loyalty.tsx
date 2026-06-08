@@ -33,12 +33,12 @@ export default function Loyalty() {
       subtitle="Transforme seus clientes em verdadeiros fãs com pontos, desafios e recompensas"
       icon={Sparkles}
     >
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Stats Cards */}
         <LoyaltyStatsCards stats={stats} />
 
         {/* Top Clients and Rules */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
           <div className="lg:col-span-2">
             <TopClientsCard clients={clients} />
           </div>
@@ -46,7 +46,7 @@ export default function Loyalty() {
         </div>
 
         {/* Challenges and Rewards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           <ChallengesCard />
           <RewardsCard />
         </div>

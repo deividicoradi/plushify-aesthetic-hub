@@ -36,59 +36,59 @@ const getInitials = (name: string) => {
 export const LoyaltyClientsTable: React.FC<LoyaltyClientsTableProps> = ({ clients }) => {
   return (
     <Card className="bg-card/80 backdrop-blur-sm border-border/50">
-      <CardHeader>
-        <CardTitle className="text-lg">Todos os Clientes Fidelizados</CardTitle>
-        <CardDescription>Histórico completo de pontuação e tier dos clientes</CardDescription>
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-base sm:text-lg">Todos os Clientes Fidelizados</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Histórico completo de pontuação e tier dos clientes</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
         {clients.length > 0 ? (
-          <div className="rounded-md border border-border/50 bg-card/30 dark:bg-card/20">
+          <div className="rounded-md border border-border/50 bg-card/30 dark:bg-card/20 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-border/50">
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Tier</TableHead>
-                  <TableHead className="text-right">Pontos</TableHead>
-                  <TableHead className="text-right">Total Gasto</TableHead>
-                  <TableHead className="text-center">Atendimentos</TableHead>
-                  <TableHead>Última Visita</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Cliente</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Tier</TableHead>
+                  <TableHead className="text-right text-xs sm:text-sm">Pontos</TableHead>
+                  <TableHead className="text-right text-xs sm:text-sm">Total Gasto</TableHead>
+                  <TableHead className="text-center text-xs sm:text-sm">Atendimentos</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Última Visita</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {clients.map((client) => (
                   <TableRow key={client.id} className="hover:bg-muted/30 dark:hover:bg-muted/20 border-border/50">
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <Avatar className="w-7 h-7 sm:w-8 sm:h-8">
+                          <AvatarFallback className="bg-primary/10 text-primary text-[10px] sm:text-xs font-medium">
                             {getInitials(client.name)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">{client.name}</div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="font-medium text-xs sm:text-sm">{client.name}</div>
+                          <div className="text-[11px] sm:text-sm text-muted-foreground">
                             {client.email || client.phone || 'Sem contato'}
                           </div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={`${getTierColor(client.tier)} text-xs`}>
+                      <Badge className={`${getTierColor(client.tier)} text-[10px] sm:text-xs`}>
                         {getTierIcon(client.tier)}
                         <span className="ml-1">{client.tier}</span>
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className="font-semibold text-primary">{client.totalPoints}</span>
+                      <span className="font-semibold text-primary text-xs sm:text-sm">{client.totalPoints}</span>
                     </TableCell>
-                    <TableCell className="text-right font-medium">
+                    <TableCell className="text-right font-medium text-xs sm:text-sm">
                       {new Intl.NumberFormat('pt-BR', {
                         style: 'currency',
                         currency: 'BRL'
                       }).format(client.totalSpent)}
                     </TableCell>
-                    <TableCell className="text-center">{client.appointmentsCount}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-center text-xs sm:text-sm">{client.appointmentsCount}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">
                       {client.lastVisit 
                         ? new Date(client.lastVisit).toLocaleDateString('pt-BR')
                         : 'Nunca'
@@ -100,10 +100,10 @@ export const LoyaltyClientsTable: React.FC<LoyaltyClientsTableProps> = ({ client
             </Table>
           </div>
         ) : (
-          <div className="text-center py-12 text-muted-foreground">
-            <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum cliente fidelizado ainda</h3>
-            <p>Complete agendamentos para começar a acumular pontos para seus clientes!</p>
+          <div className="text-center py-8 sm:py-12 text-muted-foreground">
+            <Users className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 opacity-50" />
+            <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Nenhum cliente fidelizado ainda</h3>
+            <p className="text-xs sm:text-sm">Complete agendamentos para começar a acumular pontos para seus clientes!</p>
           </div>
         )}
       </CardContent>
