@@ -14,16 +14,905 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string
+          client_id: string | null
+          client_name: string
+          created_at: string
+          duration: number
+          id: string
+          notes: string | null
+          price: number
+          service_id: string | null
+          service_name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time: string
+          client_id?: string | null
+          client_name: string
+          created_at?: string
+          duration?: number
+          id?: string
+          notes?: string | null
+          price?: number
+          service_id?: string | null
+          service_name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string
+          client_id?: string | null
+          client_name?: string
+          created_at?: string
+          duration?: number
+          id?: string
+          notes?: string | null
+          price?: number
+          service_id?: string | null
+          service_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          reason: string | null
+          record_id: string
+          table_name: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          reason?: string | null
+          record_id: string
+          table_name: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          reason?: string | null
+          record_id?: string
+          table_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      authorization_passwords: {
+        Row: {
+          created_at: string
+          id: string
+          password_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_hash?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cash_closures: {
+        Row: {
+          card_amount: number
+          cash_amount: number
+          closed_at: string | null
+          closing_balance: number
+          closure_date: string
+          created_at: string
+          difference: number
+          id: string
+          notes: string | null
+          opening_balance: number
+          other_amount: number
+          pix_amount: number
+          status: string
+          total_expenses: number
+          total_income: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_amount?: number
+          cash_amount?: number
+          closed_at?: string | null
+          closing_balance: number
+          closure_date: string
+          created_at?: string
+          difference?: number
+          id?: string
+          notes?: string | null
+          opening_balance?: number
+          other_amount?: number
+          pix_amount?: number
+          status?: string
+          total_expenses?: number
+          total_income?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_amount?: number
+          cash_amount?: number
+          closed_at?: string | null
+          closing_balance?: number
+          closure_date?: string
+          created_at?: string
+          difference?: number
+          id?: string
+          notes?: string | null
+          opening_balance?: number
+          other_amount?: number
+          pix_amount?: number
+          status?: string
+          total_expenses?: number
+          total_income?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cash_openings: {
+        Row: {
+          card_amount: number
+          cash_amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          opened_at: string
+          opening_balance: number
+          opening_date: string
+          other_amount: number
+          pix_amount: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_amount?: number
+          cash_amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opening_balance?: number
+          opening_date: string
+          other_amount?: number
+          pix_amount?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_amount?: number
+          cash_amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opening_balance?: number
+          opening_date?: string
+          other_amount?: number
+          pix_amount?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          last_visit: string | null
+          name: string
+          phone: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_visit?: string | null
+          name: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_visit?: string | null
+          name?: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      dashboard_analytics: {
+        Row: {
+          analysis_date: string
+          created_at: string
+          id: string
+          insights: Json
+          metrics: Json
+          recommendations: Json
+          trends: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis_date?: string
+          created_at?: string
+          id?: string
+          insights: Json
+          metrics: Json
+          recommendations: Json
+          trends: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis_date?: string
+          created_at?: string
+          id?: string
+          insights?: Json
+          metrics?: Json
+          recommendations?: Json
+          trends?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string
+          expense_date: string
+          id: string
+          notes: string | null
+          payment_method_id: string | null
+          receipt_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          description: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          payment_method_id?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          payment_method_id?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_transactions: {
+        Row: {
+          amount: number
+          appointment_id: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          transaction_date: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          appointment_id?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          transaction_date?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          transaction_date?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      installments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          id: string
+          installment_number: number
+          notes: string | null
+          paid_amount: number
+          payment_date: string | null
+          payment_id: string
+          status: string
+          total_installments: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          id?: string
+          installment_number: number
+          notes?: string | null
+          paid_amount?: number
+          payment_date?: string | null
+          payment_id: string
+          status?: string
+          total_installments: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          installment_number?: number
+          notes?: string | null
+          paid_amount?: number
+          payment_date?: string | null
+          payment_id?: string
+          status?: string
+          total_installments?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installments_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_transactions: {
+        Row: {
+          cost_price: number | null
+          created_at: string
+          id: string
+          new_stock: number
+          notes: string | null
+          previous_stock: number
+          product_id: string
+          quantity: number
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          cost_price?: number | null
+          created_at?: string
+          id?: string
+          new_stock: number
+          notes?: string | null
+          previous_stock: number
+          product_id: string
+          quantity: number
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          cost_price?: number | null
+          created_at?: string
+          id?: string
+          new_stock?: number
+          notes?: string | null
+          previous_stock?: number
+          product_id?: string
+          quantity?: number
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payment_methods: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          appointment_id: string | null
+          client_id: string | null
+          created_at: string
+          description: string | null
+          discount: number | null
+          due_date: string | null
+          id: string
+          installments: number
+          notes: string | null
+          paid_amount: number
+          payment_date: string | null
+          payment_method_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          appointment_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          discount?: number | null
+          due_date?: string | null
+          id?: string
+          installments?: number
+          notes?: string | null
+          paid_amount?: number
+          payment_date?: string | null
+          payment_method_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          discount?: number | null
+          due_date?: string | null
+          id?: string
+          installments?: number
+          notes?: string | null
+          paid_amount?: number
+          payment_date?: string | null
+          payment_method_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          active: boolean
+          barcode: string | null
+          brand: string | null
+          category: string | null
+          cost_price: number | null
+          created_at: string
+          description: string | null
+          id: string
+          min_stock_level: number | null
+          name: string
+          price: number
+          sku: string | null
+          stock_quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
+          cost_price?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          min_stock_level?: number | null
+          name: string
+          price?: number
+          sku?: string | null
+          stock_quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
+          cost_price?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          min_stock_level?: number | null
+          name?: string
+          price?: number
+          sku?: string | null
+          stock_quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          active: boolean
+          category: string | null
+          created_at: string
+          description: string | null
+          duration: number
+          id: string
+          name: string
+          price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          duration: number
+          id?: string
+          name: string
+          price: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          hire_date: string | null
+          id: string
+          name: string
+          permissions: Json | null
+          phone: string | null
+          role: string
+          salary: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          hire_date?: string | null
+          id?: string
+          name: string
+          permissions?: Json | null
+          phone?: string | null
+          role: string
+          salary?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          hire_date?: string | null
+          id?: string
+          name?: string
+          permissions?: Json | null
+          phone?: string | null
+          role?: string
+          salary?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan_type: Database["public"]["Enums"]["plan_type"]
+          started_at: string
+          status: string
+          trial_ends_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_type?: Database["public"]["Enums"]["plan_type"]
+          started_at?: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_type?: Database["public"]["Enums"]["plan_type"]
+          started_at?: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      working_hours: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          start_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          start_time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          start_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_appointment_availability: {
+        Args: {
+          p_appointment_date: string
+          p_appointment_time: string
+          p_duration: number
+          p_exclude_appointment_id?: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      create_public_booking: {
+        Args: {
+          p_appointment_date: string
+          p_appointment_time: string
+          p_client_email: string
+          p_client_name: string
+          p_client_phone: string
+          p_notes?: string
+          p_service_id: string
+        }
+        Returns: string
+      }
+      detect_sql_injection: { Args: { input_text: string }; Returns: boolean }
+      get_available_slots: {
+        Args: {
+          p_date: string
+          p_service_duration?: number
+          p_slot_interval?: number
+          p_user_id: string
+        }
+        Returns: {
+          is_available: boolean
+          slot_time: string
+        }[]
+      }
+      get_public_available_slots: {
+        Args: { p_date: string; p_service_id: string }
+        Returns: {
+          is_available: boolean
+          slot_time: string
+        }[]
+      }
+      get_public_services: {
+        Args: never
+        Returns: {
+          category: string
+          description: string
+          duration: number
+          id: string
+          name: string
+          price: number
+        }[]
+      }
+      get_user_plan: {
+        Args: { user_uuid?: string }
+        Returns: Database["public"]["Enums"]["plan_type"]
+      }
+      has_feature_access: { Args: { feature_name: string }; Returns: boolean }
+      sanitize_input: { Args: { input_text: string }; Returns: string }
+      validate_email: { Args: { email: string }; Returns: boolean }
+      validate_phone: { Args: { phone: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      plan_type: "trial" | "professional" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +1039,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      plan_type: ["trial", "professional", "premium"],
+    },
   },
 } as const
