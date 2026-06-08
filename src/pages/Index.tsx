@@ -8,14 +8,13 @@ import Features from '../components/Features';
 import Testimonials from '../components/Testimonials';
 import Footer from '../components/Footer';
 import { PlansSection } from '../components/home/PlansSection';
-import { WhatsAppFloatingChat } from '../components/whatsapp/WhatsAppFloatingChat';
 
 const Index = () => {
   return (
     <div className="min-h-screen">
       <SEO
         title="Plushify - Gestão para Profissionais de Estética"
-        description="Plataforma completa para profissionais de estética: agendamentos, clientes, financeiro, estoque e WhatsApp em um só lugar."
+        description="Plataforma completa para profissionais de estética: agendamentos, clientes, financeiro e estoque em um só lugar."
         path="/"
       />
       <Navbar />
@@ -29,7 +28,6 @@ const Index = () => {
         <Testimonials />
       </main>
       <Footer />
-      <WhatsAppFloatingChat />
     </div>
   );
 };

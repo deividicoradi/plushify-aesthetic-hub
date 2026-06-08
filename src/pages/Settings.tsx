@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X, MessageCircle, ArrowLeft, Edit } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
-import { WhatsAppSettings } from '@/components/whatsapp/WhatsAppSettings';
 
 const Settings = () => {
   const { user } = useAuth();
@@ -72,7 +71,7 @@ const Settings = () => {
         </div>
         
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="profile" className="flex items-center gap-2 text-xs sm:text-sm">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Perfil</span>
@@ -82,11 +81,6 @@ const Settings = () => {
               <Shield className="w-4 h-4" />
               <span className="hidden sm:inline">Conta</span>
               <span className="sm:hidden">Conta</span>
-            </TabsTrigger>
-            <TabsTrigger value="whatsapp" className="flex items-center gap-2 text-xs sm:text-sm">
-              <MessageCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">WhatsApp</span>
-              <span className="sm:hidden">WhatsApp</span>
             </TabsTrigger>
           </TabsList>
           
@@ -268,10 +262,6 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="whatsapp" className="space-y-6">
-            <WhatsAppSettings />
           </TabsContent>
         </Tabs>
       </div>
