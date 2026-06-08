@@ -30,39 +30,39 @@ interface RewardItemProps {
 
 export const RewardItem = React.memo<RewardItemProps>(({ reward }) => {
   return (
-    <div className={`p-4 rounded-lg border border-border/50 transition-all hover:shadow-md ${!reward.available ? 'opacity-60' : ''} bg-card/30 dark:bg-card/20`}>
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-primary/10 rounded">
+    <div className={`p-3 sm:p-4 rounded-lg border border-border/50 transition-all hover:shadow-md ${!reward.available ? 'opacity-60' : ''} bg-card/30 dark:bg-card/20`}>
+      <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="p-1 sm:p-1.5 bg-primary/10 rounded shrink-0">
             {getTypeIcon(reward.type)}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="font-medium text-sm">{reward.title}</h4>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+              <h4 className="font-medium text-xs sm:text-sm truncate">{reward.title}</h4>
               {reward.popular && (
-                <Badge className="bg-orange-100/80 text-orange-700 dark:bg-orange-900/80 dark:text-orange-300 text-xs">
+                <Badge className="bg-orange-100/80 text-orange-700 dark:bg-orange-900/80 dark:text-orange-300 text-[10px] sm:text-xs">
                   🔥 Popular
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">{reward.description}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground">{reward.description}</p>
           </div>
         </div>
-        <Badge className={`text-xs ${getTierColor(reward.tier)}`}>
+        <Badge className={`text-[10px] sm:text-xs shrink-0 ${getTierColor(reward.tier)}`}>
           {reward.tier}
         </Badge>
       </div>
       
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
         <div className="flex items-center gap-1">
           <Sparkles className="w-3 h-3 text-yellow-500" />
-          <span className="text-sm font-bold text-primary">{reward.pointsCost} pontos</span>
+          <span className="text-xs sm:text-sm font-bold text-primary">{reward.pointsCost} pontos</span>
         </div>
         <Button 
           size="sm" 
           variant={reward.available ? "default" : "secondary"}
           disabled={!reward.available}
-          className="text-xs"
+          className="text-[11px] sm:text-xs w-full sm:w-auto h-8"
         >
           {reward.available ? 'Resgatar' : 'Indisponível'}
         </Button>

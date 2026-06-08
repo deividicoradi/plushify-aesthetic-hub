@@ -11,14 +11,14 @@ export const ChallengesCard: React.FC = () => {
 
   return (
     <Card className="bg-card/80 backdrop-blur-sm border-border/50">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Target className="w-5 h-5 text-primary" />
+      <CardHeader className="pb-3 sm:pb-4 p-4 sm:p-6">
+        <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+          <Target className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           Desafios e Metas
         </CardTitle>
-        <CardDescription>Complete desafios para ganhar pontos extras e recompensas especiais</CardDescription>
+        <CardDescription className="text-xs sm:text-sm">Complete desafios para ganhar pontos extras e recompensas especiais</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0 sm:pt-0">
         {loading ? (
           <LoadingChallenges />
         ) : (
@@ -30,7 +30,7 @@ export const ChallengesCard: React.FC = () => {
         )}
         
         <div className="pt-2 text-center">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11px] sm:text-xs text-muted-foreground">
             🎯 Complete desafios para subir de nível mais rápido!
           </p>
         </div>
