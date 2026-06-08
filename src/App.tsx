@@ -18,7 +18,6 @@ import Reports from "./pages/Reports";
 import Plans from "./pages/Plans";
 import Auth from "./pages/Auth";
 import Signup from "./pages/Signup";
-import WhatsApp from "./pages/WhatsApp";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -130,14 +129,6 @@ const AppContent = () => {
         element={
           <ProtectedRoute>
             <Reports />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/whatsapp"
-        element={
-          <ProtectedRoute>
-            <WhatsApp />
           </ProtectedRoute>
         }
       />
