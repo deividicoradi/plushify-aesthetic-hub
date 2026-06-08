@@ -69,25 +69,25 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
   return (
     <>
       <Card className="flex flex-col h-full transition-all duration-300 hover:shadow-lg">
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 p-4 sm:p-6">
           {editing ? (
             <Input
               id={`edit-note-title-${note.id}`}
               name="edit-note-title"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className="font-bold focus:ring-2 focus:ring-plush-500"
+              className="font-bold focus:ring-2 focus:ring-plush-500 text-sm sm:text-base"
               placeholder="Título da nota"
               disabled={isSubmitting}
             />
           ) : (
-            <CardTitle className="break-words">{note.title}</CardTitle>
+            <CardTitle className="break-words text-base sm:text-lg">{note.title}</CardTitle>
           )}
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
             {note.updated_at ? `Atualizado: ${formatDate(note.updated_at)}` : formatDate(note.created_at)}
           </p>
         </CardHeader>
-        <CardContent className="flex-grow pb-2">
+        <CardContent className="flex-grow pb-2 p-4 sm:p-6 pt-0 sm:pt-0">
           {editing ? (
             <Textarea
               id={`edit-note-content-${note.id}`}
@@ -95,15 +95,15 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               rows={5}
-              className="resize-none h-full min-h-[100px] focus:ring-2 focus:ring-plush-500"
+              className="resize-none h-full min-h-[100px] focus:ring-2 focus:ring-plush-500 text-sm sm:text-base"
               placeholder="Conteúdo da nota..."
               disabled={isSubmitting}
             />
           ) : (
-            <p className="whitespace-pre-wrap break-words">{note.content}</p>
+            <p className="whitespace-pre-wrap break-words text-sm sm:text-base">{note.content}</p>
           )}
         </CardContent>
-        <CardFooter className="flex justify-end gap-2 pt-2">
+        <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 pt-2 p-4 sm:p-6">
           {editing ? (
             <>
               <Button 
@@ -115,14 +115,14 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
                   setEditContent(note.content);
                 }}
                 disabled={isSubmitting}
-                className="transition-colors"
+                className="transition-colors w-full sm:w-auto"
               >
                 <X className="mr-1 h-4 w-4" />
                 Cancelar
               </Button>
               <Button 
                 size="sm"
-                className="bg-plush-600 hover:bg-plush-700 transition-colors"
+                className="bg-plush-600 hover:bg-plush-700 transition-colors w-full sm:w-auto"
                 onClick={handleUpdate}
                 disabled={isSubmitting}
               >
@@ -140,7 +140,7 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
                 variant="outline" 
                 size="sm" 
                 onClick={() => setEditing(true)}
-                className="transition-colors hover:bg-plush-50"
+                className="transition-colors hover:bg-plush-50 w-full sm:w-auto"
               >
                 <Edit className="mr-1 h-4 w-4" />
                 Editar
@@ -149,7 +149,7 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
                 variant="destructive" 
                 size="sm" 
                 onClick={() => setShowDeleteDialog(true)}
-                className="transition-colors"
+                className="transition-colors w-full sm:w-auto"
               >
                 <Trash className="mr-1 h-4 w-4" />
                 Excluir
@@ -161,18 +161,19 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
 
       {/* Diálogo de confirmação para exclusão */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>Excluir Nota</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">Excluir Nota</DialogTitle>
+            <DialogDescription className="text-sm">
               Tem certeza que deseja excluir esta nota? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex justify-between sm:justify-between">
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between">
             <Button 
               variant="outline" 
               onClick={() => setShowDeleteDialog(false)}
               disabled={isSubmitting}
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Cancelar
             </Button>
@@ -180,6 +181,7 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
               variant="destructive" 
               onClick={handleDelete}
               disabled={isSubmitting}
+              className="w-full sm:w-auto order-1 sm:order-2"
             >
               {isSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
