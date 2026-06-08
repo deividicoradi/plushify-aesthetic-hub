@@ -20,6 +20,7 @@ declare const __APP_VERSION__: string;
 
 const BUILD_ID_KEY = 'plushify:build-id';
 const RECOVERY_FLAG = 'plushify:stale-bundle-recovery';
+const SELF_DESTROY_SW_FLAG = 'plushify:self-destroy-sw-installed';
 
 const currentBuildId =
   typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : 'dev';
@@ -80,6 +81,22 @@ async function purgeClientCaches(): Promise<void> {
   }
 }
 
+async function installSelfDestroyingServiceWorker(): Promise<void> {
+  try {
+    if (!('serviceWorker' in navigator)) return;
+    if (sessionStorage.getItem(SELF_DESTROY_SW_FLAG) === '1') return;
+
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    if (!navigator.serviceWorker.controller && registrations.length === 0) return;
+
+    sessionStorage.setItem(SELF_DESTROY_SW_FLAG, '1');
+    const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+    await reg.update().catch(() => undefined);
+  } catch (e) {
+    console.warn('[StaleBundleGuard] self-destroying SW register failed', e);
+  }
+}
+
 let recovering = false;
 
 function showRecoveryOverlay(): void {
@@ -121,7 +138,7 @@ function showRecoveryOverlay(): void {
   document.body?.appendChild(overlay);
 }
 
-async function recoverFromStaleBundle(reason: string): Promise<void> {
+export async function recoverFromStaleBundle(reason: string): Promise<void> {
   if (recovering) return;
   recovering = true;
 
@@ -136,6 +153,7 @@ async function recoverFromStaleBundle(reason: string): Promise<void> {
 
   console.warn(`[StaleBundleGuard] Bundle obsoleto detectado (${reason}). Limpando cache e recarregando...`);
   showRecoveryOverlay();
+  await installSelfDestroyingServiceWorker();
   await purgeClientCaches();
 
   // Atualiza build id ANTES do reload para não disparar de novo
@@ -153,15 +171,53 @@ async function recoverFromStaleBundle(reason: string): Promise<void> {
   }, 650);
 }
 
-function isChunkLoadError(message: string): boolean {
+export function isRecoverableBootError(message: string): boolean {
   if (!message) return false;
   return (
     /Failed to fetch dynamically imported module/i.test(message) ||
     /Importing a module script failed/i.test(message) ||
     /ChunkLoadError/i.test(message) ||
     /Loading chunk \d+ failed/i.test(message) ||
-    /Unable to preload CSS/i.test(message)
+    /Unable to preload CSS/i.test(message) ||
+    /supabaseUrl is required/i.test(message) ||
+    /supabaseKey is required/i.test(message) ||
+    /Supabase configuration missing/i.test(message)
   );
+}
+
+export async function ensureFreshBundleBeforeBoot(): Promise<boolean> {
+  if (typeof window === 'undefined' || isPreviewOrIframe()) return true;
+
+  void installSelfDestroyingServiceWorker();
+
+  try {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('reset-cache') === '1') {
+      url.searchParams.delete('reset-cache');
+      showRecoveryOverlay();
+      await purgeClientCaches();
+      localStorage.setItem(BUILD_ID_KEY, currentBuildId);
+      window.location.replace(url.toString());
+      return false;
+    }
+  } catch {
+    /* noop */
+  }
+
+  try {
+    const storedBuildId = localStorage.getItem(BUILD_ID_KEY);
+    if (storedBuildId && storedBuildId !== currentBuildId) {
+      await recoverFromStaleBundle('pre-boot-version-mismatch');
+      return false;
+    }
+    if (!storedBuildId) {
+      localStorage.setItem(BUILD_ID_KEY, currentBuildId);
+    }
+  } catch {
+    /* noop */
+  }
+
+  return true;
 }
 
 export function initStaleBundleGuard(): void {
@@ -202,9 +258,9 @@ export function initStaleBundleGuard(): void {
   // 2. Listener global para erros de chunk
   window.addEventListener('error', (event) => {
     const msg = event?.message || (event?.error && event.error.message) || '';
-    if (isChunkLoadError(msg)) {
+    if (isRecoverableBootError(msg)) {
       event.preventDefault?.();
-      void recoverFromStaleBundle('chunk-load-error');
+      void recoverFromStaleBundle('recoverable-window-error');
     }
   });
 
@@ -212,9 +268,9 @@ export function initStaleBundleGuard(): void {
     const reason: any = event?.reason;
     const msg =
       (reason && (reason.message || (typeof reason === 'string' ? reason : ''))) || '';
-    if (isChunkLoadError(msg)) {
+    if (isRecoverableBootError(msg)) {
       event.preventDefault?.();
-      void recoverFromStaleBundle('chunk-load-rejection');
+      void recoverFromStaleBundle('recoverable-promise-rejection');
     }
   });
 
@@ -233,6 +289,7 @@ export function checkManualResetFlag(): void {
     const url = new URL(window.location.href);
     if (url.searchParams.get('reset-cache') === '1') {
       url.searchParams.delete('reset-cache');
+      showRecoveryOverlay();
       void purgeClientCaches().then(() => {
         window.location.replace(url.toString());
       });

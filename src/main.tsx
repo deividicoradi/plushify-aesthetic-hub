@@ -1,7 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
-import App from './App'
 import './index.css'
 import './utils/networkInstrumentation'
 import { initSentry } from './lib/sentry'
@@ -11,11 +10,8 @@ import { cleanupConsoleLogsInProduction } from './utils/console-cleanup'
 import { validateEnvironment, checkProductionReadiness } from './utils/environmentNormalizer'
 import { initPerformanceMonitor } from './utils/performanceOptimizer'
 import { logger } from './utils/debugLogger'
-import { initStaleBundleGuard, checkManualResetFlag } from './utils/staleBundleGuard'
+import { ensureFreshBundleBeforeBoot, initStaleBundleGuard, isRecoverableBootError, recoverFromStaleBundle } from './utils/staleBundleGuard'
 
-// Stale bundle guard — DEVE rodar antes de qualquer import dinâmico do app.
-// Detecta bundles obsoletos (deploy novo) e recupera sem tela branca.
-checkManualResetFlag();
 initStaleBundleGuard();
 
 // Suprimir erros de WebSocket do ambiente de desenvolvimento Lovable
@@ -75,10 +71,21 @@ function showFatalError(message: string) {
 
 // Capture uncaught errors to render a friendly message instead of a blank screen
 window.addEventListener('error', (e) => {
-  showFatalError(e.message || 'Erro inesperado.')
+  const message = e.message || e.error?.message || 'Erro inesperado.'
+  if (isRecoverableBootError(message)) {
+    e.preventDefault?.()
+    void recoverFromStaleBundle('main-window-error')
+    return
+  }
+  showFatalError(message)
 })
 window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
   const reason = (e.reason && (e.reason.message || e.reason.toString())) || 'Erro inesperado.'
+  if (isRecoverableBootError(reason)) {
+    e.preventDefault?.()
+    void recoverFromStaleBundle('main-promise-rejection')
+    return
+  }
   showFatalError(reason)
 })
 
@@ -87,6 +94,9 @@ async function initializeApp() {
   try {
     // Skip SW initialization to prevent Firestore calls
     console.log('[APP] Service Worker disabled to prevent external API calls');
+
+    const canBoot = await ensureFreshBundleBeforeBoot();
+    if (!canBoot) return;
 
     // Initialize cleanup and optimization
     initCleanup()
@@ -131,6 +141,7 @@ async function initializeApp() {
     
     // Evidência final de renderização
     console.log('[RENDER] Inicializando React App...');
+    const { default: App } = await import('./App');
     const root = createRoot(rootElement);
     root.render(<HelmetProvider><App /></HelmetProvider>);
     console.log('[RENDER] React App renderizado com sucesso');
@@ -140,7 +151,12 @@ async function initializeApp() {
 
   } catch (err: any) {
     console.error('Falha ao renderizar App:', err)
-    showFatalError(err?.message || 'Falha ao inicializar o aplicativo.')
+    const message = err?.message || 'Falha ao inicializar o aplicativo.'
+    if (isRecoverableBootError(message)) {
+      await recoverFromStaleBundle('main-render-catch')
+      return
+    }
+    showFatalError(message)
   }
 }
 
