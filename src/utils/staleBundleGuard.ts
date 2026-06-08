@@ -20,6 +20,7 @@ declare const __APP_VERSION__: string;
 
 const BUILD_ID_KEY = 'plushify:build-id';
 const RECOVERY_FLAG = 'plushify:stale-bundle-recovery';
+const SELF_DESTROY_SW_FLAG = 'plushify:self-destroy-sw-installed';
 
 const currentBuildId =
   typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : 'dev';
@@ -83,6 +84,12 @@ async function purgeClientCaches(): Promise<void> {
 async function installSelfDestroyingServiceWorker(): Promise<void> {
   try {
     if (!('serviceWorker' in navigator)) return;
+    if (sessionStorage.getItem(SELF_DESTROY_SW_FLAG) === '1') return;
+
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    if (!navigator.serviceWorker.controller && registrations.length === 0) return;
+
+    sessionStorage.setItem(SELF_DESTROY_SW_FLAG, '1');
     const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
     await reg.update().catch(() => undefined);
   } catch (e) {
