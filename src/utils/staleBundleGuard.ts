@@ -80,6 +80,16 @@ async function purgeClientCaches(): Promise<void> {
   }
 }
 
+async function installSelfDestroyingServiceWorker(): Promise<void> {
+  try {
+    if (!('serviceWorker' in navigator)) return;
+    const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+    await reg.update().catch(() => undefined);
+  } catch (e) {
+    console.warn('[StaleBundleGuard] self-destroying SW register failed', e);
+  }
+}
+
 let recovering = false;
 
 function showRecoveryOverlay(): void {
@@ -136,6 +146,7 @@ export async function recoverFromStaleBundle(reason: string): Promise<void> {
 
   console.warn(`[StaleBundleGuard] Bundle obsoleto detectado (${reason}). Limpando cache e recarregando...`);
   showRecoveryOverlay();
+  await installSelfDestroyingServiceWorker();
   await purgeClientCaches();
 
   // Atualiza build id ANTES do reload para não disparar de novo
@@ -169,6 +180,8 @@ export function isRecoverableBootError(message: string): boolean {
 
 export async function ensureFreshBundleBeforeBoot(): Promise<boolean> {
   if (typeof window === 'undefined' || isPreviewOrIframe()) return true;
+
+  void installSelfDestroyingServiceWorker();
 
   try {
     const url = new URL(window.location.href);
