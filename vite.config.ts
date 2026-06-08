@@ -57,7 +57,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
     ...(mode === 'production' ? [VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       injectRegister: null,
       includeAssets: ['favicon.ico', 'lovable-uploads/2c6a89a0-0e82-4a31-b0cf-c233fc3cad6c.png'],
       manifest: {
@@ -79,8 +79,8 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         globPatterns: [],
         cleanupOutdatedCaches: true,
-        skipWaiting: false,
-        clientsClaim: false,
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         navigateFallback: null
