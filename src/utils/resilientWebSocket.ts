@@ -349,7 +349,7 @@ export function createOrJoinResilientConnection(
     
     send(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
       if (state.connection instanceof WebSocket && state.readyState === ConnectionReadyState.OPEN) {
-        state.connection.send(data);
+        state.connection.send(data as any);
       } else {
         devError('Cannot send: connection not ready or is EventSource');
       }
