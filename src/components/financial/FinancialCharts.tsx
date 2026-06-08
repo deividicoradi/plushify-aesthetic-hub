@@ -61,7 +61,7 @@ export const FinancialCharts = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Gráfico de Fluxo de Caixa Mensal */}
       <CashFlowChart 
         data={monthlyData}
@@ -70,7 +70,7 @@ export const FinancialCharts = ({
         periodLabel={getPeriodLabel()}
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         {/* Receitas vs Despesas */}
         <RevenueExpensesChart 
           data={monthlyData}

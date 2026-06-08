@@ -63,16 +63,16 @@ const FinancialDashboard = () => {
       subtitle="Análise completa das suas finanças com gráficos e indicadores"
       icon={TrendingUp}
       actions={
-        <div className="flex items-center gap-2">
-          <PeriodFilter 
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+          <PeriodFilter
             value={selectedPeriod}
             onChange={setSelectedPeriod}
           />
-          <Button onClick={handleRefresh} variant="outline" size="sm">
+          <Button onClick={handleRefresh} variant="outline" size="sm" className="h-8">
             <RefreshCw className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Atualizar</span>
           </Button>
-          <Button onClick={handleExportReport} size="sm">
+          <Button onClick={handleExportReport} size="sm" className="h-8">
             <Download className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Exportar</span>
           </Button>

@@ -123,14 +123,14 @@ export const FinancialAlerts = ({ metrics, loading = false }: FinancialAlertsPro
 
   return (
     <Card className="bg-card border-border">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-card-foreground">
-          <AlertTriangle className="w-5 h-5" />
+      <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-2">
+        <CardTitle className="flex items-center gap-2 text-card-foreground text-base sm:text-lg">
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
           Alertas Financeiros
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="p-4 sm:p-6 pt-2 sm:pt-2">
+        <div className="space-y-3 sm:space-y-4">
           {alerts.length === 0 ? (
             <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20">
               <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -143,12 +143,12 @@ export const FinancialAlerts = ({ metrics, loading = false }: FinancialAlertsPro
               <Alert key={index} className={getAlertBorderColor(alert.type)}>
                 <alert.icon className="h-4 w-4" />
                 <AlertDescription>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="font-medium mb-1 text-foreground">{alert.title}</div>
-                      <div className="text-sm text-muted-foreground">{alert.description}</div>
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium mb-1 text-foreground text-sm sm:text-base">{alert.title}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">{alert.description}</div>
                     </div>
-                    <Badge variant={getAlertBadgeVariant(alert.type)} className="ml-2">
+                    <Badge variant={getAlertBadgeVariant(alert.type)} className="self-start sm:ml-2 shrink-0">
                       {alert.badge}
                     </Badge>
                   </div>
