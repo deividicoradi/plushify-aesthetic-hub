@@ -1,7 +1,5 @@
-
 import React from 'react';
-import { TrendingUp, Users, Calendar, DollarSign } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { TrendingUp, Users, Calendar, DollarSign, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface KPICardsProps {
@@ -18,107 +16,85 @@ interface KPICardsProps {
   formatCurrency: (value: number) => string;
 }
 
-export const KPICards = ({ metrics, dashboardStats, formatCurrency }: KPICardsProps) => {
-  const saldoLiquido = metrics ? metrics.totalReceitas - (metrics as any).totalDespesas : 0;
-  const navigate = useNavigate();
+interface KpiProps {
+  label: string;
+  value: string | number;
+  delta?: { value: string; positive: boolean } | null;
+  Icon: React.ComponentType<{ className?: string }>;
+  onClick?: () => void;
+}
 
-  const handleDoubleClick = (route: string) => {
-    navigate(route);
-  };
+const KpiCard = ({ label, value, delta, Icon, onClick }: KpiProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="group text-left bg-[#1a1322] hover:bg-[#2a1a2e] border border-white/5 hover:border-[#D65E9A]/30 p-6 rounded-3xl flex flex-col justify-between transition-all duration-300 min-h-[140px]"
+  >
+    <div className="flex justify-between items-start">
+      <div className="p-2 bg-[#D65E9A]/10 rounded-xl group-hover:bg-[#D65E9A]/20 transition-colors">
+        <Icon className="w-5 h-5 text-[#D65E9A]" />
+      </div>
+      {delta && (
+        <span
+          className={`text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1 ${
+            delta.positive
+              ? 'text-emerald-400 bg-emerald-400/10'
+              : 'text-rose-400 bg-rose-400/10'
+          }`}
+        >
+          {delta.positive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+          {delta.value}
+        </span>
+      )}
+    </div>
+    <div className="mt-4">
+      <p className="text-gray-400 text-sm">{label}</p>
+      <h3 className="text-2xl font-bold text-white mt-1 font-[Sora,system-ui,sans-serif] tracking-tight">
+        {value}
+      </h3>
+    </div>
+  </button>
+);
+
+export const KPICards = ({ metrics, dashboardStats, formatCurrency }: KPICardsProps) => {
+  const saldoLiquido = metrics ? metrics.totalReceitas - ((metrics as any).totalDespesas ?? 0) : 0;
+  const navigate = useNavigate();
+  const growth = metrics?.crescimentoReceitas ?? 0;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-950/50 border-blue-200 dark:border-blue-800">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-600 dark:text-blue-400 text-sm font-medium">Receita Total</p>
-              <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                {formatCurrency(metrics?.totalReceitas || 0)}
-              </p>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                +{metrics?.crescimentoReceitas?.toFixed(1) || '0'}% vs mês anterior
-              </p>
-            </div>
-            <div 
-              className="bg-blue-500 p-3 rounded-full cursor-pointer hover:bg-blue-600 transition-colors"
-              onDoubleClick={() => handleDoubleClick('/financial')}
-              title="Duplo clique para ir ao Financeiro"
-            >
-              <DollarSign className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-950/50 border-green-200 dark:border-green-800">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-600 dark:text-green-400 text-sm font-medium">Total Clientes</p>
-              <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                {dashboardStats.totalClients || 0}
-              </p>
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                +{dashboardStats.newThisMonth || 0} este mês
-              </p>
-            </div>
-            <div 
-              className="bg-green-500 p-3 rounded-full cursor-pointer hover:bg-green-600 transition-colors"
-              onDoubleClick={() => handleDoubleClick('/clients')}
-              title="Duplo clique para ir aos Clientes"
-            >
-              <Users className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-950/50 border-purple-200 dark:border-purple-800">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">Agendamentos</p>
-              <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                {dashboardStats.totalAppointments || 0}
-              </p>
-              <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                {dashboardStats.weeklyAppointments || 0} esta semana
-              </p>
-            </div>
-            <div 
-              className="bg-purple-500 p-3 rounded-full cursor-pointer hover:bg-purple-600 transition-colors"
-              onDoubleClick={() => handleDoubleClick('/appointments')}
-              title="Duplo clique para ir aos Agendamentos"
-            >
-              <Calendar className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-950/50 border-orange-200 dark:border-orange-800">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-orange-600 dark:text-orange-400 text-sm font-medium">Saldo Líquido</p>
-              <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                {formatCurrency(saldoLiquido)}
-              </p>
-              <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                Receitas - Despesas
-              </p>
-            </div>
-            <div 
-              className="bg-orange-500 p-3 rounded-full cursor-pointer hover:bg-orange-600 transition-colors"
-              onDoubleClick={() => handleDoubleClick('/financial')}
-              title="Duplo clique para ir ao Financeiro"
-            >
-              <TrendingUp className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <KpiCard
+        label="Receita Total"
+        value={formatCurrency(metrics?.totalReceitas || 0)}
+        delta={growth !== 0 ? { value: `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`, positive: growth >= 0 } : null}
+        Icon={DollarSign}
+        onClick={() => navigate('/financial')}
+      />
+      <KpiCard
+        label="Total Clientes"
+        value={dashboardStats.totalClients || 0}
+        delta={dashboardStats.newThisMonth ? { value: `+${dashboardStats.newThisMonth}`, positive: true } : null}
+        Icon={Users}
+        onClick={() => navigate('/clients')}
+      />
+      <KpiCard
+        label="Agendamentos"
+        value={dashboardStats.totalAppointments || 0}
+        delta={
+          dashboardStats.weeklyAppointments
+            ? { value: `${dashboardStats.weeklyAppointments}/sem`, positive: true }
+            : null
+        }
+        Icon={Calendar}
+        onClick={() => navigate('/appointments')}
+      />
+      <KpiCard
+        label="Saldo Líquido"
+        value={formatCurrency(saldoLiquido)}
+        delta={null}
+        Icon={TrendingUp}
+        onClick={() => navigate('/financial')}
+      />
     </div>
   );
 };
