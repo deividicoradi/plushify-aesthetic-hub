@@ -4,10 +4,8 @@ import { useClientStats } from '@/hooks/useClientStats';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useProductsData } from '@/hooks/inventory/useProductsData';
 import { useServices } from '@/hooks/useServices';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, CheckCircle, Infinity } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Infinity as InfinityIcon, Users, Calendar, Package, Settings, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const PlanLimitsDisplay = () => {
   const { currentPlan, getLimit, hasReachedLimit, isTestUser } = usePlanLimits();
@@ -15,110 +13,110 @@ export const PlanLimitsDisplay = () => {
   const { appointments } = useAppointments();
   const { products } = useProductsData();
   const { services } = useServices();
+  const navigate = useNavigate();
 
   const limits = [
-    { 
-      type: 'clients' as const, 
-      current: totalClients, 
-      label: 'Clientes',
-      icon: '👥'
-    },
-    { 
-      type: 'appointments' as const, 
-      current: appointments.length, 
-      label: 'Agendamentos',
-      icon: '📅'
-    },
-    { 
-      type: 'products' as const, 
-      current: products.length, 
-      label: 'Produtos',
-      icon: '📦'
-    },
-    { 
-      type: 'services' as const, 
-      current: services.length, 
-      label: 'Serviços',
-      icon: '⚙️'
-    },
+    { type: 'clients' as const, current: totalClients, label: 'Clientes', Icon: Users },
+    { type: 'appointments' as const, current: appointments.length, label: 'Agendamentos', Icon: Calendar },
+    { type: 'products' as const, current: products.length, label: 'Produtos', Icon: Package },
+    { type: 'services' as const, current: services.length, label: 'Serviços', Icon: Settings },
   ];
+
+  const planLabel =
+    currentPlan === 'trial' ? 'GRÁTIS' : currentPlan === 'professional' ? 'Professional' : 'Premium';
 
   if (isTestUser) {
     return (
-      <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-blue-800 dark:text-blue-200 text-lg flex items-center gap-2">
-            🧪 Modo de Teste - Acesso Completo
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-blue-700 dark:text-blue-300 text-sm">
-            Você tem acesso ilimitado a todas as funcionalidades para testes.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="relative overflow-hidden bg-[#1a1322] border border-white/5 rounded-3xl p-6">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#D65E9A]/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="relative flex items-center gap-3">
+          <div className="p-2 bg-[#D65E9A]/10 rounded-xl">
+            <Sparkles className="w-5 h-5 text-[#D65E9A]" />
+          </div>
+          <div>
+            <h3 className="text-white font-semibold font-[Sora,system-ui,sans-serif]">
+              Modo de Teste — Acesso Completo
+            </h3>
+            <p className="text-gray-400 text-sm mt-0.5">
+              Você tem acesso ilimitado a todas as funcionalidades.
+            </p>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center justify-between">
-          Limites do Plano
-          <Badge variant={currentPlan === 'premium' ? 'default' : 'secondary'}>
-            {currentPlan === 'trial' ? 'GRÁTIS' : 
-             currentPlan === 'professional' ? 'Professional' : 'Premium'}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {limits.map(({ type, current, label, icon }) => {
+    <div className="relative overflow-hidden bg-[#1a1322] border border-white/5 rounded-3xl p-6 md:p-8">
+      <div className="absolute top-0 right-0 w-48 h-48 bg-[#D65E9A]/10 blur-3xl rounded-full pointer-events-none" />
+
+      <div className="relative flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-white text-lg md:text-xl font-bold font-[Sora,system-ui,sans-serif]">
+            Limites do Plano
+          </h2>
+          <p className="text-gray-400 text-xs mt-1">Acompanhe o uso dos seus recursos</p>
+        </div>
+        <span className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#D65E9A]/15 text-[#D65E9A] border border-[#D65E9A]/30">
+          {planLabel}
+        </span>
+      </div>
+
+      <div className="relative grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        {limits.map(({ type, current, label, Icon }) => {
           const limit = getLimit(type);
           const isAtLimit = hasReachedLimit(type, current);
           const isUnlimited = limit === -1;
           const percentage = isUnlimited ? 0 : Math.min((current / limit) * 100, 100);
+          const danger = isAtLimit;
+          const warning = !isUnlimited && percentage >= 80 && !danger;
 
           return (
-            <div key={type} className="space-y-2">
+            <div key={type} className="space-y-2.5">
               <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2">
-                  <span>{icon}</span>
+                <span className="flex items-center gap-2 text-gray-300">
+                  <Icon className="w-4 h-4 text-[#D65E9A]/80" />
                   {label}
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">
-                    {current}
-                    {isUnlimited ? (
-                      <span className="text-green-600 ml-1">
-                        <Infinity className="w-4 h-4 inline" />
-                      </span>
-                    ) : (
-                      `/${limit}`
-                    )}
-                  </span>
-                  {isAtLimit ? (
-                    <AlertTriangle className="w-4 h-4 text-red-500" />
-                  ) : current >= limit * 0.8 && !isUnlimited ? (
-                    <AlertTriangle className="w-4 h-4 text-orange-500" />
+                <span className="text-white font-medium tabular-nums">
+                  {current}
+                  {isUnlimited ? (
+                    <InfinityIcon className="w-4 h-4 inline ml-1 text-emerald-400" />
                   ) : (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-gray-500"> / {limit}</span>
                   )}
-                </div>
+                </span>
               </div>
               {!isUnlimited && (
-                <Progress 
-                  value={percentage} 
-                  className={`h-2 ${
-                    isAtLimit ? 'bg-red-100' : 
-                    percentage >= 80 ? 'bg-orange-100' : 
-                    'bg-green-100'
-                  }`}
-                />
+                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      danger
+                        ? 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.5)]'
+                        : warning
+                        ? 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.45)]'
+                        : 'bg-[#D65E9A] shadow-[0_0_12px_rgba(214,94,154,0.45)]'
+                    }`}
+                    style={{ width: `${Math.max(percentage, isUnlimited ? 0 : 4)}%` }}
+                  />
+                </div>
+              )}
+              {isUnlimited && (
+                <div className="w-full h-1.5 bg-emerald-400/15 rounded-full" />
               )}
             </div>
           );
         })}
-      </CardContent>
-    </Card>
+      </div>
+
+      {currentPlan !== 'premium' && (
+        <button
+          onClick={() => navigate('/planos')}
+          className="relative mt-7 w-full py-3 bg-[#D65E9A] hover:bg-[#c44d87] text-white font-semibold rounded-2xl transition-all shadow-lg shadow-[#D65E9A]/20"
+        >
+          Fazer Upgrade do Plano
+        </button>
+      )}
+    </div>
   );
 };
