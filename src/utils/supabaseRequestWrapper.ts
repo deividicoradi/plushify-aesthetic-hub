@@ -16,7 +16,7 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   const isSupabaseRest = url.includes('.supabase.co/rest/');
   const isSupabaseAuth = url.includes('.supabase.co/auth/');
   
-  if (!isSupabaseRest && !isSupabaseAuth) {
+  if (!isSupabaseRest || isSupabaseAuth) {
     // Outras requisições seguem normalmente
     return originalFetch(input, init);
   }
