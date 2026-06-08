@@ -172,62 +172,62 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
     .sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-[#1a1322] p-6 font-[Sora]">
+    <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-[#1a1322] p-4 sm:p-6 font-[Sora]">
       {/* Decorative glows */}
-      <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-[#D65E9A]/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-[#7B3FA0]/10 blur-3xl pointer-events-none" />
+      <div className="absolute -top-32 -right-32 w-64 sm:w-80 h-64 sm:h-80 rounded-full bg-[#D65E9A]/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-64 sm:w-80 h-64 sm:h-80 rounded-full bg-[#7B3FA0]/10 blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="relative flex items-center justify-between gap-3 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#D65E9A]/30 to-[#7B3FA0]/30 border border-[#D65E9A]/30 flex items-center justify-center shadow-lg shadow-[#D65E9A]/10">
-            <Brain className="w-5 h-5 text-[#D65E9A]" />
+      <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-[#D65E9A]/30 to-[#7B3FA0]/30 border border-[#D65E9A]/30 flex items-center justify-center shadow-lg shadow-[#D65E9A]/10">
+            <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-[#D65E9A]" />
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
+          <div className="min-w-0">
+            <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight flex items-center gap-2">
               Insights Inteligentes
               {saving && <Save className="w-3.5 h-3.5 text-[#D65E9A] animate-pulse" />}
             </h3>
-            <p className="text-xs text-white/50 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-white/50 mt-0.5 leading-snug">
               Análises automáticas baseadas nos seus dados
               {latestAnalysis && ' · sincronizadas'}
             </p>
           </div>
         </div>
-        <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] font-medium text-white/60">
+        <span className="self-start sm:self-auto inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[10px] sm:text-[11px] font-medium text-white/60 whitespace-nowrap">
           <span className="w-1.5 h-1.5 rounded-full bg-[#D65E9A] animate-pulse" />
           {sortedInsights.length} insights
         </span>
       </div>
 
       {/* Insights grid */}
-      <div className="relative grid gap-3 sm:grid-cols-2">
+      <div className="relative grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
         {sortedInsights.map((insight, index) => {
           const IconComponent = insight.icon || Lightbulb;
           const style = getStyle(insight.type);
           return (
             <div
               key={index}
-              className={`group relative overflow-hidden rounded-2xl border ${style.ring} bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-sm p-4 transition-all duration-300 hover:-translate-y-0.5`}
+              className={`group relative overflow-hidden rounded-xl sm:rounded-2xl border ${style.ring} bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-sm p-3 sm:p-4 transition-all duration-300 hover:-translate-y-0.5`}
             >
               {/* Accent bar */}
-              <span className={`absolute left-0 top-4 bottom-4 w-[3px] rounded-r ${style.accent} opacity-70`} />
+              <span className={`absolute left-0 top-3 bottom-3 sm:top-4 sm:bottom-4 w-[3px] rounded-r ${style.accent} opacity-70`} />
 
-              <div className="flex items-start gap-3 pl-2">
-                <div className={`flex-shrink-0 w-9 h-9 rounded-xl border ${style.iconBg} flex items-center justify-center`}>
-                  <IconComponent className={`w-4 h-4 ${style.iconColor}`} />
+              <div className="flex items-start gap-2.5 sm:gap-3 pl-2">
+                <div className={`flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border ${style.iconBg} flex items-center justify-center`}>
+                  <IconComponent className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${style.iconColor}`} />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold text-white text-sm leading-snug">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1">
+                    <h4 className="font-semibold text-white text-[13px] sm:text-sm leading-snug">
                       {insight.title}
                     </h4>
-                    <span className={`hidden md:inline-block text-[10px] uppercase tracking-wider font-medium px-1.5 py-0.5 rounded ${style.iconBg} ${style.iconColor} border`}>
+                    <span className={`inline-block text-[9px] sm:text-[10px] uppercase tracking-wider font-medium px-1.5 py-0.5 rounded ${style.iconBg} ${style.iconColor} border`}>
                       {style.label}
                     </span>
                   </div>
-                  <p className="text-xs leading-relaxed text-white/65">
+                  <p className="text-[11px] sm:text-xs leading-relaxed text-white/65 break-words">
                     {insight.message}
                   </p>
                 </div>
