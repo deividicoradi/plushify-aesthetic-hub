@@ -7,11 +7,16 @@ export interface RuntimeEnv {
   MODE: string;
 }
 
-// Fixed configuration for this project (safe to expose anon key)
+// Resolve from VITE_* at build time, with a safe fallback to the current
+// Lovable Cloud project so the app keeps booting even if env injection fails.
+const FALLBACK_URL = 'https://iqpldxwwvnlloefqfhoo.supabase.co';
+const FALLBACK_ANON =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxcGxkeHd3dm5sbG9lZnFmaG9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzE0NjcsImV4cCI6MjA5NjUwNzQ2N30.CC7iWCl_8tp0K_2lZxRvDTLjhYvn85Tn2WYLzOFS3qs';
+
+const viteEnv = (typeof import.meta !== 'undefined' ? (import.meta as any)?.env : undefined) ?? {};
 const SUPABASE_CONFIG = {
-  url: 'https://wmoylybbwikkqbxiqwbq.supabase.co',
-  anonKey:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtb3lseWJid2lra3FieGlxd2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzNzc3NTcsImV4cCI6MjA2MDk1Mzc1N30.Z0n_XICRbLX1kRT6KOWvFtV6a12r0pH3kW8HYtO6Ztw',
+  url: viteEnv.VITE_SUPABASE_URL || FALLBACK_URL,
+  anonKey: viteEnv.VITE_SUPABASE_PUBLISHABLE_KEY || viteEnv.VITE_SUPABASE_ANON_KEY || FALLBACK_ANON,
 };
 
 const merged: RuntimeEnv = {
