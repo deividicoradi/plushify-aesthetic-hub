@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Plus, Wrench } from 'lucide-react';
+import { Plus, Wrench, Package, CheckCircle, XCircle, DollarSign } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
@@ -137,40 +136,44 @@ const Services = () => {
       />
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Serviços</CardTitle>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">Total de Serviços</CardTitle>
+            <Package className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+          <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Serviços Ativos</CardTitle>
+        <Card className="border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">Serviços Ativos</CardTitle>
+            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+          <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.active}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Serviços Inativos</CardTitle>
+        <Card className="border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">Serviços Inativos</CardTitle>
+            <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-500">{stats.inactive}</div>
+          <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold text-gray-500">{stats.inactive}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Preço Médio</CardTitle>
+        <Card className="border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">Preço Médio</CardTitle>
+            <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold truncate">
               {new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
@@ -181,14 +184,14 @@ const Services = () => {
       </div>
 
       {/* Services List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Serviços</CardTitle>
+      <Card className="border-border/60">
+        <CardHeader className="p-3 sm:p-4 lg:p-6 pb-0 sm:pb-0">
+          <CardTitle className="text-base sm:text-lg">Lista de Serviços</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 lg:p-6 pt-3 sm:pt-4">
           {isLoading ? (
             <div className="text-center py-8">
-              <p>Carregando serviços...</p>
+              <p className="text-sm text-muted-foreground">Carregando serviços...</p>
             </div>
           ) : (
             <ServicesList

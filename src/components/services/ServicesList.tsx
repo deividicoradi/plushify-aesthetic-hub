@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { MoreHorizontal, Edit, Trash2, Clock, DollarSign } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Clock, DollarSign, Package } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
@@ -94,16 +93,82 @@ export const ServicesList = ({ services, onEdit, onDelete, onToggleStatus }: Ser
 
   if (services.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <p>Nenhum serviço cadastrado ainda.</p>
-        <p className="text-sm">Clique em "Novo Serviço" para começar.</p>
+      <div className="text-center py-12 text-muted-foreground">
+        <Package className="w-10 h-10 mx-auto mb-3 opacity-40" />
+        <p className="text-sm">Nenhum serviço cadastrado ainda.</p>
+        <p className="text-xs mt-1">Clique em "Novo Serviço" para começar.</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="rounded-md border">
+      {/* Mobile/Tablet Card View */}
+      <div className="md:hidden space-y-3">
+        {services.map((service) => (
+          <div
+            key={service.id}
+            className="rounded-lg border border-border bg-card p-3 sm:p-4 shadow-sm"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-medium text-sm truncate">{service.name}</h3>
+                  <Badge variant={service.active ? "default" : "secondary"} className="text-[10px]">
+                    {service.active ? 'Ativo' : 'Inativo'}
+                  </Badge>
+                </div>
+                {service.description && (
+                  <p className="text-xs text-muted-foreground truncate mt-1">
+                    {service.description}
+                  </p>
+                )}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0 shrink-0">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onEdit(service)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setDeleteId(service.id)}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Deletar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+              {service.category && (
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                    {service.category}
+                  </Badge>
+                </div>
+              )}
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Clock className="w-3.5 h-3.5" />
+                <span>{formatDuration(service.duration)}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <DollarSign className="w-3.5 h-3.5" />
+                <span className="font-medium text-foreground">{formatCurrency(service.price)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -119,10 +184,10 @@ export const ServicesList = ({ services, onEdit, onDelete, onToggleStatus }: Ser
             {services.map((service) => (
               <TableRow key={service.id}>
                 <TableCell>
-                  <div>
-                    <p className="font-medium">{service.name}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{service.name}</p>
                     {service.description && (
-                      <p className="text-sm text-gray-500 truncate max-w-[200px]">
+                      <p className="text-sm text-muted-foreground truncate max-w-[200px]">
                         {service.description}
                       </p>
                     )}
@@ -137,13 +202,13 @@ export const ServicesList = ({ services, onEdit, onDelete, onToggleStatus }: Ser
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4 text-gray-400" />
+                    <Clock className="w-4 h-4 text-muted-foreground" />
                     {formatDuration(service.duration)}
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
-                    <DollarSign className="w-4 h-4 text-gray-400" />
+                    <DollarSign className="w-4 h-4 text-muted-foreground" />
                     {formatCurrency(service.price)}
                   </div>
                 </TableCell>

@@ -174,7 +174,7 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="duration">Duração (min)</Label>
               <Input
@@ -231,11 +231,11 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
             <Label htmlFor="active">Serviço ativo</Label>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
               {loading ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
