@@ -161,6 +161,9 @@ const Navbar = () => {
             <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={isOpen}
+              aria-controls="mobile-navigation"
               className="text-muted-foreground hover:text-foreground focus:outline-none focus:text-foreground"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -170,7 +173,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden">
+          <div id="mobile-navigation" className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t border-border/40">
               <button
                 onClick={handleInicioClick}
