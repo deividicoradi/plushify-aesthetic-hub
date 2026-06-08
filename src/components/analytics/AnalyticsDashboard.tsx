@@ -34,7 +34,7 @@ export const AnalyticsDashboard: React.FC = () => {
 
   if (dashboardStats.loading || reportsData.loading || chartLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         
         <AnalyticsKPICards
           totalClients={0}
@@ -43,16 +43,16 @@ export const AnalyticsDashboard: React.FC = () => {
           newThisMonth={0}
         />
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-80 bg-muted rounded animate-pulse" />
-          <div className="h-80 bg-muted rounded animate-pulse" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+          <div className="h-64 sm:h-80 bg-muted rounded animate-pulse" />
+          <div className="h-64 sm:h-80 bg-muted rounded animate-pulse" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Métricas Principais */}
       <AnalyticsKPICards
         totalClients={dashboardStats.totalClients}
@@ -75,19 +75,19 @@ export const AnalyticsDashboard: React.FC = () => {
       />
 
       {/* Análises Financeiras */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         <PaymentMethodChart data={paymentMethodData} />
         <RevenueVsExpensesChart data={revenueVsExpensesData} />
       </div>
 
       {/* Análises de Agendamentos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         <AppointmentStatusChart data={appointmentStatusData} />
         <WeeklyPatternChart data={weeklyPatternData} />
       </div>
 
       {/* Análises de Clientes e Serviços */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         <ClientGrowthChart data={clientGrowthData} />
         <ServicePerformanceChart data={servicePerformanceData} />
       </div>

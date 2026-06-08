@@ -8,15 +8,15 @@ interface AnalyticsInsightsProps {
 const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({ newThisMonth }) => {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Insights Principais</CardTitle>
-        <CardDescription>
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-base sm:text-lg">Insights Principais</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">
           Análises automáticas baseadas nos seus dados
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="p-4 border rounded-lg">
+      <CardContent className="p-4 sm:p-6 pt-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+          <div className="p-3 sm:p-4 border rounded-lg">
             <h4 className="font-semibold text-green-600 dark:text-green-400 mb-2">
               📈 Crescimento Positivo
             </h4>
@@ -26,7 +26,7 @@ const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({ newThisMonth }) =
             </p>
           </div>
           
-          <div className="p-4 border rounded-lg">
+          <div className="p-3 sm:p-4 border rounded-lg">
             <h4 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">
               🕐 Horário de Pico
             </h4>
@@ -36,7 +36,7 @@ const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({ newThisMonth }) =
             </p>
           </div>
           
-          <div className="p-4 border rounded-lg">
+          <div className="p-3 sm:p-4 border rounded-lg">
             <h4 className="font-semibold text-purple-600 dark:text-purple-400 mb-2">
               💎 Clientes VIP
             </h4>

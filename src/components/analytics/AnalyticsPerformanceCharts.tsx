@@ -29,19 +29,19 @@ const AnalyticsPerformanceCharts: React.FC<AnalyticsPerformanceChartsProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
       {/* Comparação Trimestral */}
       <Card>
-        <CardHeader>
-          <CardTitle>Comparação Trimestre a Trimestre</CardTitle>
-          <CardDescription>Últimos 4 trimestres</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Comparação Trimestre a Trimestre</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Últimos 4 trimestres</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={quarterlyData}>
+        <CardContent className="p-2 sm:p-6 pt-0 sm:pt-0">
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={quarterlyData} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="quarter" />
-              <YAxis tickFormatter={(value) => formatCurrency(value)} />
+              <XAxis dataKey="quarter" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} width={70} tickFormatter={(value) => formatCurrency(value)} />
               <Tooltip formatter={(value) => formatCurrency(Number(value))} />
               <Bar dataKey="revenue" fill="#8884d8" />
             </BarChart>
@@ -51,16 +51,16 @@ const AnalyticsPerformanceCharts: React.FC<AnalyticsPerformanceChartsProps> = ({
 
       {/* Receita Últimos 13 Meses */}
       <Card>
-        <CardHeader>
-          <CardTitle>Receita Últimos 12 Meses</CardTitle>
-          <CardDescription>Tendência mensal de receita</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Receita Últimos 12 Meses</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Tendência mensal de receita</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyRevenueData}>
+        <CardContent className="p-2 sm:p-6 pt-0 sm:pt-0">
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={monthlyRevenueData} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis tickFormatter={(value) => formatCurrency(value)} />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} width={70} tickFormatter={(value) => formatCurrency(value)} />
               <Tooltip formatter={(value) => formatCurrency(Number(value))} />
               <Line 
                 type="monotone" 
