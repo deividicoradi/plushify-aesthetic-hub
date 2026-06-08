@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReportsMetrics } from '@/hooks/useReportsData';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 import { TrendingUp, AlertTriangle, Target, Lightbulb, Zap, Award, Brain, Save } from 'lucide-react';
@@ -16,27 +15,27 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
 
   if (loading || !metrics) {
     return (
-      <Card className="bg-card border-border shadow-sm">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Brain className="w-4 h-4 text-primary-foreground" />
+      <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-[#1a1322] p-6 font-[Sora]">
+        <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-[#D65E9A]/10 blur-3xl pointer-events-none" />
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#D65E9A]/30 to-[#7B3FA0]/30 border border-[#D65E9A]/30 flex items-center justify-center">
+            <Brain className="w-5 h-5 text-[#D65E9A]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-white">Insights Inteligentes</h3>
+            <p className="text-xs text-white/50">Carregando análises...</p>
+          </div>
+        </div>
+        <div className="animate-pulse grid gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+              <div className="w-32 h-4 bg-white/10 rounded mb-3" />
+              <div className="w-full h-3 bg-white/10 rounded mb-2" />
+              <div className="w-3/4 h-3 bg-white/10 rounded" />
             </div>
-            <CardTitle className="text-xl">Insights Inteligentes</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="p-4 bg-muted rounded-lg">
-                <div className="w-32 h-5 bg-muted-foreground/20 rounded mb-3"></div>
-                <div className="w-full h-4 bg-muted-foreground/20 rounded mb-2"></div>
-                <div className="w-3/4 h-4 bg-muted-foreground/20 rounded"></div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -124,42 +123,45 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
     priority: 'low'
   });
 
-  const getCardClass = (type: string) => {
-    const baseClass = "p-4 rounded-lg border transition-all duration-200 hover:shadow-md";
-    
-    switch (type) {
-      case 'success': 
-        return `${baseClass} bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800`;
-      case 'warning': 
-        return `${baseClass} bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800`;
-      case 'opportunity': 
-        return `${baseClass} bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800`;
-      case 'tip': 
-        return `${baseClass} bg-purple-50 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800`;
-      default: 
-        return `${baseClass} bg-muted border-border`;
-    }
+  const typeStyles: Record<string, { ring: string; iconBg: string; iconColor: string; accent: string; label: string }> = {
+    success: {
+      ring: 'border-emerald-400/20 hover:border-emerald-400/40',
+      iconBg: 'bg-emerald-500/15 border-emerald-400/30',
+      iconColor: 'text-emerald-300',
+      accent: 'bg-emerald-400',
+      label: 'Positivo',
+    },
+    warning: {
+      ring: 'border-amber-400/20 hover:border-amber-400/40',
+      iconBg: 'bg-amber-500/15 border-amber-400/30',
+      iconColor: 'text-amber-300',
+      accent: 'bg-amber-400',
+      label: 'Atenção',
+    },
+    opportunity: {
+      ring: 'border-sky-400/20 hover:border-sky-400/40',
+      iconBg: 'bg-sky-500/15 border-sky-400/30',
+      iconColor: 'text-sky-300',
+      accent: 'bg-sky-400',
+      label: 'Oportunidade',
+    },
+    tip: {
+      ring: 'border-[#D65E9A]/25 hover:border-[#D65E9A]/50',
+      iconBg: 'bg-[#D65E9A]/15 border-[#D65E9A]/30',
+      iconColor: 'text-[#D65E9A]',
+      accent: 'bg-[#D65E9A]',
+      label: 'Dica',
+    },
+    info: {
+      ring: 'border-violet-400/20 hover:border-violet-400/40',
+      iconBg: 'bg-violet-500/15 border-violet-400/30',
+      iconColor: 'text-violet-300',
+      accent: 'bg-violet-400',
+      label: 'Insight',
+    },
   };
 
-  const getTextColor = (type: string) => {
-    switch (type) {
-      case 'success': return 'text-green-800 dark:text-green-200';
-      case 'warning': return 'text-amber-800 dark:text-amber-200';
-      case 'opportunity': return 'text-blue-800 dark:text-blue-200';
-      case 'tip': return 'text-purple-800 dark:text-purple-200';
-      default: return 'text-foreground';
-    }
-  };
-
-  const getIconColor = (type: string) => {
-    switch (type) {
-      case 'success': return 'bg-green-600';
-      case 'warning': return 'bg-amber-600';
-      case 'opportunity': return 'bg-blue-600';
-      case 'tip': return 'bg-purple-600';
-      default: return 'bg-muted-foreground';
-    }
-  };
+  const getStyle = (type: string) => typeStyles[type] ?? typeStyles.info;
 
   // Sort by priority
   const priorityOrder = { high: 3, medium: 2, low: 1 };
@@ -170,38 +172,62 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
     .sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
 
   return (
-    <Card className="bg-card border-border shadow-sm">
-      <CardHeader className="pb-4">
+    <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-[#1a1322] p-6 font-[Sora]">
+      {/* Decorative glows */}
+      <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-[#D65E9A]/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-[#7B3FA0]/10 blur-3xl pointer-events-none" />
+
+      {/* Header */}
+      <div className="relative flex items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <Brain className="w-4 h-4 text-primary-foreground" />
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#D65E9A]/30 to-[#7B3FA0]/30 border border-[#D65E9A]/30 flex items-center justify-center shadow-lg shadow-[#D65E9A]/10">
+            <Brain className="w-5 h-5 text-[#D65E9A]" />
           </div>
-          <div className="flex-1">
-            <CardTitle className="text-xl flex items-center gap-2">
+          <div>
+            <h3 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
               Insights Inteligentes
-              {saving && <Save className="w-4 h-4 text-blue-500 animate-pulse" />}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Análises automáticas baseadas nos seus dados {latestAnalysis && '(salvas automaticamente)'}
+              {saving && <Save className="w-3.5 h-3.5 text-[#D65E9A] animate-pulse" />}
+            </h3>
+            <p className="text-xs text-white/50 mt-0.5">
+              Análises automáticas baseadas nos seus dados
+              {latestAnalysis && ' · sincronizadas'}
             </p>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] font-medium text-white/60">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#D65E9A] animate-pulse" />
+          {sortedInsights.length} insights
+        </span>
+      </div>
+
+      {/* Insights grid */}
+      <div className="relative grid gap-3 sm:grid-cols-2">
         {sortedInsights.map((insight, index) => {
-          const IconComponent = insight.icon || Lightbulb; // Fallback component
+          const IconComponent = insight.icon || Lightbulb;
+          const style = getStyle(insight.type);
           return (
-            <div key={index} className={getCardClass(insight.type)}>
-              <div className="flex items-start gap-4">
-                <div className={`flex-shrink-0 w-8 h-8 ${getIconColor(insight.type)} rounded-lg flex items-center justify-center`}>
-                  <IconComponent className="w-4 h-4 text-white" />
+            <div
+              key={index}
+              className={`group relative overflow-hidden rounded-2xl border ${style.ring} bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-sm p-4 transition-all duration-300 hover:-translate-y-0.5`}
+            >
+              {/* Accent bar */}
+              <span className={`absolute left-0 top-4 bottom-4 w-[3px] rounded-r ${style.accent} opacity-70`} />
+
+              <div className="flex items-start gap-3 pl-2">
+                <div className={`flex-shrink-0 w-9 h-9 rounded-xl border ${style.iconBg} flex items-center justify-center`}>
+                  <IconComponent className={`w-4 h-4 ${style.iconColor}`} />
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
-                  <h4 className={`font-semibold ${getTextColor(insight.type)} mb-1`}>
-                    {insight.title}
-                  </h4>
-                  <p className={`text-sm ${getTextColor(insight.type)} opacity-90`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-semibold text-white text-sm leading-snug">
+                      {insight.title}
+                    </h4>
+                    <span className={`hidden md:inline-block text-[10px] uppercase tracking-wider font-medium px-1.5 py-0.5 rounded ${style.iconBg} ${style.iconColor} border`}>
+                      {style.label}
+                    </span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-white/65">
                     {insight.message}
                   </p>
                 </div>
@@ -209,7 +235,7 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
             </div>
           );
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
