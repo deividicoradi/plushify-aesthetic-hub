@@ -121,7 +121,7 @@ function showRecoveryOverlay(): void {
   document.body?.appendChild(overlay);
 }
 
-async function recoverFromStaleBundle(reason: string): Promise<void> {
+export async function recoverFromStaleBundle(reason: string): Promise<void> {
   if (recovering) return;
   recovering = true;
 
@@ -153,7 +153,7 @@ async function recoverFromStaleBundle(reason: string): Promise<void> {
   }, 650);
 }
 
-function isRecoverableBootError(message: string): boolean {
+export function isRecoverableBootError(message: string): boolean {
   if (!message) return false;
   return (
     /Failed to fetch dynamically imported module/i.test(message) ||
