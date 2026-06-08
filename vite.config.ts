@@ -119,6 +119,7 @@ export default defineConfig(({ mode }) => ({
   // Configurar variáveis de ambiente para diferentes modos
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || 'dev'),
+    __BUILD_ID__: JSON.stringify(`${Date.now()}`),
     'process.env.NODE_ENV': JSON.stringify(mode),
   },
   
