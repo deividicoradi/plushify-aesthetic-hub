@@ -68,27 +68,27 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
 
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12">
-              <AvatarFallback className="bg-primary text-primary-foreground">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs sm:text-sm">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h3 className="font-semibold text-lg">{member.name}</h3>
-              <p className="text-sm text-muted-foreground">
+            <div className="min-w-0">
+              <h3 className="font-semibold text-sm sm:text-lg truncate">{member.name}</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {getRoleLabel(member.role)}
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {getStatusBadge(member.status)}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -109,29 +109,29 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {member.email && (
-            <div className="flex items-center gap-2 text-sm">
-              <Mail className="w-4 h-4 text-muted-foreground" />
-              <span>{member.email}</span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
+              <span className="truncate">{member.email}</span>
             </div>
           )}
           
           {member.phone && (
-            <div className="flex items-center gap-2 text-sm">
-              <Phone className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
               <span>{member.phone}</span>
             </div>
           )}
           
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="w-4 h-4 text-muted-foreground" />
+          <div className="flex items-center gap-2 text-xs sm:text-sm">
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
             <span>Contratado em: {formatDate(member.hire_date)}</span>
           </div>
           
           {member.salary && (
-            <div className="flex items-center gap-2 text-sm">
-              <DollarSign className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
               <span>{formatSalary(member.salary)}</span>
             </div>
           )}

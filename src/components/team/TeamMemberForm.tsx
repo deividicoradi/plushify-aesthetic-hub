@@ -95,15 +95,15 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">
             {member ? 'Editar Membro' : 'Adicionar Novo Membro'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <FormField
               label="Nome"
               name="name"
@@ -135,9 +135,9 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
             />
 
             <div className="space-y-2">
-              <Label>Cargo *</Label>
+              <Label className="text-xs sm:text-sm">Cargo *</Label>
               <Select value={selectedRole} onValueChange={(value) => setValue('role', value)}>
-                <SelectTrigger>
+                <SelectTrigger className="h-9 sm:h-10">
                   <SelectValue placeholder="Selecione o cargo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -149,14 +149,14 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
                 </SelectContent>
               </Select>
               {errors.role && (
-                <p className="text-sm text-destructive">{errors.role.message}</p>
+                <p className="text-xs sm:text-sm text-destructive">{errors.role.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label className="text-xs sm:text-sm">Status</Label>
               <Select value={selectedStatus} onValueChange={(value) => setValue('status', value as 'active' | 'inactive')}>
-                <SelectTrigger>
+                <SelectTrigger className="h-9 sm:h-10">
                   <SelectValue placeholder="Selecione o status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -170,19 +170,19 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label>Data de Contratação</Label>
+              <Label className="text-xs sm:text-sm">Data de Contratação</Label>
               <input
                 id="team-member-hire-date"
                 name="hire_date"
                 type="date"
                 value={watch('hire_date') || ''}
                 onChange={(e) => setValue('hire_date', e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Salário</Label>
+              <Label className="text-xs sm:text-sm">Salário</Label>
               <input
                 id="team-member-salary"
                 name="salary"
@@ -192,21 +192,26 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
                 value={watch('salary')?.toString() || ''}
                 onChange={(e) => setValue('salary', parseFloat(e.target.value) || 0)}
                 placeholder="0.00"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2 sm:pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full sm:w-auto order-1 sm:order-2"
+            >
               {loading ? 'Salvando...' : member ? 'Atualizar' : 'Adicionar'}
             </Button>
           </div>
