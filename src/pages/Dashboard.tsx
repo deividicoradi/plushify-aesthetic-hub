@@ -3,7 +3,7 @@ import React from 'react';
 import { BarChart3 } from 'lucide-react';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { DashboardContent } from '@/components/dashboard/DashboardContent';
-import { PlanLimitsDisplay } from '@/components/dashboard/PlanLimitsDisplay';
+import { TodayOverview } from '@/components/dashboard/TodayOverview';
 
 const Dashboard = () => {
   return (
@@ -12,7 +12,7 @@ const Dashboard = () => {
       subtitle="Visão geral do seu negócio"
       icon={BarChart3}
     >
-      <PlanLimitsDisplay />
+      <TodayOverview />
       <DashboardContent />
     </ResponsiveLayout>
   );
