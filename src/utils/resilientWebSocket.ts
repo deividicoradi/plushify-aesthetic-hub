@@ -347,7 +347,7 @@ export function createOrJoinResilientConnection(
       state.connection?.removeEventListener(type, listener);
     },
     
-    send(data: string | ArrayBuffer | Blob | ArrayBufferView<ArrayBuffer>) {
+    send(data: string | ArrayBuffer | Blob | ArrayBufferView) {
       if (state.connection instanceof WebSocket && state.readyState === ConnectionReadyState.OPEN) {
         state.connection.send(data);
       } else {
