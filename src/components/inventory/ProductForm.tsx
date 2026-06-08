@@ -66,9 +66,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   };
 
   return (
-    <div className="bg-card text-card-foreground p-6 rounded-lg border">
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="bg-card text-card-foreground p-4 sm:p-6 rounded-lg border">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-2">
             <Label htmlFor="name">Nome do Produto *</Label>
             <Input
@@ -245,18 +245,19 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           />
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2 sm:pt-4">
+          <Button
+            type="button"
+            variant="outline"
             onClick={onCancel}
+            className="w-full sm:w-auto"
           >
             Cancelar
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isLoading}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {isLoading ? "Salvando..." : initialData ? "Atualizar" : "Criar Produto"}
           </Button>
