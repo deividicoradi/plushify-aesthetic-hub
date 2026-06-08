@@ -149,8 +149,8 @@ Nos vemos em breve!`;
   return (
     <>
       <Card className={`hover:shadow-md transition-shadow duration-200 ${isSelected ? 'ring-2 ring-primary' : ''}`}>
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex items-start gap-3 sm:gap-4">
             {/* Checkbox para seleção */}
             {onSelect && (
               <div className="pt-1">
@@ -161,15 +161,15 @@ Nos vemos em breve!`;
               </div>
             )}
 
-            <div className="flex-1 space-y-3">
+            <div className="flex-1 min-w-0 space-y-3">
               {/* Header with client info */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-plush-100 rounded-full flex items-center justify-center">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 shrink-0 bg-plush-100 rounded-full flex items-center justify-center">
                     <User className="w-5 h-5 text-plush-600" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {appointment.client_name}
                     </h3>
                     <p className="text-sm text-gray-500">
@@ -177,23 +177,23 @@ Nos vemos em breve!`;
                     </p>
                   </div>
                 </div>
-                
-                {/* Status and WhatsApp buttons stacked vertically */}
-                <div className="flex flex-col gap-2 items-end">
+
+                {/* Status and WhatsApp buttons */}
+                <div className="flex flex-row sm:flex-col gap-2 sm:items-end w-full sm:w-auto">
                   <div className={`
-                    px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200
-                    shadow-sm hover:shadow-md min-w-[140px] text-center
+                    px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium border transition-all duration-200
+                    shadow-sm hover:shadow-md flex-1 sm:flex-none sm:min-w-[140px] text-center
                     ${statusColors[appointment.status]}
                   `}>
                     {statusLabels[appointment.status]}
                   </div>
-                  <button 
+                  <button
                     onClick={sendWhatsAppMessage}
                     className="
-                      px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200
+                      px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium border transition-all duration-200
                       bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:shadow-md
                       dark:bg-green-950 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900
-                      shadow-sm min-w-[140px] flex items-center justify-center gap-2
+                      shadow-sm flex-1 sm:flex-none sm:min-w-[140px] flex items-center justify-center gap-2
                       focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
                       active:scale-95
                     "
@@ -205,20 +205,20 @@ Nos vemos em breve!`;
               </div>
 
               {/* Service, time and professional info */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-medium">{appointment.service_name}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Package className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span className="text-sm font-medium truncate">{appointment.service_name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-400" />
+                  <Clock className="w-4 h-4 text-gray-400 shrink-0" />
                   <span className="text-sm">{formatTime(appointment.appointment_time)} ({appointment.duration}min)</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm">Profissional Responsável</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <UserCheck className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span className="text-sm truncate">Profissional Responsável</span>
                 </div>
-                <div className="font-semibold text-plush-600">
+                <div className="font-semibold text-plush-600 sm:text-right lg:text-left">
                   {formatPrice(appointment.price)}
                 </div>
               </div>

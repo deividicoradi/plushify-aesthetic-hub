@@ -285,7 +285,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
     <div className="space-y-4">
       {/* Quick Filters Bar - Simplified */}
       {(selectedDate || statusFilter) && (
-        <div className="flex flex-wrap items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
           {selectedDate && (
             <div className="flex items-center gap-2 px-3 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm">
               <CalendarDays className="w-3 h-3 text-blue-500" />
@@ -325,7 +325,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
       )}
       
       {/* Compact Filter Controls - Mobile Optimized */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
         <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -434,26 +434,32 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 h-auto sm:h-10 p-1">
-          <TabsTrigger value="hoje" className="text-xs sm:text-sm px-2 sm:px-3 py-2.5 sm:py-2 touch-target">
+        <TabsList className="grid w-full grid-cols-4 h-11 sm:h-10 p-1">
+          <TabsTrigger value="hoje" className="text-xs sm:text-sm px-1 sm:px-3 py-2 leading-tight touch-target">
             <span className="hidden sm:inline">Hoje ({todayAppointments.length})</span>
-            <span className="sm:hidden">Hoje<br/>({todayAppointments.length})</span>
+            <span className="sm:hidden flex items-center gap-1">
+              Hoje<span className="text-[10px] opacity-70">({todayAppointments.length})</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="amanha" className="text-xs sm:text-sm px-2 sm:px-3 py-2.5 sm:py-2 touch-target">
+          <TabsTrigger value="amanha" className="text-xs sm:text-sm px-1 sm:px-3 py-2 leading-tight touch-target">
             <span className="hidden sm:inline">Amanhã ({tomorrowAppointments.length})</span>
-            <span className="sm:hidden">Amanhã<br/>({tomorrowAppointments.length})</span>
+            <span className="sm:hidden flex items-center gap-1">
+              Amanhã<span className="text-[10px] opacity-70">({tomorrowAppointments.length})</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="todos" className="text-xs sm:text-sm px-2 sm:px-3 py-2.5 sm:py-2 touch-target">
+          <TabsTrigger value="todos" className="text-xs sm:text-sm px-1 sm:px-3 py-2 leading-tight touch-target">
             <span className="hidden sm:inline">Todos ({filteredAppointments.length})</span>
-            <span className="sm:hidden">Todos<br/>({filteredAppointments.length})</span>
+            <span className="sm:hidden flex items-center gap-1">
+              Todos<span className="text-[10px] opacity-70">({filteredAppointments.length})</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="data" className="text-xs sm:text-sm px-2 sm:px-3 py-2.5 sm:py-2 touch-target">
+          <TabsTrigger value="data" className="text-xs sm:text-sm px-1 sm:px-3 py-2 leading-tight touch-target">
             <span className="hidden sm:inline">Por Data</span>
             <span className="sm:hidden">Data</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="hoje" className="space-y-4 mt-6">
+        <TabsContent value="hoje" className="space-y-4 mt-4 sm:mt-6">
           {todayAppointments.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500">Nenhum agendamento para hoje</p>
@@ -463,7 +469,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
           )}
         </TabsContent>
 
-        <TabsContent value="amanha" className="space-y-4 mt-6">
+        <TabsContent value="amanha" className="space-y-4 mt-4 sm:mt-6">
           {tomorrowAppointments.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500">Nenhum agendamento para amanhã</p>
@@ -473,7 +479,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
           )}
         </TabsContent>
 
-        <TabsContent value="todos" className="space-y-4 mt-6">
+        <TabsContent value="todos" className="space-y-4 mt-4 sm:mt-6">
           {filteredAppointments.length === 0 ? (
             <div className="text-center py-12">
               <CalendarDays className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -502,7 +508,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
           )}
         </TabsContent>
 
-        <TabsContent value="data" className="space-y-4 mt-6">
+        <TabsContent value="data" className="space-y-4 mt-4 sm:mt-6">
           {selectedDate ? (
             (() => {
               // Filtra por data E status (se selecionado)

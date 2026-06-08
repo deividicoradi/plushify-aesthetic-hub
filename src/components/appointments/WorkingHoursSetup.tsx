@@ -137,9 +137,9 @@ export const WorkingHoursSetup = () => {
             Configurações Gerais
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200 dark:border-blue-800/50">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200 dark:border-blue-800/50">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <Label className="text-sm font-medium">Confirmar agendamentos automaticamente</Label>
                 <p className="text-xs text-muted-foreground mt-1">
                   Aprovar agendamentos dentro do horário de trabalho
@@ -158,8 +158,8 @@ export const WorkingHoursSetup = () => {
               />
             </div>
             
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <Label className="text-sm font-medium">Concluir agendamentos automaticamente</Label>
                 <p className="text-xs text-muted-foreground mt-1">
                   Finalizar agendamentos confirmados às 23:00
@@ -202,44 +202,58 @@ export const WorkingHoursSetup = () => {
               const hourIndex = editedHours.findIndex(h => h.day_of_week === day.value);
               
               return (
-                <div key={day.value} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                  <div className="w-32">
-                    <Label className="text-sm font-medium">{day.label}</Label>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={!!hour.is_active}
-                      onCheckedChange={(checked) => handleToggleActive(day.value, checked)}
-                    />
-                    <span className="text-sm text-muted-foreground">Ativo</span>
+                <div
+                  key={day.value}
+                  className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                >
+                  {/* Linha 1 (mobile): label + switch + status */}
+                  <div className="flex items-center justify-between md:justify-start gap-3 md:gap-4 md:w-auto">
+                    <div className="md:w-32">
+                      <Label className="text-sm font-medium">{day.label}</Label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={!!hour.is_active}
+                        onCheckedChange={(checked) => handleToggleActive(day.value, checked)}
+                      />
+                      <span className="text-sm text-muted-foreground">Ativo</span>
+                    </div>
+
+                    <div className="md:hidden">
+                      {hour.is_active ? (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
                   </div>
 
                   {hour.is_active && (
-                    <>
+                    <div className="flex flex-wrap items-center gap-3 md:gap-4">
                       <div className="flex items-center gap-2">
-                        <Label className="text-sm">De:</Label>
+                        <Label className="text-sm whitespace-nowrap">De:</Label>
                         <Input
                           type="time"
                           value={hour.start_time}
                           onChange={(e) => updateHour(hourIndex, 'start_time', e.target.value)}
-                          className="w-32"
+                          className="w-28 sm:w-32 h-10"
                         />
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Label className="text-sm">Até:</Label>
+                        <Label className="text-sm whitespace-nowrap">Até:</Label>
                         <Input
                           type="time"
                           value={hour.end_time}
                           onChange={(e) => updateHour(hourIndex, 'end_time', e.target.value)}
-                          className="w-32"
+                          className="w-28 sm:w-32 h-10"
                         />
                       </div>
-                    </>
+                    </div>
                   )}
 
-                  <div className="ml-auto">
+                  <div className="hidden md:block ml-auto">
                     {hour.is_active ? (
                       <CheckCircle className="w-4 h-4 text-green-500" />
                     ) : (
@@ -254,10 +268,11 @@ export const WorkingHoursSetup = () => {
 
         {/* Botão de Salvar Global */}
         {hasChanges && (
-          <div className="flex justify-end pt-4 border-t">
-            <Button onClick={handleSaveAll} className="gap-2">
+          <div className="flex justify-stretch sm:justify-end pt-4 border-t">
+            <Button onClick={handleSaveAll} className="gap-2 w-full sm:w-auto">
               <Save className="w-4 h-4" />
-              Salvar Todas as Configurações
+              <span className="hidden sm:inline">Salvar Todas as Configurações</span>
+              <span className="sm:hidden">Salvar Configurações</span>
             </Button>
           </div>
         )}
