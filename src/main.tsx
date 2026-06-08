@@ -11,6 +11,12 @@ import { cleanupConsoleLogsInProduction } from './utils/console-cleanup'
 import { validateEnvironment, checkProductionReadiness } from './utils/environmentNormalizer'
 import { initPerformanceMonitor } from './utils/performanceOptimizer'
 import { logger } from './utils/debugLogger'
+import { initStaleBundleGuard, checkManualResetFlag } from './utils/staleBundleGuard'
+
+// Stale bundle guard — DEVE rodar antes de qualquer import dinâmico do app.
+// Detecta bundles obsoletos (deploy novo) e recupera sem tela branca.
+checkManualResetFlag();
+initStaleBundleGuard();
 
 // Suprimir erros de WebSocket do ambiente de desenvolvimento Lovable
 if (import.meta.env.MODE === 'development') {
