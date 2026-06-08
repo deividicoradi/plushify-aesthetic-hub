@@ -90,9 +90,9 @@ const Inventory = () => {
       {/* Limit Alert */}
       <LimitAlert type="products" currentCount={products.length} action="adicionar" />
       
-      {/* Search */}
-      <div className="flex flex-col gap-3 sm:gap-4">
-        <div className="relative w-full">
+      {/* Search + Action */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 sm:items-center">
+        <div className="relative w-full sm:flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar produtos..."
@@ -101,14 +101,11 @@ const Inventory = () => {
             className="pl-10 h-11 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200"
           />
         </div>
-        
-        <div className="flex gap-2 w-full justify-end">
-          <Button onClick={handleCreateProduct} className="gap-2 touch-target">
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Novo Produto</span>
-            <span className="sm:hidden">Novo</span>
-          </Button>
-        </div>
+
+        <Button onClick={handleCreateProduct} className="gap-2 w-full sm:w-auto h-11 sm:h-10 shrink-0">
+          <Plus className="w-4 h-4" />
+          <span>Novo Produto</span>
+        </Button>
       </div>
       
       <StatsCards products={products} />
@@ -122,7 +119,7 @@ const Inventory = () => {
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[calc(100vw-2rem)] sm:w-full p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>
               {editingProduct ? 'Editar Produto' : 'Novo Produto'}
