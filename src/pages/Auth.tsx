@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { SEO } from '@/components/SEO';
 import { Logo } from '@/components/ui/Logo';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -319,6 +320,11 @@ const Auth = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <SEO
+        title="Entrar - Plushify"
+        description="Acesse sua conta Plushify para gerenciar agendamentos, clientes e finanças do seu negócio de estética."
+        path="/auth"
+      />
       <Card className="w-full max-w-md shadow-md">
         <CardHeader className="text-center space-y-6">
           <div className="flex justify-center">

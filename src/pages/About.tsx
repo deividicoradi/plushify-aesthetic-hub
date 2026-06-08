@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { SEO } from '@/components/SEO';
 import Navbar from '../components/Navbar';
 import AboutHero from '../components/about/AboutHero';
 import AboutStory from '../components/about/AboutStory';
@@ -10,7 +11,13 @@ import AboutCommitments from '../components/about/AboutCommitments';
 const About = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Sobre a Plushify - Nossa História e Missão"
+        description="Conheça a história da Plushify, nossa missão de transformar a gestão de negócios de estética e os valores que guiam nosso trabalho."
+        path="/about"
+      />
       <Navbar />
+      
       
       <AboutHero />
       <AboutStory />
