@@ -34,7 +34,7 @@ const Reports = () => {
             planFeature="hasReportsDetailed"
             showUpgradePrompt={true}
           >
-            <div className="space-y-8">
+            <div className="space-y-5 sm:space-y-6 lg:space-y-8">
               {/* Métricas principais */}
               <MetricsGrid 
                 metrics={metrics} 
