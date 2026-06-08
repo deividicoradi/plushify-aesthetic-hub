@@ -73,26 +73,31 @@ const Hero = () => {
                   <img 
                     src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" 
                     alt="Profissional da beleza" 
+                    width={32} height={32} loading="lazy" decoding="async"
                     className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
                   />
                   <img 
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=32&h=32&fit=crop&crop=face" 
                     alt="Profissional da beleza" 
+                    width={32} height={32} loading="lazy" decoding="async"
                     className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
                   />
                   <img 
                     src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=32&h=32&fit=crop&crop=face" 
                     alt="Profissional da beleza" 
+                    width={32} height={32} loading="lazy" decoding="async"
                     className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
                   />
                   <img 
                     src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=32&h=32&fit=crop&crop=face" 
                     alt="Profissional da beleza" 
+                    width={32} height={32} loading="lazy" decoding="async"
                     className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
                   />
                   <img 
                     src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=32&h=32&fit=crop&crop=face" 
                     alt="Profissional da beleza" 
+                    width={32} height={32} loading="lazy" decoding="async"
                     className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
                   />
                 </div>
