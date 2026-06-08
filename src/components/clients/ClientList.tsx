@@ -12,6 +12,13 @@ type Client = {
   name: string;
   email: string | null;
   phone: string | null;
+  cpf: string | null;
+  cep: string | null;
+  address: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  payment_method: string | null;
   status: string;
   created_at: string;
   last_visit: string | null;
@@ -42,7 +49,7 @@ const ClientList: React.FC<{
     try {
       const { data, error } = await supabase
         .from('clients')
-        .select('id, name, email, phone, status, created_at, last_visit')
+        .select('id, name, email, phone, cpf, cep, address, neighborhood, city, state, payment_method, status, created_at, last_visit')
         .eq('user_id', user.id);
 
       if (error) throw error;
