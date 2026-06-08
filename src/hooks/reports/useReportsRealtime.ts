@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -9,13 +9,17 @@ interface RealtimeHookParams {
 
 export const useReportsRealtime = ({ onDataChange }: RealtimeHookParams) => {
   const { user } = useAuth();
+  const onDataChangeRef = useRef(onDataChange);
+  onDataChangeRef.current = onDataChange;
 
   useEffect(() => {
     if (!user) return;
 
-    // Canal único para todos os eventos de reports (evita múltiplos canais)
+    // Nome único por mount para evitar reuso do canal em StrictMode/HMR,
+    // que causa "cannot add postgres_changes callbacks after subscribe()".
+    const channelName = `reports-realtime-updates-${user.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const reportsChannel = supabase
-      .channel('reports-realtime-updates')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -26,7 +30,7 @@ export const useReportsRealtime = ({ onDataChange }: RealtimeHookParams) => {
         },
         (payload) => {
           console.log('Appointments changed:', payload.eventType);
-          onDataChange();
+          onDataChangeRef.current();
         }
       )
       .on(
@@ -39,7 +43,7 @@ export const useReportsRealtime = ({ onDataChange }: RealtimeHookParams) => {
         },
         (payload) => {
           console.log('Clients changed:', payload.eventType);
-          onDataChange();
+          onDataChangeRef.current();
         }
       )
       .on(
@@ -52,7 +56,7 @@ export const useReportsRealtime = ({ onDataChange }: RealtimeHookParams) => {
         },
         (payload) => {
           console.log('Transactions changed:', payload.eventType);
-          onDataChange();
+          onDataChangeRef.current();
         }
       )
       .on(
@@ -65,7 +69,7 @@ export const useReportsRealtime = ({ onDataChange }: RealtimeHookParams) => {
         },
         (payload) => {
           console.log('Products changed:', payload.eventType);
-          onDataChange();
+          onDataChangeRef.current();
         }
       )
       .subscribe();
@@ -73,5 +77,5 @@ export const useReportsRealtime = ({ onDataChange }: RealtimeHookParams) => {
     return () => {
       supabase.removeChannel(reportsChannel);
     };
-  }, [user?.id, onDataChange]); // user?.id ao invés de user para evitar re-subscribe
+  }, [user?.id]);
 };
