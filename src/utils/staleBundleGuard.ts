@@ -82,6 +82,45 @@ async function purgeClientCaches(): Promise<void> {
 
 let recovering = false;
 
+function showRecoveryOverlay(): void {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('stale-bundle-overlay')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'stale-bundle-overlay';
+  overlay.setAttribute('role', 'status');
+  overlay.setAttribute('aria-live', 'polite');
+  overlay.style.cssText = [
+    'position:fixed',
+    'inset:0',
+    'z-index:2147483647',
+    'display:flex',
+    'align-items:center',
+    'justify-content:center',
+    'background:rgba(15,23,42,0.55)',
+    'backdrop-filter:blur(6px)',
+    '-webkit-backdrop-filter:blur(6px)',
+    'font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif',
+    'animation:sbg-fade .2s ease-out',
+  ].join(';');
+
+  overlay.innerHTML = `
+    <style>
+      @keyframes sbg-fade { from { opacity: 0 } to { opacity: 1 } }
+      @keyframes sbg-spin { to { transform: rotate(360deg) } }
+    </style>
+    <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:380px;width:calc(100% - 32px);box-shadow:0 20px 60px -10px rgba(0,0,0,.3);text-align:center;">
+      <div style="width:44px;height:44px;margin:0 auto 16px;border:3px solid #e2e8f0;border-top-color:#D65E9A;border-radius:50%;animation:sbg-spin .8s linear infinite;"></div>
+      <h2 style="margin:0 0 8px;font-size:17px;font-weight:600;color:#0f172a;">Atualizando aplicativo</h2>
+      <p style="margin:0;font-size:14px;line-height:1.5;color:#64748b;">
+        Uma nova versão foi detectada. Estamos limpando o cache e recarregando para você — leva só alguns segundos.
+      </p>
+    </div>
+  `;
+
+  document.body?.appendChild(overlay);
+}
+
 async function recoverFromStaleBundle(reason: string): Promise<void> {
   if (recovering) return;
   recovering = true;
@@ -96,6 +135,7 @@ async function recoverFromStaleBundle(reason: string): Promise<void> {
   sessionStorage.setItem(RECOVERY_FLAG, '1');
 
   console.warn(`[StaleBundleGuard] Bundle obsoleto detectado (${reason}). Limpando cache e recarregando...`);
+  showRecoveryOverlay();
   await purgeClientCaches();
 
   // Atualiza build id ANTES do reload para não disparar de novo
@@ -105,10 +145,12 @@ async function recoverFromStaleBundle(reason: string): Promise<void> {
     /* noop */
   }
 
-  // Reload "hard" com query param para furar cache de borda
-  const url = new URL(window.location.href);
-  url.searchParams.set('_v', currentBuildId);
-  window.location.replace(url.toString());
+  // Pequeno atraso para que o overlay seja visível antes do reload
+  window.setTimeout(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('_v', currentBuildId);
+    window.location.replace(url.toString());
+  }, 650);
 }
 
 function isChunkLoadError(message: string): boolean {
