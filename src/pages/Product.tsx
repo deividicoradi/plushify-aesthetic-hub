@@ -52,6 +52,11 @@ const Product = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Produto Plushify - Funcionalidades para Estética"
+        description="Conheça as funcionalidades do Plushify: agendamentos, CRM, financeiro, estoque, fidelidade e relatórios para profissionais de estética."
+        path="/product"
+      />
       <Navbar />
       
       {/* Hero Section */}
