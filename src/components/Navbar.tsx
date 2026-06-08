@@ -173,7 +173,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden">
+          <div id="mobile-navigation" className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t border-border/40">
               <button
                 onClick={handleInicioClick}
