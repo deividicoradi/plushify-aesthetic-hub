@@ -21,6 +21,7 @@ declare const __APP_VERSION__: string;
 const BUILD_ID_KEY = 'plushify:build-id';
 const RECOVERY_FLAG = 'plushify:stale-bundle-recovery';
 const SELF_DESTROY_SW_FLAG = 'plushify:self-destroy-sw-installed';
+const PRE_RENDER_SWEEP_FLAG = 'plushify:pre-render-sweep-done';
 
 const currentBuildId =
   typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : 'dev';
@@ -297,4 +298,73 @@ export function checkManualResetFlag(): void {
   } catch {
     /* noop */
   }
+}
+
+/**
+ * Varredura pré-render: detecta Service Workers antigos (de deploys
+ * anteriores que usavam vite-plugin-pwa/Workbox) e executa uma limpeza
+ * EXTRA de caches ANTES de qualquer rota ser renderizada. Isso evita a
+ * tela branca causada por um SW antigo interceptando o index.html e
+ * servindo chunks que não existem mais.
+ *
+ * Diferenças vs. recoverFromStaleBundle:
+ *  - Não força reload se conseguir limpar tudo silenciosamente.
+ *  - Só recarrega se houver SW controlando a página (controller != null),
+ *    porque nesse caso as próximas requisições ainda passariam pelo SW.
+ *  - Roda no máximo uma vez por sessão (flag em sessionStorage).
+ */
+export async function preRenderServiceWorkerSweep(): Promise<boolean> {
+  if (typeof window === 'undefined') return true;
+  if (isPreviewOrIframe()) return true;
+
+  try {
+    if (sessionStorage.getItem(PRE_RENDER_SWEEP_FLAG) === '1') return true;
+  } catch {
+    /* noop */
+  }
+
+  if (!('serviceWorker' in navigator) && !('caches' in window)) {
+    try { sessionStorage.setItem(PRE_RENDER_SWEEP_FLAG, '1'); } catch { /* noop */ }
+    return true;
+  }
+
+  let hadController = false;
+  let hadRegistrations = false;
+  let hadCaches = false;
+
+  try {
+    if ('serviceWorker' in navigator) {
+      hadController = !!navigator.serviceWorker.controller;
+      const regs = await navigator.serviceWorker.getRegistrations();
+      hadRegistrations = regs.length > 0;
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      hadCaches = keys.length > 0;
+    }
+  } catch (e) {
+    console.warn('[StaleBundleGuard] sweep inspect failed', e);
+  }
+
+  if (!hadController && !hadRegistrations && !hadCaches) {
+    try { sessionStorage.setItem(PRE_RENDER_SWEEP_FLAG, '1'); } catch { /* noop */ }
+    return true;
+  }
+
+  console.warn(
+    `[StaleBundleGuard] Pre-render sweep: controller=${hadController} regs=${hadRegistrations} caches=${hadCaches}`,
+  );
+
+  // Se a página está sendo controlada por um SW antigo, precisamos
+  // recarregar para escapar do controle dele — caso contrário, qualquer
+  // chunk lazy carregado a seguir ainda passará pelo SW.
+  if (hadController) {
+    await recoverFromStaleBundle('pre-render-sw-controller');
+    return false;
+  }
+
+  // Sem controller: limpeza silenciosa é suficiente, render pode prosseguir.
+  await purgeClientCaches();
+  try { sessionStorage.setItem(PRE_RENDER_SWEEP_FLAG, '1'); } catch { /* noop */ }
+  return true;
 }
