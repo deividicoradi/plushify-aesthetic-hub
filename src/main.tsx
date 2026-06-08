@@ -11,6 +11,12 @@ import { validateEnvironment, checkProductionReadiness } from './utils/environme
 import { initPerformanceMonitor } from './utils/performanceOptimizer'
 import { logger } from './utils/debugLogger'
 import { ensureFreshBundleBeforeBoot, initStaleBundleGuard, isRecoverableBootError, preRenderServiceWorkerSweep, recoverFromStaleBundle } from './utils/staleBundleGuard'
+import { installDomPatches, isDomMutationError } from './utils/domPatches'
+
+// Patch nativo do DOM para tolerar interferência de extensões
+// (Google Translate, tradutores embutidos, etc.) que disparam
+// "Failed to execute 'removeChild' on 'Node'".
+installDomPatches();
 
 initStaleBundleGuard();
 
@@ -72,6 +78,13 @@ function showFatalError(message: string) {
 // Capture uncaught errors to render a friendly message instead of a blank screen
 window.addEventListener('error', (e) => {
   const message = e.message || e.error?.message || 'Erro inesperado.'
+  if (isDomMutationError(message)) {
+    // Bug conhecido de extensões/tradutores interferindo no React.
+    // Já mitigado por installDomPatches() — apenas suprimir o ruído.
+    e.preventDefault?.()
+    console.warn('[main] DOM mutation error suprimido:', message)
+    return
+  }
   if (isRecoverableBootError(message)) {
     e.preventDefault?.()
     void recoverFromStaleBundle('main-window-error')
@@ -81,6 +94,11 @@ window.addEventListener('error', (e) => {
 })
 window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
   const reason = (e.reason && (e.reason.message || e.reason.toString())) || 'Erro inesperado.'
+  if (isDomMutationError(reason)) {
+    e.preventDefault?.()
+    console.warn('[main] DOM mutation rejection suprimido:', reason)
+    return
+  }
   if (isRecoverableBootError(reason)) {
     e.preventDefault?.()
     void recoverFromStaleBundle('main-promise-rejection')

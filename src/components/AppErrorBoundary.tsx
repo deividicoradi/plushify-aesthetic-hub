@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
+import { isDomMutationError } from '@/utils/domPatches';
 
 interface Props {
   children: ReactNode;
@@ -35,6 +36,16 @@ export class AppErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const currentRoute = window.location.pathname;
+
+    // Erro causado por extensões do navegador (Google Translate, etc.)
+    // mexendo no DOM por baixo do React. Já tratamos via domPatches,
+    // mas se chegar aqui apenas resetamos a árvore silenciosamente em
+    // vez de mostrar a tela de erro crítico.
+    if (isDomMutationError(error?.message || '')) {
+      console.warn('[AppErrorBoundary] DOM mutation error ignorado:', error.message);
+      this.setState({ hasError: false, error: null, errorInfo: null, errorId: '' });
+      return;
+    }
     
     console.group('🚨 App Error Boundary - Critical App Failure');
     console.error('Error:', error);
