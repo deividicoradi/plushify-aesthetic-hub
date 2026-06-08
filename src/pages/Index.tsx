@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { SEO } from '@/components/SEO';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import BenefitsSection from '../components/BenefitsSection';
