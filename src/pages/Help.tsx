@@ -3,16 +3,30 @@ import React from 'react';
 import { HelpCircle, ExternalLink, Mail, MessageCircle, Clock, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { SEO } from '@/components/SEO';
 
 const Help = () => {
   return (
-    <ResponsiveLayout
-      title="Central de Ajuda"
-      subtitle="Encontre respostas e suporte para suas dúvidas"
-      icon={HelpCircle}
-    >
-      <div className="space-y-6">
+    <div className="min-h-screen bg-background">
+      <SEO
+        title="Central de Ajuda - Plushify"
+        description="Encontre respostas, tutoriais e suporte para usar o Plushify."
+        path="/help"
+      />
+      <Navbar />
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-3xl mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-xl bg-primary/10">
+              <HelpCircle className="w-6 h-6 text-primary" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Central de Ajuda</h1>
+          </div>
+          <p className="text-muted-foreground text-lg">Encontre respostas e suporte para suas dúvidas</p>
+        </div>
+        <div className="space-y-6">
             {/* Support Cards Grid */}
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="border shadow-sm">
@@ -329,8 +343,10 @@ const Help = () => {
                  </CardContent>
                </Card>
              </div>
-      </div>
-    </ResponsiveLayout>
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 };
 
