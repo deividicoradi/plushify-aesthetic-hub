@@ -2,6 +2,7 @@
 import React from 'react';
 import { SEO } from '@/components/SEO';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import AboutHero from '../components/about/AboutHero';
 import AboutStory from '../components/about/AboutStory';
 import AboutMission from '../components/about/AboutMission';
@@ -32,6 +33,7 @@ const About = () => {
       </section>
 
       <AboutCommitments />
+      <Footer />
     </div>
   );
 };
