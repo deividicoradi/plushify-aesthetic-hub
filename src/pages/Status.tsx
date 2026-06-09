@@ -2,6 +2,9 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, AlertCircle, XCircle, Clock } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { SEO } from '@/components/SEO';
 
 const systemStatus = [
   {
@@ -92,6 +95,12 @@ const Status = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Status do Sistema - Plushify"
+        description="Acompanhe o status em tempo real dos serviços da plataforma Plushify."
+        path="/status"
+      />
+      <Navbar />
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary/10 to-secondary/10 py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -220,6 +229,7 @@ const Status = () => {
           </Card>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
