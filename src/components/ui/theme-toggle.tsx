@@ -27,11 +27,7 @@ export function ThemeToggle() {
   }
 
   const toggleTheme = () => {
-    console.log('Current theme:', theme);
-    console.log('Resolved theme:', resolvedTheme);
-    
     const newTheme = resolvedTheme === "light" ? "dark" : "light";
-    console.log('Setting theme to:', newTheme);
     setTheme(newTheme);
   };
 

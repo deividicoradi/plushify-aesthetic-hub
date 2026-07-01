@@ -58,7 +58,7 @@ export const useSubscription = () => {
       } else {
         // No active subscription found, default to trial
         setCurrentPlan('trial');
-        console.log('Nenhuma assinatura encontrada, usando trial');
+        if (import.meta.env.DEV) console.log('Nenhuma assinatura encontrada, usando trial');
       }
     } catch (error) {
       console.error('Erro ao buscar assinatura:', error);

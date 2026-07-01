@@ -13,6 +13,10 @@ import { logger } from './utils/debugLogger'
 import { ensureFreshBundleBeforeBoot, initStaleBundleGuard, isRecoverableBootError, preRenderServiceWorkerSweep, recoverFromStaleBundle } from './utils/staleBundleGuard'
 import { installDomPatches, isDomMutationError } from './utils/domPatches'
 
+// Silenciar logs verbosos (log/debug/info) em produção o quanto antes,
+// antes que outros módulos importem e disparem seus logs de módulo.
+cleanupConsoleLogsInProduction();
+
 // Patch nativo do DOM para tolerar interferência de extensões
 // (Google Translate, tradutores embutidos, etc.) que disparam
 // "Failed to execute 'removeChild' on 'Node'".

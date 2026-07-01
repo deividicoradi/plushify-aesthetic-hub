@@ -56,8 +56,10 @@ const AppContent = () => {
   // Inicializar analytics tracking
   useAnalytics();
   
-  // Imprimir evidências do router
-  console.log('[ROUTER] mapa de rotas carregado OK (basename: ./, public: /, private: /dashboard, 404: *)');
+  // Log de diagnóstico do router apenas em dev
+  if (import.meta.env.DEV) {
+    console.log('[ROUTER] mapa de rotas carregado OK (basename: ./, public: /, private: /dashboard, 404: *)');
+  }
   
   return (
     <Routes>
