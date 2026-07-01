@@ -25,12 +25,14 @@ const merged: RuntimeEnv = {
   MODE: (typeof import.meta !== 'undefined' && (import.meta as any)?.env?.MODE) || 'production',
 };
 
-// Safe diagnostics (never print secrets)
-console.info('[ENV] Supabase configured:', {
-  URL: !!merged.SUPABASE_URL,
-  ANON: !!merged.SUPABASE_ANON_KEY,
-  MODE: merged.MODE,
-});
+// Safe diagnostics (never print secrets) — dev apenas
+if (import.meta.env.DEV) {
+  console.info('[ENV] Supabase configured:', {
+    URL: !!merged.SUPABASE_URL,
+    ANON: !!merged.SUPABASE_ANON_KEY,
+    MODE: merged.MODE,
+  });
+}
 
 export const env = merged;
 

@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Função para atualizar a sessão (removida para evitar refresh desnecessário)
   const refreshSession = async () => {
-    console.log('Refresh session called - but skipping to avoid rate limits');
+    if (import.meta.env.DEV) console.log('Refresh session called - but skipping to avoid rate limits');
   };
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Atualizar estado inicial (sem log repetitivo)
         if (initialSession?.user) {
-          console.log('[AUTH] Initial session loaded');
+          if (import.meta.env.DEV) console.log('[AUTH] Initial session loaded');
           setSession(initialSession);
           setUser(initialSession.user);
           setUserContext({
@@ -107,11 +107,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           // Ignorar eventos duplicados dentro de 1 segundo
           if (isDuplicateEvent(event)) {
-            console.log('[AUTH] Duplicate event ignored:', event);
+            if (import.meta.env.DEV) console.log('[AUTH] Duplicate event ignored:', event);
             return;
           }
-          
-          console.log('[AUTH] Event:', event);
+
+          if (import.meta.env.DEV) console.log('[AUTH] Event:', event);
           
           setSession(newSession);
           setUser(newSession?.user ?? null);
@@ -147,7 +147,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       mounted = false;
       if (subscriptionRef.current) {
-        console.log('[AUTH] Cleanup: unsubscribing');
+        if (import.meta.env.DEV) console.log('[AUTH] Cleanup: unsubscribing');
         subscriptionRef.current.unsubscribe();
         subscriptionRef.current = null;
       }
