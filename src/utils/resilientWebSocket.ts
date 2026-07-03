@@ -63,7 +63,7 @@ function detectSandboxEnvironment(): boolean {
 
 // Normalizar e validar URL WebSocket
 function normalizeWebSocketUrl(url: string): string {
-  const isDev = process.env.NODE_ENV !== 'production';
+  const isDev = import.meta.env.DEV;
   
   try {
     const parsed = new URL(url);
@@ -101,13 +101,13 @@ function calculateBackoff(
 
 // Log apenas em desenvolvimento
 function devLog(message: string, ...args: any[]): void {
-  if (process.env.NODE_ENV !== 'production') {
+  if (import.meta.env.DEV) {
     console.log(`[ResilientWS] ${message}`, ...args);
   }
 }
 
 function devError(message: string, ...args: any[]): void {
-  if (process.env.NODE_ENV !== 'production') {
+  if (import.meta.env.DEV) {
     console.error(`[ResilientWS] ${message}`, ...args);
   }
 }
