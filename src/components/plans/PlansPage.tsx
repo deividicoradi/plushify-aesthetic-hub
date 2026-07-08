@@ -62,14 +62,10 @@ export const PlansPage: React.FC = () => {
       }
 
       try {
-        const { data, error } = await supabase.rpc('start_subscription', {
-          p_user_id: user.id,
-          p_plan_code: 'trial',
-          p_billing_interval: 'month',
-          p_trial_days: 3
-        });
+        const { data, error } = await supabase.functions.invoke('start-trial');
 
         if (error) throw error;
+        if (data?.error) throw new Error(data.message || data.error);
 
         toast({
           title: "Trial ativado com sucesso!",
