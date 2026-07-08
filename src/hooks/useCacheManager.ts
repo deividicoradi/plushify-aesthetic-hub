@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CacheEntry<T = any> {
   data: T;
@@ -16,10 +17,16 @@ interface CacheStats {
   misses: number;
 }
 
-const CACHE_PREFIX = 'plushify_cache_';
+const CACHE_PREFIX_BASE = 'plushify_cache_';
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
 
 export const useCacheManager = () => {
+  const { user } = useAuth();
+  // Scope cache keys per-user to avoid cross-account data leakage on shared browsers.
+  const CACHE_PREFIX = user?.id
+    ? `${CACHE_PREFIX_BASE}${user.id}_`
+    : `${CACHE_PREFIX_BASE}anon_`;
+
   const [stats, setStats] = useState<CacheStats>({
     totalEntries: 0,
     totalSize: 0,
@@ -44,7 +51,7 @@ export const useCacheManager = () => {
     } catch (error) {
       console.warn('Failed to set cache:', error);
     }
-  }, []);
+  }, [CACHE_PREFIX]);
 
   // Get cache entry
   const getCache = useCallback(<T>(key: string): T | null => {
@@ -71,20 +78,20 @@ export const useCacheManager = () => {
       updateMissStats();
       return null;
     }
-  }, []);
+  }, [CACHE_PREFIX]);
 
   // Clear specific cache entry
   const clearCache = useCallback((key: string) => {
     localStorage.removeItem(`${CACHE_PREFIX}${key}`);
     updateStats();
-  }, []);
+  }, [CACHE_PREFIX]);
 
   // Clear all cache entries
   const clearAllCache = useCallback(() => {
     const keys = Object.keys(localStorage).filter(key => key.startsWith(CACHE_PREFIX));
     keys.forEach(key => localStorage.removeItem(key));
     updateStats();
-  }, []);
+  }, [CACHE_PREFIX]);
 
   // Update cache statistics
   const updateStats = useCallback(() => {
@@ -105,7 +112,7 @@ export const useCacheManager = () => {
       hitRate: prev.hits + prev.misses > 0 ? (prev.hits / (prev.hits + prev.misses)) * 100 : 0,
       missRate: prev.hits + prev.misses > 0 ? (prev.misses / (prev.hits + prev.misses)) * 100 : 0
     }));
-  }, []);
+  }, [CACHE_PREFIX]);
 
   const updateHitStats = useCallback(() => {
     setStats(prev => ({ ...prev, hits: prev.hits + 1 }));
@@ -142,7 +149,7 @@ export const useCacheManager = () => {
     }
     
     return cleaned;
-  }, []);
+  }, [CACHE_PREFIX]);
 
   // Cache with automatic refresh
   const getCacheWithRefresh = useCallback(async <T>(
