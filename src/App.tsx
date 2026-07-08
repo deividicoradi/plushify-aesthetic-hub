@@ -1,3 +1,4 @@
+import React, { lazy, Suspense } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -8,23 +9,10 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { PWAProvider } from "@/components/pwa/PWAProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import Appointments from "./pages/Appointments";
-import Clients from "./pages/Clients";
-import Financial from "./pages/Financial";
-import Services from "./pages/Services";
-import Reports from "./pages/Reports";
 import Plans from "./pages/Plans";
 import Auth from "./pages/Auth";
 import Signup from "./pages/Signup";
-import Settings from "./pages/Settings";
-import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import Notes from "./pages/Notes";
-import Loyalty from "./pages/Loyalty";
-import Inventory from "./pages/Inventory";
-import AdvancedAnalytics from "./pages/AdvancedAnalytics";
-import FinancialDashboard from "./pages/FinancialDashboard";
 import Help from "./pages/Help";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -34,7 +22,6 @@ import Product from "./pages/Product";
 import About from "./pages/About";
 import Status from "./pages/Status";
 import Updates from "./pages/Updates";
-import TeamManagement from "./pages/TeamManagement";
 import PublicBooking from "./pages/PublicBooking";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -43,6 +30,32 @@ import { queryClient } from "@/lib/queryClient";
 import ScrollToTop from "./components/ScrollToTop";
 import { PerformanceMonitor } from "./components/PerformanceMonitor";
 import { CacheOptimizerProvider } from "./components/CacheOptimizer";
+
+// Lazy-loaded protected pages (code-splitting)
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Appointments = lazy(() => import("./pages/Appointments"));
+const Clients = lazy(() => import("./pages/Clients"));
+const Financial = lazy(() => import("./pages/Financial"));
+const Services = lazy(() => import("./pages/Services"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Notes = lazy(() => import("./pages/Notes"));
+const Loyalty = lazy(() => import("./pages/Loyalty"));
+const Inventory = lazy(() => import("./pages/Inventory"));
+const AdvancedAnalytics = lazy(() => import("./pages/AdvancedAnalytics"));
+const FinancialDashboard = lazy(() => import("./pages/FinancialDashboard"));
+const TeamManagement = lazy(() => import("./pages/TeamManagement"));
+
+const RouteFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary" />
+  </div>
+);
+
+const Lazy = (node: React.ReactNode) => (
+  <Suspense fallback={<RouteFallback />}>{node}</Suspense>
+);
 
 
 // Security: Remove Lovable token from URL
@@ -81,7 +94,7 @@ const AppContent = () => {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            {Lazy(<Dashboard />)}
           </ProtectedRoute>
         }
       />
@@ -89,7 +102,7 @@ const AppContent = () => {
         path="/appointments"
         element={
           <ProtectedRoute>
-            <Appointments />
+            {Lazy(<Appointments />)}
           </ProtectedRoute>
         }
       />
@@ -97,7 +110,7 @@ const AppContent = () => {
         path="/clients"
         element={
           <ProtectedRoute>
-            <Clients />
+            {Lazy(<Clients />)}
           </ProtectedRoute>
         }
       />
@@ -105,7 +118,7 @@ const AppContent = () => {
         path="/financial"
         element={
           <ProtectedRoute>
-            <Financial />
+            {Lazy(<Financial />)}
           </ProtectedRoute>
         }
       />
@@ -113,7 +126,7 @@ const AppContent = () => {
         path="/financial-dashboard"
         element={
           <ProtectedRoute>
-            <FinancialDashboard />
+            {Lazy(<FinancialDashboard />)}
           </ProtectedRoute>
         }
       />
@@ -121,7 +134,7 @@ const AppContent = () => {
         path="/services"
         element={
           <ProtectedRoute>
-            <Services />
+            {Lazy(<Services />)}
           </ProtectedRoute>
         }
       />
@@ -129,7 +142,7 @@ const AppContent = () => {
         path="/reports"
         element={
           <ProtectedRoute>
-            <Reports />
+            {Lazy(<Reports />)}
           </ProtectedRoute>
         }
       />
@@ -137,7 +150,7 @@ const AppContent = () => {
         path="/settings"
         element={
           <ProtectedRoute>
-            <Settings />
+            {Lazy(<Settings />)}
           </ProtectedRoute>
         }
       />
@@ -145,7 +158,7 @@ const AppContent = () => {
         path="/profile"
         element={
           <ProtectedRoute>
-            <Profile />
+            {Lazy(<Profile />)}
           </ProtectedRoute>
         }
       />
@@ -153,7 +166,7 @@ const AppContent = () => {
         path="/notes"
         element={
           <ProtectedRoute>
-            <Notes />
+            {Lazy(<Notes />)}
           </ProtectedRoute>
         }
       />
@@ -161,7 +174,7 @@ const AppContent = () => {
         path="/loyalty"
         element={
           <ProtectedRoute>
-            <Loyalty />
+            {Lazy(<Loyalty />)}
           </ProtectedRoute>
         }
       />
@@ -169,7 +182,7 @@ const AppContent = () => {
         path="/inventory"
         element={
           <ProtectedRoute>
-            <Inventory />
+            {Lazy(<Inventory />)}
           </ProtectedRoute>
         }
       />
@@ -177,7 +190,7 @@ const AppContent = () => {
         path="/analytics"
         element={
           <ProtectedRoute>
-            <AdvancedAnalytics />
+            {Lazy(<AdvancedAnalytics />)}
           </ProtectedRoute>
         }
       />
@@ -185,7 +198,7 @@ const AppContent = () => {
         path="/team"
         element={
           <ProtectedRoute>
-            <TeamManagement />
+            {Lazy(<TeamManagement />)}
           </ProtectedRoute>
         }
       />
