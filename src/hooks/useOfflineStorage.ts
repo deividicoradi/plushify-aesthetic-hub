@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface OfflineQueueItem {
   id: string;
@@ -10,20 +11,26 @@ interface OfflineQueueItem {
 }
 
 export const useOfflineStorage = () => {
+  const { user } = useAuth();
+  // Scope the offline queue key per-user to prevent one account replaying another
+  // account's queued mutations on a shared browser.
+  const queueKey = user?.id ? `offline-queue:${user.id}` : 'offline-queue:anon';
   const [offlineQueue, setOfflineQueue] = useState<OfflineQueueItem[]>([]);
   const [isProcessingQueue, setIsProcessingQueue] = useState(false);
 
   useEffect(() => {
     // Carregar queue do localStorage
-    const savedQueue = localStorage.getItem('offline-queue');
+    const savedQueue = localStorage.getItem(queueKey);
     if (savedQueue) {
       try {
         setOfflineQueue(JSON.parse(savedQueue));
       } catch (error) {
         console.error('Erro ao carregar queue offline:', error);
       }
+    } else {
+      setOfflineQueue([]);
     }
-  }, []);
+  }, [queueKey]);
 
   const addToQueue = (item: Omit<OfflineQueueItem, 'id' | 'timestamp'>) => {
     const queueItem: OfflineQueueItem = {
@@ -34,7 +41,7 @@ export const useOfflineStorage = () => {
 
     const updatedQueue = [...offlineQueue, queueItem];
     setOfflineQueue(updatedQueue);
-    localStorage.setItem('offline-queue', JSON.stringify(updatedQueue));
+    localStorage.setItem(queueKey, JSON.stringify(updatedQueue));
   };
 
   const processQueue = async () => {
@@ -60,14 +67,14 @@ export const useOfflineStorage = () => {
     // Remover itens processados com sucesso
     const remainingQueue = offlineQueue.filter(item => !successfulItems.includes(item.id));
     setOfflineQueue(remainingQueue);
-    localStorage.setItem('offline-queue', JSON.stringify(remainingQueue));
+    localStorage.setItem(queueKey, JSON.stringify(remainingQueue));
     
     setIsProcessingQueue(false);
   };
 
   const clearQueue = () => {
     setOfflineQueue([]);
-    localStorage.removeItem('offline-queue');
+    localStorage.removeItem(queueKey);
   };
 
   return {
