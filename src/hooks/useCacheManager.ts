@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CacheEntry<T = any> {
   data: T;
@@ -16,10 +17,16 @@ interface CacheStats {
   misses: number;
 }
 
-const CACHE_PREFIX = 'plushify_cache_';
+const CACHE_PREFIX_BASE = 'plushify_cache_';
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
 
 export const useCacheManager = () => {
+  const { user } = useAuth();
+  // Scope cache keys per-user to avoid cross-account data leakage on shared browsers.
+  const CACHE_PREFIX = user?.id
+    ? `${CACHE_PREFIX_BASE}${user.id}_`
+    : `${CACHE_PREFIX_BASE}anon_`;
+
   const [stats, setStats] = useState<CacheStats>({
     totalEntries: 0,
     totalSize: 0,
