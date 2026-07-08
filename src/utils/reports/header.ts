@@ -1,5 +1,5 @@
 
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import { ReportData } from './types';
 import { formatDate } from './formatters';
 

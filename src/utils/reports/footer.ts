@@ -1,5 +1,5 @@
 
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import { formatDateTime } from './formatters';
 
 export const addReportFooter = (doc: jsPDF): void => {
