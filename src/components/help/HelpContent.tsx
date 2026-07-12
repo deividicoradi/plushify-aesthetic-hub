@@ -75,12 +75,12 @@ export const HelpContent = () => {
             <div className="space-y-3">
               <p className="text-muted-foreground mb-4">Recursos para aprender e resolver dúvidas:</p>
               {[
-                { id: 'dashboard-help', label: 'Como usar o Dashboard', color: 'blue' },
-                { id: 'clients-help', label: 'Gestão de Clientes', color: 'green' },
-                { id: 'appointments-help', label: 'Sistema de Agendamentos', color: 'purple' },
-                { id: 'financial-help', label: 'Controle Financeiro', color: 'emerald' },
-                { id: 'services-help', label: 'Cadastro de Serviços', color: 'orange' },
-                { id: 'inventory-help', label: 'Gestão de Estoque', color: 'red' },
+                { id: 'dashboard-help', label: 'Como usar o Dashboard', bg: 'bg-blue-100 dark:bg-blue-900', text: 'text-blue-600 dark:text-blue-400' },
+                { id: 'clients-help', label: 'Gestão de Clientes', bg: 'bg-green-100 dark:bg-green-900', text: 'text-green-600 dark:text-green-400' },
+                { id: 'appointments-help', label: 'Sistema de Agendamentos', bg: 'bg-purple-100 dark:bg-purple-900', text: 'text-purple-600 dark:text-purple-400' },
+                { id: 'financial-help', label: 'Controle Financeiro', bg: 'bg-emerald-100 dark:bg-emerald-900', text: 'text-emerald-600 dark:text-emerald-400' },
+                { id: 'services-help', label: 'Cadastro de Serviços', bg: 'bg-orange-100 dark:bg-orange-900', text: 'text-orange-600 dark:text-orange-400' },
+                { id: 'inventory-help', label: 'Gestão de Estoque', bg: 'bg-red-100 dark:bg-red-900', text: 'text-red-600 dark:text-red-400' },
               ].map(item => (
                 <div
                   key={item.id}
@@ -88,8 +88,8 @@ export const HelpContent = () => {
                   onClick={() => document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`p-1 bg-${item.color}-100 dark:bg-${item.color}-900 rounded`}>
-                      <BookOpen className={`w-4 h-4 text-${item.color}-600 dark:text-${item.color}-400`} />
+                    <div className={`p-1 rounded ${item.bg}`}>
+                      <BookOpen className={`w-4 h-4 ${item.text}`} />
                     </div>
                     <span className="font-medium">{item.label}</span>
                   </div>
