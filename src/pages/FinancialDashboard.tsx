@@ -81,7 +81,7 @@ const FinancialDashboard = () => {
     >
       {/* Métricas principais */}
       {metrics && (
-        <MetricsCards metrics={metrics} loading={loading} />
+        <MetricsCards metrics={metrics} loading={loading} dateRange={dateRange} />
       )}
 
       {/* Alertas */}
