@@ -1,7 +1,8 @@
 // Integration tests for create-checkout edge function.
 // Hits the deployed function endpoint over HTTPS. No Stripe calls happen —
 // requests are rejected before Stripe is ever contacted.
-import "https://deno.land/std@0.224.0/dotenv/load.ts";
+import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
+await load({ export: true, examplePath: null });
 import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
 const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL")!;
