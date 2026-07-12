@@ -26,10 +26,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const ANON_KEY = Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY")!;
 
 // If the sandbox doesn't have the service-role key we skip — this test
 // requires admin access to mint and destroy a user.
 const canRun = Boolean(SUPABASE_URL && SERVICE_ROLE);
+const canRunAuth = Boolean(SUPABASE_URL && SERVICE_ROLE && ANON_KEY);
 
 Deno.test({
   name: "checkout flow: start_subscription upgrades user to professional",
