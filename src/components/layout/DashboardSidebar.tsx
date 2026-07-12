@@ -40,7 +40,7 @@ const DashboardSidebar = () => {
     { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty' },
     { icon: Users, label: 'Equipe', path: '/team', premium: true },
-    { icon: HelpCircle, label: 'Ajuda', path: '/help' },
+    { icon: HelpCircle, label: 'Ajuda', path: '/app/help' },
   ];
 
   return (
