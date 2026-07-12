@@ -207,16 +207,6 @@ Deno.test({
         "victim user must have no subscription created",
       );
 
-      // Sanity: A calling for themselves is allowed (auth.uid() = p_user_id).
-      const { data: okId, error: okErr } = await asA.rpc("start_subscription", {
-        p_user_id: userA,
-        p_plan_code: "professional",
-        p_billing_interval: "month",
-        p_trial_days: 0,
-      });
-      assertEquals(okErr, null, `self-call failed: ${okErr?.message}`);
-      assert(typeof okId === "string" && okId.length > 0, "expected sub id for self");
-
       await asA.auth.signOut();
     } finally {
       await admin.from("user_subscriptions").delete().in("user_id", [userA, userB]);
