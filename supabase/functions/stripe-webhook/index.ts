@@ -1,7 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { mapPriceIdToPlan } from "../_shared/stripe-catalog.ts";
+import {
+  mapPriceIdToPlan,
+  resolvePlanFromMetadata,
+  isProductionStripe,
+} from "../_shared/stripe-catalog.ts";
 
 // Restrictive CORS for webhook - should only be called by Stripe
 const corsHeaders = {
@@ -62,15 +66,34 @@ serve(async (req) => {
       });
     }
 
-    // Catálogo compartilhado — mesma fonte usada pelo create-checkout.
-    // Resolve price_id (recebido do Stripe) → { plan_code, billing_interval }.
-    const mapPriceToSubscription = (priceId: string) => {
-      const mapping = mapPriceIdToPlan(priceId);
-      if (!mapping) {
-        logStep('AVISO: price_id não encontrado no catálogo (verifique STRIPE_PRICE_* secrets)', { priceId });
+    // Resolve plan for a Stripe subscription. Priority:
+    //   1. Official Price ID mapping (catálogo compartilhado).
+    //   2. Server-set subscription.metadata (plan_type + billing_period),
+    //      written by create-checkout — NEVER by the client.
+    // In production, only (1) is accepted: if the Price ID isn't in the
+    // catalog we refuse to process the event instead of guessing.
+    const resolvePlanForSubscription = (
+      subscription: Stripe.Subscription,
+    ): { plan_code: "professional" | "premium"; billing_interval: "month" | "year" } | null => {
+      const priceId = subscription.items.data[0]?.price.id;
+      if (priceId) {
+        const byPrice = mapPriceIdToPlan(priceId);
+        if (byPrice) return byPrice;
+      }
+      if (isProductionStripe()) {
+        logStep("ERRO: price_id não mapeado em produção (metadata fallback desabilitado)", { priceId });
         return null;
       }
-      return mapping;
+      const byMetadata = resolvePlanFromMetadata(subscription.metadata as Record<string, string> | null);
+      if (byMetadata) {
+        logStep("Plano resolvido via subscription.metadata (dev/preview fallback)", {
+          priceId,
+          plan: byMetadata.plan_code,
+        });
+        return byMetadata;
+      }
+      logStep("AVISO: price_id sem mapeamento e metadata inválida", { priceId });
+      return null;
     };
 
     // Dedupe: verificar se já processamos este evento
@@ -102,12 +125,11 @@ serve(async (req) => {
           
           // Buscar subscription no Stripe
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-          const priceId = subscription.items.data[0]?.price.id;
-          
-          const mapping = mapPriceToSubscription(priceId);
+          const mapping = resolvePlanForSubscription(subscription);
           if (!mapping) {
-            logStep('ERRO: Não foi possível mapear price_id', { priceId });
-            throw new Error(`price_id não mapeado: ${priceId}`);
+            throw new Error(
+              `plano não mapeado (price_id=${subscription.items.data[0]?.price.id ?? "unknown"})`,
+            );
           }
 
           const userId = session.client_reference_id || session.metadata?.user_id;
@@ -153,12 +175,11 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         logStep("Processing customer.subscription.updated", { subscriptionId: subscription.id });
         
-        const priceId = subscription.items.data[0]?.price.id;
-        const mapping = mapPriceToSubscription(priceId);
-        
+        const mapping = resolvePlanForSubscription(subscription);
         if (!mapping) {
-          logStep('ERRO: Não foi possível mapear price_id', { priceId });
-          throw new Error(`price_id não mapeado: ${priceId}`);
+          throw new Error(
+            `plano não mapeado (price_id=${subscription.items.data[0]?.price.id ?? "unknown"})`,
+          );
         }
 
         // Buscar user_id pela stripe_subscription_id

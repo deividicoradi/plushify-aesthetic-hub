@@ -8,6 +8,8 @@ import {
   getAppUrl,
   isValidPlan,
   isValidBillingPeriod,
+  isProductionStripe,
+  assertCatalogReadyForCheckout,
   type PlanCode,
   type BillingPeriod,
 } from "../_shared/stripe-catalog.ts";
@@ -177,7 +179,22 @@ serve(async (req) => {
 
     // Catálogo unificado (shared/stripe-catalog.ts) — mesma fonte usada pelo webhook.
     const planConfig = PLAN_CATALOG[validatedInput.plan_type][validatedInput.billing_period];
+
+    // PRODUÇÃO: se algum dos 4 Price IDs estiver ausente, aborta ANTES de
+    // criar a Checkout Session — não deixamos o cliente ser cobrado com
+    // um catálogo incompleto que o webhook não conseguiria mapear.
+    assertCatalogReadyForCheckout(validatedInput.plan_type, validatedInput.billing_period);
+
     const configuredPriceId = getPriceId(validatedInput.plan_type, validatedInput.billing_period);
+    const productionMode = isProductionStripe();
+
+    // Defesa em profundidade: mesmo com assert acima, se em produção o
+    // Price ID específico do plano solicitado estiver faltando, recusa.
+    if (productionMode && !configuredPriceId) {
+      throw new Error(
+        `STRIPE_CATALOG_INCOMPLETE: missing Price ID for ${validatedInput.plan_type}/${validatedInput.billing_period}`,
+      );
+    }
 
     logStep("SECURITY: Plan configuration selected", {
       plan_type: validatedInput.plan_type,
@@ -185,6 +202,7 @@ serve(async (req) => {
       amount: planConfig.amount,
       name: planConfig.name,
       pricingMode: configuredPriceId ? "price_id" : "price_data_fallback",
+      productionMode,
     });
 
     const safeOrigin = getAppUrl(origin);
@@ -261,16 +279,23 @@ serve(async (req) => {
     });
 
     // SEGURANÇA: Não expor detalhes internos ao cliente
-    const publicErrorMessage = errorMessage.includes("SECURITY") 
-      ? "Erro de segurança. Tente novamente."
-      : "Erro ao processar pagamento. Tente novamente.";
+    let publicErrorMessage = "Erro ao processar pagamento. Tente novamente.";
+    let statusCode = 500;
+    if (errorMessage.includes("STRIPE_CATALOG_INCOMPLETE")) {
+      publicErrorMessage =
+        "Pagamento indisponível no momento: catálogo de planos incompleto. Contate o suporte.";
+      statusCode = 503;
+    } else if (errorMessage.includes("SECURITY")) {
+      publicErrorMessage = "Erro de segurança. Tente novamente.";
+      statusCode = 403;
+    }
 
     return new Response(JSON.stringify({ 
       error: publicErrorMessage,
       code: "PAYMENT_ERROR"
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: errorMessage.includes("SECURITY") ? 403 : 500,
+      status: statusCode,
     });
   }
 });
