@@ -215,3 +215,118 @@ Deno.test({
     }
   },
 });
+
+// customer.subscription.updated: plan-change isolation.
+//
+// Simulates the webhook path for `customer.subscription.updated` — the
+// handler looks up user_id by stripe_subscription_id, then calls
+// start_subscription with the new plan_code. We prove that:
+//   1. Only the user tied to that stripe_subscription_id is updated.
+//   2. An unrelated user (B) with no prior subscription still has zero
+//      rows in user_subscriptions after the event is processed.
+//
+// We invoke start_subscription with service_role to match exactly what
+// stripe-webhook/index.ts does on customer.subscription.updated.
+Deno.test({
+  name:
+    "customer.subscription.updated: only the matching user is upgraded, other users untouched",
+  ignore: !canRun,
+  async fn() {
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const emailA = `sub-upd-a-${crypto.randomUUID()}@test.plushify.local`;
+    const emailB = `sub-upd-b-${crypto.randomUUID()}@test.plushify.local`;
+    const { data: uA, error: eA } = await admin.auth.admin.createUser({
+      email: emailA,
+      password: crypto.randomUUID() + "Aa1!",
+      email_confirm: true,
+    });
+    assertEquals(eA, null, `create A failed: ${eA?.message}`);
+    const { data: uB, error: eB } = await admin.auth.admin.createUser({
+      email: emailB,
+      password: crypto.randomUUID() + "Aa1!",
+      email_confirm: true,
+    });
+    assertEquals(eB, null, `create B failed: ${eB?.message}`);
+    const userA = uA.user!.id;
+    const userB = uB.user!.id;
+
+    const stripeSub = `sub_test_${crypto.randomUUID().replace(/-/g, "")}`;
+    const stripeCus = `cus_test_${crypto.randomUUID().replace(/-/g, "")}`;
+
+    try {
+      // Initial state: A subscribes to professional (checkout.session.completed).
+      const firstEnd = new Date(Date.now() + 30 * 86_400_000).toISOString();
+      const { error: firstErr } = await admin.rpc("start_subscription", {
+        p_user_id: userA,
+        p_plan_code: "professional",
+        p_billing_interval: "month",
+        p_trial_days: 0,
+        p_stripe_subscription_id: stripeSub,
+        p_stripe_customer_id: stripeCus,
+        p_current_period_end: firstEnd,
+      });
+      assertEquals(firstErr, null, `initial upsert failed: ${firstErr?.message}`);
+
+      // Confirm B has NO subscription row before the update event.
+      const { data: bBefore } = await admin
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", userB);
+      assertEquals(bBefore?.length ?? 0, 0, "B must start without a subscription");
+
+      // Simulate `customer.subscription.updated`: A's plan changes to premium.
+      // The webhook resolves user_id by stripe_subscription_id — we hand it
+      // userA here to mirror that lookup, then call start_subscription.
+      const newEnd = new Date(Date.now() + 60 * 86_400_000).toISOString();
+      const { error: updErr } = await admin.rpc("start_subscription", {
+        p_user_id: userA,
+        p_plan_code: "premium",
+        p_billing_interval: "month",
+        p_trial_days: 0,
+        p_stripe_subscription_id: stripeSub,
+        p_stripe_customer_id: stripeCus,
+        p_current_period_end: newEnd,
+      });
+      assertEquals(updErr, null, `updated event upsert failed: ${updErr?.message}`);
+
+      // A must now be on premium with the extended period.
+      const { data: aRow, error: aErr } = await admin
+        .from("user_subscriptions")
+        .select("plan_type, status, expires_at")
+        .eq("user_id", userA)
+        .single();
+      assertEquals(aErr, null, `select A failed: ${aErr?.message}`);
+      assertEquals(aRow!.plan_type, "premium", "A should be upgraded to premium");
+      assertEquals(aRow!.status, "active");
+      assert(
+        new Date(aRow!.expires_at!).getTime() > new Date(firstEnd).getTime(),
+        "A's expires_at should be extended by the updated event",
+      );
+
+      // Exactly one row for A — the update must be an UPSERT, not a duplicate.
+      const { data: aAll } = await admin
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", userA);
+      assertEquals(aAll?.length ?? 0, 1, "A must have exactly one subscription row");
+
+      // B must STILL have no subscription — the event is scoped to A only.
+      const { data: bAfter } = await admin
+        .from("user_subscriptions")
+        .select("id, plan_type")
+        .eq("user_id", userB);
+      assertEquals(
+        bAfter?.length ?? 0,
+        0,
+        "B must remain without a subscription after A's update event",
+      );
+    } finally {
+      await admin.from("user_subscriptions").delete().in("user_id", [userA, userB]);
+      await admin.auth.admin.deleteUser(userA);
+      await admin.auth.admin.deleteUser(userB);
+    }
+  },
+});
