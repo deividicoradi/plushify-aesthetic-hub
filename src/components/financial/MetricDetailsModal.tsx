@@ -2,7 +2,15 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Inbox } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ArrowDownWideNarrow, ArrowUpWideNarrow, Inbox } from 'lucide-react';
 import type {
   FinancialDetails,
   PaymentRow,
@@ -99,13 +107,24 @@ const InstallmentItem = ({ i }: { i: InstallmentRow }) => (
   </div>
 );
 
-interface Section {
+type SortOrder = 'desc' | 'asc';
+const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
+type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
+
+interface Section<T = any> {
+  key: string;
   title: string;
   total: number;
-  count: number;
-  items: React.ReactNode;
-  isEmpty: boolean;
+  items: T[];
+  getDate: (item: T) => string | null | undefined;
+  render: (item: T) => React.ReactNode;
 }
+
+const dateValue = (d?: string | null) => {
+  if (!d) return 0;
+  const t = new Date(d).getTime();
+  return Number.isNaN(t) ? 0 : t;
+};
 
 function buildSections(metric: MetricKey, d: FinancialDetails): {
   title: string;
@@ -124,26 +143,33 @@ function buildSections(metric: MetricKey, d: FinancialDetails): {
   const receitasTotal = sumPaid(d.paidPayments) + sumCash(d.cashClosures);
   const despesasTotal = sumExp(d.expenses);
 
-  const paymentsSection = (list: PaymentRow[], title = 'Pagamentos recebidos'): Section => ({
+  const paymentsSection = (
+    list: PaymentRow[],
+    key = 'payments',
+    title = 'Pagamentos recebidos'
+  ): Section<PaymentRow> => ({
+    key,
     title,
     total: sumPaid(list),
-    count: list.length,
-    isEmpty: list.length === 0,
-    items: list.map(p => <PaymentItem key={p.id} p={p} />),
+    items: list,
+    getDate: (p) => p.payment_date || p.created_at,
+    render: (p) => <PaymentItem key={p.id} p={p} />,
   });
-  const cashSection = (list: CashClosureRow[]): Section => ({
+  const cashSection = (list: CashClosureRow[]): Section<CashClosureRow> => ({
+    key: 'cash',
     title: 'Fechamentos de caixa',
     total: sumCash(list),
-    count: list.length,
-    isEmpty: list.length === 0,
-    items: list.map(c => <CashClosureItem key={c.id} c={c} />),
+    items: list,
+    getDate: (c) => c.closure_date,
+    render: (c) => <CashClosureItem key={c.id} c={c} />,
   });
-  const expensesSection = (list: ExpenseRow[]): Section => ({
+  const expensesSection = (list: ExpenseRow[]): Section<ExpenseRow> => ({
+    key: 'expenses',
     title: 'Despesas',
     total: sumExp(list),
-    count: list.length,
-    isEmpty: list.length === 0,
-    items: list.map(e => <ExpenseItem key={e.id} e={e} />),
+    items: list,
+    getDate: (e) => e.expense_date,
+    render: (e) => <ExpenseItem key={e.id} e={e} />,
   });
 
   switch (metric) {
@@ -189,11 +215,12 @@ function buildSections(metric: MetricKey, d: FinancialDetails): {
         totalLabel: 'Valor em aberto',
         sections: [
           {
+            key: 'installments',
             title: 'Parcelas',
             total,
-            count: d.overdueInstallments.length,
-            isEmpty: d.overdueInstallments.length === 0,
-            items: d.overdueInstallments.map(i => <InstallmentItem key={i.id} i={i} />),
+            items: d.overdueInstallments,
+            getDate: (i) => i.due_date,
+            render: (i) => <InstallmentItem key={i.id} i={i} />,
           },
         ],
       };
@@ -210,7 +237,7 @@ function buildSections(metric: MetricKey, d: FinancialDetails): {
         headerTotal: avg,
         headerCount: list.length,
         totalLabel: 'Ticket médio',
-        sections: [paymentsSection(list, 'Pagamentos considerados')],
+        sections: [paymentsSection(list, 'payments', 'Pagamentos considerados')],
       };
     }
     case 'receitasMes':
@@ -229,6 +256,87 @@ function buildSections(metric: MetricKey, d: FinancialDetails): {
   }
 }
 
+function SectionView({
+  section,
+  sortOrder,
+  pageSize,
+}: {
+  section: Section;
+  sortOrder: SortOrder;
+  pageSize: PageSize;
+}) {
+  const [page, setPage] = React.useState(1);
+
+  const sorted = React.useMemo(() => {
+    const arr = [...section.items];
+    arr.sort((a, b) => {
+      const da = dateValue(section.getDate(a));
+      const db = dateValue(section.getDate(b));
+      return sortOrder === 'desc' ? db - da : da - db;
+    });
+    return arr;
+  }, [section, sortOrder]);
+
+  const totalCount = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [sortOrder, pageSize, section.key, totalCount]);
+
+  const currentPage = Math.min(page, totalPages);
+  const start = (currentPage - 1) * pageSize;
+  const visible = sorted.slice(start, start + pageSize);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-semibold">{section.title}</h4>
+        <span className="text-xs text-muted-foreground">
+          {totalCount} {totalCount === 1 ? 'registro' : 'registros'} · {fmtCurrency(section.total)}
+        </span>
+      </div>
+      {totalCount === 0 ? (
+        <p className="text-xs text-muted-foreground py-2">Nenhum registro.</p>
+      ) : (
+        <>
+          <div className="space-y-1.5">{visible.map((item) => section.render(item))}</div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-xs text-muted-foreground">
+                {start + 1}–{Math.min(start + pageSize, totalCount)} de {totalCount}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7"
+                  disabled={currentPage <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Anterior
+                </Button>
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  {currentPage}/{totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Próxima
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 export const MetricDetailsModal: React.FC<Props> = ({
   open,
   onOpenChange,
@@ -237,9 +345,19 @@ export const MetricDetailsModal: React.FC<Props> = ({
   loading,
   period,
 }) => {
+  const [sortOrder, setSortOrder] = React.useState<SortOrder>('desc');
+  const [pageSize, setPageSize] = React.useState<PageSize>(20);
+
+  React.useEffect(() => {
+    if (open) {
+      setSortOrder('desc');
+    }
+  }, [open, metric]);
+
   if (!metric) return null;
 
   const built = details ? buildSections(metric, details) : null;
+  const allEmpty = built ? built.sections.every((s) => s.items.length === 0) : false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -271,26 +389,55 @@ export const MetricDetailsModal: React.FC<Props> = ({
               </div>
             </div>
 
+            {!allEmpty && (
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8"
+                  onClick={() => setSortOrder((o) => (o === 'desc' ? 'asc' : 'desc'))}
+                  title="Alternar ordenação por data"
+                >
+                  {sortOrder === 'desc' ? (
+                    <ArrowDownWideNarrow className="w-4 h-4 mr-1.5" />
+                  ) : (
+                    <ArrowUpWideNarrow className="w-4 h-4 mr-1.5" />
+                  )}
+                  {sortOrder === 'desc' ? 'Mais recentes' : 'Mais antigos'}
+                </Button>
+                <div className="flex items-center gap-1.5 ml-auto">
+                  <span className="text-xs text-muted-foreground">Por página</span>
+                  <Select
+                    value={String(pageSize)}
+                    onValueChange={(v) => setPageSize(Number(v) as PageSize)}
+                  >
+                    <SelectTrigger className="h-8 w-[80px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZE_OPTIONS.map((n) => (
+                        <SelectItem key={n} value={String(n)}>
+                          {n}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
             <ScrollArea className="flex-1 -mx-2 px-2">
               <div className="space-y-5 py-3">
-                {built.sections.every(s => s.isEmpty) ? (
+                {allEmpty ? (
                   <EmptyState label="Nenhum registro encontrado para este período." />
                 ) : (
-                  built.sections.map((s, idx) => (
-                    <div key={idx} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-semibold">{s.title}</h4>
-                        <span className="text-xs text-muted-foreground">
-                          {s.count} {s.count === 1 ? 'registro' : 'registros'} ·{' '}
-                          {fmtCurrency(s.total)}
-                        </span>
-                      </div>
-                      {s.isEmpty ? (
-                        <p className="text-xs text-muted-foreground py-2">Nenhum registro.</p>
-                      ) : (
-                        <div className="space-y-1.5">{s.items}</div>
-                      )}
-                    </div>
+                  built.sections.map((s) => (
+                    <SectionView
+                      key={s.key}
+                      section={s}
+                      sortOrder={sortOrder}
+                      pageSize={pageSize}
+                    />
                   ))
                 )}
               </div>
