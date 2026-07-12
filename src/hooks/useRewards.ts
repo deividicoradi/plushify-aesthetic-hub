@@ -14,72 +14,39 @@ export interface Reward {
   popular: boolean;
 }
 
+const sb: any = supabase;
+
 export const useRewards = () => {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  // Dados padrão de recompensas para demonstração
-  const defaultRewards: Reward[] = [
-    {
-      id: '1',
-      title: 'Desconto 10%',
-      description: 'Em qualquer serviço',
-      pointsCost: 100,
-      type: 'discount',
-      tier: 'Bronze',
-      available: true,
-      popular: true
-    },
-    {
-      id: '2',
-      title: 'Limpeza de Pele Grátis',
-      description: 'Serviço completo',
-      pointsCost: 250,
-      type: 'service',
-      tier: 'Prata',
-      available: true,
-      popular: false
-    },
-    {
-      id: '3',
-      title: 'Kit Cuidados Premium',
-      description: 'Produtos exclusivos',
-      pointsCost: 400,
-      type: 'product',
-      tier: 'Ouro',
-      available: true,
-      popular: true
-    },
-    {
-      id: '4',
-      title: 'Day Spa Completo',
-      description: 'Experiência exclusiva VIP',
-      pointsCost: 800,
-      type: 'experience',
-      tier: 'Diamante',
-      available: false,
-      popular: false
-    }
-  ];
-
   const fetchRewards = async () => {
     if (!user) return;
-
     try {
       setLoading(true);
-      
-      // Por enquanto, vamos usar os dados padrão
-      // Quando implementarmos a tabela de rewards no futuro, podemos substituir por:
-      // const { data, error } = await supabase
-      //   .from('rewards')
-      //   .select('*')
-      //   .eq('user_id', user.id);
-      
-      setRewards(defaultRewards);
+      await sb.rpc('ensure_loyalty_defaults');
+      const { data, error } = await sb
+        .from('loyalty_rewards')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('active', true)
+        .order('points_cost');
+      if (error) throw error;
+      const mapped: Reward[] = (data ?? []).map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        description: r.description ?? '',
+        pointsCost: Number(r.points_cost) || 0,
+        type: (['discount', 'service', 'product', 'experience'].includes(r.reward_type) ? r.reward_type : 'discount') as Reward['type'],
+        tier: ((['Bronze', 'Prata', 'Ouro', 'Diamante'].includes(r.tier_name) ? r.tier_name : 'Bronze') as Reward['tier']),
+        available: !!r.available,
+        popular: !!r.popular,
+      }));
+      setRewards(mapped);
     } catch (error) {
       console.error('Erro ao buscar recompensas:', error);
-      setRewards(defaultRewards);
+      setRewards([]);
     } finally {
       setLoading(false);
     }

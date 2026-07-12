@@ -16,6 +16,8 @@ export interface Challenge {
   completed: boolean;
 }
 
+const sb: any = supabase;
+
 export const useChallenges = () => {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,9 +28,9 @@ export const useChallenges = () => {
 
     try {
       setLoading(true);
-
-      // Buscar dados reais para calcular progresso dos desafios
-      const [paymentsData, clientsData] = await Promise.all([
+      await sb.rpc('ensure_loyalty_defaults');
+      const [configured, paymentsData, clientsData] = await Promise.all([
+        sb.from('loyalty_challenges').select('*').eq('user_id', user.id).in('status', ['active']).order('created_at', { ascending: false }),
         supabase
           .from('payments')
           .select('amount, status, created_at')
@@ -54,64 +56,34 @@ export const useChallenges = () => {
 
       const totalClients = clientsData.data?.length || 0;
 
-      // Gerar desafios dinâmicos baseados nos dados reais
-      const dynamicChallenges: Challenge[] = [
-        {
-          id: '1',
-          title: 'Cliente Frequente',
-          description: 'Realize 5 agendamentos este mês',
-          target: 5,
-          current: Math.min(paymentsThisMonth.length, 5),
-          reward: '50 pontos bônus',
-          type: 'visits',
-          difficulty: 'easy',
-          expiresAt: '2025-01-31',
-          completed: paymentsThisMonth.length >= 5
-        },
-        {
-          id: '2',
-          title: 'Grande Investidor',
-          description: 'Gaste R$ 500 em serviços',
-          target: 500,
-          current: Math.min(totalSpentThisMonth, 500),
-          reward: '100 pontos + desconto 10%',
-          type: 'spending',
-          difficulty: 'medium',
-          expiresAt: '2025-01-31',
-          completed: totalSpentThisMonth >= 500
-        },
-        {
-          id: '3',
-          title: 'Embaixador VIP',
-          description: 'Indique 3 novos clientes',
-          target: 3,
-          current: Math.min(totalClients, 3),
-          reward: '200 pontos + brinde especial',
-          type: 'referral',
-          difficulty: 'hard',
-          expiresAt: '2025-01-31',
-          completed: totalClients >= 3
-        }
-      ];
+      const progressFor = (goalType: string, target: number) => {
+        if (goalType === 'visits') return Math.min(paymentsThisMonth.length, target);
+        if (goalType === 'spending') return Math.min(totalSpentThisMonth, target);
+        if (goalType === 'referral') return Math.min(totalClients, target);
+        return 0;
+      };
 
-      setChallenges(dynamicChallenges);
+      const mapped: Challenge[] = (configured.data ?? []).map((c: any) => {
+        const target = Number(c.target_value) || 1;
+        const current = progressFor(c.goal_type, target);
+        return {
+          id: c.id,
+          title: c.title,
+          description: c.description ?? '',
+          target,
+          current,
+          reward: c.reward ?? '',
+          type: (['visits', 'spending', 'referral', 'frequency'].includes(c.goal_type) ? c.goal_type : 'visits') as Challenge['type'],
+          difficulty: (['easy', 'medium', 'hard'].includes(c.difficulty) ? c.difficulty : 'easy') as Challenge['difficulty'],
+          expiresAt: c.period_end ?? new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString(),
+          completed: current >= target,
+        };
+      });
+
+      setChallenges(mapped);
     } catch (error) {
       console.error('Erro ao buscar desafios:', error);
-      // Fallback para dados padrão em caso de erro
-      setChallenges([
-        {
-          id: '1',
-          title: 'Cliente Frequente',
-          description: 'Realize 5 agendamentos este mês',
-          target: 5,
-          current: 0,
-          reward: '50 pontos bônus',
-          type: 'visits',
-          difficulty: 'easy',
-          expiresAt: '2025-01-31',
-          completed: false
-        }
-      ]);
+      setChallenges([]);
     } finally {
       setLoading(false);
     }
