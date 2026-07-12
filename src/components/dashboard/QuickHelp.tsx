@@ -13,14 +13,14 @@ export const QuickHelp = () => {
       icon: Book,
       title: "Guia de Introdução",
       description: "Aprenda o básico do Plushify",
-      action: () => navigate('/help'),
+      action: () => navigate('/app/help'),
       color: "from-blue-500 to-blue-600"
     },
     {
       icon: Video,
       title: "Tutoriais",
       description: "Vídeos explicativos",
-      action: () => navigate('/help'),
+      action: () => navigate('/app/help'),
       color: "from-green-500 to-green-600"
     },
     {
@@ -66,7 +66,7 @@ export const QuickHelp = () => {
         
         <Button
           className="w-full mt-6 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white border-0 shadow-md"
-          onClick={() => navigate('/help')}
+          onClick={() => navigate('/app/help')}
         >
           <Book className="w-4 h-4 mr-2" />
           Ver toda a ajuda
