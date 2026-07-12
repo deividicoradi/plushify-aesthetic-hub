@@ -57,7 +57,7 @@ const Testimonials = () => {
       callout: "Aumentei meu faturamento em 40%"
     },
     {
-      quote: "O recurso de cursos e certificados me permitiu criar uma nova fonte de renda sem precisar sair do meu espaço. As automações de email e WhatsApp mantêm minhas turmas sempre cheias.",
+      quote: "O recurso de cursos e certificados me permitiu criar uma nova fonte de renda sem precisar sair do meu espaço. As automações de email mantêm minhas turmas sempre cheias.",
       author: "Juliana Costa",
       role: "Especialista em Dermopigmentação, Belo Horizonte",
       stars: 5

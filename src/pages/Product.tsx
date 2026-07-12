@@ -11,7 +11,7 @@ const Product = () => {
     {
       icon: Calendar,
       title: "Agendamentos Inteligentes",
-      description: "Sistema completo de agendamentos com calendário interativo, lembretes automáticos por WhatsApp e e-mail, controle de disponibilidade e reagendamentos facilitados."
+      description: "Sistema completo de agendamentos com calendário interativo, lembretes automáticos por e-mail, controle de disponibilidade e reagendamentos facilitados."
     },
     {
       icon: Users,
