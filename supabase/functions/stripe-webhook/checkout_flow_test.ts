@@ -119,3 +119,99 @@ Deno.test({
     }
   },
 });
+
+// Authenticated user MUST NOT be able to call start_subscription targeting
+// another user_id. The SECURITY DEFINER function guards with:
+//   IF auth.uid() IS NOT NULL AND auth.uid() <> p_user_id THEN
+//     RAISE EXCEPTION 'Acesso negado';
+//
+// This test proves the guard by:
+//   1. Minting two throwaway users A and B via the admin API.
+//   2. Signing in as A through the anon (JWT) client so auth.uid() is set.
+//   3. Calling start_subscription with p_user_id = B.
+//   4. Asserting we get an "Acesso negado" error and that B has no row.
+//   5. Sanity-check: calling with p_user_id = A succeeds (auth.uid() matches).
+Deno.test({
+  name: "start_subscription: authenticated user cannot target another user_id",
+  ignore: !canRunAuth,
+  async fn() {
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const passwordA = crypto.randomUUID() + "Aa1!";
+    const emailA = `guard-a-${crypto.randomUUID()}@test.plushify.local`;
+    const emailB = `guard-b-${crypto.randomUUID()}@test.plushify.local`;
+
+    const { data: uA, error: eA } = await admin.auth.admin.createUser({
+      email: emailA,
+      password: passwordA,
+      email_confirm: true,
+    });
+    assertEquals(eA, null, `create A failed: ${eA?.message}`);
+    const { data: uB, error: eB } = await admin.auth.admin.createUser({
+      email: emailB,
+      password: crypto.randomUUID() + "Aa1!",
+      email_confirm: true,
+    });
+    assertEquals(eB, null, `create B failed: ${eB?.message}`);
+    const userA = uA.user!.id;
+    const userB = uB.user!.id;
+
+    try {
+      // Sign in as A through the anon client so auth.uid() = userA
+      // inside the SECURITY DEFINER function.
+      const asA = createClient(SUPABASE_URL, ANON_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { data: session, error: signInErr } =
+        await asA.auth.signInWithPassword({ email: emailA, password: passwordA });
+      assertEquals(signInErr, null, `sign-in failed: ${signInErr?.message}`);
+      assert(session.session?.access_token, "expected access token for A");
+
+      // Cross-user call: A tries to upgrade B → must be rejected.
+      const { data: badData, error: badErr } = await asA.rpc(
+        "start_subscription",
+        {
+          p_user_id: userB,
+          p_plan_code: "premium",
+          p_billing_interval: "month",
+          p_trial_days: 0,
+        },
+      );
+      assert(badErr, "expected an error when targeting another user");
+      assertEquals(badData, null, "no id should be returned on rejection");
+      assert(
+        (badErr!.message || "").toLowerCase().includes("acesso negado"),
+        `expected "Acesso negado", got: ${badErr!.message}`,
+      );
+
+      // B must still have no subscription row.
+      const { data: bRows } = await admin
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", userB);
+      assertEquals(
+        bRows?.length ?? 0,
+        0,
+        "victim user must have no subscription created",
+      );
+
+      // Sanity: A calling for themselves is allowed (auth.uid() = p_user_id).
+      const { data: okId, error: okErr } = await asA.rpc("start_subscription", {
+        p_user_id: userA,
+        p_plan_code: "professional",
+        p_billing_interval: "month",
+        p_trial_days: 0,
+      });
+      assertEquals(okErr, null, `self-call failed: ${okErr?.message}`);
+      assert(typeof okId === "string" && okId.length > 0, "expected sub id for self");
+
+      await asA.auth.signOut();
+    } finally {
+      await admin.from("user_subscriptions").delete().in("user_id", [userA, userB]);
+      await admin.auth.admin.deleteUser(userA);
+      await admin.auth.admin.deleteUser(userB);
+    }
+  },
+});
