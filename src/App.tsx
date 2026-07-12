@@ -47,6 +47,7 @@ const AdvancedAnalytics = lazy(() => import("./pages/AdvancedAnalytics"));
 const FinancialDashboard = lazy(() => import("./pages/FinancialDashboard"));
 const TeamManagement = lazy(() => import("./pages/TeamManagement"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
+const PlansInternal = lazy(() => import("./pages/PlansInternal"));
 
 const RouteFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -208,6 +209,14 @@ const AppContent = () => {
         element={
           <ProtectedRoute>
             {Lazy(<HelpCenter />)}
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app/planos"
+        element={
+          <ProtectedRoute>
+            {Lazy(<PlansInternal />)}
           </ProtectedRoute>
         }
       />
