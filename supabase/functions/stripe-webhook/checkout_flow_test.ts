@@ -181,9 +181,19 @@ Deno.test({
       );
       assert(badErr, "expected an error when targeting another user");
       assertEquals(badData, null, "no id should be returned on rejection");
+      // The call must be rejected. Two acceptable rejection paths:
+      //   a) authenticated has no EXECUTE grant on start_subscription →
+          //      PostgREST returns "permission denied for function ..."
+      //   b) authenticated has EXECUTE → the SECURITY DEFINER guard raises
+      //      "Acesso negado" because auth.uid() <> p_user_id.
+      // Either way, an authenticated user MUST NOT be able to upgrade
+      // another user's plan. We accept both messages here.
+      const msg = (badErr!.message || "").toLowerCase();
       assert(
-        (badErr!.message || "").toLowerCase().includes("acesso negado"),
-        `expected "Acesso negado", got: ${badErr!.message}`,
+        msg.includes("acesso negado") ||
+          msg.includes("permission denied") ||
+          msg.includes("not allowed"),
+        `expected rejection ("Acesso negado" or "permission denied"), got: ${badErr!.message}`,
       );
 
       // B must still have no subscription row.
