@@ -3,13 +3,19 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign, AlertTriangle, CreditCard, Target } from 'lucide-react';
 import { FinancialMetrics } from '@/hooks/useFinancialData';
+import { useFinancialDetails } from '@/hooks/financial/useFinancialDetails';
+import { MetricDetailsModal, type MetricKey } from './MetricDetailsModal';
 
 interface MetricsCardsProps {
   metrics: FinancialMetrics;
   loading?: boolean;
+  dateRange: { startDate: Date; endDate: Date; period: string };
 }
 
-export const MetricsCards = ({ metrics, loading = false }: MetricsCardsProps) => {
+export const MetricsCards = ({ metrics, loading = false, dateRange }: MetricsCardsProps) => {
+  const [activeMetric, setActiveMetric] = React.useState<MetricKey | null>(null);
+  const { details, loading: detailsLoading } = useFinancialDetails(dateRange);
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -47,10 +53,21 @@ export const MetricsCards = ({ metrics, loading = false }: MetricsCardsProps) =>
   const GrowthIconReceitas = getGrowthIcon(metrics.crescimentoReceitas);
   const GrowthIconDespesas = getGrowthIcon(metrics.crescimentoDespesas);
 
+  const cardClass =
+    'cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 hover:ring-1 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
+  const open = (m: MetricKey) => setActiveMetric(m);
+
   return (
+    <>
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
       {/* Saldo Líquido */}
-      <Card className="col-span-2 lg:col-span-1 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800">
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={() => open('saldoLiquido')}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open('saldoLiquido')}
+        className={`col-span-2 lg:col-span-1 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800 ${cardClass}`}
+      >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">Saldo Líquido</CardTitle>
           <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
@@ -66,7 +83,13 @@ export const MetricsCards = ({ metrics, loading = false }: MetricsCardsProps) =>
       </Card>
 
       {/* Total Receitas */}
-      <Card className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800">
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={() => open('totalReceitas')}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open('totalReceitas')}
+        className={`bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800 ${cardClass}`}
+      >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">Total Receitas</CardTitle>
           <GrowthIconReceitas className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" />
@@ -82,7 +105,13 @@ export const MetricsCards = ({ metrics, loading = false }: MetricsCardsProps) =>
       </Card>
 
       {/* Total Despesas */}
-      <Card className="bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-950/30 dark:to-pink-950/30 border-red-200 dark:border-red-800">
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={() => open('totalDespesas')}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open('totalDespesas')}
+        className={`bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-950/30 dark:to-pink-950/30 border-red-200 dark:border-red-800 ${cardClass}`}
+      >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">Total Despesas</CardTitle>
           <GrowthIconDespesas className="h-3 w-3 sm:h-4 sm:w-4 text-red-600 dark:text-red-400" />
@@ -98,7 +127,13 @@ export const MetricsCards = ({ metrics, loading = false }: MetricsCardsProps) =>
       </Card>
 
       {/* Parcelas Vencidas */}
-      <Card className="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200 dark:border-orange-800">
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={() => open('parcelasVencidas')}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open('parcelasVencidas')}
+        className={`bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200 dark:border-orange-800 ${cardClass}`}
+      >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-300">Parcelas Vencidas</CardTitle>
           <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 dark:text-orange-400" />
@@ -114,7 +149,13 @@ export const MetricsCards = ({ metrics, loading = false }: MetricsCardsProps) =>
       </Card>
 
       {/* Ticket Médio */}
-      <Card className="bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-950/30 dark:to-violet-950/30 border-purple-200 dark:border-purple-800">
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={() => open('ticketMedio')}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open('ticketMedio')}
+        className={`bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-950/30 dark:to-violet-950/30 border-purple-200 dark:border-purple-800 ${cardClass}`}
+      >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-xs sm:text-sm font-medium text-purple-700 dark:text-purple-300">Ticket Médio</CardTitle>
           <Target className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600 dark:text-purple-400" />
@@ -130,7 +171,13 @@ export const MetricsCards = ({ metrics, loading = false }: MetricsCardsProps) =>
       </Card>
 
       {/* Receitas Mês Atual */}
-      <Card className="bg-gradient-to-br from-teal-50 to-cyan-100 dark:from-teal-950/30 dark:to-cyan-950/30 border-teal-200 dark:border-teal-800">
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={() => open('receitasMes')}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open('receitasMes')}
+        className={`bg-gradient-to-br from-teal-50 to-cyan-100 dark:from-teal-950/30 dark:to-cyan-950/30 border-teal-200 dark:border-teal-800 ${cardClass}`}
+      >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-xs sm:text-sm font-medium text-teal-700 dark:text-teal-300">Receitas do Mês</CardTitle>
           <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-teal-600 dark:text-teal-400" />
@@ -145,5 +192,14 @@ export const MetricsCards = ({ metrics, loading = false }: MetricsCardsProps) =>
         </CardContent>
       </Card>
     </div>
+    <MetricDetailsModal
+      open={activeMetric !== null}
+      onOpenChange={(v) => !v && setActiveMetric(null)}
+      metric={activeMetric}
+      details={details}
+      loading={detailsLoading}
+      period={dateRange.period}
+    />
+    </>
   );
 };
