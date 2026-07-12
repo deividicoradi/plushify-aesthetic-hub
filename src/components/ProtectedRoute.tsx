@@ -64,7 +64,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   if (currentPlan === 'trial' && !isTestUser) {
     if (restrictedRoutes.some(route => location.pathname.startsWith(route))) {
       console.log('SECURITY: Trial user blocked from premium features');
-      return <Navigate to="/planos" replace state={{ 
+      return <Navigate to="/app/planos" replace state={{ 
         message: 'Esta funcionalidade requer um plano pago. Faça upgrade para continuar.',
         from: location 
       }} />;
