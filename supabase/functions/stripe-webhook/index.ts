@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { mapPriceIdToPlan } from "../_shared/stripe-catalog.ts";
 
 // Restrictive CORS for webhook - should only be called by Stripe
 const corsHeaders = {
@@ -61,20 +62,12 @@ serve(async (req) => {
       });
     }
 
-    // Catálogo de price_id → {plan_code, billing_interval}
-    const PRICE_CATALOG: Record<string, { plan_code: string; billing_interval: string }> = {
-      // Professional
-      'price_professional_monthly': { plan_code: 'professional', billing_interval: 'month' },
-      'price_professional_annual': { plan_code: 'professional', billing_interval: 'year' },
-      // Enterprise (premium no DB)
-      'price_premium_monthly': { plan_code: 'premium', billing_interval: 'month' },
-      'price_premium_annual': { plan_code: 'premium', billing_interval: 'year' },
-    };
-
+    // Catálogo compartilhado — mesma fonte usada pelo create-checkout.
+    // Resolve price_id (recebido do Stripe) → { plan_code, billing_interval }.
     const mapPriceToSubscription = (priceId: string) => {
-      const mapping = PRICE_CATALOG[priceId];
+      const mapping = mapPriceIdToPlan(priceId);
       if (!mapping) {
-        logStep('AVISO: price_id não encontrado no catálogo', { priceId });
+        logStep('AVISO: price_id não encontrado no catálogo (verifique STRIPE_PRICE_* secrets)', { priceId });
         return null;
       }
       return mapping;
