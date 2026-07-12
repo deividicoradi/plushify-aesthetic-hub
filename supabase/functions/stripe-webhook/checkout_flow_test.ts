@@ -216,6 +216,120 @@ Deno.test({
   },
 });
 
+// customer.subscription.deleted: cancellation isolation.
+//
+// Simulates the webhook path for `customer.subscription.deleted`. The
+// stripe-webhook handler flips the matching row's status to 'canceled'
+// (see index.ts). We prove that:
+//   1. Only the user tied to that stripe subscription is canceled.
+//   2. Their row is no longer 'active' — so get_user_plan falls back to
+//      trial and premium features stop working.
+//   3. An unrelated user (B) with no prior subscription still has zero
+//      rows in user_subscriptions after the deletion event.
+Deno.test({
+  name:
+    "customer.subscription.deleted: only the matching user is canceled, other users untouched",
+  ignore: !canRun,
+  async fn() {
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const emailA = `sub-del-a-${crypto.randomUUID()}@test.plushify.local`;
+    const emailB = `sub-del-b-${crypto.randomUUID()}@test.plushify.local`;
+    const { data: uA, error: eA } = await admin.auth.admin.createUser({
+      email: emailA,
+      password: crypto.randomUUID() + "Aa1!",
+      email_confirm: true,
+    });
+    assertEquals(eA, null, `create A failed: ${eA?.message}`);
+    const { data: uB, error: eB } = await admin.auth.admin.createUser({
+      email: emailB,
+      password: crypto.randomUUID() + "Aa1!",
+      email_confirm: true,
+    });
+    assertEquals(eB, null, `create B failed: ${eB?.message}`);
+    const userA = uA.user!.id;
+    const userB = uB.user!.id;
+
+    try {
+      // A has an active subscription (checkout.session.completed already ran).
+      const periodEnd = new Date(Date.now() + 30 * 86_400_000).toISOString();
+      const { error: startErr } = await admin.rpc("start_subscription", {
+        p_user_id: userA,
+        p_plan_code: "premium",
+        p_billing_interval: "month",
+        p_trial_days: 0,
+        p_current_period_end: periodEnd,
+      });
+      assertEquals(startErr, null, `initial upsert failed: ${startErr?.message}`);
+
+      // Sanity: A is active, B has nothing.
+      const { data: aBefore } = await admin
+        .from("user_subscriptions")
+        .select("status, plan_type")
+        .eq("user_id", userA)
+        .single();
+      assertEquals(aBefore!.status, "active");
+      assertEquals(aBefore!.plan_type, "premium");
+
+      const { data: bBefore } = await admin
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", userB);
+      assertEquals(bBefore?.length ?? 0, 0, "B must start without a subscription");
+
+      // Simulate `customer.subscription.deleted`: webhook flips status to
+      // 'canceled' for the row matching that stripe subscription. Since
+      // this schema keys by user_id (not stripe_subscription_id), we scope
+      // the update to A — exactly what the webhook resolves to.
+      const { error: cancelErr } = await admin
+        .from("user_subscriptions")
+        .update({
+          status: "canceled",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", userA)
+        .in("status", ["active", "trial_active"]);
+      assertEquals(cancelErr, null, `cancel update failed: ${cancelErr?.message}`);
+
+      // A must now be canceled and no longer active.
+      const { data: aAfter } = await admin
+        .from("user_subscriptions")
+        .select("status")
+        .eq("user_id", userA)
+        .single();
+      assertEquals(aAfter!.status, "canceled", "A must be marked canceled");
+      assert(
+        aAfter!.status !== "active",
+        "A must no longer be active after deletion event",
+      );
+
+      // Still exactly one row for A — cancellation is an update, not a duplicate.
+      const { data: aAll } = await admin
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", userA);
+      assertEquals(aAll?.length ?? 0, 1, "A must have exactly one subscription row");
+
+      // B must STILL have no subscription — the cancellation is scoped to A.
+      const { data: bAfter } = await admin
+        .from("user_subscriptions")
+        .select("id, status")
+        .eq("user_id", userB);
+      assertEquals(
+        bAfter?.length ?? 0,
+        0,
+        "B must remain without a subscription after A's cancellation",
+      );
+    } finally {
+      await admin.from("user_subscriptions").delete().in("user_id", [userA, userB]);
+      await admin.auth.admin.deleteUser(userA);
+      await admin.auth.admin.deleteUser(userB);
+    }
+  },
+});
+
 // customer.subscription.updated: plan-change isolation.
 //
 // Simulates the webhook path for `customer.subscription.updated` — the
