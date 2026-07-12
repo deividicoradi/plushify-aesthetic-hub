@@ -24,8 +24,10 @@ export interface PaymentDetailRow {
   payment_date: string | null;
   created_at: string;
   status: string;
-  clients?: { name: string | null } | null;
-  payment_methods?: { name: string | null } | null;
+  client_id: string | null;
+  payment_method_id: string;
+  client_name?: string | null;
+  payment_method_name?: string | null;
 }
 
 export interface CashClosureDetailRow {
@@ -44,7 +46,7 @@ export interface AppointmentDetailRow {
   price: number;
   professional_id: string | null;
   created_at: string;
-  professionals?: { name: string | null } | null;
+  professional_name?: string | null;
 }
 
 export interface ProductDetailRow {
@@ -101,11 +103,11 @@ export const useReportsDetails = (metric: ReportsMetricKey | null) => {
               clients: (clients || []) as ClientRow[],
             });
         } else if (metric === 'totalRevenue') {
-          const [paymentsRes, cashRes] = await Promise.all([
+          const [paymentsRes, cashRes, clientsRes, methodsRes] = await Promise.all([
             supabase
               .from('payments')
               .select(
-                'id, description, paid_amount, payment_date, created_at, status, clients(name), payment_methods(name)'
+                'id, description, paid_amount, payment_date, created_at, status, client_id, payment_method_id'
               )
               .eq('user_id', user.id)
               .eq('status', 'pago'),
@@ -113,25 +115,49 @@ export const useReportsDetails = (metric: ReportsMetricKey | null) => {
               .from('cash_closures')
               .select('id, closure_date, total_income')
               .eq('user_id', user.id),
+            supabase.rpc('get_clients_masked', { p_mask_sensitive: false }),
+            supabase
+              .from('payment_methods')
+              .select('id, name')
+              .eq('user_id', user.id),
           ]);
+          const clientMap = new Map<string, string>();
+          (clientsRes.data || []).forEach((c: any) => clientMap.set(c.id, c.name));
+          const methodMap = new Map<string, string>();
+          (methodsRes.data || []).forEach((m: any) => methodMap.set(m.id, m.name));
+          const enriched: PaymentDetailRow[] = (paymentsRes.data || []).map((p: any) => ({
+            ...p,
+            client_name: p.client_id ? clientMap.get(p.client_id) ?? null : null,
+            payment_method_name: methodMap.get(p.payment_method_id) ?? null,
+          }));
           if (!cancelled)
             setData({
               ...empty,
-              payments: (paymentsRes.data || []) as PaymentDetailRow[],
+              payments: enriched,
               cashClosures: (cashRes.data || []) as CashClosureDetailRow[],
             });
         } else if (metric === 'totalAppointments') {
-          const { data: appts } = await supabase
-            .from('appointments')
-            .select(
-              'id, client_name, service_name, appointment_date, appointment_time, status, price, professional_id, created_at, professionals(name)'
-            )
-            .eq('user_id', user.id);
-          if (!cancelled)
-            setData({
-              ...empty,
-              appointments: (appts || []) as AppointmentDetailRow[],
-            });
+          const [apptsRes, profsRes] = await Promise.all([
+            supabase
+              .from('appointments')
+              .select(
+                'id, client_name, service_name, appointment_date, appointment_time, status, price, professional_id, created_at'
+              )
+              .eq('user_id', user.id),
+            supabase
+              .from('professionals')
+              .select('id, name')
+              .eq('user_id', user.id),
+          ]);
+          const profMap = new Map<string, string>();
+          (profsRes.data || []).forEach((p: any) => profMap.set(p.id, p.name));
+          const enriched: AppointmentDetailRow[] = (apptsRes.data || []).map((a: any) => ({
+            ...a,
+            professional_name: a.professional_id
+              ? profMap.get(a.professional_id) ?? null
+              : null,
+          }));
+          if (!cancelled) setData({ ...empty, appointments: enriched });
         } else if (metric === 'totalProducts') {
           const { data: products } = await supabase
             .from('products')
