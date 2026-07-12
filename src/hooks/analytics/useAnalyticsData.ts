@@ -57,7 +57,12 @@ interface ServicePerformanceData {
   avgPrice: number;
 }
 
-export const useAnalyticsChartData = () => {
+interface OptionalRange {
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export const useAnalyticsChartData = (range?: OptionalRange) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [pipelineByAmountData, setPipelineByAmountData] = useState<PipelineData[]>([]);
@@ -79,6 +84,11 @@ export const useAnalyticsChartData = () => {
     'Outros': '#6b7280'
   };
 
+  const fromISO = range?.startDate?.toISOString();
+  const toISO = range?.endDate?.toISOString();
+  const fromDate = range?.startDate?.toISOString().slice(0, 10);
+  const toDate = range?.endDate?.toISOString().slice(0, 10);
+
   useEffect(() => {
     if (!user) return;
     
@@ -87,11 +97,14 @@ export const useAnalyticsChartData = () => {
         setLoading(true);
 
         // Buscar dados de pipeline por valor (receita por serviço)
-        const { data: revenueByService, error: revenueError } = await supabase
+        let revenueByServiceQuery = supabase
           .from('appointments')
           .select('service_name, price')
           .eq('user_id', user.id)
           .eq('status', 'concluido');
+        if (fromDate) revenueByServiceQuery = revenueByServiceQuery.gte('appointment_date', fromDate);
+        if (toDate) revenueByServiceQuery = revenueByServiceQuery.lte('appointment_date', toDate);
+        const { data: revenueByService, error: revenueError } = await revenueByServiceQuery;
 
         if (revenueError) throw revenueError;
 
@@ -110,10 +123,13 @@ export const useAnalyticsChartData = () => {
         }));
 
         // Buscar dados de pipeline por quantidade (agendamentos por serviço)
-        const { data: countByService, error: countError } = await supabase
+        let countByServiceQuery = supabase
           .from('appointments')
           .select('service_name')
           .eq('user_id', user.id);
+        if (fromDate) countByServiceQuery = countByServiceQuery.gte('appointment_date', fromDate);
+        if (toDate) countByServiceQuery = countByServiceQuery.lte('appointment_date', toDate);
+        const { data: countByService, error: countError } = await countByServiceQuery;
 
         if (countError) throw countError;
 
@@ -192,11 +208,14 @@ export const useAnalyticsChartData = () => {
         setMonthlyRevenueData(monthlyRevenue);
 
         // Buscar dados de métodos de pagamento
-        const { data: paymentMethods, error: paymentMethodError } = await supabase
+        let paymentMethodsQuery = supabase
           .from('payments')
           .select('amount, payment_method_id, payment_methods(name, type)')
           .eq('user_id', user.id)
           .eq('status', 'pago');
+        if (fromISO) paymentMethodsQuery = paymentMethodsQuery.gte('payment_date', fromISO);
+        if (toISO) paymentMethodsQuery = paymentMethodsQuery.lte('payment_date', toISO);
+        const { data: paymentMethods, error: paymentMethodError } = await paymentMethodsQuery;
 
         if (paymentMethodError) throw paymentMethodError;
 
@@ -218,10 +237,13 @@ export const useAnalyticsChartData = () => {
         }));
 
         // Buscar dados de status de agendamentos
-        const { data: appointmentStatus, error: statusError } = await supabase
+        let appointmentStatusQuery = supabase
           .from('appointments')
           .select('status')
           .eq('user_id', user.id);
+        if (fromDate) appointmentStatusQuery = appointmentStatusQuery.gte('appointment_date', fromDate);
+        if (toDate) appointmentStatusQuery = appointmentStatusQuery.lte('appointment_date', toDate);
+        const { data: appointmentStatus, error: statusError } = await appointmentStatusQuery;
 
         if (statusError) throw statusError;
 
@@ -270,11 +292,14 @@ export const useAnalyticsChartData = () => {
         }
 
         // Buscar padrão semanal
-        const { data: weeklyAppointments, error: weeklyError } = await supabase
+        let weeklyQuery = supabase
           .from('appointments')
           .select('appointment_date, price')
           .eq('user_id', user.id)
           .eq('status', 'concluido');
+        if (fromDate) weeklyQuery = weeklyQuery.gte('appointment_date', fromDate);
+        if (toDate) weeklyQuery = weeklyQuery.lte('appointment_date', toDate);
+        const { data: weeklyAppointments, error: weeklyError } = await weeklyQuery;
 
         if (weeklyError) throw weeklyError;
 
@@ -369,7 +394,7 @@ export const useAnalyticsChartData = () => {
     };
 
     fetchAnalyticsData();
-  }, [user]);
+  }, [user, fromISO, toISO, fromDate, toDate]);
 
   return {
     pipelineByAmountData,
