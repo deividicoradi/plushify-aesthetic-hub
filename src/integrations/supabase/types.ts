@@ -536,6 +536,267 @@ export type Database = {
           },
         ]
       }
+      loyalty_challenges: {
+        Row: {
+          audience: string
+          created_at: string
+          description: string | null
+          difficulty: string
+          goal_type: string
+          id: string
+          period_end: string | null
+          period_start: string | null
+          reward: string | null
+          status: string
+          target_value: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audience?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          goal_type?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          reward?: string | null
+          status?: string
+          target_value?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          goal_type?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          reward?: string | null
+          status?: string
+          target_value?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      loyalty_point_transactions: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kind: string
+          points: number
+          reference_id: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: string
+          points?: number
+          reference_id?: string | null
+          source?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: string
+          points?: number
+          reference_id?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      loyalty_reward_redemptions: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          estimated_value: number
+          id: string
+          points_used: number
+          redeemed_at: string
+          reward_id: string | null
+          reward_title: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          estimated_value?: number
+          id?: string
+          points_used?: number
+          redeemed_at?: string
+          reward_id?: string | null
+          reward_title: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          estimated_value?: number
+          id?: string
+          points_used?: number
+          redeemed_at?: string
+          reward_id?: string | null
+          reward_title?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      loyalty_rewards: {
+        Row: {
+          active: boolean
+          available: boolean
+          created_at: string
+          description: string | null
+          id: string
+          points_cost: number
+          popular: boolean
+          reward_type: string
+          tier_name: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          validity_days: number | null
+        }
+        Insert: {
+          active?: boolean
+          available?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          points_cost?: number
+          popular?: boolean
+          reward_type?: string
+          tier_name?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          validity_days?: number | null
+        }
+        Update: {
+          active?: boolean
+          available?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          points_cost?: number
+          popular?: boolean
+          reward_type?: string
+          tier_name?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          validity_days?: number | null
+        }
+        Relationships: []
+      }
+      loyalty_settings: {
+        Row: {
+          created_at: string
+          how_it_works: Json
+          id: string
+          points_active: boolean
+          points_per_currency: number
+          points_validity_days: number | null
+          seeded: boolean
+          updated_at: string
+          user_id: string
+          vip_criteria: Json
+        }
+        Insert: {
+          created_at?: string
+          how_it_works?: Json
+          id?: string
+          points_active?: boolean
+          points_per_currency?: number
+          points_validity_days?: number | null
+          seeded?: boolean
+          updated_at?: string
+          user_id: string
+          vip_criteria?: Json
+        }
+        Update: {
+          created_at?: string
+          how_it_works?: Json
+          id?: string
+          points_active?: boolean
+          points_per_currency?: number
+          points_validity_days?: number | null
+          seeded?: boolean
+          updated_at?: string
+          user_id?: string
+          vip_criteria?: Json
+        }
+        Relationships: []
+      }
+      loyalty_tiers: {
+        Row: {
+          active: boolean
+          benefit: string | null
+          color: string
+          created_at: string
+          description: string | null
+          id: string
+          min_points: number
+          min_spent: number
+          name: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          benefit?: string | null
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          min_points?: number
+          min_spent?: number
+          name: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          benefit?: string | null
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          min_points?: number
+          min_spent?: number
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           content: string | null
@@ -1020,6 +1281,7 @@ export type Database = {
         Returns: string
       }
       detect_sql_injection: { Args: { input_text: string }; Returns: boolean }
+      ensure_loyalty_defaults: { Args: never; Returns: undefined }
       get_available_slots: {
         Args: {
           p_date: string
