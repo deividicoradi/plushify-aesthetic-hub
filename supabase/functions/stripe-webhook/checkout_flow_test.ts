@@ -86,17 +86,8 @@ Deno.test({
       assertEquals(row!.status, "active");
       assert(row!.expires_at, "expires_at should be set");
 
-      // 5. get_user_plan agrees
-      const { data: plan, error: planErr } = await admin.rpc("get_user_plan", {
-        user_uuid: userId,
-      });
-      // get_user_plan enforces auth.uid() = user_uuid, so service-role
-      // invocation without a session either errors or returns 'trial'.
-      // We instead validate directly from the row above; log for debug.
-      console.log("get_user_plan (service role) =>", plan, planErr?.message);
-
-      // 6. Simulate second webhook (customer.subscription.updated) with
-      //    an extended period — start_subscription upserts.
+      // 5. Simulate second webhook (customer.subscription.updated) with
+      //    a plan change + extended period — start_subscription upserts.
       const newPeriodEnd = new Date(Date.now() + 60 * 86_400_000).toISOString();
       const { error: rpcErr2 } = await admin.rpc("start_subscription", {
         p_user_id: userId,
@@ -107,15 +98,18 @@ Deno.test({
         p_stripe_customer_id: fakeStripeCus,
         p_current_period_end: newPeriodEnd,
       });
-      // start_subscription checks auth.uid() = p_user_id; service role has
-      // no auth.uid(), so this must fail — proving the RPC cannot be
-      // used to escalate a plan without either the user's JWT or the
-      // webhook's direct DB access via service role bypassing the check.
-      // Note: SECURITY DEFINER + auth.uid() IS NULL raises "Acesso negado".
-      // In production the webhook uses service_role to call the same RPC;
-      // to keep the RPC safe we verify the guard here.
-      assert(rpcErr2, "start_subscription without auth.uid() should be blocked");
-      console.log("guard fired as expected:", rpcErr2!.message);
+      assertEquals(rpcErr2, null, `second upsert failed: ${rpcErr2?.message}`);
+
+      const { data: row2 } = await admin
+        .from("user_subscriptions")
+        .select("plan_type, expires_at")
+        .eq("user_id", userId)
+        .single();
+      assertEquals(row2!.plan_type, "premium", "plan should be upgraded to premium");
+      assert(
+        new Date(row2!.expires_at!).getTime() > new Date(periodEnd).getTime(),
+        "expires_at should be extended by the second webhook event",
+      );
     } finally {
       // Cleanup
       await admin.from("user_subscriptions").delete().eq("user_id", userId);
