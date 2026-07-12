@@ -216,6 +216,121 @@ Deno.test({
   },
 });
 
+// customer.subscription.updated: downgrade isolation (premium → professional).
+//
+// The webhook's updated-event path calls start_subscription with the new
+// plan_code mapped from the price_id. A downgrade must:
+//   1. Change ONLY the matching user's plan from premium to professional.
+//   2. Keep exactly one row per user (upsert, not duplicate).
+//   3. Leave unrelated users (B) with no subscription row at all.
+Deno.test({
+  name:
+    "customer.subscription.updated: downgrade premium → professional only touches the matching user",
+  ignore: !canRun,
+  async fn() {
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const emailA = `sub-down-a-${crypto.randomUUID()}@test.plushify.local`;
+    const emailB = `sub-down-b-${crypto.randomUUID()}@test.plushify.local`;
+    const { data: uA, error: eA } = await admin.auth.admin.createUser({
+      email: emailA,
+      password: crypto.randomUUID() + "Aa1!",
+      email_confirm: true,
+    });
+    assertEquals(eA, null, `create A failed: ${eA?.message}`);
+    const { data: uB, error: eB } = await admin.auth.admin.createUser({
+      email: emailB,
+      password: crypto.randomUUID() + "Aa1!",
+      email_confirm: true,
+    });
+    assertEquals(eB, null, `create B failed: ${eB?.message}`);
+    const userA = uA.user!.id;
+    const userB = uB.user!.id;
+
+    const stripeSub = `sub_test_${crypto.randomUUID().replace(/-/g, "")}`;
+    const stripeCus = `cus_test_${crypto.randomUUID().replace(/-/g, "")}`;
+
+    try {
+      // A starts on premium (initial checkout.session.completed).
+      const firstEnd = new Date(Date.now() + 60 * 86_400_000).toISOString();
+      const { error: startErr } = await admin.rpc("start_subscription", {
+        p_user_id: userA,
+        p_plan_code: "premium",
+        p_billing_interval: "month",
+        p_trial_days: 0,
+        p_stripe_subscription_id: stripeSub,
+        p_stripe_customer_id: stripeCus,
+        p_current_period_end: firstEnd,
+      });
+      assertEquals(startErr, null, `initial upsert failed: ${startErr?.message}`);
+
+      // Sanity: A on premium, B with nothing.
+      const { data: aBefore } = await admin
+        .from("user_subscriptions")
+        .select("plan_type, status")
+        .eq("user_id", userA)
+        .single();
+      assertEquals(aBefore!.plan_type, "premium");
+      assertEquals(aBefore!.status, "active");
+      const { data: bBefore } = await admin
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", userB);
+      assertEquals(bBefore?.length ?? 0, 0, "B must start without a subscription");
+
+      // Simulate `customer.subscription.updated` with a cheaper price:
+      // premium → professional. Webhook maps price_id → 'professional'
+      // and calls start_subscription for the matched user_id.
+      const newEnd = new Date(Date.now() + 30 * 86_400_000).toISOString();
+      const { error: downErr } = await admin.rpc("start_subscription", {
+        p_user_id: userA,
+        p_plan_code: "professional",
+        p_billing_interval: "month",
+        p_trial_days: 0,
+        p_stripe_subscription_id: stripeSub,
+        p_stripe_customer_id: stripeCus,
+        p_current_period_end: newEnd,
+      });
+      assertEquals(downErr, null, `downgrade upsert failed: ${downErr?.message}`);
+
+      // A must now be on professional, still active.
+      const { data: aAfter, error: aErr } = await admin
+        .from("user_subscriptions")
+        .select("plan_type, status")
+        .eq("user_id", userA)
+        .single();
+      assertEquals(aErr, null, `select A failed: ${aErr?.message}`);
+      assertEquals(aAfter!.plan_type, "professional", "A should be downgraded to professional");
+      assert(aAfter!.plan_type !== "premium", "A must no longer be premium");
+      assertEquals(aAfter!.status, "active");
+
+      // Still exactly one row for A — downgrade must upsert, not duplicate.
+      const { data: aAll } = await admin
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", userA);
+      assertEquals(aAll?.length ?? 0, 1, "A must have exactly one subscription row");
+
+      // B must STILL have no subscription — downgrade is scoped to A only.
+      const { data: bAfter } = await admin
+        .from("user_subscriptions")
+        .select("id, plan_type")
+        .eq("user_id", userB);
+      assertEquals(
+        bAfter?.length ?? 0,
+        0,
+        "B must remain without a subscription after A's downgrade",
+      );
+    } finally {
+      await admin.from("user_subscriptions").delete().in("user_id", [userA, userB]);
+      await admin.auth.admin.deleteUser(userA);
+      await admin.auth.admin.deleteUser(userB);
+    }
+  },
+});
+
 // customer.subscription.deleted: cancellation isolation.
 //
 // Simulates the webhook path for `customer.subscription.deleted`. The
