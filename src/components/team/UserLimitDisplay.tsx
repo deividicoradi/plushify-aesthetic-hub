@@ -74,7 +74,7 @@ export const UserLimitDisplay = ({
             {showUpgradeButton && upgradeInfo.suggestedPlan && (
               <Button
                 size="sm"
-                onClick={() => navigate('/planos')}
+                onClick={() => navigate('/app/planos')}
                 className="h-7 sm:h-8 px-2 sm:px-3 text-xs"
               >
                 <Crown className="w-3 h-3 mr-1" />
@@ -134,7 +134,7 @@ export const UserLimitDisplay = ({
                 </p>
                 <Button
                   size="sm"
-                  onClick={() => navigate('/planos')}
+                  onClick={() => navigate('/app/planos')}
                   className="w-full sm:w-auto"
                 >
                   <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />

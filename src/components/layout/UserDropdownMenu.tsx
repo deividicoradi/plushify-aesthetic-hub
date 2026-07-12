@@ -36,7 +36,7 @@ export const UserDropdownMenu = () => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/planos" className="flex items-center w-full">
+          <Link to="/app/planos" className="flex items-center w-full">
             <Crown className="mr-2 h-4 w-4" />
             <span>Planos</span>
           </Link>

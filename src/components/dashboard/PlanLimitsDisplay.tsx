@@ -111,7 +111,7 @@ export const PlanLimitsDisplay = () => {
 
       {currentPlan !== 'premium' && (
         <button
-          onClick={() => navigate('/planos')}
+          onClick={() => navigate('/app/planos')}
           className="relative mt-7 w-full py-3 bg-[#D65E9A] hover:bg-[#c44d87] text-white font-semibold rounded-2xl transition-all shadow-lg shadow-[#D65E9A]/20"
         >
           Fazer Upgrade do Plano
