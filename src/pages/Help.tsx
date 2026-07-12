@@ -1,11 +1,10 @@
 
 import React from 'react';
-import { HelpCircle, ExternalLink, Mail, MessageCircle, Clock, BookOpen } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { HelpCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { SEO } from '@/components/SEO';
+import { HelpContent } from '@/components/help/HelpContent';
 
 const Help = () => {
   return (
@@ -26,7 +25,14 @@ const Help = () => {
           </div>
           <p className="text-muted-foreground text-lg">Encontre respostas e suporte para suas dúvidas</p>
         </div>
-        <div className="space-y-6">
+        <HelpContent />
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default Help;
             {/* Support Cards Grid */}
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="border shadow-sm">
