@@ -92,7 +92,7 @@ export const PlanInfoBanner = () => {
         </div>
         <Button 
           size="sm" 
-          onClick={() => navigate('/planos')}
+          onClick={() => navigate('/app/planos')}
           className="bg-primary hover:bg-primary/90"
         >
           Fazer Upgrade

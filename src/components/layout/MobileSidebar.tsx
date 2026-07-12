@@ -45,7 +45,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose })
     { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty' },
     { icon: Users, label: 'Equipe', path: '/team', premium: true },
-    { icon: Crown, label: 'Planos', path: '/planos' },
+    { icon: Crown, label: 'Planos', path: '/app/planos' },
     { icon: HelpCircle, label: 'Ajuda', path: '/app/help' },
     { icon: Settings, label: 'Configurações', path: '/settings' },
   ];

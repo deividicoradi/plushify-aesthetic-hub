@@ -27,7 +27,7 @@ export const UserLimitModal = ({ open, onOpenChange, onCancel }: UserLimitModalP
 
   const handleUpgrade = () => {
     onOpenChange(false);
-    navigate('/planos');
+    navigate('/app/planos');
   };
 
   const handleCancel = () => {

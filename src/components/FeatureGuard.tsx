@@ -115,7 +115,7 @@ export const FeatureGuard = ({
             </p>
           </div>
           <Button 
-            onClick={() => navigate('/planos')}
+            onClick={() => navigate('/app/planos')}
             className="bg-orange-600 hover:bg-orange-700 text-white ml-4"
           >
             <Crown className="w-4 h-4 mr-2" />
