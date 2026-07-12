@@ -8,7 +8,6 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Trash2, Save } from 'lucide-react';
 import { useLoyaltyConfig, LoyaltyTier, LoyaltyChallenge, LoyaltyReward } from '@/hooks/loyalty/useLoyaltyConfig';
 
@@ -40,14 +39,14 @@ export const LoyaltyConfigDialog: React.FC<Props> = ({ open, onOpenChange }) => 
               <TabsTrigger value="vip">VIP</TabsTrigger>
               <TabsTrigger value="how">Como Funciona</TabsTrigger>
             </TabsList>
-            <ScrollArea className="flex-1 mt-3 pr-3">
+            <div className="flex-1 overflow-y-auto min-h-0 mt-3 pr-3">
               <TabsContent value="points"><PointsTab settings={settings} onSave={saveSettings} /></TabsContent>
               <TabsContent value="tiers"><TiersTab tiers={tiers} upsert={upsertTier} onDelete={deleteTier} /></TabsContent>
               <TabsContent value="challenges"><ChallengesTab items={challenges} upsert={upsertChallenge} onDelete={deleteChallenge} /></TabsContent>
               <TabsContent value="rewards"><RewardsTab items={rewards} tiers={tiers} upsert={upsertReward} onDelete={deleteReward} /></TabsContent>
               <TabsContent value="vip"><VipTab settings={settings} onSave={saveSettings} tiers={tiers} /></TabsContent>
               <TabsContent value="how"><HowItWorksTab settings={settings} onSave={saveSettings} /></TabsContent>
-            </ScrollArea>
+            </div>
           </Tabs>
         )}
       </DialogContent>
