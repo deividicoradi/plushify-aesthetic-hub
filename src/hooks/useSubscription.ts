@@ -68,35 +68,8 @@ export const useSubscription = () => {
     }
   };
 
-  const createTrialSubscription = async () => {
-    if (!user) return;
-
-    try {
-      const trialEndDate = new Date();
-      trialEndDate.setDate(trialEndDate.getDate() + 3);
-
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .insert({
-          user_id: user.id,
-          plan_type: 'trial',
-          trial_ends_at: trialEndDate.toISOString(),
-          status: 'active'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Erro ao criar assinatura trial:', error);
-        return;
-      }
-
-      setSubscription(data);
-      setCurrentPlan('trial');
-    } catch (error) {
-      console.error('Erro ao criar assinatura trial:', error);
-    }
-  };
+  // Trial creation is server-only (edge function `start-trial` → `start_subscription` RPC).
+  // Direct client INSERT on user_subscriptions is blocked by RLS to prevent plan escalation.
 
   const checkSubscriptionStatus = async (): Promise<boolean> => {
     if (!user) return false;
