@@ -2,6 +2,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  PLAN_CATALOG,
+  getPriceId,
+  getAppUrl,
+  isValidPlan,
+  isValidBillingPeriod,
+  type PlanCode,
+  type BillingPeriod,
+} from "../_shared/stripe-catalog.ts";
 
 // Dynamic CORS headers for better security
 const getCorsHeaders = (origin?: string) => {
@@ -30,35 +39,15 @@ const logStep = (step: string, details?: any) => {
 const RATE_LIMIT_WINDOW_MS = 30 * 1000; // 30 seconds
 const userRequestTimestamps = new Map<string, number>();
 
-// SEGURANÇA: Price IDs oficiais - Vamos criar preços de teste que funcionem
-const OFFICIAL_PRICE_IDS = {
-  professional: {
-    monthly: "price_professional_monthly",
-    annual: "price_professional_annual"
-  },
-  premium: {
-    monthly: "price_premium_monthly", 
-    annual: "price_premium_annual"
-  }
-} as const;
-
 // SEGURANÇA: Validação rigorosa de entrada
 const validateInput = (plan_type: string, billing_period: string) => {
-  const validPlans = ['professional', 'premium'] as const;
-  const validPeriods = ['monthly', 'annual'] as const;
-  
-  if (!validPlans.includes(plan_type as any)) {
+  if (!isValidPlan(plan_type)) {
     throw new Error(`SECURITY: Invalid plan type attempted: ${plan_type}`);
   }
-  
-  if (!validPeriods.includes(billing_period as any)) {
+  if (!isValidBillingPeriod(billing_period)) {
     throw new Error(`SECURITY: Invalid billing period attempted: ${billing_period}`);
   }
-  
-  return {
-    plan_type: plan_type as typeof validPlans[number],
-    billing_period: billing_period as typeof validPeriods[number]
-  };
+  return { plan_type, billing_period } as { plan_type: PlanCode; billing_period: BillingPeriod };
 };
 
 // SEGURANÇA: Verificação adicional de autenticação
@@ -186,50 +175,45 @@ serve(async (req) => {
       logStep("SECURITY: New customer will be created");
     }
 
-    // Em vez de usar Price IDs hardcoded, vamos criar o preço dinamicamente
-    const planPrices = {
-      professional: {
-        monthly: { amount: 8900, name: "Professional Mensal" }, // R$ 89,00
-        annual: { amount: 89000, name: "Professional Anual" }   // R$ 890,00
-      },
-      premium: {
-        monthly: { amount: 17900, name: "Enterprise Mensal" },  // R$ 179,00
-        annual: { amount: 179000, name: "Enterprise Anual" }    // R$ 1.790,00
-      }
-    };
+    // Catálogo unificado (shared/stripe-catalog.ts) — mesma fonte usada pelo webhook.
+    const planConfig = PLAN_CATALOG[validatedInput.plan_type][validatedInput.billing_period];
+    const configuredPriceId = getPriceId(validatedInput.plan_type, validatedInput.billing_period);
 
-    const planConfig = planPrices[validatedInput.plan_type][validatedInput.billing_period];
-    
-    logStep("SECURITY: Plan configuration selected", { 
-      plan_type: validatedInput.plan_type, 
-      billing_period: validatedInput.billing_period, 
+    logStep("SECURITY: Plan configuration selected", {
+      plan_type: validatedInput.plan_type,
+      billing_period: validatedInput.billing_period,
       amount: planConfig.amount,
-      name: planConfig.name
+      name: planConfig.name,
+      pricingMode: configuredPriceId ? "price_id" : "price_data_fallback",
     });
 
-    const safeOrigin = origin || "https://09df458b-dedc-46e2-af46-e15d28209b01.lovableproject.com";
-    
-    // SEGURANÇA: Criar checkout session com preço dinâmico
+    const safeOrigin = getAppUrl(origin);
+
+    // Em produção, todos os 4 STRIPE_PRICE_* devem estar configurados e o
+    // Stripe usará o Price ID real. Enquanto os IDs reais não estão setados
+    // (dev/preview), caímos em price_data com os mesmos valores do catálogo.
+    const line_item = configuredPriceId
+      ? { price: configuredPriceId, quantity: 1 }
+      : {
+          price_data: {
+            currency: planConfig.currency,
+            product_data: {
+              name: planConfig.name,
+              description: planConfig.description,
+            },
+            unit_amount: planConfig.amount,
+            recurring: { interval: planConfig.interval },
+          },
+          quantity: 1,
+        };
+
+    // SEGURANÇA: Criar checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price_data: {
-            currency: 'brl',
-            product_data: {
-              name: planConfig.name,
-              description: `Plano ${validatedInput.plan_type} - ${validatedInput.billing_period === 'annual' ? 'Anual' : 'Mensal'}`,
-            },
-            unit_amount: planConfig.amount,
-            recurring: {
-              interval: validatedInput.billing_period === 'annual' ? 'year' : 'month',
-            },
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: [line_item],
       mode: "subscription",
+      client_reference_id: user.id,
       success_url: `${safeOrigin}/planos?success=true&plan=${validatedInput.plan_type}&billing=${validatedInput.billing_period}`,
       cancel_url: `${safeOrigin}/planos?canceled=true`,
       metadata: {
