@@ -1,10 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useStripeCheckoutIndividual } from '@/hooks/useStripeCheckoutIndividual';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  setPendingCheckout,
+  getPendingCheckout,
+  clearPendingCheckout,
+} from '@/utils/pendingCheckout';
 import { PlansHero } from './PlansHero';
 import { PlanAlerts } from './PlanAlerts';
 import { BillingToggle } from './BillingToggle';
@@ -19,6 +25,7 @@ import Footer from '../Footer';
 export const PlansPage: React.FC = () => {
   const [isAnnual, setIsAnnual] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { currentPlan, subscription, loading, checkSubscriptionStatus } = useSubscription();
   const { createCheckout, openCustomerPortal, isLoading } = useStripeCheckoutIndividual();
   const { toast } = useToast();
@@ -50,6 +57,23 @@ export const PlansPage: React.FC = () => {
   }, [toast, checkSubscriptionStatus]);
 
   const handlePlanSelection = async (planId: string) => {
+    // Visitante não autenticado: guardar escolha e mandar para login/cadastro
+    if (!user) {
+      const validPlans = ['trial', 'professional', 'premium'] as const;
+      if (!validPlans.includes(planId as typeof validPlans[number])) return;
+      const billingPeriod = isAnnual ? 'annual' : 'monthly';
+      setPendingCheckout(
+        planId as 'trial' | 'professional' | 'premium',
+        billingPeriod,
+      );
+      toast({
+        title: 'Faça login para continuar',
+        description: 'Após entrar, seu plano será retomado automaticamente.',
+      });
+      navigate('/auth?tab=login&redirect=checkout');
+      return;
+    }
+
     if (planId === 'trial') {
       // Trial: chamar start_subscription no frontend
       if (!user?.id) {
@@ -94,6 +118,40 @@ export const PlansPage: React.FC = () => {
   const handleManageSubscription = async () => {
     await openCustomerPortal();
   };
+
+  // Retomar checkout pendente após autenticação
+  useEffect(() => {
+    if (!user || loading) return;
+    const pending = getPendingCheckout();
+    if (!pending) return;
+    clearPendingCheckout();
+    // Ajustar o toggle mensal/anual conforme escolha original
+    setIsAnnual(pending.billingPeriod === 'annual');
+    // Executar de forma assíncrona para permitir render
+    void (async () => {
+      if (pending.planType === 'trial') {
+        try {
+          const { data, error } = await supabase.functions.invoke('start-trial');
+          if (error) throw error;
+          if (data?.error) throw new Error(data.message || data.error);
+          toast({
+            title: 'Trial ativado com sucesso!',
+            description: 'Você tem 3 dias para explorar a plataforma.',
+          });
+          await checkSubscriptionStatus();
+        } catch (err: any) {
+          toast({
+            title: 'Erro ao ativar trial',
+            description: err?.message || 'Tente novamente mais tarde.',
+            variant: 'destructive',
+          });
+        }
+      } else {
+        await createCheckout(pending.planType, pending.billingPeriod);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loading]);
 
   const plans = createPlansData(currentPlan);
 
