@@ -9,12 +9,15 @@ import { createPlansData } from '@/utils/plans/plansData';
 import { useAuth } from '@/contexts/AuthContext';
 import { setPendingCheckout, type PendingPlanType } from '@/utils/pendingCheckout';
 import { useToast } from '@/hooks/use-toast';
+import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { supabase } from '@/integrations/supabase/client';
 
 export const PlansSection = () => {
   const [isAnnual, setIsAnnual] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { createCheckout, loading: checkoutLoading } = useStripeCheckout();
 
   // Usar dados centralizados dos planos
   const plansData = createPlansData('none'); // Não há plano atual na home
@@ -27,23 +30,48 @@ export const PlansSection = () => {
     popular: plan.mostComplete || false
   }));
 
-  const handlePlanClick = (planId: string) => {
+  const handlePlanClick = async (planId: string) => {
     const validPlans: PendingPlanType[] = ['trial', 'professional', 'premium'];
     if (!validPlans.includes(planId as PendingPlanType)) {
-      navigate('/planos');
       return;
     }
+
     const billingPeriod = isAnnual ? 'annual' : 'monthly';
     setPendingCheckout(planId as PendingPlanType, billingPeriod);
+
+    if (authLoading) return;
+
     if (!user) {
       toast({
-        title: 'Faça login para continuar',
+        title: 'Crie sua conta para continuar',
         description: 'Após entrar, seu plano será retomado automaticamente.',
       });
       navigate('/auth?tab=signup&redirect=checkout');
       return;
     }
-    navigate('/planos');
+
+    if (planId === 'trial') {
+      try {
+        const { data, error } = await supabase.functions.invoke('start-trial');
+        if (error) throw error;
+        if (data?.error) throw new Error(data.message || data.error);
+
+        toast({
+          title: 'Trial ativado com sucesso!',
+          description: 'Você tem 3 dias para explorar a plataforma.',
+        });
+        navigate('/dashboard');
+      } catch (error: any) {
+        toast({
+          title: 'Erro ao ativar trial',
+          description: error?.message || 'Tente novamente mais tarde.',
+          variant: 'destructive',
+        });
+      }
+      return;
+    }
+
+    await createCheckout(planId as 'professional' | 'premium', billingPeriod);
   };
 
   return (
@@ -167,6 +195,7 @@ export const PlansSection = () => {
                         ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg' 
                         : 'bg-primary hover:bg-primary/90 text-primary-foreground'
                     }`}
+                    disabled={authLoading || checkoutLoading}
                     onClick={() => handlePlanClick(plan.id)}
                   >
                     <span>{plan.buttonText}</span>
