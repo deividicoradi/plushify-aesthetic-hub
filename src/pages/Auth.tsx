@@ -48,6 +48,15 @@ const Auth = () => {
         // após o checkout ser iniciado com sucesso, permitindo nova tentativa em caso de erro.
         (async () => {
           try {
+            // Garantir que temos um access_token válido antes de invocar a edge function.
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData.session?.access_token) {
+              const { data: refreshed } = await supabase.auth.refreshSession();
+              if (!refreshed.session?.access_token) {
+                resumingRef.current = false;
+                return;
+              }
+            }
             if (pending.planType === 'trial') {
               await supabase.functions.invoke('start-trial');
               clearPendingCheckout();
