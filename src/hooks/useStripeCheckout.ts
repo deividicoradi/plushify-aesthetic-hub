@@ -24,11 +24,14 @@ export const useStripeCheckout = () => {
     return true;
   };
 
-  const createCheckout = async (planType: 'professional' | 'premium', billingPeriod: 'monthly' | 'annual' = 'monthly') => {
+  const createCheckout = async (
+    planType: 'professional' | 'premium',
+    billingPeriod: 'monthly' | 'annual' = 'monthly',
+  ): Promise<boolean> => {
     // Evitar múltiplas chamadas simultâneas
     if (loading) {
       console.log('SECURITY: Checkout already in progress, ignoring duplicate request');
-      return;
+      return false;
     }
 
     try {
@@ -41,7 +44,7 @@ export const useStripeCheckout = () => {
           description: "Você precisa estar logado para continuar.",
           variant: "destructive",
         });
-        return;
+        return false;
       }
 
       // SEGURANÇA: Validação local dos parâmetros
@@ -76,6 +79,7 @@ export const useStripeCheckout = () => {
           
           console.log('SECURITY: Valid checkout URL received, redirecting');
           window.location.href = data.url;
+          return true;
         } catch (urlError) {
           console.error('SECURITY: Invalid checkout URL', { url: data.url });
           throw new Error('URL de checkout inválida recebida');
@@ -103,9 +107,11 @@ export const useStripeCheckout = () => {
         description: errorMessage,
         variant: "destructive",
       });
+      return false;
     } finally {
       setLoading(false);
     }
+    return false;
   };
 
   const openCustomerPortal = async () => {
