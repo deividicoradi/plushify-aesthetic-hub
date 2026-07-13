@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createRemoteJWKSet, jwtVerify } from "https://esm.sh/jose@5.9.6";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +23,11 @@ const log = (step: string, details?: unknown) => {
   console.log(`[ABACATE-CREATE-SUBSCRIPTION] ${step}${suffix}`);
 };
 
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const JWKS = createRemoteJWKSet(
+  new URL(`${SUPABASE_URL}/auth/v1/.well-known/jwks.json`),
+);
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -35,14 +40,20 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) throw new Error("AUTH: missing bearer token");
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-    );
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userErr } = await supabase.auth.getUser(token);
-    if (userErr || !userData.user?.email) throw new Error("AUTH: invalid session");
-    const user = userData.user;
+    // Verificação stateless: apenas assinatura + expiração via JWKS.
+    // Evita falha quando a sessão foi encerrada mas o JWT ainda é válido.
+    let claims: { sub?: string; email?: string };
+    try {
+      const { payload } = await jwtVerify(token, JWKS, {
+        issuer: `${SUPABASE_URL}/auth/v1`,
+      });
+      claims = payload as { sub?: string; email?: string };
+    } catch (e) {
+      throw new Error(`AUTH: invalid token (${e instanceof Error ? e.message : "verify failed"})`);
+    }
+    if (!claims.sub || !claims.email) throw new Error("AUTH: token missing sub/email");
+    const user = { id: claims.sub, email: claims.email };
 
     const body = await req.json().catch(() => ({}));
     const planType = String(body.plan_type ?? "");
