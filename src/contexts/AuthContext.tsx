@@ -162,8 +162,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       setUserContext({ id: '' });
       
-      // 2. Navegar imediatamente (não espera o Supabase)
-      navigate('/auth', { replace: true });
+      // 2. Navegar imediatamente para a HomePage (não espera o Supabase)
+      navigate('/', { replace: true });
       
       // 3. Mostrar toast
       toast({
