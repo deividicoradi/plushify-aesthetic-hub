@@ -13,7 +13,8 @@ import { toast } from "@/components/ui/sonner";
 import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { getPendingCheckout } from '@/utils/pendingCheckout';
+import { getPendingCheckout, clearPendingCheckout } from '@/utils/pendingCheckout';
+import { useStripeCheckout } from '@/hooks/useStripeCheckout';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -32,20 +33,36 @@ const Auth = () => {
   
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { createCheckout } = useStripeCheckout();
 
   useEffect(() => {
     // Verificar se o usuário já está logado ao carregar a página
     if (user) {
       const pending = getPendingCheckout();
       if (pending) {
-        if (import.meta.env.DEV) console.log('User logged in with pending checkout, resuming on /planos');
-        navigate('/planos', { replace: true });
+        if (import.meta.env.DEV) console.log('User logged in with pending checkout, resuming', pending);
+        // Trial: ativar direto; planos pagos: iniciar checkout
+        (async () => {
+          try {
+            if (pending.planType === 'trial') {
+              await supabase.functions.invoke('start-trial');
+              clearPendingCheckout();
+              navigate('/dashboard', { replace: true });
+              return;
+            }
+            clearPendingCheckout();
+            await createCheckout(pending.planType, pending.billingPeriod);
+          } catch (e) {
+            console.error('Failed to resume pending checkout', e);
+            navigate('/planos', { replace: true });
+          }
+        })();
       } else {
         if (import.meta.env.DEV) console.log('User already logged in, redirecting to dashboard');
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, createCheckout]);
 
   // Validações de formulário
   const validateEmail = (email: string) => {
