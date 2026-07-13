@@ -1176,9 +1176,14 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
+          abacate_checkout_id: string | null
+          abacate_customer_id: string | null
+          abacate_subscription_id: string | null
+          cancel_at_period_end: boolean
           created_at: string
           expires_at: string | null
           id: string
+          payment_kind: string | null
           plan_type: Database["public"]["Enums"]["plan_type"]
           started_at: string
           status: string
@@ -1187,9 +1192,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          abacate_checkout_id?: string | null
+          abacate_customer_id?: string | null
+          abacate_subscription_id?: string | null
+          cancel_at_period_end?: boolean
           created_at?: string
           expires_at?: string | null
           id?: string
+          payment_kind?: string | null
           plan_type?: Database["public"]["Enums"]["plan_type"]
           started_at?: string
           status?: string
@@ -1198,9 +1208,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          abacate_checkout_id?: string | null
+          abacate_customer_id?: string | null
+          abacate_subscription_id?: string | null
+          cancel_at_period_end?: boolean
           created_at?: string
           expires_at?: string | null
           id?: string
+          payment_kind?: string | null
           plan_type?: Database["public"]["Enums"]["plan_type"]
           started_at?: string
           status?: string
@@ -1398,11 +1413,13 @@ export type Database = {
       }
       start_subscription: {
         Args: {
+          p_abacate_checkout_id?: string
+          p_abacate_customer_id?: string
+          p_abacate_subscription_id?: string
           p_billing_interval?: string
           p_current_period_end?: string
+          p_payment_kind?: string
           p_plan_code: string
-          p_stripe_customer_id?: string
-          p_stripe_subscription_id?: string
           p_trial_days?: number
           p_user_id: string
         }
