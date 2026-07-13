@@ -6,17 +6,43 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Map plan_type + billing_period -> AbacatePay subscription product ID
-const PRODUCT_MAP: Record<string, Record<string, string>> = {
+// Mapeamento oficial plano/ciclo -> produto AbacatePay
+// Referência: catálogo real na conta AbacatePay (verificado via /v2/products/list).
+// Nome/valor/ciclo esperados são usados para VALIDAR o produto antes do checkout,
+// garantindo que a AbacatePay retornará exatamente o plano escolhido.
+export const EXPECTED_PLANS = {
   professional: {
-    monthly: "prod_bDC0SgHXsdz2y5aKYkf6zLQf",
-    annual: "prod_bM42yN1t65DCWRxj5d0NNQdx",
+    monthly: {
+      productId: "prod_bDC0SgHXsdz2y5aKYkf6zLQf",
+      name: "Plushify Profissional (Mensal)",
+      amount: 8900,
+      cycle: "MONTHLY",
+    },
+    annual: {
+      productId: "prod_bM42yN1t65DCWRxj5d0NNQdx",
+      name: "Plushify Profissional (Anual)",
+      amount: 89000,
+      cycle: "ANNUALLY",
+    },
   },
   premium: {
-    monthly: "prod_TXrDWNj1Kc1wgcPRhn01Cnaf",
-    annual: "prod_FWGcbH5Puu5eua6M0652RRNy",
+    monthly: {
+      productId: "prod_TXrDWNj1Kc1wgcPRhn01Cnaf",
+      name: "Plushify Premium (Mensal)",
+      amount: 17900,
+      cycle: "MONTHLY",
+    },
+    annual: {
+      productId: "prod_FWGcbH5Puu5eua6M0652RRNy",
+      name: "Plushify Premium (Anual)",
+      amount: 179000,
+      cycle: "ANNUALLY",
+    },
   },
-};
+} as const;
+
+type PlanKey = keyof typeof EXPECTED_PLANS;
+type CycleKey = keyof typeof EXPECTED_PLANS["professional"];
 
 const log = (step: string, details?: unknown) => {
   const suffix = details === undefined ? "" : ` - ${JSON.stringify(details)}`;
@@ -56,11 +82,38 @@ serve(async (req) => {
     const user = { id: claims.sub, email: claims.email };
 
     const body = await req.json().catch(() => ({}));
-    const planType = String(body.plan_type ?? "");
-    const billingPeriod = String(body.billing_period ?? "monthly");
+    const planType = String(body.plan_type ?? "") as PlanKey;
+    const billingPeriod = String(body.billing_period ?? "monthly") as CycleKey;
 
-    const productId = PRODUCT_MAP[planType]?.[billingPeriod];
-    if (!productId) throw new Error(`INPUT: invalid plan ${planType}/${billingPeriod}`);
+    const expected = EXPECTED_PLANS[planType]?.[billingPeriod];
+    if (!expected) throw new Error(`INPUT: invalid plan ${planType}/${billingPeriod}`);
+    const productId = expected.productId;
+
+    // Verificação obrigatória: consulta o produto na AbacatePay e valida
+    // productId, nome, valor e ciclo ANTES de abrir o checkout.
+    const verifyRes = await fetch(
+      `https://api.abacatepay.com/v2/products/list`,
+      { headers: { Authorization: `Bearer ${apiKey}` } },
+    );
+    const verifyJson = await verifyRes.json();
+    if (!verifyRes.ok || !verifyJson?.success) {
+      throw new Error(`VERIFY: could not list products (${verifyJson?.error ?? verifyRes.statusText})`);
+    }
+    const remote = (verifyJson.data as Array<Record<string, unknown>>).find(
+      (p) => p.id === productId,
+    );
+    if (!remote) {
+      throw new Error(`VERIFY: product ${productId} not found on AbacatePay for ${planType}/${billingPeriod}`);
+    }
+    const mismatches: string[] = [];
+    if (remote.price !== expected.amount) mismatches.push(`price ${remote.price} != ${expected.amount}`);
+    if (remote.name !== expected.name) mismatches.push(`name "${remote.name}" != "${expected.name}"`);
+    if (remote.cycle !== expected.cycle) mismatches.push(`cycle ${remote.cycle} != ${expected.cycle}`);
+    if (remote.status !== "ACTIVE") mismatches.push(`status ${remote.status} != ACTIVE`);
+    if (mismatches.length) {
+      throw new Error(`VERIFY: ${planType}/${billingPeriod} mismatch — ${mismatches.join("; ")}`);
+    }
+    log("verified", { productId, name: remote.name, price: remote.price, cycle: remote.cycle });
 
     const origin = req.headers.get("origin") ?? "https://plushify-aesthetic-hub.lovable.app";
     const returnUrl = `${origin}/planos?canceled=true`;
