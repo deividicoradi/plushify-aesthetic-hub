@@ -13,6 +13,7 @@ import { toast } from "@/components/ui/sonner";
 import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { getPendingCheckout } from '@/utils/pendingCheckout';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -35,8 +36,14 @@ const Auth = () => {
   useEffect(() => {
     // Verificar se o usuário já está logado ao carregar a página
     if (user) {
-      if (import.meta.env.DEV) console.log('User already logged in, redirecting to dashboard');
-      navigate('/dashboard', { replace: true });
+      const pending = getPendingCheckout();
+      if (pending) {
+        if (import.meta.env.DEV) console.log('User logged in with pending checkout, resuming on /planos');
+        navigate('/planos', { replace: true });
+      } else {
+        if (import.meta.env.DEV) console.log('User already logged in, redirecting to dashboard');
+        navigate('/dashboard', { replace: true });
+      }
     }
   }, [user, navigate]);
 
