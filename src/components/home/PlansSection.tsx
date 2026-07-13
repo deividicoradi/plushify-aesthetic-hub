@@ -6,10 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { createPlansData } from '@/utils/plans/plansData';
+import { useAuth } from '@/contexts/AuthContext';
+import { setPendingCheckout, type PendingPlanType } from '@/utils/pendingCheckout';
+import { useToast } from '@/hooks/use-toast';
 
 export const PlansSection = () => {
   const [isAnnual, setIsAnnual] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   // Usar dados centralizados dos planos
   const plansData = createPlansData('none'); // Não há plano atual na home
@@ -22,7 +27,22 @@ export const PlansSection = () => {
     popular: plan.mostComplete || false
   }));
 
-  const handlePlanClick = () => {
+  const handlePlanClick = (planId: string) => {
+    const validPlans: PendingPlanType[] = ['trial', 'professional', 'premium'];
+    if (!validPlans.includes(planId as PendingPlanType)) {
+      navigate('/planos');
+      return;
+    }
+    const billingPeriod = isAnnual ? 'annual' : 'monthly';
+    setPendingCheckout(planId as PendingPlanType, billingPeriod);
+    if (!user) {
+      toast({
+        title: 'Faça login para continuar',
+        description: 'Após entrar, seu plano será retomado automaticamente.',
+      });
+      navigate('/auth?tab=login&redirect=checkout');
+      return;
+    }
     navigate('/planos');
   };
 
@@ -147,7 +167,7 @@ export const PlansSection = () => {
                         ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg' 
                         : 'bg-primary hover:bg-primary/90 text-primary-foreground'
                     }`}
-                    onClick={handlePlanClick}
+                    onClick={() => handlePlanClick(plan.id)}
                   >
                     <span>{plan.buttonText}</span>
                     <ArrowRight className="w-5 h-5 ml-2" />
