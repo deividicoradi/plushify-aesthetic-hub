@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SEO } from '@/components/SEO';
 import { Logo } from '@/components/ui/Logo';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -34,14 +34,18 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { createCheckout } = useStripeCheckout();
+  const resumingRef = useRef(false);
 
   useEffect(() => {
     // Verificar se o usuário já está logado ao carregar a página
     if (user) {
       const pending = getPendingCheckout();
       if (pending) {
+        if (resumingRef.current) return;
+        resumingRef.current = true;
         if (import.meta.env.DEV) console.log('User logged in with pending checkout, resuming', pending);
-        // Trial: ativar direto; planos pagos: iniciar checkout
+        // Fluxo genérico para qualquer plano/ciclo. Limpa a seleção somente
+        // após o checkout ser iniciado com sucesso, permitindo nova tentativa em caso de erro.
         (async () => {
           try {
             if (pending.planType === 'trial') {
@@ -50,11 +54,15 @@ const Auth = () => {
               navigate('/dashboard', { replace: true });
               return;
             }
-            clearPendingCheckout();
-            await createCheckout(pending.planType, pending.billingPeriod);
+            const ok = await createCheckout(pending.planType, pending.billingPeriod);
+            if (ok) {
+              clearPendingCheckout();
+            } else {
+              resumingRef.current = false;
+            }
           } catch (e) {
             console.error('Failed to resume pending checkout', e);
-            navigate('/planos', { replace: true });
+            resumingRef.current = false;
           }
         })();
       } else {
