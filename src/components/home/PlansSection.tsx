@@ -40,7 +40,7 @@ export const PlansSection = () => {
         title: 'Faça login para continuar',
         description: 'Após entrar, seu plano será retomado automaticamente.',
       });
-      navigate('/auth?tab=login&redirect=checkout');
+      navigate('/auth?tab=signup&redirect=checkout');
       return;
     }
     navigate('/planos');
