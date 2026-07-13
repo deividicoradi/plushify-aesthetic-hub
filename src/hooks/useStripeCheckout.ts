@@ -53,8 +53,8 @@ export const useStripeCheckout = () => {
         userId: user.id 
       });
 
-      // SEGURANÇA: Chamar função com parâmetros validados
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
+      // Chamar edge function AbacatePay com parâmetros validados
+      const { data, error } = await supabase.functions.invoke('abacate-create-subscription', {
         body: { 
           plan_type: planType, // Apenas valores validados
           billing_period: billingPeriod // Apenas valores validados
@@ -67,15 +67,15 @@ export const useStripeCheckout = () => {
       }
 
       if (data?.url) {
-        // SEGURANÇA: Verificar se URL é válida antes de redirecionar
+        // Verificar se URL é da AbacatePay antes de redirecionar
         try {
           const checkoutUrl = new URL(data.url);
-          if (!checkoutUrl.hostname.includes('checkout.stripe.com')) {
+          if (!checkoutUrl.hostname.endsWith('abacatepay.com')) {
             throw new Error('URL de checkout inválida');
           }
           
           console.log('SECURITY: Valid checkout URL received, redirecting');
-          window.open(data.url, '_blank');
+          window.location.href = data.url;
         } catch (urlError) {
           console.error('SECURITY: Invalid checkout URL', { url: data.url });
           throw new Error('URL de checkout inválida recebida');
