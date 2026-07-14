@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
-export const useStripeCheckout = () => {
+// Hook único de checkout — usa exclusivamente AbacatePay.
+export const useAbacateCheckout = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -56,7 +57,6 @@ export const useStripeCheckout = () => {
         userId: user.id 
       });
 
-      // Chamar edge function AbacatePay com parâmetros validados
       const { data, error } = await supabase.functions.invoke('abacate-create-subscription', {
         body: { 
           plan_type: planType, // Apenas valores validados
@@ -114,63 +114,15 @@ export const useStripeCheckout = () => {
     return false;
   };
 
+  // AbacatePay não possui um portal do cliente self-service equivalente ao Stripe.
+  // Mantido como stub para preservar a assinatura pública anterior; instrui o usuário
+  // a entrar em contato com o suporte para gerenciar/cancelar a assinatura.
   const openCustomerPortal = async () => {
-    // Evitar múltiplas chamadas simultâneas
-    if (loading) {
-      console.log('SECURITY: Portal opening already in progress, ignoring duplicate request');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      // SEGURANÇA: Verificar autenticação
-      if (!user) {
-        toast({
-          title: "Erro de Autenticação",
-          description: "Você precisa estar logado para acessar o portal.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('SECURITY: Opening customer portal for user', { userId: user.id });
-      
-      const { data, error } = await supabase.functions.invoke('customer-portal');
-
-      if (error) {
-        console.error('SECURITY: Customer portal error', error);
-        throw error;
-      }
-
-      if (data?.url) {
-        // SEGURANÇA: Verificar se URL do portal é válida
-        try {
-          const portalUrl = new URL(data.url);
-          if (!portalUrl.hostname.includes('billing.stripe.com')) {
-            throw new Error('URL do portal inválida');
-          }
-          
-          console.log('SECURITY: Valid portal URL received, redirecting');
-          window.open(data.url, '_blank');
-        } catch (urlError) {
-          console.error('SECURITY: Invalid portal URL', { url: data.url });
-          throw new Error('URL do portal inválida recebida');
-        }
-      } else {
-        throw new Error('Nenhuma URL do portal foi recebida');
-      }
-    } catch (error: any) {
-      console.error('SECURITY: Portal access failed', error);
-      
-      toast({
-        title: "Erro",
-        description: "Não foi possível abrir o portal de gerenciamento. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Gerenciar assinatura',
+      description:
+        'Para alterar ou cancelar sua assinatura, entre em contato com o suporte da Plushify.',
+    });
   };
 
   return {
