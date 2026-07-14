@@ -14,7 +14,7 @@ import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { getPendingCheckout, clearPendingCheckout } from '@/utils/pendingCheckout';
-import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { useAbacateCheckout } from '@/hooks/useAbacateCheckout';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const Auth = () => {
   
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { createCheckout } = useStripeCheckout();
+  const { createCheckout } = useAbacateCheckout();
   const resumingRef = useRef(false);
 
   useEffect(() => {

@@ -9,7 +9,7 @@ import { createPlansData } from '@/utils/plans/plansData';
 import { useAuth } from '@/contexts/AuthContext';
 import { setPendingCheckout, type PendingPlanType } from '@/utils/pendingCheckout';
 import { useToast } from '@/hooks/use-toast';
-import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { useAbacateCheckout } from '@/hooks/useAbacateCheckout';
 import { supabase } from '@/integrations/supabase/client';
 
 export const PlansSection = () => {
@@ -17,7 +17,7 @@ export const PlansSection = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const { createCheckout, loading: checkoutLoading } = useStripeCheckout();
+  const { createCheckout, loading: checkoutLoading } = useAbacateCheckout();
 
   // Usar dados centralizados dos planos
   const plansData = createPlansData('none'); // Não há plano atual na home

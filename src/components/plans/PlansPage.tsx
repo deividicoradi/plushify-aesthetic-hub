@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { useAbacateCheckout } from '@/hooks/useAbacateCheckout';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +27,7 @@ export const PlansPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { currentPlan, subscription, loading, checkSubscriptionStatus } = useSubscription();
-  const { createCheckout, openCustomerPortal, loading: checkoutLoading } = useStripeCheckout();
+  const { createCheckout, openCustomerPortal, loading: checkoutLoading } = useAbacateCheckout();
   const isLoading = (_planKey: string) => checkoutLoading;
   const { toast } = useToast();
 
