@@ -39,8 +39,8 @@ export const validateCSPCompliance = () => {
   // Verificar se há scripts bloqueados por CSP
   const blockedScripts = Array.from(document.querySelectorAll('script')).filter(script => {
     const src = script.src;
-    return src && !src.includes('localhost') && !src.includes('lovable.dev') && 
-           !src.includes('stripe.com') && !src.includes('google');
+    return src && !src.includes('localhost') && !src.includes('lovable.dev') &&
+           !src.includes('abacatepay.com') && !src.includes('google');
   });
   
   if (blockedScripts.length === 0) {
