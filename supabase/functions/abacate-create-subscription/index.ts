@@ -49,6 +49,20 @@ const log = (step: string, details?: unknown) => {
   console.log(`[ABACATE-CREATE-SUBSCRIPTION] ${step}${suffix}`);
 };
 
+const getCreatedItemId = (data: unknown): string | null => {
+  if (!data || typeof data !== "object") return null;
+  const items = (data as { items?: unknown }).items;
+  if (!Array.isArray(items) || !items[0] || typeof items[0] !== "object") return null;
+  const id = (items[0] as { id?: unknown }).id;
+  return typeof id === "string" ? id : null;
+};
+
+const getCreatedAmount = (data: unknown): number | null => {
+  if (!data || typeof data !== "object") return null;
+  const amount = (data as { amount?: unknown }).amount;
+  return typeof amount === "number" ? amount : null;
+};
+
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const JWKS = createRemoteJWKSet(
   new URL(`${SUPABASE_URL}/auth/v1/.well-known/jwks.json`),
@@ -116,10 +130,16 @@ serve(async (req) => {
     log("verified", { productId, name: remote.name, price: remote.price, cycle: remote.cycle });
 
     const origin = req.headers.get("origin") ?? "https://plushify-aesthetic-hub.lovable.app";
-    const returnUrl = `${origin}/planos?canceled=true`;
+    const returnUrl = `${origin}/`;
     const completionUrl = `${origin}/planos?success=true&plan=${planType}&billing=${billingPeriod}`;
 
-    log("creating subscription", { userId: user.id, planType, billingPeriod, productId });
+    // AbacatePay treats externalId as an idempotency/reference key. Reusing only
+    // the user id can return a previous pending checkout, which makes every plan
+    // open the first bill created for that user. Keep the user id in metadata and
+    // make the checkout reference unique per attempt.
+    const externalId = ["plushify", user.id, planType, billingPeriod, crypto.randomUUID()].join(":");
+
+    log("creating subscription", { userId: user.id, planType, billingPeriod, productId, externalId });
 
     const res = await fetch("https://api.abacatepay.com/v2/subscriptions/create", {
       method: "POST",
@@ -132,7 +152,7 @@ serve(async (req) => {
         methods: ["CARD"],
         returnUrl,
         completionUrl,
-        externalId: user.id,
+        externalId,
         metadata: {
           user_id: user.id,
           user_email: user.email,
@@ -149,7 +169,25 @@ serve(async (req) => {
       throw new Error(`ABACATE: ${json?.error ?? res.statusText}`);
     }
 
-    return new Response(JSON.stringify({ url: json.data.url, id: json.data.id }), {
+    const createdItemId = getCreatedItemId(json.data);
+    const createdAmount = getCreatedAmount(json.data);
+    const responseMismatches: string[] = [];
+    if (createdItemId !== productId) responseMismatches.push(`item ${createdItemId ?? "missing"} != ${productId}`);
+    if (createdAmount !== expected.amount) responseMismatches.push(`amount ${createdAmount ?? "missing"} != ${expected.amount}`);
+    if (responseMismatches.length) {
+      log("checkout response mismatch", {
+        userId: user.id,
+        planType,
+        billingPeriod,
+        productId,
+        billId: json.data.id,
+        billUrl: json.data.url,
+        mismatches: responseMismatches,
+      });
+      throw new Error(`ABACATE: checkout mismatch — ${responseMismatches.join("; ")}`);
+    }
+
+    return new Response(JSON.stringify({ url: json.data.url, id: json.data.id, externalId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
