@@ -68,7 +68,16 @@ const JWKS = createRemoteJWKSet(
   new URL(`${SUPABASE_URL}/auth/v1/.well-known/jwks.json`),
 );
 
-serve(async (req) => {
+type VerifyToken = (token: string) => Promise<{ sub?: string; email?: string }>;
+
+const defaultVerify: VerifyToken = async (token) => {
+  const { payload } = await jwtVerify(token, JWKS, {
+    issuer: `${SUPABASE_URL}/auth/v1`,
+  });
+  return payload as { sub?: string; email?: string };
+};
+
+export const createHandler = (verify: VerifyToken = defaultVerify) => async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -81,14 +90,9 @@ serve(async (req) => {
     if (!authHeader?.startsWith("Bearer ")) throw new Error("AUTH: missing bearer token");
 
     const token = authHeader.replace("Bearer ", "");
-    // Verificação stateless: apenas assinatura + expiração via JWKS.
-    // Evita falha quando a sessão foi encerrada mas o JWT ainda é válido.
     let claims: { sub?: string; email?: string };
     try {
-      const { payload } = await jwtVerify(token, JWKS, {
-        issuer: `${SUPABASE_URL}/auth/v1`,
-      });
-      claims = payload as { sub?: string; email?: string };
+      claims = await verify(token);
     } catch (e) {
       throw new Error(`AUTH: invalid token (${e instanceof Error ? e.message : "verify failed"})`);
     }
@@ -199,4 +203,6 @@ serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 },
     );
   }
-});
+};
+
+serve(createHandler());
