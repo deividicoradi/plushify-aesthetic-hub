@@ -14,6 +14,12 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 // Eventos disponíveis (subscription): subscription.completed, subscription.renewed,
 // subscription.cancelled, subscription.trial_started.
 //
+// Plano anual não usa assinatura recorrente (AbacatePay não suporta Pix/parcelamento
+// em recorrência) — é um checkout avulso via /v2/checkouts/create, então também
+// tratamos aqui o evento `checkout.completed`. Nesse caso `data` já é o objeto
+// "bill" direto (sem aninhar em "subscription"), com `id` no formato bill_...,
+// `installmentsCount` e (supostamente) `method` indicando PIX ou CARD.
+//
 // NÃO confirmado pela documentação (validar com evento real antes de confiar):
 //   - se `externalId` (o que definimos na criação do checkout) volta dentro de
 //     data.subscription, ou só no objeto "bill" original — por isso o código
@@ -44,7 +50,7 @@ const log = (step: string, details?: unknown) => {
   console.log(`[ABACATE-WEBHOOK] ${step}${suffix}`)
 }
 
-const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed'])
+const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed', 'checkout.completed'])
 const CANCELLATION_EVENTS = new Set(['subscription.cancelled'])
 
 // externalId foi criado por nós em abacate-create-subscription no formato:
@@ -153,12 +159,41 @@ Deno.serve(async (req) => {
 
     const { userId, planType, billingPeriod } = parsed
     const billingInterval = billingPeriod === 'annual' ? 'year' : 'month'
+    const isAnnualCheckout = eventType === 'checkout.completed'
 
-    const abacateSubscriptionId = sub.id ? String(sub.id) : null
+    // Checkout avulso (anual): não é uma "assinatura" AbacatePay, então não tem
+    // abacate_subscription_id — guardamos só o id do checkout (bill_...).
+    const abacateSubscriptionId = !isAnnualCheckout && sub.id ? String(sub.id) : null
     const abacateCustomerId = sub.customerId ? String(sub.customerId) : null
-    const abacateCheckoutId = dataRoot.id && dataRoot.id !== sub.id ? String(dataRoot.id) : null
-    // AJUSTAR: nome do campo de próxima cobrança não confirmado na documentação.
-    const currentPeriodEnd = sub.nextBillingDate ? String(sub.nextBillingDate) : null
+    const abacateCheckoutId = isAnnualCheckout
+      ? String(sub.id ?? dataRoot.id ?? '') || null
+      : (dataRoot.id && dataRoot.id !== sub.id ? String(dataRoot.id) : null)
+
+    // AJUSTAR: nome real do campo de próxima cobrança de assinatura mensal
+    // não confirmado na documentação.
+    let currentPeriodEnd = sub.nextBillingDate ? String(sub.nextBillingDate) : null
+
+    // Checkout anual é pagamento único — não existe "próxima cobrança" vinda da
+    // AbacatePay. Calculamos nós mesmos: acesso válido por 1 ano a partir de agora.
+    if (isAnnualCheckout && !currentPeriodEnd) {
+      const oneYearFromNow = new Date()
+      oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1)
+      currentPeriodEnd = oneYearFromNow.toISOString()
+    }
+
+    // AJUSTAR: nome do campo que indica o método usado (PIX vs CARD) e onde ele
+    // aparece no payload de checkout.completed não está confirmado na doc —
+    // validar com um pagamento Pix real e um parcelado real.
+    let paymentKind: 'recurring_card' | 'pix' | 'installments' = 'recurring_card'
+    if (isAnnualCheckout) {
+      const installmentsCount = Number(sub.installmentsCount ?? 0)
+      const method = String(sub.method ?? '').toUpperCase()
+      if (method === 'PIX') {
+        paymentKind = 'pix'
+      } else if (installmentsCount > 1) {
+        paymentKind = 'installments'
+      }
+    }
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -169,7 +204,7 @@ Deno.serve(async (req) => {
     const { data: subscriptionId, error } = await admin.rpc('start_subscription', {
       p_user_id: userId,
       p_plan_code: planType,
-      p_payment_kind: 'recurring_card',
+      p_payment_kind: paymentKind,
       p_billing_interval: billingInterval,
       p_trial_days: 0,
       p_abacate_subscription_id: abacateSubscriptionId,
@@ -187,7 +222,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    log('subscription activated', { userId, planType, billingInterval, subscriptionId })
+    log('subscription activated', { userId, planType, billingInterval, paymentKind, subscriptionId })
 
     return new Response(JSON.stringify({ received: true, subscription_id: subscriptionId }), {
       status: 200,

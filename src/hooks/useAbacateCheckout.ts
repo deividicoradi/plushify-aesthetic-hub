@@ -57,11 +57,17 @@ export const useAbacateCheckout = () => {
         userId: user.id 
       });
 
-      const { data, error } = await supabase.functions.invoke('abacate-create-subscription', {
-        body: { 
-          plan_type: planType, // Apenas valores validados
-          billing_period: billingPeriod // Apenas valores validados
-        }
+      // Mensal = assinatura recorrente (cartão). Anual = cobrança única
+      // via Pix ou cartão parcelado — a AbacatePay não suporta parcelamento
+      // nem Pix em cobrança recorrente, só em checkout avulso.
+      const functionName = billingPeriod === 'annual'
+        ? 'abacate-create-checkout'
+        : 'abacate-create-subscription';
+
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: billingPeriod === 'annual'
+          ? { plan_type: planType }
+          : { plan_type: planType, billing_period: billingPeriod }
       });
 
       if (error) {
