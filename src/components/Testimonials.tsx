@@ -43,6 +43,24 @@ const Testimonial = ({
 const Testimonials = () => {
   const testimonials: { quote: string; author: string; role: string; stars: number; callout?: string }[] = [];
 
+  if (testimonials.length === 0) {
+    return (
+      <section className="py-12 bg-gradient-to-b from-background to-muted/30" id="testimonials">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto text-center bg-card border border-border rounded-2xl p-8 shadow-sm">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3 font-serif text-foreground">
+              Estamos no <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">início</span>
+            </h2>
+            <p className="text-muted-foreground">
+              Seja um dos primeiros negócios a usar o Plushify e ajude a escrever
+              as primeiras histórias de sucesso.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-gradient-to-b from-background to-muted/30" id="testimonials">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,32 +69,23 @@ const Testimonials = () => {
             Histórias de <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Sucesso</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Veja como o Plushify está transformando a realidade de profissionais 
+            Veja como o Plushify está transformando a realidade de profissionais
             de estética em todo o Brasil.
           </p>
         </div>
-        
-        {testimonials.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <Testimonial
-                key={index}
-                quote={testimonial.quote}
-                author={testimonial.author}
-                role={testimonial.role}
-                stars={testimonial.stars}
-                callout={testimonial.callout}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-lg text-muted-foreground">
-              Estamos no início — seja um dos primeiros negócios a usar o Plushify
-              e ajude a escrever essa história.
-            </p>
-          </div>
-        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <Testimonial
+              key={index}
+              quote={testimonial.quote}
+              author={testimonial.author}
+              role={testimonial.role}
+              stars={testimonial.stars}
+              callout={testimonial.callout}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
