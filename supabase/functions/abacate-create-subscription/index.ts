@@ -130,7 +130,7 @@ serve(async (req) => {
     log("verified", { productId, name: remote.name, price: remote.price, cycle: remote.cycle });
 
     const origin = req.headers.get("origin") ?? "https://plushify-aesthetic-hub.lovable.app";
-    const returnUrl = `${origin}/planos?canceled=true`;
+    const returnUrl = `${origin}/`;
     const completionUrl = `${origin}/planos?success=true&plan=${planType}&billing=${billingPeriod}`;
 
     // AbacatePay treats externalId as an idempotency/reference key. Reusing only
