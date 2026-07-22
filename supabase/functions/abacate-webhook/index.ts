@@ -38,11 +38,9 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 //    na URL) — um log de WARN aparece até isso ser configurado.
 // 4. Disparar um pagamento de teste e conferir os logs desta função no painel do Supabase.
 //
-// Pendência conhecida (não bloqueia o piloto, mas precisa entrar no backlog):
-// `subscription.cancelled` hoje só é logado — ainda não existe uma RPC para
-// rebaixar o usuário para o plano trial/free quando a assinatura é cancelada
-// ou os retries de cobrança se esgotam. Isso deve ser implementado antes de
-// haver qualquer cliente pagante recorrente real.
+// `subscription.cancelled` chama a RPC cancel_subscription, que marca
+// status='cancelled' — get_user_plan() já ignora linhas não-ativas e volta
+// pro trial automaticamente, então não precisa mexer em plan_type.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -168,12 +166,45 @@ Deno.serve(async (req) => {
     const sub = (dataRoot.subscription ?? dataRoot) as Record<string, unknown>
 
     if (CANCELLATION_EVENTS.has(eventType)) {
-      log('CANCELLATION: recebido mas ainda não implementado — ação manual necessária', {
-        subscriptionId: sub.id,
-        customerId: sub.customerId,
+      const cancelExternalId = (sub.externalId ?? dataRoot.externalId ?? null) as string | null
+      const cancelParsed = parseExternalId(cancelExternalId)
+      const cancelMetadata = (sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
+      const cancelUserId = cancelParsed?.userId ?? (cancelMetadata.user_id ? String(cancelMetadata.user_id) : null)
+      const cancelSubscriptionId = sub.id ? String(sub.id) : null
+
+      if (!cancelUserId) {
+        log('ERROR: cancelamento recebido mas não foi possível identificar o usuário', {
+          eventType,
+          externalId: cancelExternalId,
+          sub,
+        })
+        return new Response(JSON.stringify({ received: true, error: 'unresolved_metadata' }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { autoRefreshToken: false, persistSession: false },
       })
-      // TODO: rebaixar o usuário para trial/free quando tivermos a RPC de cancelamento.
-      return new Response(JSON.stringify({ received: true, action: 'manual_review_required' }), {
+
+      const { data: cancelled, error: cancelError } = await admin.rpc('cancel_subscription', {
+        p_user_id: cancelUserId,
+        p_abacate_subscription_id: cancelSubscriptionId,
+      })
+
+      if (cancelError) {
+        log('ERROR: rpc cancel_subscription falhou', cancelError)
+        return new Response(JSON.stringify({ error: 'Failed to cancel subscription' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      log('subscription cancelled', { userId: cancelUserId, subscriptionId: cancelSubscriptionId, applied: cancelled })
+      return new Response(JSON.stringify({ received: true, cancelled }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
