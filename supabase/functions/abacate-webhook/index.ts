@@ -4,17 +4,34 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 // pago do usuário. Sem esta função, um pagamento aprovado nunca é refletido
 // em user_subscriptions e o cliente fica preso no plano trial mesmo após pagar.
 //
-// IMPORTANTE — antes de ir pra produção:
-// 1. Configure esta URL como webhook no painel do AbacatePay:
+// Baseado em https://docs.abacatepay.com/pages/webhooks (consultado em 2026-07-22).
+//
+// Formato confirmado pela documentação:
+//   { "id": "log_...", "event": "subscription.completed", "apiVersion": 2,
+//     "devMode": false, "data": { "subscription": { "id": "subs_...", "amount": ...,
+//     "status": "ACTIVE", "method": "CARD", "customerId": "cust_...", ... } } }
+//
+// Eventos disponíveis (subscription): subscription.completed, subscription.renewed,
+// subscription.cancelled, subscription.trial_started.
+//
+// NÃO confirmado pela documentação (validar com evento real antes de confiar):
+//   - se `externalId` (o que definimos na criação do checkout) volta dentro de
+//     data.subscription, ou só no objeto "bill" original — por isso o código
+//     tenta os dois lugares e, como último recurso, usa `metadata`.
+//   - o nome exato do campo de próxima cobrança (assumido `nextBillingDate`).
+// Pontos marcados com "// AJUSTAR" são os candidatos a corrigir ao ver o payload real.
+//
+// Configuração necessária antes de produção:
+// 1. Painel AbacatePay > Webhooks > cadastrar:
 //    https://<seu-projeto>.supabase.co/functions/v1/abacate-webhook?webhookSecret=SEU_SEGREDO
-//    (AbacatePay valida o webhook via query param `webhookSecret`, não via
-//    header assinado — confirme isso no painel deles ao cadastrar a URL).
-// 2. Defina o secret no Supabase: `supabase secrets set ABACATE_WEBHOOK_SECRET=SEU_SEGREDO`
-// 3. Dispare um evento de teste real (ou um pagamento de R$1) e confira os logs
-//    desta função — o formato exato do payload (nomes dos campos dentro de
-//    `data`) precisa ser validado contra o evento real antes de confiar 100%.
-//    Os pontos marcados com "// AJUSTAR" abaixo são os mais prováveis de
-//    precisar de ajuste fino conforme o payload real.
+// 2. `supabase secrets set ABACATE_WEBHOOK_SECRET=SEU_SEGREDO` (mesmo valor acima)
+// 3. Disparar um pagamento de teste e conferir os logs desta função no painel do Supabase.
+//
+// Pendência conhecida (não bloqueia o piloto, mas precisa entrar no backlog):
+// `subscription.cancelled` hoje só é logado — ainda não existe uma RPC para
+// rebaixar o usuário para o plano trial/free quando a assinatura é cancelada
+// ou os retries de cobrança se esgotam. Isso deve ser implementado antes de
+// haver qualquer cliente pagante recorrente real.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,15 +44,18 @@ const log = (step: string, details?: unknown) => {
   console.log(`[ABACATE-WEBHOOK] ${step}${suffix}`)
 }
 
-// Eventos que representam "cliente pagou / assinatura está ativa".
-// AJUSTAR: confirmar os nomes exatos de evento no payload real do AbacatePay.
-const PAID_EVENTS = new Set([
-  'billing.paid',
-  'subscription.paid',
-  'subscription.created',
-  'subscription.renewed',
-  'subscription.updated',
-])
+const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed'])
+const CANCELLATION_EVENTS = new Set(['subscription.cancelled'])
+
+// externalId foi criado por nós em abacate-create-subscription no formato:
+// "plushify:<userId>:<planType>:<billingPeriod>:<uuid>"
+const parseExternalId = (externalId: string | null) => {
+  if (!externalId) return null
+  const parts = externalId.split(':')
+  if (parts.length < 4 || parts[0] !== 'plushify') return null
+  const [, userId, planType, billingPeriod] = parts
+  return { userId, planType, billingPeriod }
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -74,49 +94,71 @@ Deno.serve(async (req) => {
 
     log('event received', body)
 
-    // AJUSTAR: confirmar onde vive o nome do evento no payload real.
-    const eventType = String(body.event ?? body.type ?? '')
+    const eventType = String(body.event ?? '')
+    const dataRoot = (body.data ?? {}) as Record<string, unknown>
 
-    // AJUSTAR: confirmar se os dados vêm em body.data ou na raiz do payload.
-    const data = (body.data ?? body) as Record<string, unknown>
+    // Eventos de assinatura vêm aninhados em data.subscription (confirmado na doc).
+    // Fallback para data direto, caso algum evento não siga o mesmo formato.
+    const sub = (dataRoot.subscription ?? dataRoot) as Record<string, unknown>
 
-    // metadata foi enviado por nós em abacate-create-subscription
-    // (user_id, plan_type, billing_period) — deve voltar aqui.
-    const metadata = (data.metadata ?? {}) as Record<string, unknown>
-    const userId = String(metadata.user_id ?? '')
-    const planType = String(metadata.plan_type ?? '')
-    const billingPeriod = String(metadata.billing_period ?? 'monthly')
+    if (CANCELLATION_EVENTS.has(eventType)) {
+      log('CANCELLATION: recebido mas ainda não implementado — ação manual necessária', {
+        subscriptionId: sub.id,
+        customerId: sub.customerId,
+      })
+      // TODO: rebaixar o usuário para trial/free quando tivermos a RPC de cancelamento.
+      return new Response(JSON.stringify({ received: true, action: 'manual_review_required' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
-    if (!userId || !planType) {
-      log('SKIP: payload sem metadata.user_id/plan_type — provavelmente evento não relacionado a assinatura', {
+    if (!ACTIVATION_EVENTS.has(eventType)) {
+      log('SKIP: evento não tratado por esta função', { eventType })
+      return new Response(JSON.stringify({ received: true, skipped: true }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // AJUSTAR se necessário: externalId pode vir em sub.externalId, no objeto
+    // "bill" original (dataRoot.externalId) ou não vir em nenhum — nesse caso
+    // caímos para metadata como último recurso.
+    const externalId = (sub.externalId ?? dataRoot.externalId ?? null) as string | null
+    let parsed = parseExternalId(externalId)
+
+    if (!parsed) {
+      const metadata = (sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
+      const userId = metadata.user_id ? String(metadata.user_id) : null
+      const planType = metadata.plan_type ? String(metadata.plan_type) : null
+      const billingPeriod = metadata.billing_period ? String(metadata.billing_period) : 'monthly'
+      if (userId && planType) {
+        parsed = { userId, planType, billingPeriod }
+      }
+    }
+
+    if (!parsed) {
+      log('ERROR: não foi possível identificar o usuário/plano no payload — precisa de ajuste manual no parsing', {
         eventType,
+        externalId,
+        sub,
       })
-      // Retorna 200 para o AbacatePay não ficar re-tentando um evento que não nos interessa.
-      return new Response(JSON.stringify({ received: true, skipped: true }), {
+      // 200 para o AbacatePay não retentar um payload que nunca vai conseguirmos processar
+      // sem antes corrigir o código — mas fica registrado no log para investigação.
+      return new Response(JSON.stringify({ received: true, error: 'unresolved_metadata' }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    if (!PAID_EVENTS.has(eventType)) {
-      log('SKIP: evento não é de pagamento confirmado', { eventType })
-      return new Response(JSON.stringify({ received: true, skipped: true }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
+    const { userId, planType, billingPeriod } = parsed
     const billingInterval = billingPeriod === 'annual' ? 'year' : 'month'
 
-    // AJUSTAR: confirmar os nomes de campo abaixo contra o payload real.
-    const abacateSubscriptionId = data.id ? String(data.id) : null
-    const abacateCustomerId = data.customerId
-      ? String(data.customerId)
-      : (data.customer as Record<string, unknown> | undefined)?.id
-        ? String((data.customer as Record<string, unknown>).id)
-        : null
-    const abacateCheckoutId = data.billId ? String(data.billId) : null
-    const currentPeriodEnd = data.nextBillingDate ? String(data.nextBillingDate) : null
+    const abacateSubscriptionId = sub.id ? String(sub.id) : null
+    const abacateCustomerId = sub.customerId ? String(sub.customerId) : null
+    const abacateCheckoutId = dataRoot.id && dataRoot.id !== sub.id ? String(dataRoot.id) : null
+    // AJUSTAR: nome do campo de próxima cobrança não confirmado na documentação.
+    const currentPeriodEnd = sub.nextBillingDate ? String(sub.nextBillingDate) : null
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
