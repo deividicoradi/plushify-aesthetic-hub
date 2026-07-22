@@ -26,7 +26,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
             Pronto para revolucionar seu negócio?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Junte-se aos milhares de profissionais que já transformaram seus negócios com nossa plataforma. 
+            Simplifique a gestão do seu negócio de estética hoje mesmo.
             <span className="font-semibold text-foreground">O sucesso está a um clique de distância!</span>
           </p>
         </div>
@@ -44,7 +44,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
             </div>
           </Button>
           <div className="text-sm text-muted-foreground">
-            Comece hoje mesmo • Resultados garantidos • Suporte completo
+            Comece hoje mesmo • Sem cartão de crédito • Suporte direto com o fundador
           </div>
         </div>
       </CardContent>

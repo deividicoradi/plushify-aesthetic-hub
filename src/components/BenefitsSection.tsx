@@ -6,32 +6,32 @@ const BenefitsSection = () => {
   const benefits = [
     {
       icon: TrendingUp,
-      title: "Aumento de até 200% no Faturamento",
-      description: "Nossos clientes reportam um crescimento significativo no faturamento após 3 meses de uso",
-      stat: "+200%",
+      title: "Controle Total do Faturamento",
+      description: "Veja receitas, despesas e saldo em tempo real, sem precisar de planilha",
+      stat: "100%",
       color: "text-green-500",
       bgColor: "bg-green-50 dark:bg-green-900/20"
     },
     {
       icon: Clock,
-      title: "Economize 15h por Semana",
-      description: "Automatize tarefas repetitivas e foque no que realmente importa: seus clientes",
-      stat: "15h/sem",
+      title: "Menos Tempo com Agenda",
+      description: "Automatize lembretes e reduza faltas de última hora",
+      stat: "Automático",
       color: "text-blue-500",
       bgColor: "bg-blue-50 dark:bg-blue-900/20"
     },
     {
       icon: Users,
-      title: "98% de Satisfação dos Clientes",
-      description: "Melhore a experiência dos seus clientes com lembretes automáticos e atendimento personalizado",
-      stat: "98%",
+      title: "Clientes Sempre à Mão",
+      description: "Histórico completo de cada cliente, sem procurar em caderno ou WhatsApp",
+      stat: "Tudo em 1 lugar",
       color: "text-purple-500",
       bgColor: "bg-purple-50 dark:bg-purple-900/20"
     },
     {
       icon: Shield,
-      title: "100% Seguro e Confiável",
-      description: "Seus dados estão seguros com criptografia de ponta e backups automáticos",
+      title: "Seguro e Confiável",
+      description: "Seus dados protegidos com criptografia e backups automáticos",
       stat: "100%",
       color: "text-orange-500",
       bgColor: "bg-orange-50 dark:bg-orange-900/20"
@@ -51,8 +51,8 @@ const BenefitsSection = () => {
             Por que escolher o <span className="gradient-text">Plushify</span>?
           </h2>
           <p className="text-xl text-muted-foreground">
-            Mais de 10.000 profissionais já transformaram seus negócios com nossa plataforma. 
-            Veja os resultados que você pode alcançar.
+            Feito para simplificar o dia a dia de quem trabalha com estética.
+            Veja como o Plushify pode ajudar o seu negócio.
           </p>
         </div>
 
@@ -95,7 +95,7 @@ const BenefitsSection = () => {
                 Pronto para transformar seu negócio?
               </h3>
               <p className="text-lg text-muted-foreground mb-6">
-                Junte-se aos milhares de profissionais que já descobriram o poder do Plushify
+                Seja um dos primeiros negócios a experimentar o Plushify
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -66,51 +66,6 @@ const Hero = () => {
               </Button>
             </div>
             
-            {/* Social Proof */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 mb-12">
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  <img 
-                    src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" 
-                    alt="Profissional da beleza" 
-                    width={32} height={32} loading="lazy" decoding="async"
-                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
-                  />
-                  <img 
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=32&h=32&fit=crop&crop=face" 
-                    alt="Profissional da beleza" 
-                    width={32} height={32} loading="lazy" decoding="async"
-                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
-                  />
-                  <img 
-                    src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=32&h=32&fit=crop&crop=face" 
-                    alt="Profissional da beleza" 
-                    width={32} height={32} loading="lazy" decoding="async"
-                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
-                  />
-                  <img 
-                    src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=32&h=32&fit=crop&crop=face" 
-                    alt="Profissional da beleza" 
-                    width={32} height={32} loading="lazy" decoding="async"
-                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
-                  />
-                  <img 
-                    src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=32&h=32&fit=crop&crop=face" 
-                    alt="Profissional da beleza" 
-                    width={32} height={32} loading="lazy" decoding="async"
-                    className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-md"
-                  />
-                </div>
-                <span className="text-sm text-muted-foreground">+1.200 profissionais</span>
-              </div>
-              <div className="flex items-center gap-1">
-                {[1,2,3,4,5].map((i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                ))}
-                <span className="text-sm text-muted-foreground ml-2">4.9/5 avaliação</span>
-              </div>
-            </div>
-            
             {/* Feature Icons Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
@@ -148,23 +103,23 @@ const Hero = () => {
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl border border-green-200 dark:border-green-800">
                     <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-green-600">+150%</p>
+                    <p className="text-lg font-bold text-green-600">Controle Total</p>
                     <p className="text-sm text-green-700 dark:text-green-300">Faturamento</p>
                   </div>
                   <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl border border-blue-200 dark:border-blue-800">
                     <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-blue-600">1.2k+</p>
+                    <p className="text-lg font-bold text-blue-600">Ilimitado</p>
                     <p className="text-sm text-blue-700 dark:text-blue-300">Clientes</p>
                   </div>
                   <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl border border-purple-200 dark:border-purple-800">
                     <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-purple-600">98%</p>
-                    <p className="text-sm text-purple-700 dark:text-purple-300">Taxa de Sucesso</p>
+                    <p className="text-lg font-bold text-purple-600">Automática</p>
+                    <p className="text-sm text-purple-700 dark:text-purple-300">Agenda</p>
                   </div>
                   <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-xl border border-orange-200 dark:border-orange-800">
                     <Shield className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-orange-600">24/7</p>
-                    <p className="text-sm text-orange-700 dark:text-orange-300">Suporte</p>
+                    <p className="text-lg font-bold text-orange-600">Seguro</p>
+                    <p className="text-sm text-orange-700 dark:text-orange-300">Seus Dados</p>
                   </div>
                 </div>
 
@@ -189,7 +144,7 @@ const Hero = () => {
 
         {/* Trust Indicators */}
         <div className="mt-20 text-center">
-          <p className="text-muted-foreground mb-8 text-lg">Confiado por milhares de profissionais em todo o Brasil</p>
+          <p className="text-muted-foreground mb-8 text-lg">Feito para negócios de estética em todo o Brasil</p>
           <div className="flex flex-wrap justify-center items-center gap-8">
             {["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador"].map((city, index) => (
               <div key={index} className="px-6 py-3 bg-muted/50 rounded-lg border text-foreground font-medium">

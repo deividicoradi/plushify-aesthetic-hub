@@ -4,22 +4,11 @@ import { Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-const testimonials = [
-  {
-    name: "Maria Silva",
-    business: "Estúdio Beleza & Arte",
-    text: "Com o plano Enterprise, aumentei meu faturamento em 150% em 6 meses!",
-    plan: "Enterprise"
-  },
-  {
-    name: "João Santos",
-    business: "Clínica Renovar",
-    text: "O dashboard executivo me dá insights que transformaram meu negócio.",
-    plan: "Enterprise"
-  }
-];
+const testimonials: { name: string; business: string; text: string; plan: string }[] = [];
 
 export const TestimonialsSection: React.FC = () => {
+  if (testimonials.length === 0) return null;
+
   return (
     <Card className="bg-muted/30">
       <CardContent className="p-8">
