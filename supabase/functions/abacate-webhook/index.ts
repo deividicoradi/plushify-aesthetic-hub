@@ -31,7 +31,12 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 // 1. Painel AbacatePay > Webhooks > cadastrar:
 //    https://<seu-projeto>.supabase.co/functions/v1/abacate-webhook?webhookSecret=SEU_SEGREDO
 // 2. `supabase secrets set ABACATE_WEBHOOK_SECRET=SEU_SEGREDO` (mesmo valor acima)
-// 3. Disparar um pagamento de teste e conferir os logs desta função no painel do Supabase.
+// 3. No mesmo painel de Webhooks, copie a "chave pública" (public key) da sua
+//    conta AbacatePay — usada para verificar a assinatura HMAC do payload —
+//    e rode `supabase secrets set ABACATE_WEBHOOK_PUBLIC_KEY=SUA_CHAVE_PUBLICA`.
+//    Sem isso a função ainda funciona, mas só com a camada mais fraca (secret
+//    na URL) — um log de WARN aparece até isso ser configurado.
+// 4. Disparar um pagamento de teste e conferir os logs desta função no painel do Supabase.
 //
 // Pendência conhecida (não bloqueia o piloto, mas precisa entrar no backlog):
 // `subscription.cancelled` hoje só é logado — ainda não existe uma RPC para
@@ -51,6 +56,32 @@ const log = (step: string, details?: unknown) => {
 }
 
 const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed', 'checkout.completed'])
+
+// Verificação de assinatura HMAC-SHA256 (camada forte, igual Stripe/GitHub).
+// A AbacatePay assina o corpo bruto (raw body) da requisição com a chave
+// pública da conta e envia em base64 no header X-Webhook-Signature.
+// Isso é MAIS forte que o `webhookSecret` da query string (que pode vazar em
+// logs de proxy/URL) — mantemos os dois como defesa em profundidade.
+const timingSafeEqual = (a: string, b: string): boolean => {
+  if (a.length !== b.length) return false
+  let result = 0
+  for (let i = 0; i < a.length; i++) result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return result === 0
+}
+
+const verifyHmacSignature = async (rawBody: string, publicKey: string, signatureB64: string): Promise<boolean> => {
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(publicKey),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const mac = await crypto.subtle.sign('HMAC', key, enc.encode(rawBody))
+  const computedB64 = btoa(String.fromCharCode(...new Uint8Array(mac)))
+  return timingSafeEqual(computedB64, signatureB64)
+}
 const CANCELLATION_EVENTS = new Set(['subscription.cancelled'])
 
 // externalId foi criado por nós em abacate-create-subscription no formato:
@@ -90,7 +121,36 @@ Deno.serve(async (req) => {
       })
     }
 
-    const body = await req.json().catch(() => null)
+    // 2. Autenticidade forte via HMAC-SHA256 (X-Webhook-Signature).
+    // Lemos o corpo como texto bruto primeiro — a assinatura é sobre os bytes
+    // exatos recebidos, não sobre um JSON reserializado.
+    const rawBody = await req.text()
+    const publicKey = Deno.env.get('ABACATE_WEBHOOK_PUBLIC_KEY')
+    const signatureHeader = req.headers.get('X-Webhook-Signature')
+
+    if (publicKey && signatureHeader) {
+      const validSignature = await verifyHmacSignature(rawBody, publicKey, signatureHeader)
+      if (!validSignature) {
+        log('AUTH: assinatura HMAC (X-Webhook-Signature) inválida')
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    } else {
+      // Ainda funciona só com o webhookSecret da URL, mas é a camada mais fraca.
+      // Configure ABACATE_WEBHOOK_PUBLIC_KEY (painel AbacatePay > Webhooks > sua
+      // chave pública da conta) assim que possível.
+      log('WARN: ABACATE_WEBHOOK_PUBLIC_KEY não configurado — validando apenas via webhookSecret na URL')
+    }
+
+    const body = (() => {
+      try {
+        return JSON.parse(rawBody)
+      } catch {
+        return null
+      }
+    })()
     if (!body) {
       return new Response(JSON.stringify({ error: 'Invalid payload' }), {
         status: 400,
