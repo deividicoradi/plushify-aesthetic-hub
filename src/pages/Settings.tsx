@@ -51,7 +51,20 @@ const Settings = () => {
     setIsEditingPassword(false);
   };
 
-  const bookingLink = user?.id ? `${window.location.origin}/agendar/${user.id}` : '';
+  // Parte decorativa do link (não é validada em nenhum lugar — só deixa a URL
+  // apresentável). Quem identifica o profissional de verdade é sempre o
+  // user.id logo depois, então não tem risco de duplicidade nem de um slug
+  // repetido "roubar" o link de outro usuário.
+  const slugify = (text: string) =>
+    text
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+  const bookingSlug = slugify(user?.user_metadata?.full_name || '') || 'agendamento';
+  const bookingLink = user?.id ? `${window.location.origin}/agendar/${bookingSlug}/${user.id}` : '';
 
   const handleCopyBookingLink = async () => {
     if (!bookingLink) return;
