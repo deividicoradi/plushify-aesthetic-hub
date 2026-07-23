@@ -165,10 +165,16 @@ Deno.serve(async (req) => {
     // Fallback para data direto, caso algum evento não siga o mesmo formato.
     const sub = (dataRoot.subscription ?? dataRoot) as Record<string, unknown>
 
+    // CONFIRMADO via payload real (entrega de 2026-07-23): externalId e metadata
+    // não vêm em data.subscription nem direto em data — vêm em data.checkout,
+    // que é irmão de data.subscription (não filho). Checkout avulso (anual)
+    // também usa este objeto. Mantemos os fallbacks antigos por segurança.
+    const checkoutObj = (dataRoot.checkout ?? {}) as Record<string, unknown>
+
     if (CANCELLATION_EVENTS.has(eventType)) {
-      const cancelExternalId = (sub.externalId ?? dataRoot.externalId ?? null) as string | null
+      const cancelExternalId = (checkoutObj.externalId ?? sub.externalId ?? dataRoot.externalId ?? null) as string | null
       const cancelParsed = parseExternalId(cancelExternalId)
-      const cancelMetadata = (sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
+      const cancelMetadata = (checkoutObj.metadata ?? sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
       const cancelUserId = cancelParsed?.userId ?? (cancelMetadata.user_id ? String(cancelMetadata.user_id) : null)
       const cancelSubscriptionId = sub.id ? String(sub.id) : null
 
@@ -218,14 +224,12 @@ Deno.serve(async (req) => {
       })
     }
 
-    // AJUSTAR se necessário: externalId pode vir em sub.externalId, no objeto
-    // "bill" original (dataRoot.externalId) ou não vir em nenhum — nesse caso
-    // caímos para metadata como último recurso.
-    const externalId = (sub.externalId ?? dataRoot.externalId ?? null) as string | null
+    // externalId e metadata vêm em data.checkout (ver checkoutObj acima).
+    const externalId = (checkoutObj.externalId ?? sub.externalId ?? dataRoot.externalId ?? null) as string | null
     let parsed = parseExternalId(externalId)
 
     if (!parsed) {
-      const metadata = (sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
+      const metadata = (checkoutObj.metadata ?? sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
       const userId = metadata.user_id ? String(metadata.user_id) : null
       const planType = metadata.plan_type ? String(metadata.plan_type) : null
       const billingPeriod = metadata.billing_period ? String(metadata.billing_period) : 'monthly'
@@ -255,10 +259,14 @@ Deno.serve(async (req) => {
     // Checkout avulso (anual): não é uma "assinatura" AbacatePay, então não tem
     // abacate_subscription_id — guardamos só o id do checkout (bill_...).
     const abacateSubscriptionId = !isAnnualCheckout && sub.id ? String(sub.id) : null
-    const abacateCustomerId = sub.customerId ? String(sub.customerId) : null
-    const abacateCheckoutId = isAnnualCheckout
-      ? String(sub.id ?? dataRoot.id ?? '') || null
-      : (dataRoot.id && dataRoot.id !== sub.id ? String(dataRoot.id) : null)
+    // CONFIRMADO via payload real: customer.id (cust_...) vem em data.customer,
+    // irmão de data.subscription — checkout.customerId observado sempre null.
+    const customerObj = (dataRoot.customer ?? {}) as Record<string, unknown>
+    const customerIdRaw = customerObj.id ?? checkoutObj.customerId ?? sub.customerId ?? null
+    const abacateCustomerId = customerIdRaw ? String(customerIdRaw) : null
+    // CONFIRMADO via payload real: id do bill (bill_...) vem em data.checkout.id
+    // em ambos os eventos (subscription.completed e checkout.completed).
+    const abacateCheckoutId = checkoutObj.id ? String(checkoutObj.id) : null
 
     // AJUSTAR: nome real do campo de próxima cobrança de assinatura mensal
     // não confirmado na documentação.
@@ -272,14 +280,16 @@ Deno.serve(async (req) => {
       currentPeriodEnd = oneYearFromNow.toISOString()
     }
 
-    // AJUSTAR: nome do campo que indica o método usado (PIX vs CARD) e onde ele
-    // aparece no payload de checkout.completed não está confirmado na doc —
-    // validar com um pagamento Pix real e um parcelado real.
+    // CONFIRMADO via payload real: checkout.completed não tem "method" singular —
+    // o método vem em checkout.methods (array, ex.: ["CARD"] ou ["PIX"]).
+    // installmentsCount ainda não confirmado (só vimos pagamento à vista em
+    // teste); mantemos leitura best-effort.
     let paymentKind: 'recurring_card' | 'pix' | 'installments' = 'recurring_card'
     if (isAnnualCheckout) {
-      const installmentsCount = Number(sub.installmentsCount ?? 0)
-      const method = String(sub.method ?? '').toUpperCase()
-      if (method === 'PIX') {
+      const installmentsCount = Number(checkoutObj.installmentsCount ?? 0)
+      const methods = Array.isArray(checkoutObj.methods) ? (checkoutObj.methods as unknown[]) : []
+      const usedPix = methods.some((m) => String(m).toUpperCase() === 'PIX')
+      if (usedPix) {
         paymentKind = 'pix'
       } else if (installmentsCount > 1) {
         paymentKind = 'installments'
