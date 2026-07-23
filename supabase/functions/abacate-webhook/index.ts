@@ -1,46 +1,51 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-// Recebe as notificações de pagamento do AbacatePay e ativa/renova o plano
-// pago do usuário. Sem esta função, um pagamento aprovado nunca é refletido
-// em user_subscriptions e o cliente fica preso no plano trial mesmo após pagar.
+// Recebe as notificações de pagamento do AbacatePay e ativa/renova/revoga o
+// plano pago do usuário. Sem esta função, um pagamento aprovado nunca é
+// refletido em user_subscriptions e o cliente fica preso no plano trial mesmo
+// após pagar — e um reembolso/chargeback nunca revoga o acesso já concedido.
 //
-// Baseado em https://docs.abacatepay.com/pages/webhooks (consultado em 2026-07-22).
+// Baseado em https://docs.abacatepay.com/pages/webhooks e teste real de ponta
+// a ponta (pagamento sandbox + inspeção do payload de entrega) em 2026-07-23.
 //
-// Formato confirmado pela documentação:
-//   { "id": "log_...", "event": "subscription.completed", "apiVersion": 2,
-//     "devMode": false, "data": { "subscription": { "id": "subs_...", "amount": ...,
-//     "status": "ACTIVE", "method": "CARD", "customerId": "cust_...", ... } } }
+// Estrutura REAL confirmada via payload de entrega (não só a doc, que é vaga
+// nesse ponto): `data` tem até três objetos irmãos — nunca aninhados um dentro
+// do outro:
+//   data.subscription  -> presente em eventos subscription.* (id subs_..., status,
+//                          frequency, method, SEM externalId/metadata)
+//   data.customer       -> presente em eventos subscription.* (id cust_..., name, email, taxId)
+//   data.checkout        -> presente em TODOS os eventos (id bill_..., externalId,
+//                          metadata, methods[], installmentsCount, status) — é
+//                          aqui que externalId/metadata realmente ficam, não em
+//                          data.subscription nem direto em data.
+// Em checkout.completed/refunded/disputed, data só tem o campo "checkout" (não
+// há subscription/customer irmãos).
 //
-// Eventos disponíveis (subscription): subscription.completed, subscription.renewed,
-// subscription.cancelled, subscription.trial_started.
-//
-// Plano anual não usa assinatura recorrente (AbacatePay não suporta Pix/parcelamento
-// em recorrência) — é um checkout avulso via /v2/checkouts/create, então também
-// tratamos aqui o evento `checkout.completed`. Nesse caso `data` já é o objeto
-// "bill" direto (sem aninhar em "subscription"), com `id` no formato bill_...,
-// `installmentsCount` e (supostamente) `method` indicando PIX ou CARD.
-//
-// NÃO confirmado pela documentação (validar com evento real antes de confiar):
-//   - se `externalId` (o que definimos na criação do checkout) volta dentro de
-//     data.subscription, ou só no objeto "bill" original — por isso o código
-//     tenta os dois lugares e, como último recurso, usa `metadata`.
-//   - o nome exato do campo de próxima cobrança (assumido `nextBillingDate`).
-// Pontos marcados com "// AJUSTAR" são os candidatos a corrigir ao ver o payload real.
+// Todos os 13 eventos documentados: checkout.completed/refunded/disputed,
+// transparent.completed/refunded/disputed, subscription.completed/renewed/
+// cancelled, transfer.completed/failed, payout.completed/failed. Só os 8
+// primeiros interessam ao Plushify (transfer/payout são sobre saques da
+// AbacatePay pra conta do MERCHANT, não pagamento de cliente).
 //
 // Configuração necessária antes de produção:
 // 1. Painel AbacatePay > Webhooks > cadastrar:
 //    https://<seu-projeto>.supabase.co/functions/v1/abacate-webhook?webhookSecret=SEU_SEGREDO
 // 2. `supabase secrets set ABACATE_WEBHOOK_SECRET=SEU_SEGREDO` (mesmo valor acima)
-// 3. No mesmo painel de Webhooks, copie a "chave pública" (public key) da sua
-//    conta AbacatePay — usada para verificar a assinatura HMAC do payload —
-//    e rode `supabase secrets set ABACATE_WEBHOOK_PUBLIC_KEY=SUA_CHAVE_PUBLICA`.
-//    Sem isso a função ainda funciona, mas só com a camada mais fraca (secret
-//    na URL) — um log de WARN aparece até isso ser configurado.
-// 4. Disparar um pagamento de teste e conferir os logs desta função no painel do Supabase.
+// 3. Disparar um pagamento de teste e conferir os logs desta função no painel do Supabase.
 //
-// `subscription.cancelled` chama a RPC cancel_subscription, que marca
-// status='cancelled' — get_user_plan() já ignora linhas não-ativas e volta
-// pro trial automaticamente, então não precisa mexer em plan_type.
+// Sobre a verificação HMAC (X-Webhook-Signature) que a doc da AbacatePay
+// menciona: removida deste código de propósito. Testado exaustivamente em
+// 2026-07-23 — essa conta/versão da AbacatePay não expõe em lugar nenhum do
+// painel (Webhook, API, Perfil) a chave pública que seria necessária para
+// verificar essa assinatura. Qualquer valor colocado em ABACATE_WEBHOOK_PUBLIC_KEY
+// é adivinhação e faz TODA entrega real da AbacatePay falhar com 401 (ela manda
+// o header, mas com uma chave que não há como obter/conferir). Autenticação
+// fica só no webhookSecret da URL — camada única, mas real e funcional.
+//
+// REVOGAÇÃO (cancelamento, reembolso, disputa): as três chamam a mesma RPC
+// cancel_subscription, cada uma com um status diferente ('cancelled' /
+// 'refunded' / 'disputed') — get_user_plan() já ignora linhas não-ativas e
+// volta pro trial automaticamente, então não precisa mexer em plan_type.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -55,32 +60,19 @@ const log = (step: string, details?: unknown) => {
 
 const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed', 'checkout.completed'])
 
-// Verificação de assinatura HMAC-SHA256 (camada forte, igual Stripe/GitHub).
-// A AbacatePay assina o corpo bruto (raw body) da requisição com a chave
-// pública da conta e envia em base64 no header X-Webhook-Signature.
-// Isso é MAIS forte que o `webhookSecret` da query string (que pode vazar em
-// logs de proxy/URL) — mantemos os dois como defesa em profundidade.
-const timingSafeEqual = (a: string, b: string): boolean => {
-  if (a.length !== b.length) return false
-  let result = 0
-  for (let i = 0; i < a.length; i++) result |= a.charCodeAt(i) ^ b.charCodeAt(i)
-  return result === 0
+// CONFIRMADO via https://docs.abacatepay.com/pages/webhooks (2026-07-23): a AbacatePay
+// dispara eventos de reembolso (`*.refunded`) e disputa/chargeback (`*.disputed`) — antes
+// desta mudança, nenhum dos dois revogava o plano: um estorno ou chargeback deixava o
+// usuário com acesso pago para sempre, mesmo sem o pagamento estar mais confirmado.
+// `transparent.*` cobre o checkout transparente (Pix/Boleto avulso via /transparents/create),
+// não usado hoje pelo Plushify, mas tratado aqui para não deixar a lacuna se for adotado.
+const REVOCATION_EVENTS: Record<string, 'cancelled' | 'refunded' | 'disputed'> = {
+  'subscription.cancelled': 'cancelled',
+  'checkout.refunded': 'refunded',
+  'transparent.refunded': 'refunded',
+  'checkout.disputed': 'disputed',
+  'transparent.disputed': 'disputed',
 }
-
-const verifyHmacSignature = async (rawBody: string, publicKey: string, signatureB64: string): Promise<boolean> => {
-  const enc = new TextEncoder()
-  const key = await crypto.subtle.importKey(
-    'raw',
-    enc.encode(publicKey),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  )
-  const mac = await crypto.subtle.sign('HMAC', key, enc.encode(rawBody))
-  const computedB64 = btoa(String.fromCharCode(...new Uint8Array(mac)))
-  return timingSafeEqual(computedB64, signatureB64)
-}
-const CANCELLATION_EVENTS = new Set(['subscription.cancelled'])
 
 // externalId foi criado por nós em abacate-create-subscription no formato:
 // "plushify:<userId>:<planType>:<billingPeriod>:<uuid>"
@@ -119,28 +111,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // 2. Autenticidade forte via HMAC-SHA256 (X-Webhook-Signature).
-    // Lemos o corpo como texto bruto primeiro — a assinatura é sobre os bytes
-    // exatos recebidos, não sobre um JSON reserializado.
     const rawBody = await req.text()
-    const publicKey = Deno.env.get('ABACATE_WEBHOOK_PUBLIC_KEY')
-    const signatureHeader = req.headers.get('X-Webhook-Signature')
-
-    if (publicKey && signatureHeader) {
-      const validSignature = await verifyHmacSignature(rawBody, publicKey, signatureHeader)
-      if (!validSignature) {
-        log('AUTH: assinatura HMAC (X-Webhook-Signature) inválida')
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
-    } else {
-      // Ainda funciona só com o webhookSecret da URL, mas é a camada mais fraca.
-      // Configure ABACATE_WEBHOOK_PUBLIC_KEY (painel AbacatePay > Webhooks > sua
-      // chave pública da conta) assim que possível.
-      log('WARN: ABACATE_WEBHOOK_PUBLIC_KEY não configurado — validando apenas via webhookSecret na URL')
-    }
 
     const body = (() => {
       try {
@@ -171,15 +142,19 @@ Deno.serve(async (req) => {
     // também usa este objeto. Mantemos os fallbacks antigos por segurança.
     const checkoutObj = (dataRoot.checkout ?? {}) as Record<string, unknown>
 
-    if (CANCELLATION_EVENTS.has(eventType)) {
+    const revocationStatus = REVOCATION_EVENTS[eventType]
+    if (revocationStatus) {
       const cancelExternalId = (checkoutObj.externalId ?? sub.externalId ?? dataRoot.externalId ?? null) as string | null
       const cancelParsed = parseExternalId(cancelExternalId)
       const cancelMetadata = (checkoutObj.metadata ?? sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
       const cancelUserId = cancelParsed?.userId ?? (cancelMetadata.user_id ? String(cancelMetadata.user_id) : null)
       const cancelSubscriptionId = sub.id ? String(sub.id) : null
+      // checkout.refunded/disputed (plano anual) não têm abacate_subscription_id —
+      // só o id do checkout/bill, que é onde o registro fica gravado.
+      const cancelCheckoutId = checkoutObj.id ? String(checkoutObj.id) : null
 
       if (!cancelUserId) {
-        log('ERROR: cancelamento recebido mas não foi possível identificar o usuário', {
+        log('ERROR: revogação recebida mas não foi possível identificar o usuário', {
           eventType,
           externalId: cancelExternalId,
           sub,
@@ -199,17 +174,25 @@ Deno.serve(async (req) => {
       const { data: cancelled, error: cancelError } = await admin.rpc('cancel_subscription', {
         p_user_id: cancelUserId,
         p_abacate_subscription_id: cancelSubscriptionId,
+        p_abacate_checkout_id: cancelCheckoutId,
+        p_status: revocationStatus,
       })
 
       if (cancelError) {
         log('ERROR: rpc cancel_subscription falhou', cancelError)
-        return new Response(JSON.stringify({ error: 'Failed to cancel subscription' }), {
+        return new Response(JSON.stringify({ error: 'Failed to revoke subscription' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
 
-      log('subscription cancelled', { userId: cancelUserId, subscriptionId: cancelSubscriptionId, applied: cancelled })
+      log('subscription revoked', {
+        userId: cancelUserId,
+        subscriptionId: cancelSubscriptionId,
+        checkoutId: cancelCheckoutId,
+        status: revocationStatus,
+        applied: cancelled,
+      })
       return new Response(JSON.stringify({ received: true, cancelled }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
