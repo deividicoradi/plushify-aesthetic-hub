@@ -31,9 +31,9 @@ Limpeza completa executada em 3 fases. Total: **~45 arquivos removidos**, **2 de
 ### 2. Consolidação de `useAnalyticsData`
 - `src/hooks/useAnalyticsData.ts` é usado apenas por `useDashboardAnalytics`, que por sua vez é usado por `InsightsSection`. O hook análogo em `hooks/analytics/useAnalyticsData.ts` tem outra responsabilidade. Mantidos separados até refatoração da camada Analytics.
 
-### 3. Edge Functions `appointment-automation` e `validate-appointment`
-- **Por que não removidas**: Sem referências no frontend, mas podem ser invocadas via cron (pg_cron) ou webhook externo. Remoção sem confirmação pode quebrar automação silenciosa.
-- **Ação requerida**: Verificar agendamentos em Cloud → Database → Cron Jobs e webhooks externos antes de deletar.
+### 3. Edge Functions `appointment-automation` e `validate-appointment` — ✅ removidas em 2026-07-23
+- Confirmado: nenhum `pg_cron` nas migrations, nenhum `[functions.*]` no `supabase/config.toml`, nenhuma referência no frontend. `validate-appointment` também era uma falha de segurança ativa — usava a service role key sem checar autenticação, permitindo que qualquer chamador não autenticado consultasse horário de trabalho e conflitos de agenda (nome de cliente, serviço) de qualquer profissional só passando o `user_id` dele no corpo da requisição.
+- A lógica de disponibilidade continua existindo no banco via `check_appointment_availability`, só não fica mais exposta como Edge Function pública.
 
 ### 4. Migração completa Toast → Sonner nos callsites
 - O shim atual mantém a API legada funcionando. Migrar os 50 callsites para `import { toast } from "sonner"` direto eliminaria a camada intermediária mas exige revisão manual em cada arquivo.
