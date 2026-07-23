@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 
 const Settings = () => {
@@ -51,20 +52,22 @@ const Settings = () => {
     setIsEditingPassword(false);
   };
 
-  // Parte decorativa do link (não é validada em nenhum lugar — só deixa a URL
-  // apresentável). Quem identifica o profissional de verdade é sempre o
-  // user.id logo depois, então não tem risco de duplicidade nem de um slug
-  // repetido "roubar" o link de outro usuário.
-  const slugify = (text: string) =>
-    text
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+  // Slug opaco, sem relação com o user_id interno — gerado e persistido no
+  // banco (get_or_create_booking_slug), não é calculado aqui no front.
+  const [bookingSlug, setBookingSlug] = useState<string | null>(null);
 
-  const bookingSlug = slugify(user?.user_metadata?.full_name || '') || 'agendamento';
-  const bookingLink = user?.id ? `${window.location.origin}/agendar/${bookingSlug}/${user.id}` : '';
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.rpc('get_or_create_booking_slug').then(({ data, error }) => {
+      if (error) {
+        console.error('Erro ao obter link de agendamento:', error);
+        return;
+      }
+      setBookingSlug(data as string);
+    });
+  }, [user?.id]);
+
+  const bookingLink = bookingSlug ? `${window.location.origin}/agendar/${bookingSlug}` : '';
 
   const handleCopyBookingLink = async () => {
     if (!bookingLink) return;
@@ -230,8 +233,8 @@ const Settings = () => {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Input value={bookingLink} readOnly className="text-sm" />
-                  <Button onClick={handleCopyBookingLink} className="gap-2 shrink-0">
+                  <Input value={bookingLink || 'Gerando link...'} readOnly className="text-sm" />
+                  <Button onClick={handleCopyBookingLink} disabled={!bookingLink} className="gap-2 shrink-0">
                     <Copy className="w-4 h-4" />
                     Copiar link
                   </Button>

@@ -37,13 +37,11 @@ interface BookingData {
   notes?: string;
 }
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export default function PublicBooking() {
-  const { userId } = useParams<{ userId: string }>();
-  const isValidUserId = !!userId && UUID_REGEX.test(userId);
+  const { slug } = useParams<{ slug: string }>();
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
+  const [servicesLoaded, setServicesLoaded] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState<BookingData>({
@@ -73,13 +71,18 @@ export default function PublicBooking() {
     setSelectedDates(dates);
   }, []);
 
-  // Buscar serviços públicos do salão indicado no link (escopado por user_id)
+  // Buscar serviços públicos do salão indicado no link. O slug é opaco —
+  // resolvido pro profissional certo só dentro da RPC, nunca expõe o
+  // user_id interno pro cliente.
   useEffect(() => {
-    if (!isValidUserId) return;
+    if (!slug) {
+      setServicesLoaded(true);
+      return;
+    }
 
     const fetchServices = async () => {
       try {
-        const { data, error } = await supabase.rpc('get_public_services', { p_user_id: userId });
+        const { data, error } = await supabase.rpc('get_public_services', { p_slug: slug });
         if (error) throw error;
         setServices(data || []);
       } catch (error) {
@@ -89,11 +92,13 @@ export default function PublicBooking() {
           description: "Não foi possível carregar os serviços.",
           variant: "destructive"
         });
+      } finally {
+        setServicesLoaded(true);
       }
     };
 
     fetchServices();
-  }, [userId, isValidUserId]);
+  }, [slug]);
 
   // Buscar horários disponíveis usando a nova função
   const fetchAvailableSlots = async (serviceId: string, date: string) => {
@@ -215,7 +220,7 @@ export default function PublicBooking() {
     setAvailableSlots([]);
   };
 
-  if (!isValidUserId) {
+  if (!slug) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center px-4">
         <Card className="max-w-md w-full">
@@ -337,10 +342,15 @@ export default function PublicBooking() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                {services.length === 0 ? (
+                {!servicesLoaded ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                     <p className="text-sm text-muted-foreground mt-2">Carregando serviços...</p>
+                  </div>
+                ) : services.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Star className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Nenhum serviço disponível para agendamento neste link.</p>
                   </div>
                 ) : (
                   services.map((service) => (

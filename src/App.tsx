@@ -91,8 +91,7 @@ const AppContent = () => {
       <Route path="/help" element={<Help />} />
       <Route path="/status" element={<Status />} />
       <Route path="/updates" element={<Updates />} />
-      <Route path="/agendar/:userId" element={<PublicBooking />} />
-      <Route path="/agendar/:slug/:userId" element={<PublicBooking />} />
+      <Route path="/agendar/:slug" element={<PublicBooking />} />
       <Route
         path="/dashboard"
         element={
