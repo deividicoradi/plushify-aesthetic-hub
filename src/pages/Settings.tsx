@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,17 @@ const Settings = () => {
 
   const handleCancelPassword = () => {
     setIsEditingPassword(false);
+  };
+
+  const bookingLink = user?.id ? `${window.location.origin}/agendar/${user.id}` : '';
+
+  const handleCopyBookingLink = async () => {
+    if (!bookingLink) return;
+    await navigator.clipboard.writeText(bookingLink);
+    toast({
+      title: "Link copiado",
+      description: "Envie esse link para seus clientes agendarem direto com você.",
+    });
   };
 
   return (
@@ -189,8 +200,33 @@ const Settings = () => {
                 )}
               </CardContent>
             </Card>
+
+            <Card className="border shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Link2 className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base sm:text-lg">Link de agendamento</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      Envie esse link para seus clientes marcarem horário direto com você
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Input value={bookingLink} readOnly className="text-sm" />
+                  <Button onClick={handleCopyBookingLink} className="gap-2 shrink-0">
+                    <Copy className="w-4 h-4" />
+                    Copiar link
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
-          
+
           <TabsContent value="account" className="space-y-6">
             <Card className="border shadow-sm">
               <CardHeader className="pb-4">

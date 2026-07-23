@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { format, addDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 interface Service {
   id: string;
@@ -37,7 +37,11 @@ interface BookingData {
   notes?: string;
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default function PublicBooking() {
+  const { userId } = useParams<{ userId: string }>();
+  const isValidUserId = !!userId && UUID_REGEX.test(userId);
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
@@ -69,11 +73,13 @@ export default function PublicBooking() {
     setSelectedDates(dates);
   }, []);
 
-  // Buscar serviços públicos usando a nova função
+  // Buscar serviços públicos do salão indicado no link (escopado por user_id)
   useEffect(() => {
+    if (!isValidUserId) return;
+
     const fetchServices = async () => {
       try {
-        const { data, error } = await supabase.rpc('get_public_services');
+        const { data, error } = await supabase.rpc('get_public_services', { p_user_id: userId });
         if (error) throw error;
         setServices(data || []);
       } catch (error) {
@@ -87,7 +93,7 @@ export default function PublicBooking() {
     };
 
     fetchServices();
-  }, []);
+  }, [userId, isValidUserId]);
 
   // Buscar horários disponíveis usando a nova função
   const fetchAvailableSlots = async (serviceId: string, date: string) => {
@@ -208,6 +214,22 @@ export default function PublicBooking() {
     setAppointmentId(null);
     setAvailableSlots([]);
   };
+
+  if (!isValidUserId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center px-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="text-center py-8">
+            <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h2 className="text-lg font-bold mb-2">Link de agendamento inválido</h2>
+            <p className="text-sm text-muted-foreground">
+              Peça ao profissional o link correto de agendamento.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
