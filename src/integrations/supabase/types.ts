@@ -1269,6 +1269,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_subscription: {
+        Args: { p_abacate_subscription_id?: string; p_user_id: string }
+        Returns: boolean
+      }
       check_appointment_availability: {
         Args: {
           p_appointment_date: string
