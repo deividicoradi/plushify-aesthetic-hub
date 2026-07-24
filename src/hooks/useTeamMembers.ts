@@ -67,6 +67,9 @@ export const useTeamMembers = () => {
         .from('team_members')
         .insert({
           ...memberData,
+          // hire_date é coluna `date`; o form manda '' quando o campo fica
+          // vazio, e '' não é uma data válida pro Postgres (erro 22007).
+          hire_date: memberData.hire_date || null,
           user_id: authUser.id,
           permissions: memberData.permissions || {},
         })
@@ -80,9 +83,9 @@ export const useTeamMembers = () => {
       queryClient.invalidateQueries({ queryKey });
       toast({ title: "Sucesso", description: "Membro adicionado com sucesso!" });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Erro ao criar membro:', error);
-      toast({ title: "Erro", description: "Não foi possível adicionar o membro.", variant: "destructive" });
+      toast({ title: "Erro", description: error?.message || "Não foi possível adicionar o membro.", variant: "destructive" });
     },
   });
 
@@ -90,7 +93,11 @@ export const useTeamMembers = () => {
     mutationFn: async ({ id, memberData }: { id: string; memberData: Partial<TeamMemberInput> }) => {
       const { data, error } = await supabase
         .from('team_members')
-        .update({ ...memberData, updated_at: new Date().toISOString() })
+        .update({
+          ...memberData,
+          hire_date: memberData.hire_date || null,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', id)
         .select()
         .single();
@@ -102,9 +109,9 @@ export const useTeamMembers = () => {
       queryClient.invalidateQueries({ queryKey });
       toast({ title: "Sucesso", description: "Membro atualizado com sucesso!" });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Erro ao atualizar membro:', error);
-      toast({ title: "Erro", description: "Não foi possível atualizar o membro.", variant: "destructive" });
+      toast({ title: "Erro", description: error?.message || "Não foi possível atualizar o membro.", variant: "destructive" });
     },
   });
 
