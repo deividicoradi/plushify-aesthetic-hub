@@ -1400,7 +1400,7 @@ export type Database = {
         }[]
       }
       get_public_services: {
-        Args: never
+        Args: { p_user_id: string }
         Returns: {
           category: string
           description: string
