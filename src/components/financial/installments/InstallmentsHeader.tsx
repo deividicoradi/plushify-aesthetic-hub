@@ -5,9 +5,10 @@ import { Plus } from 'lucide-react';
 
 interface InstallmentsHeaderProps {
   onCreateNew: () => void;
+  disabled?: boolean;
 }
 
-const InstallmentsHeader = ({ onCreateNew }: InstallmentsHeaderProps) => {
+const InstallmentsHeader = ({ onCreateNew, disabled }: InstallmentsHeaderProps) => {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div className="min-w-0">
@@ -19,7 +20,7 @@ const InstallmentsHeader = ({ onCreateNew }: InstallmentsHeaderProps) => {
 
       <Button
         onClick={onCreateNew}
-        className="gap-2 w-full sm:w-auto h-11 sm:h-10 shrink-0"
+        className={`gap-2 w-full sm:w-auto h-11 sm:h-10 shrink-0 ${disabled ? 'opacity-60' : ''}`}
       >
         <Plus className="w-4 h-4" />
         <span>Novo Parcelamento</span>

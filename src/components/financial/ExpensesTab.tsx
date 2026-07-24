@@ -8,9 +8,12 @@ import { useExpensesData } from '@/hooks/financial/useExpensesData';
 import { ExpenseComparisonCharts } from './charts/ExpenseComparisonCharts';
 import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 import { useExpensesByType } from '@/hooks/financial/useExpensesByType';
+import { useCashStatus } from './CashStatusProvider';
+import { toast } from "@/hooks/use-toast";
 
 const ExpensesTab = () => {
   const { expenses, isLoading, deleteExpense } = useExpensesData();
+  const { isOpen: isCashOpen } = useCashStatus();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,6 +35,21 @@ const ExpensesTab = () => {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
+  };
+
+  // Bloqueia ANTES de abrir o formulário (não só no submit): sem isso o
+  // usuário preenche tudo e só descobre que o caixa está fechado ao salvar,
+  // perdendo o preenchimento à toa.
+  const handleNewExpense = () => {
+    if (!isCashOpen) {
+      toast({
+        title: "Caixa fechado",
+        description: "Abra o caixa de hoje antes de lançar uma nova despesa.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsDialogOpen(true);
   };
 
   const handleEdit = (expense: any) => {
@@ -68,8 +86,9 @@ const ExpensesTab = () => {
       <ExpensesHeader
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        onNewExpense={() => setIsDialogOpen(true)}
+        onNewExpense={handleNewExpense}
         totalExpenses={totalExpenses}
+        disabled={!isCashOpen}
       />
 
       {/* Gráficos de Despesas Fixas e Variáveis */}

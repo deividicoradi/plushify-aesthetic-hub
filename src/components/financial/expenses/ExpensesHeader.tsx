@@ -10,9 +10,10 @@ interface ExpensesHeaderProps {
   onSearchChange: (value: string) => void;
   onNewExpense: () => void;
   totalExpenses: number;
+  disabled?: boolean;
 }
 
-const ExpensesHeader = ({ searchTerm, onSearchChange, onNewExpense, totalExpenses }: ExpensesHeaderProps) => {
+const ExpensesHeader = ({ searchTerm, onSearchChange, onNewExpense, totalExpenses, disabled }: ExpensesHeaderProps) => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -58,7 +59,7 @@ const ExpensesHeader = ({ searchTerm, onSearchChange, onNewExpense, totalExpense
 
         <Button
           onClick={onNewExpense}
-          className="gap-2 w-full sm:w-auto h-11 sm:h-10 shrink-0"
+          className={`gap-2 w-full sm:w-auto h-11 sm:h-10 shrink-0 ${disabled ? 'opacity-60' : ''}`}
         >
           <Plus className="w-4 h-4" />
           <span>Nova Despesa</span>

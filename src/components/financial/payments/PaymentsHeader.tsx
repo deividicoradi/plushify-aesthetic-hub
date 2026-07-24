@@ -8,9 +8,10 @@ interface PaymentsHeaderProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onNewPayment: () => void;
+  disabled?: boolean;
 }
 
-const PaymentsHeader = ({ searchTerm, onSearchChange, onNewPayment }: PaymentsHeaderProps) => {
+const PaymentsHeader = ({ searchTerm, onSearchChange, onNewPayment, disabled }: PaymentsHeaderProps) => {
   return (
     <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
       <div className="relative w-full sm:flex-1">
@@ -25,7 +26,7 @@ const PaymentsHeader = ({ searchTerm, onSearchChange, onNewPayment }: PaymentsHe
 
       <Button
         onClick={onNewPayment}
-        className="gap-2 w-full sm:w-auto h-11 sm:h-10 shrink-0"
+        className={`gap-2 w-full sm:w-auto h-11 sm:h-10 shrink-0 ${disabled ? 'opacity-60' : ''}`}
       >
         <Plus className="w-4 h-4" />
         <span>Novo Pagamento</span>

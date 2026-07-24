@@ -6,20 +6,34 @@ import InstallmentsEmptyState from './installments/InstallmentsEmptyState';
 import InstallmentsByClient from './installments/InstallmentsByClient';
 import InstallmentsNoClient from './installments/InstallmentsNoClient';
 import { useInstallmentsDataByClient } from '@/hooks/financial/useInstallmentsDataByClient';
+import { useCashStatus } from './CashStatusProvider';
+import { toast } from "@/hooks/use-toast";
 
 const InstallmentsTab = () => {
+  const { isOpen: isCashOpen } = useCashStatus();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingInstallment, setEditingInstallment] = useState<any>(null);
 
-  const { 
-    clientGroups, 
-    installmentsWithoutClient, 
+  const {
+    clientGroups,
+    installmentsWithoutClient,
     totalInstallments,
-    isLoading, 
-    refetch 
+    isLoading,
+    refetch
   } = useInstallmentsDataByClient();
 
+  // Bloqueia ANTES de abrir o formulário (não só no submit) só pra parcelamento
+  // NOVO — editar um parcelamento existente segue permitido (a regra de caixa
+  // aberto se aplica à data do registro, não à de hoje).
   const handleOpenDialog = (installment?: any) => {
+    if (!installment && !isCashOpen) {
+      toast({
+        title: "Caixa fechado",
+        description: "Abra o caixa de hoje antes de criar um novo parcelamento.",
+        variant: "destructive",
+      });
+      return;
+    }
     setEditingInstallment(installment || null);
     setDialogOpen(true);
   };
@@ -36,7 +50,7 @@ const InstallmentsTab = () => {
 
   return (
     <div className="space-y-6">
-      <InstallmentsHeader onCreateNew={() => handleOpenDialog()} />
+      <InstallmentsHeader onCreateNew={() => handleOpenDialog()} disabled={!isCashOpen} />
 
       <div className="space-y-6">
         {isLoading ? (
