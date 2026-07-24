@@ -10,7 +10,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClients } from '@/hooks/useClients';
-import { buildReminderMessage, buildWhatsAppLink } from '@/utils/appointments/reminderMessage';
+import { buildReminderMessage, buildWhatsAppLink, formatAppointmentTime } from '@/utils/appointments/reminderMessage';
 
 export const RemindersPanel = () => {
   const { appointments, updateAppointment } = useAppointments();
@@ -18,11 +18,29 @@ export const RemindersPanel = () => {
   const [selectedDate, setSelectedDate] = useState(() => format(addDays(new Date(), 1), 'yyyy-MM-dd'));
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
+  // O form de "Novo Agendamento" não vincula client_id (só o agendamento
+  // público faz isso) — client_name é texto livre digitado pelo dono. Por
+  // isso, além de cruzar por client_id, cai pra um match por nome (mesmo
+  // critério usado em nenhum outro lugar hoje, heurístico) pra achar o
+  // telefone de clientes já cadastrados mesmo sem o vínculo formal.
   const phoneByClientId = useMemo(() => {
     const map = new Map<string, string | undefined>();
     clients.forEach((c) => map.set(c.id, c.phone));
     return map;
   }, [clients]);
+
+  const phoneByClientName = useMemo(() => {
+    const map = new Map<string, string | undefined>();
+    clients.forEach((c) => map.set(c.name.trim().toLowerCase(), c.phone));
+    return map;
+  }, [clients]);
+
+  const resolvePhone = (apt: { client_id?: string; client_name: string }) => {
+    if (apt.client_id && phoneByClientId.has(apt.client_id)) {
+      return phoneByClientId.get(apt.client_id);
+    }
+    return phoneByClientName.get(apt.client_name.trim().toLowerCase());
+  };
 
   const reminders = useMemo(() => {
     return appointments
@@ -84,7 +102,7 @@ export const RemindersPanel = () => {
           ) : (
             <div className="space-y-2">
               {reminders.map((apt) => {
-                const phone = apt.client_id ? phoneByClientId.get(apt.client_id) : undefined;
+                const phone = resolvePhone(apt);
                 const message = buildReminderMessage(apt);
                 const whatsappUrl = buildWhatsAppLink(phone, message);
                 const wasSent = !!apt.reminder_sent_at;
@@ -97,7 +115,7 @@ export const RemindersPanel = () => {
                     <div className="min-w-0">
                       <p className="font-medium truncate">{apt.client_name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {apt.appointment_time} · {apt.service_name}
+                        {formatAppointmentTime(apt.appointment_time)} · {apt.service_name}
                         {!phone && ' · sem telefone cadastrado'}
                       </p>
                     </div>

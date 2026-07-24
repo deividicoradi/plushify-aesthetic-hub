@@ -2,6 +2,13 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Appointment } from '@/hooks/useAppointments';
 
+// appointment_time vem do banco como "HH:MM:SS" (coluna `time`); a UI do
+// resto do app (AppointmentCard) sempre exibe só "HH:MM".
+export const formatAppointmentTime = (time: string): string => {
+  const [hours, minutes] = time.split(':');
+  return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+};
+
 export const buildReminderMessage = (appointment: Appointment): string => {
   // parseISO trata "yyyy-MM-dd" como data local; new Date() trataria como
   // UTC e a formatação em fuso negativo (Brasil) mostraria o dia anterior.
@@ -11,7 +18,7 @@ export const buildReminderMessage = (appointment: Appointment): string => {
 
 Passando pra lembrar do seu horário amanhã:
 📅 Data: ${date}
-⏰ Horário: ${appointment.appointment_time}
+⏰ Horário: ${formatAppointmentTime(appointment.appointment_time)}
 ✂️ Serviço: ${appointment.service_name}
 
 Qualquer imprevisto, nos avise! Até lá 😊`;
