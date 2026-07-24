@@ -261,7 +261,7 @@ export const AnalyticsDashboard: React.FC = () => {
       </div>
 
       {/* Resumo de Insights */}
-      <AnalyticsInsights newThisMonth={kpis.totalClients} />
+      <AnalyticsInsights newThisMonth={kpis.totalClients} periodLabel={range.label} />
 
       {active && (
         <DetailsListModal

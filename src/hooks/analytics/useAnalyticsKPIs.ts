@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -58,8 +59,10 @@ export const useAnalyticsKPIs = (range: Range) => {
 
   const fromISO = range.startDate.toISOString();
   const toISO = range.endDate.toISOString();
-  const fromDate = range.startDate.toISOString().slice(0, 10);
-  const toDate = range.endDate.toISOString().slice(0, 10);
+  // format() usa o dia local; toISOString().slice(0,10) usaria o dia em UTC,
+  // que pode incluir um dia a mais na borda do período em fusos negativos.
+  const fromDate = format(range.startDate, 'yyyy-MM-dd');
+  const toDate = format(range.endDate, 'yyyy-MM-dd');
 
   useEffect(() => {
     if (!user) return;

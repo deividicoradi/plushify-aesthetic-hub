@@ -3,9 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 interface AnalyticsInsightsProps {
   newThisMonth: number;
+  periodLabel?: string;
 }
 
-const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({ newThisMonth }) => {
+const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({ newThisMonth, periodLabel }) => {
   return (
     <Card>
       <CardHeader className="p-4 sm:p-6">
@@ -21,7 +22,8 @@ const AnalyticsInsights: React.FC<AnalyticsInsightsProps> = ({ newThisMonth }) =
               📈 Crescimento Positivo
             </h4>
             <p className="text-sm text-muted-foreground">
-              Seu negócio cresceu {newThisMonth} novos clientes este mês, 
+              Seu negócio cresceu {newThisMonth} novos clientes
+              {periodLabel ? ` no período "${periodLabel}"` : ' este mês'},
               mostrando uma tendência positiva de expansão.
             </p>
           </div>

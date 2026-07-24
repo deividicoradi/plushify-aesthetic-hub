@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -86,8 +87,10 @@ export const useAnalyticsChartData = (range?: OptionalRange) => {
 
   const fromISO = range?.startDate?.toISOString();
   const toISO = range?.endDate?.toISOString();
-  const fromDate = range?.startDate?.toISOString().slice(0, 10);
-  const toDate = range?.endDate?.toISOString().slice(0, 10);
+  // format() usa o dia local; toISOString().slice(0,10) usaria o dia em UTC,
+  // que pode incluir um dia a mais na borda do período em fusos negativos.
+  const fromDate = range?.startDate ? format(range.startDate, 'yyyy-MM-dd') : undefined;
+  const toDate = range?.endDate ? format(range.endDate, 'yyyy-MM-dd') : undefined;
 
   useEffect(() => {
     if (!user) return;
@@ -305,7 +308,10 @@ export const useAnalyticsChartData = (range?: OptionalRange) => {
 
         const weeklyMap = new Map<number, { appointments: number; revenue: number }>();
         weeklyAppointments?.forEach(appointment => {
-          const dayOfWeek = new Date(appointment.appointment_date).getDay();
+          // parseISO trata "yyyy-MM-dd" como data local; new Date() trataria
+          // como UTC e .getDay() sempre retornaria o dia da semana anterior
+          // em fusos negativos (ex: Brasil) — não só em casos de borda.
+          const dayOfWeek = parseISO(appointment.appointment_date).getDay();
           const current = weeklyMap.get(dayOfWeek) || { appointments: 0, revenue: 0 };
           weeklyMap.set(dayOfWeek, {
             appointments: current.appointments + 1,
