@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -23,7 +23,7 @@ export const useProfessionals = () => {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProfessionals = async () => {
+  const fetchProfessionals = useCallback(async () => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
@@ -43,9 +43,9 @@ export const useProfessionals = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const createProfessional = async (professionalData: Omit<Professional, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+  const createProfessional = useCallback(async (professionalData: Omit<Professional, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
@@ -79,9 +79,9 @@ export const useProfessionals = () => {
       });
       return null;
     }
-  };
+  }, []);
 
-  const updateProfessional = async (id: string, updates: Partial<Professional>) => {
+  const updateProfessional = useCallback(async (id: string, updates: Partial<Professional>) => {
     try {
       const { data, error } = await supabase
         .from('team_members')
@@ -107,9 +107,9 @@ export const useProfessionals = () => {
       });
       return null;
     }
-  };
+  }, []);
 
-  const deleteProfessional = async (id: string) => {
+  const deleteProfessional = useCallback(async (id: string) => {
     try {
       const { error } = await supabase
         .from('team_members')
@@ -133,9 +133,9 @@ export const useProfessionals = () => {
       });
       return false;
     }
-  };
+  }, []);
 
-  const getProfessionalsByService = async (serviceId: string) => {
+  const getProfessionalsByService = useCallback(async (serviceId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
@@ -166,11 +166,11 @@ export const useProfessionals = () => {
       // Em caso de erro, retornar todos os profissionais ativos
       return professionals.filter(p => p.active);
     }
-  };
+  }, [professionals]);
 
   useEffect(() => {
     fetchProfessionals();
-  }, []);
+  }, [fetchProfessionals]);
 
   return {
     professionals,
