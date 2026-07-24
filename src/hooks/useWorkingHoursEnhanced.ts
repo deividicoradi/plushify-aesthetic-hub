@@ -67,26 +67,43 @@ export const useWorkingHoursEnhanced = () => {
 
       // upsert (não update): dias configurados pela primeira vez ainda não
       // têm linha em working_hours, então não têm id para dar match num update.
-      const { data, error } = await supabase
-        .from('working_hours')
-        .upsert(
-          updatedHours.map(hour => ({
-            id: hour.id,
-            user_id: user.id,
-            day_of_week: hour.day_of_week,
-            is_active: hour.is_active,
-            start_time: hour.start_time,
-            end_time: hour.end_time,
-            auto_confirm_appointments: hour.auto_confirm_appointments,
-            auto_complete_appointments: hour.auto_complete_appointments
-          })),
-          { onConflict: 'user_id,day_of_week' }
-        )
-        .select();
+      const toRow = (hour: WorkingHoursEnhanced) => ({
+        user_id: user.id,
+        day_of_week: hour.day_of_week,
+        is_active: hour.is_active,
+        start_time: hour.start_time,
+        end_time: hour.end_time,
+        auto_confirm_appointments: hour.auto_confirm_appointments,
+        auto_complete_appointments: hour.auto_complete_appointments
+      });
 
+      // Linhas existentes (têm id) e novas (sem id) vão em upserts separados:
+      // se misturadas no mesmo array, o "columns" inferido pelo PostgREST a
+      // partir da união das chaves manda id=null explícito pras novas linhas,
+      // violando o NOT NULL em vez de cair no DEFAULT gen_random_uuid().
+      const existing = updatedHours.filter(h => h.id);
+      const brandNew = updatedHours.filter(h => !h.id);
+
+      const results = await Promise.all([
+        existing.length > 0
+          ? supabase.from('working_hours').upsert(
+              existing.map(h => ({ id: h.id, ...toRow(h) })),
+              { onConflict: 'user_id,day_of_week' }
+            ).select()
+          : Promise.resolve({ data: [], error: null }),
+        brandNew.length > 0
+          ? supabase.from('working_hours').upsert(
+              brandNew.map(toRow),
+              { onConflict: 'user_id,day_of_week' }
+            ).select()
+          : Promise.resolve({ data: [], error: null })
+      ]);
+
+      const error = results.find(r => r.error)?.error;
       if (error) throw error;
 
-      setWorkingHours(data || updatedHours);
+      const data = results.flatMap(r => r.data || []);
+      setWorkingHours(data.length > 0 ? data : updatedHours);
       toast({
         title: "Sucesso",
         description: "Configurações de horário salvas com sucesso"
