@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ProductFormData, Product, useProductsData } from "@/hooks/inventory/useProductsData";
 import { usePlanLimits } from '@/hooks/usePlanLimits';
@@ -39,6 +39,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   } = useForm<ProductFormData>({
     defaultValues: {
       name: initialData?.name || "",
+      sku: initialData?.sku || "",
       description: initialData?.description || "",
       price: initialData?.price || 0,
       cost_price: initialData?.cost_price || 0,
@@ -80,6 +81,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             {errors.name && (
               <p className="text-sm text-destructive">{errors.name.message}</p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="sku">SKU</Label>
+            <Input
+              id="sku"
+              {...register("sku")}
+              placeholder="Ex: SH-001"
+              className="focus:border-primary focus:ring-primary"
+            />
           </div>
 
           <div className="space-y-2">
@@ -179,13 +190,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {acquisitionDate ? format(new Date(acquisitionDate), "dd/MM/yyyy") : "Selecionar data"}
+                  {acquisitionDate ? format(parseISO(acquisitionDate), "dd/MM/yyyy") : "Selecionar data"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={acquisitionDate ? new Date(acquisitionDate) : undefined}
+                  selected={acquisitionDate ? parseISO(acquisitionDate) : undefined}
                   onSelect={(date) => setValue("acquisition_date", date ? format(date, "yyyy-MM-dd") : "")}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
@@ -206,13 +217,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {validityDate ? format(new Date(validityDate), "dd/MM/yyyy") : "Selecionar data"}
+                  {validityDate ? format(parseISO(validityDate), "dd/MM/yyyy") : "Selecionar data"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={validityDate ? new Date(validityDate) : undefined}
+                  selected={validityDate ? parseISO(validityDate) : undefined}
                   onSelect={(date) => setValue("validity_date", date ? format(date, "yyyy-MM-dd") : "")}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
