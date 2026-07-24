@@ -31,9 +31,15 @@ export const useReportsMetrics = () => {
     setError(null);
 
     const result = await handleAsyncError(async () => {
+      // getDateRange('month') é uma janela rolante (últimos ~30 dias), não o
+      // mês calendário. Chamar a mesma função duas vezes pra "mês passado"
+      // fazia lastMonthStart cair DEPOIS de lastMonthEnd (mesmo início da
+      // janela atual, só o fim que era corrigido) — a consulta do mês
+      // anterior nunca retornava linhas, e o crescimento ficava sempre 0%.
       const { start: currentMonthStart, end: now } = getDateRange('month');
-      const { start: lastMonthStart, end: lastMonthEnd } = getDateRange('month');
-      lastMonthEnd.setTime(currentMonthStart.getTime() - 1);
+      const lastMonthEnd = new Date(currentMonthStart.getTime() - 1);
+      const lastMonthStart = new Date(currentMonthStart);
+      lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
 
       // Optimized parallel queries using secure RPC for clients
       const [

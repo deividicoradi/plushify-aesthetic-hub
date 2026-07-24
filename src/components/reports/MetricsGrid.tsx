@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { parseISO } from 'date-fns';
 import { Users, CalendarDays, Receipt, Package, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
@@ -50,7 +51,7 @@ const MetricCard = ({ title, value, growth, icon: Icon, description, colorClass,
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <p className="text-2xl font-bold text-foreground">
-              {loading ? '...' : (title.includes('Receita') ? `R$ ${value.toLocaleString('pt-BR')}` : value.toString())}
+              {loading ? '...' : (title.includes('Receita') ? fmtCurrency(value) : value.toString())}
             </p>
             <p className="text-xs text-muted-foreground">{description}</p>
             {growth !== undefined && (
@@ -112,7 +113,10 @@ const fmtCurrency = (v: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 const fmtDate = (d?: string | null) => {
   if (!d) return '—';
-  const dt = new Date(d);
+  // parseISO trata "yyyy-MM-dd" (closure_date, appointment_date) como data
+  // local; new Date() trataria como UTC e mostraria o dia anterior em
+  // fusos negativos (ex: Brasil).
+  const dt = parseISO(d);
   if (Number.isNaN(dt.getTime())) return '—';
   return dt.toLocaleDateString('pt-BR');
 };

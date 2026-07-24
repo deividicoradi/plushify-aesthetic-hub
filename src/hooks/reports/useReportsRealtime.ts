@@ -51,11 +51,24 @@ export const useReportsRealtime = ({ onDataChange }: RealtimeHookParams) => {
         {
           event: '*',
           schema: 'public',
-          table: 'financial_transactions',
+          table: 'payments',
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('Transactions changed:', payload.eventType);
+          console.log('Payments changed:', payload.eventType);
+          onDataChangeRef.current();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'cash_closures',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Cash closures changed:', payload.eventType);
           onDataChangeRef.current();
         }
       )
