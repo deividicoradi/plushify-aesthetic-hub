@@ -1,13 +1,21 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Gift } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
-import { useRewards } from '@/hooks/useRewards';
+import { useRewards, Reward } from '@/hooks/useRewards';
+import { LoyaltyClient } from '@/hooks/useLoyalty';
 import { RewardItem } from './RewardItem';
 import { LoadingRewards } from './LoadingRewards';
+import { RedeemRewardDialog } from './RedeemRewardDialog';
 
-export const RewardsCard: React.FC = () => {
+interface RewardsCardProps {
+  clients: LoyaltyClient[];
+  onRedeemed?: () => void;
+}
+
+export const RewardsCard: React.FC<RewardsCardProps> = ({ clients, onRedeemed }) => {
   const { rewards, loading } = useRewards();
+  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
 
   return (
     <Card className="bg-card/80 backdrop-blur-sm border-border/50">
@@ -24,17 +32,25 @@ export const RewardsCard: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 gap-2 sm:gap-3">
             {rewards.map((reward) => (
-              <RewardItem key={reward.id} reward={reward} />
+              <RewardItem key={reward.id} reward={reward} onRedeem={setSelectedReward} />
             ))}
           </div>
         )}
-        
+
         <div className="pt-2 text-center border-t border-border/50">
           <p className="text-[11px] sm:text-xs text-muted-foreground">
             💎 Novos níveis desbloqueiam recompensas exclusivas
           </p>
         </div>
       </CardContent>
+
+      <RedeemRewardDialog
+        open={!!selectedReward}
+        onOpenChange={(o) => !o && setSelectedReward(null)}
+        reward={selectedReward}
+        clients={clients}
+        onRedeemed={onRedeemed}
+      />
     </Card>
   );
 };

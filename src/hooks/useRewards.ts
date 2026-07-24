@@ -9,7 +9,7 @@ export interface Reward {
   description: string;
   pointsCost: number;
   type: 'discount' | 'service' | 'product' | 'experience';
-  tier: 'Bronze' | 'Prata' | 'Ouro' | 'Diamante';
+  tier: string;
   available: boolean;
   popular: boolean;
 }
@@ -39,7 +39,7 @@ export const useRewards = () => {
         description: r.description ?? '',
         pointsCost: Number(r.points_cost) || 0,
         type: (['discount', 'service', 'product', 'experience'].includes(r.reward_type) ? r.reward_type : 'discount') as Reward['type'],
-        tier: ((['Bronze', 'Prata', 'Ouro', 'Diamante'].includes(r.tier_name) ? r.tier_name : 'Bronze') as Reward['tier']),
+        tier: r.tier_name || 'Bronze',
         available: !!r.available,
         popular: !!r.popular,
       }));

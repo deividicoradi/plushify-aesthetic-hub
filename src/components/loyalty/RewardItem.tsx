@@ -26,9 +26,10 @@ const getTierColor = (tier: string) => {
 
 interface RewardItemProps {
   reward: Reward;
+  onRedeem?: (reward: Reward) => void;
 }
 
-export const RewardItem = React.memo<RewardItemProps>(({ reward }) => {
+export const RewardItem = React.memo<RewardItemProps>(({ reward, onRedeem }) => {
   return (
     <div className={`p-3 sm:p-4 rounded-lg border border-border/50 transition-all hover:shadow-md ${!reward.available ? 'opacity-60' : ''} bg-card/30 dark:bg-card/20`}>
       <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
@@ -58,10 +59,11 @@ export const RewardItem = React.memo<RewardItemProps>(({ reward }) => {
           <Sparkles className="w-3 h-3 text-yellow-500" />
           <span className="text-xs sm:text-sm font-bold text-primary">{reward.pointsCost} pontos</span>
         </div>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           variant={reward.available ? "default" : "secondary"}
           disabled={!reward.available}
+          onClick={() => onRedeem?.(reward)}
           className="text-[11px] sm:text-xs w-full sm:w-auto h-8"
         >
           {reward.available ? 'Resgatar' : 'Indisponível'}

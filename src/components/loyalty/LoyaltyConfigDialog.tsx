@@ -145,8 +145,6 @@ const ChallengesTab: React.FC<{ items: LoyaltyChallenge[]; upsert: (c: any) => v
                   <SelectItem value="visits">Agendamentos</SelectItem>
                   <SelectItem value="spending">Valor gasto</SelectItem>
                   <SelectItem value="referral">Indicações</SelectItem>
-                  <SelectItem value="product">Produto</SelectItem>
-                  <SelectItem value="service">Serviço</SelectItem>
                 </SelectContent>
               </Select>
               <Input type="number" value={d.target_value} onChange={e => set(c.id, { target_value: Number(e.target.value) })} placeholder="Meta" />

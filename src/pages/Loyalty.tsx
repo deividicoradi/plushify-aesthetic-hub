@@ -19,7 +19,7 @@ import { LoyaltyMetric } from "@/hooks/loyalty/useLoyaltyDetails";
 const sb: any = supabase;
 
 export default function Loyalty() {
-  const { clients, tiers, stats, loading } = useLoyalty();
+  const { clients, tiers, stats, loading, refetch } = useLoyalty();
   const { user } = useAuth();
   const [configOpen, setConfigOpen] = useState(false);
   const [metric, setMetric] = useState<LoyaltyMetric | null>(null);
@@ -27,32 +27,39 @@ export default function Loyalty() {
     activeChallenges: 0, redemptionsCount: 0, redemptionsValue: 0, pointsCirculating: 0,
   });
 
-  useEffect(() => {
+  const loadAggregates = async () => {
     if (!user) return;
-    (async () => {
-      await sb.rpc('ensure_loyalty_defaults');
-      const [ch, red, tx, settings] = await Promise.all([
-        sb.from('loyalty_challenges').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'active'),
-        sb.from('loyalty_reward_redemptions').select('estimated_value').eq('user_id', user.id),
-        sb.from('loyalty_point_transactions').select('points, kind, created_at').eq('user_id', user.id),
-        sb.from('loyalty_settings').select('points_validity_days').eq('user_id', user.id).maybeSingle(),
-      ]);
-      const redRows = red.data ?? [];
-      const txRows = tx.data ?? [];
-      const validityDays = settings.data?.points_validity_days;
-      const cutoff = validityDays ? Date.now() - validityDays * 24 * 60 * 60 * 1000 : null;
-      setAggregates({
-        activeChallenges: ch.count ?? 0,
-        redemptionsCount: redRows.length,
-        redemptionsValue: redRows.reduce((s: number, r: any) => s + (Number(r.estimated_value) || 0), 0),
-        // pontos "earn" mais velhos que a validade configurada não contam mais no saldo circulante
-        pointsCirculating: txRows.reduce((s: number, r: any) => {
-          if (r.kind !== 'spend' && cutoff && new Date(r.created_at).getTime() < cutoff) return s;
-          return s + (r.kind === 'spend' ? -1 : 1) * (Number(r.points) || 0);
-        }, 0),
-      });
-    })();
+    await sb.rpc('ensure_loyalty_defaults');
+    const [ch, red, tx, settings] = await Promise.all([
+      sb.from('loyalty_challenges').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'active'),
+      sb.from('loyalty_reward_redemptions').select('estimated_value').eq('user_id', user.id),
+      sb.from('loyalty_point_transactions').select('points, kind, created_at').eq('user_id', user.id),
+      sb.from('loyalty_settings').select('points_validity_days').eq('user_id', user.id).maybeSingle(),
+    ]);
+    const redRows = red.data ?? [];
+    const txRows = tx.data ?? [];
+    const validityDays = settings.data?.points_validity_days;
+    const cutoff = validityDays ? Date.now() - validityDays * 24 * 60 * 60 * 1000 : null;
+    setAggregates({
+      activeChallenges: ch.count ?? 0,
+      redemptionsCount: redRows.length,
+      redemptionsValue: redRows.reduce((s: number, r: any) => s + (Number(r.estimated_value) || 0), 0),
+      // pontos "earn" mais velhos que a validade configurada não contam mais no saldo circulante
+      pointsCirculating: txRows.reduce((s: number, r: any) => {
+        if (r.kind !== 'spend' && cutoff && new Date(r.created_at).getTime() < cutoff) return s;
+        return s + (r.kind === 'spend' ? -1 : 1) * (Number(r.points) || 0);
+      }, 0),
+    });
+  };
+
+  useEffect(() => {
+    loadAggregates();
   }, [user, configOpen, metric]);
+
+  const handleRedeemed = () => {
+    refetch();
+    loadAggregates();
+  };
 
   if (loading) {
     return (
@@ -102,7 +109,7 @@ export default function Loyalty() {
         {/* Challenges and Rewards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           <ChallengesCard />
-          <RewardsCard />
+          <RewardsCard clients={clients} onRedeemed={handleRedeemed} />
         </div>
 
         {/* All Clients Table */}
