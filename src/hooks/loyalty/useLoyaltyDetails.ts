@@ -12,6 +12,7 @@ export function useLoyaltyDetails(metric: LoyaltyMetric | null, open: boolean) {
   const [rows, setRows] = useState<any[]>([]);
   const [clientsMap, setClientsMap] = useState<Record<string, string>>({});
   const [rewardsMap, setRewardsMap] = useState<Record<string, string>>({});
+  const [pointsBalance, setPointsBalance] = useState(0);
 
   useEffect(() => {
     if (!open || !metric || !user) return;
@@ -65,13 +66,23 @@ export function useLoyaltyDetails(metric: LoyaltyMetric | null, open: boolean) {
             setRewardsMap(Object.fromEntries((rw.data ?? []).map((r: any) => [r.id, r.title])));
           }
         } else if (metric === 'points') {
-          const [tx, cl] = await Promise.all([
+          const [tx, cl, settings] = await Promise.all([
             sb.from('loyalty_point_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(2000),
             sb.from('clients').select('id,name').eq('user_id', user.id),
+            sb.from('loyalty_settings').select('points_validity_days').eq('user_id', user.id).maybeSingle(),
           ]);
+          const txRows = tx.data ?? [];
+          const validityDays = settings.data?.points_validity_days;
+          const cutoff = validityDays ? Date.now() - validityDays * 24 * 60 * 60 * 1000 : null;
+          // pontos "earn" mais velhos que a validade configurada não contam mais no saldo
+          const balance = txRows.reduce((s: number, r: any) => {
+            if (r.kind !== 'spend' && cutoff && new Date(r.created_at).getTime() < cutoff) return s;
+            return s + (r.kind === 'spend' ? -1 : 1) * (Number(r.points) || 0);
+          }, 0);
           if (!cancelled) {
-            setRows(tx.data ?? []);
+            setRows(txRows);
             setClientsMap(Object.fromEntries((cl.data ?? []).map((c: any) => [c.id, c.name])));
+            setPointsBalance(balance);
           }
         }
       } finally {
@@ -81,5 +92,5 @@ export function useLoyaltyDetails(metric: LoyaltyMetric | null, open: boolean) {
     return () => { cancelled = true; };
   }, [metric, open, user]);
 
-  return { loading, rows, clientsMap, rewardsMap };
+  return { loading, rows, clientsMap, rewardsMap, pointsBalance };
 }

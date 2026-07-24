@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const LoyaltyDetailsModal: React.FC<Props> = ({ open, onOpenChange, metric }) => {
-  const { loading, rows, clientsMap, rewardsMap } = useLoyaltyDetails(metric, open);
+  const { loading, rows, clientsMap, rewardsMap, pointsBalance } = useLoyaltyDetails(metric, open);
 
   const config: Record<LoyaltyMetric, {
     title: string; totalLabel: string; total: string;
@@ -92,7 +92,7 @@ export const LoyaltyDetailsModal: React.FC<Props> = ({ open, onOpenChange, metri
     points: {
       title: 'Pontos Circulando',
       totalLabel: 'Saldo total',
-      total: String(rows.reduce((s: number, r: any) => s + (r.kind === 'spend' ? -1 : 1) * (Number(r.points) || 0), 0)),
+      total: String(pointsBalance),
       section: {
         key: 'points', title: 'Movimentações', items: rows,
         getDate: (r) => r.created_at,

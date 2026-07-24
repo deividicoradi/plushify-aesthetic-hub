@@ -5,10 +5,11 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { LoyaltyClient } from '@/hooks/useLoyalty';
+import { LoyaltyClient, LoyaltyTierInfo } from '@/hooks/useLoyalty';
 
 interface TopClientsCardProps {
   clients: LoyaltyClient[];
+  tiers: LoyaltyTierInfo[];
 }
 
 const getTierColor = (tier: string) => {
@@ -29,20 +30,27 @@ const getTierIcon = (tier: string) => {
   }
 };
 
-const getNextTierProgress = (totalSpent: number, currentTier: string) => {
-  switch (currentTier) {
-    case 'Bronze': return { next: 'Prata', required: 500, progress: (totalSpent / 500) * 100 };
-    case 'Prata': return { next: 'Ouro', required: 1000, progress: ((totalSpent - 500) / 500) * 100 };
-    case 'Ouro': return { next: 'Diamante', required: 2000, progress: ((totalSpent - 1000) / 1000) * 100 };
-    default: return { next: 'Máximo', required: 0, progress: 100 };
+const getNextTierProgress = (totalSpent: number, currentTier: string, tiers: LoyaltyTierInfo[]) => {
+  const sorted = [...tiers].sort((a, b) => Number(a.min_spent) - Number(b.min_spent));
+  const idx = sorted.findIndex(t => t.name === currentTier);
+
+  if (idx === -1 || idx === sorted.length - 1) {
+    return { next: 'Máximo', remaining: 0, progress: 100 };
   }
+
+  const current = sorted[idx];
+  const next = sorted[idx + 1];
+  const span = Number(next.min_spent) - Number(current.min_spent);
+  const progress = span > 0 ? ((totalSpent - Number(current.min_spent)) / span) * 100 : 100;
+
+  return { next: next.name, remaining: Math.max(Number(next.min_spent) - totalSpent, 0), progress };
 };
 
 const getInitials = (name: string) => {
   return name.split(' ').map(n => n[0]).join('').toUpperCase();
 };
 
-export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
+export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients, tiers }) => {
   const topClients = clients.slice(0, 5);
 
   return (
@@ -62,7 +70,7 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
         {topClients.length > 0 ? (
           <div className="space-y-3 sm:space-y-4">
             {topClients.map((client, index) => {
-              const nextTier = getNextTierProgress(client.totalSpent, client.tier);
+              const nextTier = getNextTierProgress(client.totalSpent, client.tier, tiers);
               const isTop3 = index < 3;
               
               return (
@@ -112,7 +120,7 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
                     </div>
                   </div>
                   
-                  {client.tier !== 'Diamante' && (
+                  {nextTier.next !== 'Máximo' && (
                     <div className="space-y-1.5 sm:space-y-2">
                       <div className="flex items-center justify-between text-[11px] sm:text-xs">
                         <span className="text-muted-foreground flex items-center gap-1">
@@ -120,12 +128,12 @@ export const TopClientsCard: React.FC<TopClientsCardProps> = ({ clients }) => {
                           Próximo nível: {nextTier.next}
                         </span>
                         <span className="text-muted-foreground">
-                          {Math.round(nextTier.progress)}%
+                          {Math.round(Math.min(Math.max(nextTier.progress, 0), 100))}%
                         </span>
                       </div>
-                      <Progress value={Math.min(nextTier.progress, 100)} className="h-1.5" />
+                      <Progress value={Math.min(Math.max(nextTier.progress, 0), 100)} className="h-1.5" />
                       <p className="text-[11px] sm:text-xs text-muted-foreground">
-                        Faltam R$ {(nextTier.required - (client.totalSpent % nextTier.required)).toFixed(0)} para {nextTier.next}
+                        Faltam R$ {nextTier.remaining.toFixed(0)} para {nextTier.next}
                       </p>
                     </div>
                   )}

@@ -3,6 +3,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+const sb: any = supabase;
+
+export interface LoyaltyTierInfo {
+  id: string;
+  name: string;
+  min_spent: number;
+}
+
 export interface LoyaltyClient {
   id: string;
   name: string;
@@ -12,7 +20,7 @@ export interface LoyaltyClient {
   totalSpent: number;
   appointmentsCount: number;
   lastVisit?: string;
-  tier: 'Bronze' | 'Prata' | 'Ouro' | 'Diamante';
+  tier: string;
 }
 
 export interface LoyaltyStats {
@@ -25,6 +33,7 @@ export interface LoyaltyStats {
 
 export const useLoyalty = () => {
   const [clients, setClients] = useState<LoyaltyClient[]>([]);
+  const [tiers, setTiers] = useState<LoyaltyTierInfo[]>([]);
   const [stats, setStats] = useState<LoyaltyStats>({
     totalClients: 0,
     totalAppointments: 0,
@@ -35,18 +44,13 @@ export const useLoyalty = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  const calculateTier = (totalSpent: number): 'Bronze' | 'Prata' | 'Ouro' | 'Diamante' => {
-    if (totalSpent >= 2000) return 'Diamante';
-    if (totalSpent >= 1000) return 'Ouro';
-    if (totalSpent >= 500) return 'Prata';
-    return 'Bronze';
-  };
-
   const fetchLoyaltyData = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
+
+      await sb.rpc('ensure_loyalty_defaults');
 
       // Buscar todos os clientes
       const { data: clientsData, error: clientsError } = await supabase
@@ -76,11 +80,23 @@ export const useLoyalty = () => {
 
       if (paymentsError) throw paymentsError;
 
+      // Buscar configuração real do programa (pontos por real gasto e níveis)
+      const [settingsResult, tiersResult] = await Promise.all([
+        sb.from('loyalty_settings').select('points_per_currency').eq('user_id', user.id).maybeSingle(),
+        sb.from('loyalty_tiers').select('id, name, min_spent').eq('user_id', user.id).order('min_spent', { ascending: false }),
+      ]);
+
+      const pointsPerCurrency = settingsResult.data?.points_per_currency ?? 1;
+      const tierList: LoyaltyTierInfo[] = tiersResult.data ?? [];
+
+      const calculateTier = (totalSpent: number): string =>
+        tierList.find(t => totalSpent >= Number(t.min_spent))?.name ?? 'Bronze';
+
       // Processar dados de fidelidade baseado em pagamentos
       const loyaltyClients: LoyaltyClient[] = clientsData?.map(client => {
         const clientPayments = paymentsData?.filter(payment => payment.client_id === client.id) || [];
         const totalSpent = clientPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
-        const totalPoints = Math.floor(totalSpent); // 1 ponto por real gasto
+        const totalPoints = Math.floor(totalSpent * pointsPerCurrency);
         const appointmentsCount = clientPayments.length; // Usando pagamentos como proxy para agendamentos
         const tier = calculateTier(totalSpent);
 
@@ -114,6 +130,7 @@ export const useLoyalty = () => {
       };
 
       setClients(loyaltyClients);
+      setTiers(tierList);
       setStats(statsData);
     } catch (error: any) {
       console.error('Erro ao buscar dados de fidelidade:', error);
@@ -128,6 +145,7 @@ export const useLoyalty = () => {
 
   return {
     clients,
+    tiers,
     stats,
     loading,
     refetch: fetchLoyaltyData

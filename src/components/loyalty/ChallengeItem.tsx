@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { parseISO } from 'date-fns';
 import { Target, Users, Calendar, DollarSign, CheckCircle, Clock, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -57,7 +58,7 @@ export const ChallengeItem = React.memo<ChallengeItemProps>(({ challenge }) => {
             </span>
             <span className="text-muted-foreground flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              Até {new Date(challenge.expiresAt).toLocaleDateString('pt-BR')}
+              Até {parseISO(challenge.expiresAt).toLocaleDateString('pt-BR')}
             </span>
           </div>
           <Progress value={(challenge.current / challenge.target) * 100} className="h-1.5 sm:h-2" />

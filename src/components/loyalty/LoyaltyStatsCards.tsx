@@ -26,7 +26,6 @@ export const LoyaltyStatsCards: React.FC<LoyaltyStatsCardsProps> = ({
 }) => {
   const vip = vipCount ?? stats.totalClients;
   const points = pointsCirculating ?? stats.pointsDistributed;
-  const completionRate = vip > 0 ? ((vip * 100) / (vip + 50)) : 0;
 
   const clickProps = (m: LoyaltyMetric) => onCardClick ? {
     role: 'button' as const,
@@ -96,12 +95,7 @@ export const LoyaltyStatsCards: React.FC<LoyaltyStatsCardsProps> = ({
             <div>
               <p className="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-300">Pontos Circulando</p>
               <p className="text-xl sm:text-2xl font-bold text-orange-900 dark:text-orange-100">{points}</p>
-              <div className="w-full bg-orange-200/80 dark:bg-orange-800/80 rounded-full h-1.5 mt-2">
-                <div 
-                  className="bg-orange-500 h-1.5 rounded-full transition-all duration-300" 
-                  style={{ width: `${Math.min(completionRate, 100)}%` }}
-                ></div>
-              </div>
+              <p className="text-[10px] sm:text-xs text-orange-600/70 dark:text-orange-400/70 mt-1">Ver detalhes →</p>
             </div>
             <div className="p-2 sm:p-3 bg-orange-200/80 dark:bg-orange-800/80 rounded-full">
               <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 dark:text-orange-300" />
