@@ -75,6 +75,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appointments_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appointments_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -337,6 +344,63 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      commissions: {
+        Row: {
+          appointment_id: string
+          base_amount: number
+          commission_amount: number
+          commission_percent: number
+          created_at: string
+          id: string
+          paid_at: string | null
+          status: string
+          team_member_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_id: string
+          base_amount: number
+          commission_amount: number
+          commission_percent: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          team_member_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_id?: string
+          base_amount?: number
+          commission_amount?: number
+          commission_percent?: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          team_member_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dashboard_analytics: {
         Row: {
@@ -1164,7 +1228,7 @@ export type Database = {
             foreignKeyName: "service_professionals_professional_id_fkey"
             columns: ["professional_id"]
             isOneToOne: false
-            referencedRelation: "professionals"
+            referencedRelation: "team_members"
             referencedColumns: ["id"]
           },
           {
@@ -1217,7 +1281,9 @@ export type Database = {
       }
       team_members: {
         Row: {
+          active: boolean
           avatar_url: string | null
+          commission_percent: number
           created_at: string
           email: string | null
           hire_date: string | null
@@ -1228,12 +1294,15 @@ export type Database = {
           pin_hash: string | null
           role: string
           salary: number | null
+          specialties: string[] | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          active?: boolean
           avatar_url?: string | null
+          commission_percent?: number
           created_at?: string
           email?: string | null
           hire_date?: string | null
@@ -1244,12 +1313,15 @@ export type Database = {
           pin_hash?: string | null
           role: string
           salary?: number | null
+          specialties?: string[] | null
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          active?: boolean
           avatar_url?: string | null
+          commission_percent?: number
           created_at?: string
           email?: string | null
           hire_date?: string | null
@@ -1260,6 +1332,7 @@ export type Database = {
           pin_hash?: string | null
           role?: string
           salary?: number | null
+          specialties?: string[] | null
           status?: string
           updated_at?: string
           user_id?: string
