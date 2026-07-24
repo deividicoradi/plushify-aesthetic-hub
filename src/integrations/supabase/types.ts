@@ -143,6 +143,24 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_links: {
+        Row: {
+          created_at: string
+          slug: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          slug: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          slug?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cash_closures: {
         Row: {
           card_amount: number
@@ -1270,7 +1288,12 @@ export type Database = {
     }
     Functions: {
       cancel_subscription: {
-        Args: { p_abacate_subscription_id?: string; p_user_id: string }
+        Args: {
+          p_abacate_checkout_id?: string
+          p_abacate_subscription_id?: string
+          p_status?: string
+          p_user_id: string
+        }
         Returns: boolean
       }
       check_appointment_availability: {
@@ -1367,6 +1390,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_or_create_booking_slug: { Args: never; Returns: string }
       get_professionals_secure: {
         Args: { p_mask_sensitive?: boolean }
         Returns: {
@@ -1395,7 +1419,7 @@ export type Database = {
         }[]
       }
       get_public_services: {
-        Args: never
+        Args: { p_slug: string }
         Returns: {
           category: string
           description: string
@@ -1415,6 +1439,7 @@ export type Database = {
         Args: { p_password: string }
         Returns: boolean
       }
+      slugify: { Args: { p_text: string }; Returns: string }
       start_subscription: {
         Args: {
           p_abacate_checkout_id?: string
