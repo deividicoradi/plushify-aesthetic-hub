@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Activity, TrendingUp } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -11,7 +11,6 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import { PeriodFilter, PeriodOption } from './PeriodFilter';
 
 interface WeeklyChartsProps {
   chartData: Array<{
@@ -21,17 +20,6 @@ interface WeeklyChartsProps {
   }>;
   formatCurrency: (value: number) => string;
 }
-
-const getPeriodLabel = (period: PeriodOption) => {
-  switch (period) {
-    case '7d': return 'Últimos 7 Dias';
-    case '30d': return 'Últimos 30 Dias';
-    case '90d': return 'Últimos 3 Meses';
-    case '6m': return 'Últimos 6 Meses';
-    case '1y': return 'Último Ano';
-    default: return 'Período Atual';
-  }
-};
 
 const tooltipStyle = {
   backgroundColor: '#1a1322',
@@ -46,15 +34,11 @@ const ChartShell = ({
   Icon,
   title,
   subtitle,
-  period,
-  onPeriodChange,
   children,
 }: {
   Icon: React.ComponentType<{ className?: string }>;
   title: string;
   subtitle: string;
-  period: PeriodOption;
-  onPeriodChange: (p: PeriodOption) => void;
   children: React.ReactNode;
 }) => (
   <div className="bg-[#1a1322] border border-white/5 rounded-3xl p-6 flex flex-col">
@@ -70,7 +54,6 @@ const ChartShell = ({
           <p className="text-gray-500 text-xs mt-0.5">{subtitle}</p>
         </div>
       </div>
-      <PeriodFilter value={period} onChange={onPeriodChange} />
     </div>
     <div className="h-72">{children}</div>
   </div>
@@ -81,8 +64,6 @@ const EmptyState = ({ message }: { message: string }) => (
 );
 
 export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) => {
-  const [appointmentsPeriod, setAppointmentsPeriod] = useState<PeriodOption>('7d');
-  const [revenuePeriod, setRevenuePeriod] = useState<PeriodOption>('7d');
   const hasData = chartData && chartData.length > 0;
 
   return (
@@ -90,9 +71,7 @@ export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) =
       <ChartShell
         Icon={Activity}
         title="Agendamentos"
-        subtitle={getPeriodLabel(appointmentsPeriod)}
-        period={appointmentsPeriod}
-        onPeriodChange={setAppointmentsPeriod}
+        subtitle="Últimos 30 dias"
       >
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
@@ -126,9 +105,7 @@ export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) =
       <ChartShell
         Icon={TrendingUp}
         title="Faturamento"
-        subtitle={getPeriodLabel(revenuePeriod)}
-        period={revenuePeriod}
-        onPeriodChange={setRevenuePeriod}
+        subtitle="Últimos 30 dias"
       >
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">

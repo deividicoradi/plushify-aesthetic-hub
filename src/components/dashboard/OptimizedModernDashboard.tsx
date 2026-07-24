@@ -3,7 +3,6 @@ import { useOptimizedDashboardData } from '@/hooks/useOptimizedDashboardData';
 import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 import { Card, CardContent } from '@/components/ui/card';
 import { KPICards } from './KPICards';
-import { FinancialEvolutionChart } from './FinancialEvolutionChart';
 import { WeeklyCharts } from './WeeklyCharts';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -61,10 +60,10 @@ export const OptimizedModernDashboard = () => {
 
   const mockMetrics = {
     totalReceitas: data.stats.monthlyRevenue,
-    totalDespesas: 0,
-    saldoLiquido: data.stats.monthlyRevenue,
+    totalDespesas: data.stats.monthlyExpenses,
+    saldoLiquido: data.stats.monthlyRevenue - data.stats.monthlyExpenses,
     receitasMesAtual: data.stats.monthlyRevenue,
-    despesasMesAtual: 0,
+    despesasMesAtual: data.stats.monthlyExpenses,
     crescimentoReceitas: 0,
     crescimentoDespesas: 0,
     parcelasVencidas: 0,

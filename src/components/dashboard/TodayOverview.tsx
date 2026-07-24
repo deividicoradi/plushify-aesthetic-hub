@@ -1,10 +1,15 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { parseISO } from 'date-fns';
 import { Calendar, Clock, ArrowUpRight, Plus, CheckCircle2, CircleDot } from 'lucide-react';
 import { useAppointments, Appointment } from '@/hooks/useAppointments';
 
 const isSameDay = (iso: string, ref: Date) => {
-  const d = new Date(iso);
+  // parseISO trata "yyyy-MM-dd" (appointment_date) como data local; new
+  // Date() trataria como UTC e, em fusos negativos (ex: Brasil), os
+  // agendamentos de HOJE nunca bateriam com a data de hoje — o widget
+  // "Agenda do dia" ficaria sempre vazio.
+  const d = parseISO(iso);
   return (
     d.getFullYear() === ref.getFullYear() &&
     d.getMonth() === ref.getMonth() &&
