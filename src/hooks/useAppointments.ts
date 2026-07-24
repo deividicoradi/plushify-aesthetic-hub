@@ -17,6 +17,8 @@ export interface Appointment {
   status: 'agendado' | 'confirmado' | 'concluido' | 'cancelado';
   price: number;
   notes?: string;
+  professional_id?: string;
+  reminder_sent_at?: string;
   created_at: string;
   updated_at: string;
 }

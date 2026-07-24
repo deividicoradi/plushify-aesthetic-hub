@@ -8,6 +8,7 @@ import { AppointmentsList } from '@/components/appointments/AppointmentsList';
 import { CreateAppointmentDialog } from '@/components/appointments/CreateAppointmentDialog';
 import { AppointmentFiltersAdvanced, type AppointmentFilters } from '@/components/appointments/AppointmentFiltersAdvanced';
 import { WorkingHoursSetup } from '@/components/appointments/WorkingHoursSetup';
+import { RemindersPanel } from '@/components/appointments/RemindersPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LimitAlert } from '@/components/LimitAlert';
 import { useAppointments } from '@/hooks/useAppointments';
@@ -32,8 +33,9 @@ const Appointments = () => {
         <LimitAlert type="appointments" currentCount={appointments.length} action="criar" />
         
         <Tabs defaultValue="agenda" className="mt-4 sm:mt-6">
-          <TabsList className="grid w-full grid-cols-2 h-11 sm:h-10">
+          <TabsList className="grid w-full grid-cols-3 h-11 sm:h-10">
             <TabsTrigger value="agenda" className="text-sm sm:text-base">Agenda</TabsTrigger>
+            <TabsTrigger value="reminders" className="text-sm sm:text-base">Lembretes</TabsTrigger>
             <TabsTrigger value="config" className="text-sm sm:text-base">Configurações</TabsTrigger>
           </TabsList>
           
@@ -81,6 +83,10 @@ const Appointments = () => {
             />
           </TabsContent>
           
+          <TabsContent value="reminders" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+            <RemindersPanel />
+          </TabsContent>
+
           <TabsContent value="config" className="space-y-6 mt-4 sm:mt-6">
             <WorkingHoursSetup />
           </TabsContent>

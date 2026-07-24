@@ -26,6 +26,7 @@ export type Database = {
           notes: string | null
           price: number
           professional_id: string | null
+          reminder_sent_at: string | null
           service_id: string | null
           service_name: string
           status: string
@@ -43,6 +44,7 @@ export type Database = {
           notes?: string | null
           price?: number
           professional_id?: string | null
+          reminder_sent_at?: string | null
           service_id?: string | null
           service_name: string
           status?: string
@@ -60,6 +62,7 @@ export type Database = {
           notes?: string | null
           price?: number
           professional_id?: string | null
+          reminder_sent_at?: string | null
           service_id?: string | null
           service_name?: string
           status?: string
