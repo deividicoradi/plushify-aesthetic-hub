@@ -1,5 +1,5 @@
 
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export const formatCurrency = (value: number) => {
@@ -10,7 +10,9 @@ export const formatCurrency = (value: number) => {
 };
 
 export const formatDate = (dateString: string) => {
-  return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+  // parseISO trata "yyyy-MM-dd" (ex: closure_date) como data local; new Date()
+  // trataria como UTC e o PDF mostraria o dia anterior em fusos negativos.
+  return format(parseISO(dateString), 'dd/MM/yyyy', { locale: ptBR });
 };
 
 export const formatDateTime = (date: Date) => {

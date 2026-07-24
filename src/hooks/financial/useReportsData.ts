@@ -1,5 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Payment, Installment } from '@/utils/reports/types';
@@ -12,6 +13,10 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
     queryFn: async () => {
       const fromDate = dateFrom.toISOString();
       const toDate = dateTo.toISOString();
+      // closure_date é `date` (sem hora); comparar com timestamp ISO completo
+      // pode vazar um dia a mais na borda do período dependendo do fuso.
+      const fromDateOnly = format(dateFrom, 'yyyy-MM-dd');
+      const toDateOnly = format(dateTo, 'yyyy-MM-dd');
 
       console.log('🔍 Buscando dados do relatório para o período:', { fromDate, toDate });
 
@@ -144,8 +149,8 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
         .from('cash_closures')
         .select('*')
         .eq('user_id', user?.id)
-        .gte('closure_date', fromDate)
-        .lte('closure_date', toDate);
+        .gte('closure_date', fromDateOnly)
+        .lte('closure_date', toDateOnly);
 
       console.log('🏦 Fechamentos de caixa encontrados:', cashClosures);
       if (cashClosuresError) {
