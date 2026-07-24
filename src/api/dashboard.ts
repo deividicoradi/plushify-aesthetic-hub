@@ -9,6 +9,7 @@ export interface DashboardStats {
   weeklyAppointments: number;
   monthlyRevenue: number;
   monthlyExpenses: number;
+  revenueGrowth: number;
 }
 
 export interface ChartData {
@@ -21,6 +22,8 @@ export interface ChartData {
 export async function fetchDashboardStats(userId: string): Promise<DashboardStats> {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(startOfMonth.getTime() - 1);
   const startOfWeek = new Date();
   const dayOfWeek = startOfWeek.getDay();
   const diff = startOfWeek.getDate() - dayOfWeek;
@@ -33,7 +36,8 @@ export async function fetchDashboardStats(userId: string): Promise<DashboardStat
     paymentsData,
     newClientsData,
     weeklyAppointmentsData,
-    expensesData
+    expensesData,
+    lastMonthPaymentsData
   ] = await Promise.all([
     supabase
       .from('clients')
@@ -68,7 +72,15 @@ export async function fetchDashboardStats(userId: string): Promise<DashboardStat
       .from('expenses')
       .select('amount, expense_date')
       .eq('user_id', userId)
-      .gte('expense_date', startOfMonth.toISOString())
+      .gte('expense_date', startOfMonth.toISOString()),
+
+    supabase
+      .from('payments')
+      .select('amount, payment_date')
+      .eq('user_id', userId)
+      .eq('status', 'pago')
+      .gte('payment_date', startOfLastMonth.toISOString())
+      .lte('payment_date', endOfLastMonth.toISOString())
   ]);
 
   if (clientsData.error) throw clientsData.error;
@@ -77,6 +89,7 @@ export async function fetchDashboardStats(userId: string): Promise<DashboardStat
   if (newClientsData.error) throw newClientsData.error;
   if (weeklyAppointmentsData.error) throw weeklyAppointmentsData.error;
   if (expensesData.error) throw expensesData.error;
+  if (lastMonthPaymentsData.error) throw lastMonthPaymentsData.error;
 
   const totalClients = clientsData.data?.length || 0;
   const activeClients = clientsData.data?.filter(c => c.status === 'Ativo').length || 0;
@@ -85,6 +98,10 @@ export async function fetchDashboardStats(userId: string): Promise<DashboardStat
   const weeklyAppointments = weeklyAppointmentsData.data?.length || 0;
   const monthlyRevenue = paymentsData.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
   const monthlyExpenses = expensesData.data?.reduce((sum, e) => sum + Number(e.amount), 0) || 0;
+  const lastMonthRevenue = lastMonthPaymentsData.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+  const revenueGrowth = lastMonthRevenue > 0
+    ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+    : 0;
 
   return {
     totalClients,
@@ -93,7 +110,8 @@ export async function fetchDashboardStats(userId: string): Promise<DashboardStat
     totalAppointments,
     weeklyAppointments,
     monthlyRevenue,
-    monthlyExpenses
+    monthlyExpenses,
+    revenueGrowth
   };
 }
 

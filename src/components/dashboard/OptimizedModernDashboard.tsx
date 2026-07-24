@@ -64,7 +64,7 @@ export const OptimizedModernDashboard = () => {
     saldoLiquido: data.stats.monthlyRevenue - data.stats.monthlyExpenses,
     receitasMesAtual: data.stats.monthlyRevenue,
     despesasMesAtual: data.stats.monthlyExpenses,
-    crescimentoReceitas: 0,
+    crescimentoReceitas: data.stats.revenueGrowth,
     crescimentoDespesas: 0,
     parcelasVencidas: 0,
     parcelasPendentes: 0,
