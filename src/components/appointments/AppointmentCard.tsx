@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { format, differenceInHours } from 'date-fns';
+import { format, differenceInHours, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAppointments, type Appointment } from '@/hooks/useAppointments';
 import { toast } from '@/hooks/use-toast';
@@ -37,7 +37,9 @@ export const AppointmentCard = ({ appointment, isSelected = false, onSelect }: A
   const [isDeleting, setIsDeleting] = useState(false);
 
   const formatDate = (date: string) => {
-    return format(new Date(date), "dd/MM/yyyy", { locale: ptBR });
+    // parseISO trata "yyyy-MM-dd" como data local; new Date() trataria como
+    // UTC e a formatação em fuso negativo (Brasil) mostraria o dia anterior.
+    return format(parseISO(date), "dd/MM/yyyy", { locale: ptBR });
   };
 
   const formatTime = (time: string) => {
