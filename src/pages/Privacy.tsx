@@ -42,7 +42,9 @@ const Privacy = () => {
                 </h2>
                 <div className="text-muted-foreground space-y-4">
                   <p>
-                    <strong>Dados de Cadastro:</strong> Nome, e-mail, telefone, CNPJ/CPF e endereço fornecidos durante o registro.
+                    <strong>Dados de Cadastro:</strong> Nome, e-mail e senha fornecidos durante o registro.
+                    Telefone e outras informações de perfil são opcionais e podem ser adicionados
+                    posteriormente nas configurações da sua conta.
                   </p>
                   <p>
                     <strong>Dados de Uso:</strong> Informações sobre como você utiliza nossa plataforma, incluindo páginas visitadas, recursos utilizados e tempo de sessão.

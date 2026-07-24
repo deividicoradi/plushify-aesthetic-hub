@@ -5,21 +5,43 @@ import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+
+const sb: any = supabase;
 
 const FooterNewsletterForm: React.FC = () => {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [agree, setAgree] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!agree) return;
-    setEnviado(true);
-    setNome('');
-    setEmail('');
-    setAgree(false);
-    setTimeout(() => setEnviado(false), 4000);
+    if (!agree || enviando) return;
+
+    setEnviando(true);
+    setErro(null);
+    try {
+      const { error } = await sb
+        .from('newsletter_subscribers')
+        .insert({ name: nome, email });
+
+      // Código 23505 = e-mail já inscrito (índice único) — trata como
+      // sucesso, não precisa incomodar quem já está na lista.
+      if (error && error.code !== '23505') throw error;
+
+      setEnviado(true);
+      setNome('');
+      setEmail('');
+      setAgree(false);
+      setTimeout(() => setEnviado(false), 4000);
+    } catch (err: any) {
+      setErro('Não foi possível concluir a inscrição. Tente novamente.');
+    } finally {
+      setEnviando(false);
+    }
   };
 
   return (
@@ -68,13 +90,18 @@ const FooterNewsletterForm: React.FC = () => {
       <Button
         type="submit"
         className="w-full mt-2"
-        disabled={!agree || !nome || !email || enviado}
+        disabled={!agree || !nome || !email || enviando || enviado}
       >
-        {enviado ? 'Enviado!' : 'Cadastrar'}
+        {enviando ? 'Enviando...' : enviado ? 'Enviado!' : 'Cadastrar'}
       </Button>
       {enviado && (
         <div className="text-green-500 text-center text-xs mt-2">
           Inscrição realizada com sucesso!
+        </div>
+      )}
+      {erro && (
+        <div className="text-destructive text-center text-xs mt-2">
+          {erro}
         </div>
       )}
     </form>

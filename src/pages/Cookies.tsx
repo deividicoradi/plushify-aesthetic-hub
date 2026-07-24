@@ -69,7 +69,6 @@ const Cookies = () => {
                       <li>• Autenticação de sessão do usuário</li>
                       <li>• Preferências de idioma e região</li>
                       <li>• Configurações de segurança</li>
-                      <li>• Carrinho de compras e processo de checkout</li>
                     </ul>
                   </div>
                 </div>
@@ -133,8 +132,10 @@ const Cookies = () => {
                 <div className="bg-background rounded-lg p-4 border border-primary/20">
                   <h3 className="font-semibold text-foreground mb-2">Na Nossa Plataforma</h3>
                   <p className="text-muted-foreground text-sm">
-                    Acesse suas configurações de privacidade no painel de controle da sua conta para 
-                    gerenciar suas preferências de cookies funcionais e de performance.
+                    Quando você visita o site pela primeira vez, um banner permite escolher entre aceitar
+                    todos os cookies, apenas os essenciais, ou personalizar cada categoria. Para alterar sua
+                    escolha depois, limpe os dados de navegação deste site nas configurações do seu navegador —
+                    o banner de preferências volta a aparecer.
                   </p>
                 </div>
               </div>
