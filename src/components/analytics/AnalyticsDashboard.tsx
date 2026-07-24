@@ -4,6 +4,8 @@ import { ptBR } from 'date-fns/locale';
 import { useReportsData } from '@/hooks/useReportsData';
 import { useAnalyticsChartData } from '@/hooks/analytics/useAnalyticsData';
 import { useAnalyticsKPIs } from '@/hooks/analytics/useAnalyticsKPIs';
+import { useTimeAnalysis } from '@/hooks/analytics/useTimeAnalysis';
+import { useClientROI } from '@/hooks/analytics/useClientROI';
 import AnalyticsKPICards, { KPIKey } from './AnalyticsKPICards';
 import {
   AnalyticsPeriodFilter,
@@ -56,6 +58,23 @@ export const AnalyticsDashboard: React.FC = () => {
   } = useAnalyticsChartData({ startDate: range.startDate, endDate: range.endDate });
 
   const [openCard, setOpenCard] = useState<KPIKey | null>(null);
+
+  // Insights (horário de pico e cliente VIP) são calculados sobre o
+  // histórico completo, não sobre o período filtrado — padrões de horário
+  // e o cliente que mais gera retorno fazem mais sentido olhando tudo.
+  const { hourlyMovement } = useTimeAnalysis();
+  const { data: topClients } = useClientROI(1);
+  const peakHour = (hourlyMovement.data ?? []).reduce<{ hour: number; appointments_count: number } | null>(
+    (best, current) => {
+      if (current.appointments_count <= 0) return best;
+      if (!best || current.appointments_count > best.appointments_count) {
+        return { hour: current.hour, appointments_count: current.appointments_count };
+      }
+      return best;
+    },
+    null,
+  );
+  const topClient = topClients && topClients.length > 0 ? topClients[0] : null;
 
   const filterBar = (
     <AnalyticsPeriodFilter
@@ -261,7 +280,12 @@ export const AnalyticsDashboard: React.FC = () => {
       </div>
 
       {/* Resumo de Insights */}
-      <AnalyticsInsights newThisMonth={kpis.totalClients} periodLabel={range.label} />
+      <AnalyticsInsights
+        newThisMonth={kpis.totalClients}
+        periodLabel={range.label}
+        peakHour={peakHour}
+        topClient={topClient}
+      />
 
       {active && (
         <DetailsListModal
