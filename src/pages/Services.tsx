@@ -52,28 +52,13 @@ const Services = () => {
   };
 
   const handleCreateService = async (data: any, professionals: Professional[]) => {
-    const success = await createService(data);
-    
-    if (success && user && professionals.length > 0) {
-      // Find the created service ID (we need to get the latest service)
-      try {
-        const { data: latestServices } = await supabase
-          .from('services')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('name', data.name)
-          .order('created_at', { ascending: false })
-          .limit(1);
+    const created = await createService(data);
 
-        if (latestServices && latestServices.length > 0) {
-          await saveServiceProfessionals(latestServices[0].id, professionals);
-        }
-      } catch (error) {
-        console.error('Error linking professionals to service:', error);
-      }
+    if (created && professionals.length > 0) {
+      await saveServiceProfessionals(created.id, professionals);
     }
-    
-    return success;
+
+    return !!created;
   };
 
   const handleUpdateService = async (data: any, professionals: Professional[]) => {

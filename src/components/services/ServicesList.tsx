@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoreHorizontal, Edit, Trash2, Clock, DollarSign, Package } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Clock, DollarSign, Package, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
@@ -135,7 +135,20 @@ export const ServicesList = ({ services, onEdit, onDelete, onToggleStatus }: Ser
                     <Edit className="mr-2 h-4 w-4" />
                     Editar
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
+                  <DropdownMenuItem onClick={() => onToggleStatus(service.id, !service.active)}>
+                    {service.active ? (
+                      <>
+                        <XCircle className="mr-2 h-4 w-4" />
+                        Desativar
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Ativar
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     onClick={() => setDeleteId(service.id)}
                     className="text-red-600"
                   >
@@ -229,7 +242,20 @@ export const ServicesList = ({ services, onEdit, onDelete, onToggleStatus }: Ser
                         <Edit className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem onClick={() => onToggleStatus(service.id, !service.active)}>
+                        {service.active ? (
+                          <>
+                            <XCircle className="mr-2 h-4 w-4" />
+                            Desativar
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Ativar
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         onClick={() => setDeleteId(service.id)}
                         className="text-red-600"
                       >

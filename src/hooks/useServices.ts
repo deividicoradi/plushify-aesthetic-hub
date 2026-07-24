@@ -37,13 +37,12 @@ export const useServices = () => {
     }
   });
 
-  const createService = async (serviceData: Omit<Service, 'id'>) => {
-    if (!user) return false;
+  const createService = async (serviceData: Omit<Service, 'id'>): Promise<Service | null> => {
+    if (!user) return null;
     try {
-      await createServiceMutation.mutateAsync(serviceData);
-      return true;
+      return await createServiceMutation.mutateAsync(serviceData);
     } catch {
-      return false;
+      return null;
     }
   };
 
