@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { startOfDay, isBefore } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 
@@ -9,7 +10,9 @@ interface InstallmentStatusProps {
 }
 
 const InstallmentStatus = ({ status, dueDate }: InstallmentStatusProps) => {
-  const isOverdue = new Date(dueDate) < new Date() && status === 'pendente';
+  // Comparar com startOfDay (não com o instante atual): uma parcela que vence hoje
+  // não está atrasada ainda, só a partir do dia seguinte.
+  const isOverdue = isBefore(new Date(dueDate), startOfDay(new Date())) && status === 'pendente';
   
   const statusConfig = {
     pendente: { 

@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
@@ -31,7 +32,7 @@ export const useInstallmentForm = (installment: any, onSuccess: () => void) => {
         payment_id: installment.payment_id || '',
         total_installments: installment.total_installments || 2,
         amount: installment.amount?.toString() || '',
-        due_date: installment.due_date ? new Date(installment.due_date) : new Date(),
+        due_date: installment.due_date ? parseISO(installment.due_date) : new Date(),
         notes: installment.notes || ''
       });
     } else {

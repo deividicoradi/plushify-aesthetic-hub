@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { startOfDay, isBefore } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReportData } from '@/utils/reports/types';
 
@@ -32,8 +33,9 @@ export const ReportSummary = ({ reportData }: ReportSummaryProps) => {
 
   const totalReceitas = totalReceitasFromPayments + totalReceitasFromCashClosures;
   const totalDespesas = reportData.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
-  const parcelasVencidas = reportData.installments.filter(i => 
-    new Date(i.due_date) < new Date() && i.status === 'pendente'
+  // Comparar com startOfDay: uma parcela que vence hoje não está atrasada ainda.
+  const parcelasVencidas = reportData.installments.filter(i =>
+    isBefore(new Date(i.due_date), startOfDay(new Date())) && i.status === 'pendente'
   ).length;
   const pagamentosExcluidos = reportData.payments.filter(p => p._deleted).length;
 

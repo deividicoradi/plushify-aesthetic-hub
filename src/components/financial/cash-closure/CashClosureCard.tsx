@@ -19,7 +19,7 @@ import {
   StickyNote,
   AlertTriangle
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface CashClosureCardProps {
@@ -53,7 +53,7 @@ const CashClosureCard = ({ closure, onEdit, onDelete }: CashClosureCardProps) =>
                 Fechamento de Caixa
               </CardTitle>
               <p className="text-sm font-semibold text-destructive">
-                {format(new Date(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
+                {format(parseISO(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
               </p>
               {closure.closed_at && (
                 <p className="text-xs text-muted-foreground">

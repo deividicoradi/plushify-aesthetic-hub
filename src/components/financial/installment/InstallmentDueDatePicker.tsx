@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { format } from 'date-fns';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
@@ -25,7 +26,7 @@ const InstallmentDueDatePicker = ({
       <Input
         id="due_date"
         type="date"
-        value={dueDate.toISOString().split('T')[0]}
+        value={format(dueDate, 'yyyy-MM-dd')}
         onChange={handleDateChange}
         required
         disabled={disabled}

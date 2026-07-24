@@ -55,7 +55,9 @@ export const usePaymentValidation = () => {
       amount: parseFloat(formData.amount),
       payment_method_id: formData.payment_method_id,
       client_id: formData.client_id || null,
-      due_date: formData.due_date || null,
+      // due_date é timestamptz; enviar "yyyy-MM-dd" puro seria interpretado como
+      // meia-noite UTC, exibindo o dia anterior em qualquer fuso negativo (ex: Brasil).
+      due_date: formData.due_date ? new Date(`${formData.due_date}T00:00:00`).toISOString() : null,
       notes: formData.notes || null,
       status: formData.status === 'parcial' && (!formData.paid_amount || Number(formData.paid_amount) <= 0) ? 'pendente' : formData.status,
       paid_amount: parseFloat(formData.paid_amount) || 0,

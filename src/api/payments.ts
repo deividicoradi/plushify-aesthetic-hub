@@ -21,12 +21,17 @@ export async function fetchPaidPaymentsWithMethods(userId: string) {
 }
 
 export async function fetchPaymentsByDate(userId: string, date: string) {
+  // Limites do dia em horário local convertidos pra UTC antes de comparar com
+  // created_at (timestamptz) — mandar "${date}T00:00:00" sem offset faz o Postgres
+  // interpretar como UTC, perdendo/adicionando ~3h de pagamentos em fusos negativos.
+  const startOfDayLocal = new Date(`${date}T00:00:00`).toISOString();
+  const endOfDayLocal = new Date(`${date}T23:59:59.999`).toISOString();
   const { data, error } = await supabase
     .from('payments')
-    .select(`*, payment_methods (name, type)`) 
+    .select(`*, payment_methods (name, type)`)
     .eq('user_id', userId)
-    .gte('created_at', `${date}T00:00:00`)
-    .lt('created_at', `${date}T23:59:59`)
+    .gte('created_at', startOfDayLocal)
+    .lte('created_at', endOfDayLocal)
     .in('status', ['pago', 'parcial']);
   if (error) throw error;
   return data;

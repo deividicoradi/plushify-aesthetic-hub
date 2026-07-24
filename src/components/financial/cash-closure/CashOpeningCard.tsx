@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DoorOpen, Calculator, Wallet, CreditCard, Smartphone, Banknote, MoreVertical, Edit, Trash2, StickyNote } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface CashOpeningCardProps {
@@ -35,7 +35,7 @@ const CashOpeningCard = ({ opening, onEdit, onDelete }: CashOpeningCardProps) =>
                 Abertura de Caixa
               </CardTitle>
               <p className="text-sm font-semibold text-primary">
-                {format(new Date(opening.opening_date), 'dd/MM/yyyy', { locale: ptBR })}
+                {format(parseISO(opening.opening_date), 'dd/MM/yyyy', { locale: ptBR })}
               </p>
               <p className="text-xs text-muted-foreground">
                 {format(new Date(opening.opened_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}

@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -42,8 +43,8 @@ export const useMonthlyFinancialData = (dateRange: DateRange) => {
           .from('cash_closures')
           .select('total_income, closure_date')
           .eq('user_id', user.id)
-          .gte('closure_date', startDate.toISOString().split('T')[0])
-          .lte('closure_date', endDate.toISOString().split('T')[0]),
+          .gte('closure_date', format(startDate, 'yyyy-MM-dd'))
+          .lte('closure_date', format(endDate, 'yyyy-MM-dd')),
 
         supabase
           .from('expenses')
@@ -67,7 +68,9 @@ export const useMonthlyFinancialData = (dateRange: DateRange) => {
       for (let i = periods - 1; i >= 0; i--) {
         const date = new Date(endDate);
         date.setMonth(date.getMonth() - i);
-        const monthKey = date.toISOString().slice(0, 7);
+        // format() usa o mês local; toISOString() pode "virar" o mês seguinte perto
+        // da meia-noite do último dia do mês, em fusos negativos (ex: Brasil).
+        const monthKey = format(date, 'yyyy-MM');
         const monthName = date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
         
         monthlyDataMap.set(monthKey, {
@@ -81,7 +84,7 @@ export const useMonthlyFinancialData = (dateRange: DateRange) => {
       // Agregar receitas dos pagamentos
       payments.forEach(p => {
         if (p.payment_date) {
-          const monthKey = p.payment_date.slice(0, 7);
+          const monthKey = format(parseISO(p.payment_date), 'yyyy-MM');
           const existing = monthlyDataMap.get(monthKey);
           if (existing) {
             existing.receitas += Number(p.paid_amount || 0);
@@ -91,7 +94,7 @@ export const useMonthlyFinancialData = (dateRange: DateRange) => {
 
       // Agregar receitas dos fechamentos de caixa
       cashClosures.forEach(c => {
-        const monthKey = c.closure_date.slice(0, 7);
+        const monthKey = format(parseISO(c.closure_date), 'yyyy-MM');
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
           existing.receitas += Number(c.total_income || 0);
@@ -100,7 +103,7 @@ export const useMonthlyFinancialData = (dateRange: DateRange) => {
 
       // Agregar despesas
       expenses.forEach(e => {
-        const monthKey = e.expense_date.slice(0, 7);
+        const monthKey = format(parseISO(e.expense_date), 'yyyy-MM');
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
           existing.despesas += Number(e.amount);

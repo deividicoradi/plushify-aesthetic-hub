@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { format, parseISO } from 'date-fns';
 import { usePaymentValidation } from './financial/usePaymentValidation';
 import { useSecurePaymentMutation } from './financial/useSecurePaymentMutation';
 import { usePaymentMutation } from './financial/usePaymentMutation';
@@ -49,7 +50,8 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
         amount: payment.amount?.toString() || '',
         payment_method_id: payment.payment_method_id || '',
         client_id: payment.client_id || '',
-        due_date: payment.due_date ? payment.due_date.split('T')[0] : '',
+        // due_date é timestamptz; extrai a data local (não a UTC) pra exibir no input.
+        due_date: payment.due_date ? format(parseISO(payment.due_date), 'yyyy-MM-dd') : '',
         notes: payment.notes || '',
         status: payment.status || 'pendente',
         paid_amount: payment.paid_amount?.toString() || '',
@@ -89,8 +91,8 @@ export const usePaymentForm = (payment?: any, onSuccess?: () => void) => {
 
     // ✅ VALIDAÇÃO OBRIGATÓRIA DO CAIXA - SEMPRE VERIFICAR ANTES DE QUALQUER OPERAÇÃO
     console.log('🔒 [VALIDAÇÃO OBRIGATÓRIA] Verificando status do caixa...');
-    const targetDate = payment ? 
-      (payment.created_at ? payment.created_at.split('T')[0] : formData.due_date) : 
+    const targetDate = payment ?
+      (payment.created_at ? format(parseISO(payment.created_at), 'yyyy-MM-dd') : formData.due_date) :
       formData.due_date;
     
     const validation = await checkAndPromptCashOpening(targetDate);

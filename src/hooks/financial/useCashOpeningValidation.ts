@@ -1,5 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
@@ -12,8 +13,9 @@ export const useCashOpeningValidation = () => {
       return { shouldProceed: false };
     }
 
-    // Usar a data atual se não for fornecida
-    const targetDate = recordDate ? recordDate.split('T')[0] : new Date().toISOString().split('T')[0];
+    // Usar a data atual (local, não UTC) se não for fornecida. new Date().toISOString()
+    // usaria o dia UTC, que "vira" o dia seguinte a partir de ~21h no horário do Brasil.
+    const targetDate = recordDate ? recordDate.split('T')[0] : format(new Date(), 'yyyy-MM-dd');
     
     console.log('🔍 [VALIDAÇÃO CRÍTICA] Verificando status do caixa para a data:', targetDate);
 
@@ -87,7 +89,7 @@ export const useCashOpeningValidation = () => {
 
   // Nova função para validar operações de hoje
   const validateTodayCashStatus = async (): Promise<{ shouldProceed: boolean }> => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = format(new Date(), 'yyyy-MM-dd');
     return await checkAndPromptCashOpening(today);
   };
 

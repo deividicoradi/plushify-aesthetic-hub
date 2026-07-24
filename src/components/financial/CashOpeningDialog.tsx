@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
   const queryClient = useQueryClient();
   
   const [formData, setFormData] = useState({
-    opening_date: new Date().toISOString().split('T')[0],
+    opening_date: format(new Date(), 'yyyy-MM-dd'),
     opening_balance: '',
     cash_amount: '',
     card_amount: '',
@@ -36,7 +37,7 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
   useEffect(() => {
     if (opening) {
       setFormData({
-        opening_date: opening.opening_date || new Date().toISOString().split('T')[0],
+        opening_date: opening.opening_date || format(new Date(), 'yyyy-MM-dd'),
         opening_balance: opening.opening_balance?.toString() || '',
         cash_amount: opening.cash_amount?.toString() || '',
         card_amount: opening.card_amount?.toString() || '',
@@ -58,7 +59,7 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
       };
 
       setFormData({
-        opening_date: new Date().toISOString().split('T')[0],
+        opening_date: format(new Date(), 'yyyy-MM-dd'),
         opening_balance: '',
         cash_amount: '',
         card_amount: '',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { parseISO } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { Plus, FolderOpen } from 'lucide-react';
 import { useCashClosureData } from '@/hooks/financial/useCashClosureData';
@@ -69,8 +70,8 @@ const CashClosureTab = () => {
 
     // Sort by date
     return combinedData.sort((a, b) => {
-      const dateA = new Date(a.opening_date || a.closure_date);
-      const dateB = new Date(b.opening_date || b.closure_date);
+      const dateA = parseISO(a.opening_date || a.closure_date);
+      const dateB = parseISO(b.opening_date || b.closure_date);
       return dateB.getTime() - dateA.getTime();
     });
   };

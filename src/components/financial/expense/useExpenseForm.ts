@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
@@ -25,7 +26,7 @@ export const useExpenseForm = (expense: any, onSuccess: () => void) => {
     amount: '',
     category: '',
     payment_method_id: '',
-    expense_date: new Date().toISOString().split('T')[0],
+    expense_date: format(new Date(), 'yyyy-MM-dd'),
     notes: ''
   });
 
@@ -36,7 +37,8 @@ export const useExpenseForm = (expense: any, onSuccess: () => void) => {
         amount: expense.amount?.toString() || '',
         category: expense.category || '',
         payment_method_id: expense.payment_method_id || '',
-        expense_date: expense.expense_date ? expense.expense_date.split('T')[0] : new Date().toISOString().split('T')[0],
+        // expense_date é timestamptz; extrai a data local (não a UTC) pra exibir no input.
+        expense_date: expense.expense_date ? format(parseISO(expense.expense_date), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
         notes: expense.notes || ''
       });
     } else {
@@ -45,7 +47,7 @@ export const useExpenseForm = (expense: any, onSuccess: () => void) => {
         amount: '',
         category: '',
         payment_method_id: '',
-        expense_date: new Date().toISOString().split('T')[0],
+        expense_date: format(new Date(), 'yyyy-MM-dd'),
         notes: ''
       });
     }
@@ -55,25 +57,34 @@ export const useExpenseForm = (expense: any, onSuccess: () => void) => {
     mutationFn: async (data: any) => {
       // ✅ VALIDAÇÃO OBRIGATÓRIA DO CAIXA ANTES DE QUALQUER OPERAÇÃO
       console.log('🔒 [VALIDAÇÃO OBRIGATÓRIA] Verificando status do caixa para despesa...');
-      const targetDate = expense ? 
-        (expense.expense_date ? expense.expense_date.split('T')[0] : data.expense_date) : 
+      // data.expense_date chega aqui como "yyyy-MM-dd" (valor bruto do form)
+      const targetDate = expense ?
+        (expense.expense_date ? format(parseISO(expense.expense_date), 'yyyy-MM-dd') : data.expense_date) :
         data.expense_date;
-      
+
       const validation = await checkAndPromptCashOpening(targetDate);
       if (!validation.shouldProceed) {
         throw new Error('Operação bloqueada: caixa não está aberto para esta data');
       }
 
+      // expense_date é timestamptz: enviar "yyyy-MM-dd" puro seria interpretado como
+      // meia-noite UTC, exibindo o dia anterior em qualquer fuso negativo (ex: Brasil).
+      // Convertendo pra meia-noite local antes de gravar.
+      const payload = {
+        ...data,
+        expense_date: new Date(`${data.expense_date}T00:00:00`).toISOString(),
+      };
+
       if (expense) {
         const { error } = await supabase
           .from('expenses')
-          .update(data)
+          .update(payload)
           .eq('id', expense.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('expenses')
-          .insert([{ ...data, user_id: user?.id }]);
+          .insert([{ ...payload, user_id: user?.id }]);
         if (error) throw error;
       }
     },

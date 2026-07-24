@@ -1,5 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
+import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -11,8 +12,10 @@ export const useCashStatusValidation = () => {
       return { isValid: false, message: 'Usuário não autenticado' };
     }
 
-    // Extrair apenas a data (YYYY-MM-DD) do timestamp
-    const recordDateOnly = recordDate.split('T')[0];
+    // Extrair a data (YYYY-MM-DD) local do timestamp — recordDate normalmente é um
+    // created_at (timestamptz); usar .split('T')[0] pegaria o dia em UTC, que "vira"
+    // o dia seguinte a partir de ~21h no horário do Brasil.
+    const recordDateOnly = format(parseISO(recordDate), 'yyyy-MM-dd');
     
     console.log('🔍 Verificando status do caixa para a data:', recordDateOnly);
 

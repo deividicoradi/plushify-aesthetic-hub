@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ReportData, Payment, Installment } from '@/utils/reports/types';
 
@@ -113,7 +113,7 @@ export const ReportPreview = ({ reportData, reportType }: ReportPreviewProps) =>
                   <div>
                     <div className="font-medium">Fechamento de Caixa</div>
                     <div className="text-sm text-muted-foreground">
-                      {format(new Date(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
+                      {format(parseISO(closure.closure_date), 'dd/MM/yyyy', { locale: ptBR })}
                     </div>
                   </div>
                   <Badge variant="default">

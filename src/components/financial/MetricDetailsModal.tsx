@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ArrowDownWideNarrow, ArrowUpWideNarrow, Inbox } from 'lucide-react';
+import { parseISO } from 'date-fns';
 import type {
   FinancialDetails,
   PaymentRow,
@@ -41,7 +42,9 @@ const fmtCurrency = (v: number) =>
 
 const fmtDate = (d?: string | null) => {
   if (!d) return '—';
-  const date = new Date(d);
+  // parseISO trata "yyyy-MM-dd" como data local; new Date() trataria como UTC e
+  // exibiria o dia anterior em fusos negativos (ex: Brasil) para colunas `date`.
+  const date = parseISO(d);
   if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleDateString('pt-BR');
 };
@@ -122,7 +125,7 @@ interface Section<T = any> {
 
 const dateValue = (d?: string | null) => {
   if (!d) return 0;
-  const t = new Date(d).getTime();
+  const t = parseISO(d).getTime();
   return Number.isNaN(t) ? 0 : t;
 };
 

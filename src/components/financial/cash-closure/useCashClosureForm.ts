@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,7 +24,7 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
   const queryClient = useQueryClient();
   
   const [formData, setFormData] = useState<CashClosureFormData>({
-    closure_date: new Date().toISOString().split('T')[0],
+    closure_date: format(new Date(), 'yyyy-MM-dd'),
     opening_balance: '',
     closing_balance: '',
     total_income: '',
@@ -43,7 +44,7 @@ export const useCashClosureForm = (closure?: any, onSuccess?: () => void) => {
     if (closure) {
       // Editando fechamento existente
       setFormData({
-        closure_date: closure.closure_date || new Date().toISOString().split('T')[0],
+        closure_date: closure.closure_date || format(new Date(), 'yyyy-MM-dd'),
         opening_balance: closure.opening_balance?.toString() || '',
         closing_balance: closure.closing_balance?.toString() || '',
         total_income: closure.total_income?.toString() || '',

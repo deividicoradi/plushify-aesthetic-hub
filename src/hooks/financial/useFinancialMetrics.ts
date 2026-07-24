@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { format, parseISO, startOfDay, isBefore } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -53,8 +54,8 @@ export const useFinancialMetrics = (dateRange: DateRange) => {
           .from('cash_closures')
           .select('total_income, closure_date')
           .eq('user_id', user.id)
-          .gte('closure_date', startDate.toISOString().split('T')[0])
-          .lte('closure_date', endDate.toISOString().split('T')[0]),
+          .gte('closure_date', format(startDate, 'yyyy-MM-dd'))
+          .lte('closure_date', format(endDate, 'yyyy-MM-dd')),
 
         supabase
           .from('expenses')
@@ -118,7 +119,7 @@ export const useFinancialMetrics = (dateRange: DateRange) => {
         .reduce((sum, p) => sum + Number(p.paid_amount || 0), 0);
 
       const receitasMesAtualFromCashClosures = cashClosures
-        .filter(c => new Date(c.closure_date) >= currentMonthStart)
+        .filter(c => parseISO(c.closure_date) >= currentMonthStart)
         .reduce((sum, c) => sum + Number(c.total_income || 0), 0);
 
       const receitasMesAtual = receitasMesAtualFromPayments + receitasMesAtualFromCashClosures;
@@ -138,9 +139,9 @@ export const useFinancialMetrics = (dateRange: DateRange) => {
         .reduce((sum, p) => sum + Number(p.paid_amount || 0), 0);
 
       const receitasMesPassadoFromCashClosures = cashClosures
-        .filter(c => 
-          new Date(c.closure_date) >= lastMonthStart && 
-          new Date(c.closure_date) <= lastMonthEnd
+        .filter(c =>
+          parseISO(c.closure_date) >= lastMonthStart &&
+          parseISO(c.closure_date) <= lastMonthEnd
         )
         .reduce((sum, c) => sum + Number(c.total_income || 0), 0);
 
@@ -153,8 +154,9 @@ export const useFinancialMetrics = (dateRange: DateRange) => {
         )
         .reduce((sum, e) => sum + Number(e.amount), 0);
 
-      const parcelasVencidas = installments.filter(i => 
-        new Date(i.due_date) < now && i.status === 'pendente'
+      // Comparar com startOfDay: uma parcela que vence hoje não está atrasada ainda.
+      const parcelasVencidas = installments.filter(i =>
+        isBefore(new Date(i.due_date), startOfDay(now)) && i.status === 'pendente'
       ).length;
 
       const parcelasPendentes = installments.filter(i => 

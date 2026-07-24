@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -33,7 +34,9 @@ export const CashStatusProvider: React.FC<CashStatusProviderProps> = ({ children
   const { data: openings, refetch } = useQuery({
     queryKey: ['cash-status', user?.id],
     queryFn: async () => {
-      const today = new Date().toISOString().split('T')[0];
+      // format() usa o fuso local; toISOString().split('T')[0] usaria o dia em UTC,
+      // que "vira" o dia seguinte a partir de ~21h no horário do Brasil.
+      const today = format(new Date(), 'yyyy-MM-dd');
       const { data, error } = await supabase
         .from('cash_openings')
         .select('*')

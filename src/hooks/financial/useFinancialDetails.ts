@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { format, parseISO, startOfDay, isBefore } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -76,8 +77,8 @@ export const useFinancialDetails = (dateRange: DateRange) => {
           .from('cash_closures')
           .select('id, total_income, closure_date')
           .eq('user_id', user.id)
-          .gte('closure_date', startDate.toISOString().split('T')[0])
-          .lte('closure_date', endDate.toISOString().split('T')[0]),
+          .gte('closure_date', format(startDate, 'yyyy-MM-dd'))
+          .lte('closure_date', format(endDate, 'yyyy-MM-dd')),
         supabase
           .from('expenses')
           .select('id, description, amount, expense_date, category')
@@ -100,14 +101,15 @@ export const useFinancialDetails = (dateRange: DateRange) => {
       const installments = (installmentsResult.data || []) as InstallmentRow[];
 
       const paidPayments = payments.filter(p => p.status === 'pago');
+      // Comparar com startOfDay: uma parcela que vence hoje não está atrasada ainda.
       const overdueInstallments = installments.filter(
-        i => new Date(i.due_date) < now && i.status === 'pendente'
+        i => isBefore(new Date(i.due_date), startOfDay(now)) && i.status === 'pendente'
       );
       const currentMonthPaidPayments = paidPayments.filter(
         p => p.payment_date && new Date(p.payment_date) >= currentMonthStart
       );
       const currentMonthCashClosures = cashClosures.filter(
-        c => new Date(c.closure_date) >= currentMonthStart
+        c => parseISO(c.closure_date) >= currentMonthStart
       );
 
       setDetails({
