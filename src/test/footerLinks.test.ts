@@ -20,7 +20,6 @@ const routeToPage: Record<string, string> = {
   "/product": "src/pages/Product.tsx",
   "/help": "src/pages/Help.tsx",
   "/updates": "src/pages/Updates.tsx",
-  "/status": "src/pages/Status.tsx",
   "/terms": "src/pages/Terms.tsx",
   "/privacy": "src/pages/Privacy.tsx",
   "/lgpd": "src/pages/LGPD.tsx",
