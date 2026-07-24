@@ -109,6 +109,18 @@
   *::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground) / 0.6);
   }
+
+  /* Setinhas de <input type="number"> (spinner) são renderizadas pelo SO/
+     navegador e sempre aparecem brancas, sem suporte real de tema — em vez
+     de tentar reestilizar (inconsistente entre navegadores), removidas. */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 }
 
 @layer utilities {
