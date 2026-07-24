@@ -56,12 +56,6 @@ const NotesAndMeta = ({ data }: { data: any }) => (
         </div>
       </div>
     )}
-    {(data.operator_id || data.machine_id) && (
-      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-        {data.operator_id && <span>Operador: <code className="bg-muted px-1.5 py-0.5 rounded">{data.operator_id.slice(0, 8)}...</code></span>}
-        {data.machine_id && <span>Terminal: <code className="bg-muted px-1.5 py-0.5 rounded">{data.machine_id.slice(-8)}</code></span>}
-      </div>
-    )}
   </>
 );
 
