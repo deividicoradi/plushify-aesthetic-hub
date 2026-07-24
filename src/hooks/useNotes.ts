@@ -57,6 +57,7 @@ export const useNotes = () => {
       const { data, error } = await (supabase as any)
         .from('notes')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -117,20 +118,19 @@ export const useNotes = () => {
       }
 
       // Cast supabase to use our custom Database type
-      const { error } = await (supabase as any)
+      // updated_at é preenchido automaticamente pelo trigger update_notes_updated_at no banco
+      const { data, error } = await (supabase as any)
         .from('notes')
-        .update({ 
-          title, 
-          content, 
-          updated_at: new Date().toISOString() 
-        })
+        .update({ title, content })
         .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select()
+        .single();
 
       if (error) throw error;
 
-      setNotes(notes.map(note => 
-        note.id === id ? { ...note, title, content } : note
+      setNotes(notes.map(note =>
+        note.id === id ? { ...note, title, content, updated_at: data.updated_at } : note
       ));
       
       toast.success("Nota atualizada com sucesso!");
