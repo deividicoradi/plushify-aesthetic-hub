@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
 
@@ -31,139 +32,104 @@ export interface TeamMemberInput {
   salary?: number;
 }
 
+// React Query (não state local): useTeamLimits() chama este hook de novo
+// pra checar o limite de usuários — com state local cada instância tinha
+// sua própria cópia da lista, então deletar/adicionar um membro numa tela
+// não refletia na contagem usada pelo limite até um remount completo.
 export const useTeamMembers = () => {
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const fetchTeamMembers = async () => {
-    try {
-      setLoading(true);
+  const queryKey = ['team-members', user?.id];
+
+  const { data: teamMembers = [], isLoading: loading, refetch } = useQuery({
+    queryKey,
+    enabled: !!user?.id,
+    queryFn: async (): Promise<TeamMember[]> => {
       const { data, error } = await supabase
         .from('team_members')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTeamMembers(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar membros da equipe:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os membros da equipe.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data || [];
+    },
+    staleTime: 60_000,
+  });
 
-  const createTeamMember = async (memberData: TeamMemberInput, skipLimitCheck = false) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
+  const createMutation = useMutation({
+    mutationFn: async (memberData: TeamMemberInput) => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error('Usuário não autenticado');
 
-      // Verificação de limite será feita no componente usando useTeamLimits
       const { data, error } = await supabase
         .from('team_members')
         .insert({
           ...memberData,
-          user_id: user.id,
+          user_id: authUser.id,
           permissions: memberData.permissions || {},
         })
         .select()
         .single();
 
       if (error) throw error;
-
-      setTeamMembers(prev => [data, ...prev]);
-      toast({
-        title: "Sucesso",
-        description: "Membro adicionado com sucesso!",
-      });
-
-      return data;
-    } catch (error) {
+      return data as TeamMember;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast({ title: "Sucesso", description: "Membro adicionado com sucesso!" });
+    },
+    onError: (error) => {
       console.error('Erro ao criar membro:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível adicionar o membro.",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
+      toast({ title: "Erro", description: "Não foi possível adicionar o membro.", variant: "destructive" });
+    },
+  });
 
-  const updateTeamMember = async (id: string, memberData: Partial<TeamMemberInput>) => {
-    try {
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, memberData }: { id: string; memberData: Partial<TeamMemberInput> }) => {
       const { data, error } = await supabase
         .from('team_members')
-        .update({
-          ...memberData,
-          updated_at: new Date().toISOString(),
-        })
+        .update({ ...memberData, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-
-      setTeamMembers(prev => 
-        prev.map(member => member.id === id ? data : member)
-      );
-
-      toast({
-        title: "Sucesso",
-        description: "Membro atualizado com sucesso!",
-      });
-
-      return data;
-    } catch (error) {
+      return data as TeamMember;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast({ title: "Sucesso", description: "Membro atualizado com sucesso!" });
+    },
+    onError: (error) => {
       console.error('Erro ao atualizar membro:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar o membro.",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
+      toast({ title: "Erro", description: "Não foi possível atualizar o membro.", variant: "destructive" });
+    },
+  });
 
-  const deleteTeamMember = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('team_members')
-        .delete()
-        .eq('id', id);
-
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('team_members').delete().eq('id', id);
       if (error) throw error;
-
-      setTeamMembers(prev => prev.filter(member => member.id !== id));
-      toast({
-        title: "Sucesso",
-        description: "Membro removido com sucesso!",
-      });
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast({ title: "Sucesso", description: "Membro removido com sucesso!" });
+    },
+    onError: (error) => {
       console.error('Erro ao remover membro:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível remover o membro.",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  useEffect(() => {
-    fetchTeamMembers();
-  }, []);
+      toast({ title: "Erro", description: "Não foi possível remover o membro.", variant: "destructive" });
+    },
+  });
 
   return {
     teamMembers,
     loading,
-    createTeamMember,
-    updateTeamMember,
-    deleteTeamMember,
-    refetch: fetchTeamMembers,
+    createTeamMember: (memberData: TeamMemberInput) => createMutation.mutateAsync(memberData),
+    updateTeamMember: (id: string, memberData: Partial<TeamMemberInput>) =>
+      updateMutation.mutateAsync({ id, memberData }),
+    deleteTeamMember: (id: string) => deleteMutation.mutateAsync(id),
+    refetch,
   };
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { parseISO } from 'date-fns';
 import { MoreVertical, Edit, Trash2, User, Phone, Mail, Calendar, DollarSign } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +29,9 @@ const formatSalary = (salary?: number) => {
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return 'Não informado';
-  return new Date(dateString).toLocaleDateString('pt-BR');
+  // parseISO trata "yyyy-MM-dd" (hire_date) como data local; new Date()
+  // trataria como UTC e mostraria o dia anterior em fusos negativos.
+  return parseISO(dateString).toLocaleDateString('pt-BR');
 };
 
 const getRoleLabel = (role: string) => {
