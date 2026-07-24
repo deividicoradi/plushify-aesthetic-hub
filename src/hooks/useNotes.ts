@@ -8,36 +8,10 @@ export type Note = {
   id: string;
   title: string;
   content: string;
+  client_id: string | null;
+  client_name?: string | null;
   created_at: string;
   updated_at?: string;
-};
-
-// Define the database schema for notes table to fix TypeScript errors
-type Database = {
-  public: {
-    Tables: {
-      notes: {
-        Row: {
-          id: string;
-          user_id: string;
-          title: string;
-          content: string;
-          created_at: string;
-          updated_at?: string;
-        };
-        Insert: {
-          user_id: string;
-          title: string;
-          content: string;
-        };
-        Update: {
-          title?: string;
-          content?: string;
-          updated_at?: string;
-        };
-      };
-    };
-  };
 };
 
 export const useNotes = () => {
@@ -56,12 +30,16 @@ export const useNotes = () => {
       // Cast supabase to use our custom Database type
       const { data, error } = await (supabase as any)
         .from('notes')
-        .select('*')
+        .select('*, clients(name)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotes(data || []);
+      const mapped: Note[] = (data || []).map((row: any) => ({
+        ...row,
+        client_name: row.clients?.name ?? null,
+      }));
+      setNotes(mapped);
     } catch (error: any) {
       console.error("Erro ao carregar notas:", error);
       toast.error("Erro ao carregar notas: " + (error.message || "Erro desconhecido"));
@@ -70,7 +48,7 @@ export const useNotes = () => {
     }
   };
 
-  const createNote = async (title: string, content: string) => {
+  const createNote = async (title: string, content: string, clientId?: string | null) => {
     try {
       if (!user) {
         toast.error("Usuário não autenticado");
@@ -85,19 +63,21 @@ export const useNotes = () => {
       // Cast supabase to use our custom Database type
       const { data, error } = await (supabase as any)
         .from('notes')
-        .insert([{ 
-          user_id: user.id, 
-          title, 
-          content 
+        .insert([{
+          user_id: user.id,
+          title,
+          content,
+          client_id: clientId || null,
         }])
-        .select()
+        .select('*, clients(name)')
         .single();
 
       if (error) throw error;
 
-      setNotes([data, ...notes]);
+      const note: Note = { ...data, client_name: data.clients?.name ?? null };
+      setNotes([note, ...notes]);
       toast.success("Nota criada com sucesso!");
-      return data;
+      return note;
     } catch (error: any) {
       console.error("Erro ao criar nota:", error);
       toast.error("Erro ao criar nota: " + (error.message || "Erro desconhecido"));
@@ -105,7 +85,7 @@ export const useNotes = () => {
     }
   };
 
-  const updateNote = async (id: string, title: string, content: string) => {
+  const updateNote = async (id: string, title: string, content: string, clientId?: string | null) => {
     try {
       if (!user) {
         toast.error("Usuário não autenticado");
@@ -121,16 +101,18 @@ export const useNotes = () => {
       // updated_at é preenchido automaticamente pelo trigger update_notes_updated_at no banco
       const { data, error } = await (supabase as any)
         .from('notes')
-        .update({ title, content })
+        .update({ title, content, client_id: clientId === undefined ? undefined : (clientId || null) })
         .eq('id', id)
         .eq('user_id', user.id)
-        .select()
+        .select('*, clients(name)')
         .single();
 
       if (error) throw error;
 
       setNotes(notes.map(note =>
-        note.id === id ? { ...note, title, content, updated_at: data.updated_at } : note
+        note.id === id
+          ? { ...note, title, content, client_id: data.client_id, client_name: data.clients?.name ?? null, updated_at: data.updated_at }
+          : note
       ));
       
       toast.success("Nota atualizada com sucesso!");

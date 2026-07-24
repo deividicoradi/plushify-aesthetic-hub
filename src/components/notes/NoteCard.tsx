@@ -4,9 +4,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Edit, Trash, Save, X, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Edit, Trash, Save, X, Loader2, User } from "lucide-react";
 import type { Note } from '@/hooks/useNotes';
-import { 
+import type { Client } from '@/hooks/useClients';
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -18,14 +21,16 @@ import { toast } from '@/components/ui/sonner';
 
 interface NoteCardProps {
   note: Note;
-  onUpdate: (id: string, title: string, content: string) => Promise<boolean>;
+  clients: Client[];
+  onUpdate: (id: string, title: string, content: string, clientId: string | null) => Promise<boolean>;
   onDelete: (id: string) => Promise<void>;
 }
 
-export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
+export const NoteCard = ({ note, clients, onUpdate, onDelete }: NoteCardProps) => {
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(note.title);
   const [editContent, setEditContent] = useState(note.content);
+  const [editClientId, setEditClientId] = useState<string | null>(note.client_id);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -37,7 +42,7 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
 
     setIsSubmitting(true);
     try {
-      const success = await onUpdate(note.id, editTitle, editContent);
+      const success = await onUpdate(note.id, editTitle, editContent, editClientId);
       if (success) {
         setEditing(false);
       }
@@ -86,6 +91,30 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
           <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
             {note.updated_at ? `Atualizado: ${formatDate(note.updated_at)}` : formatDate(note.created_at)}
           </p>
+          {editing ? (
+            <div className="mt-2">
+              <Select
+                value={editClientId ?? 'none'}
+                onValueChange={(v) => setEditClientId(v === 'none' ? null : v)}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Vincular a um cliente (opcional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem cliente vinculado</SelectItem>
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : note.client_name ? (
+            <Badge variant="outline" className="mt-2 gap-1 text-[11px] font-normal">
+              <User className="w-3 h-3" />
+              {note.client_name}
+            </Badge>
+          ) : null}
         </CardHeader>
         <CardContent className="flex-grow pb-2 p-4 sm:p-6 pt-0 sm:pt-0">
           {editing ? (
@@ -113,6 +142,7 @@ export const NoteCard = ({ note, onUpdate, onDelete }: NoteCardProps) => {
                   setEditing(false);
                   setEditTitle(note.title);
                   setEditContent(note.content);
+                  setEditClientId(note.client_id);
                 }}
                 disabled={isSubmitting}
                 className="transition-colors w-full sm:w-auto"

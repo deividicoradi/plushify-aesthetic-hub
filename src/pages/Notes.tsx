@@ -5,30 +5,39 @@ import { Plus, Search, FileText } from "lucide-react";
 import { CreateNoteForm } from '@/components/notes/CreateNoteForm';
 import { NoteCard } from '@/components/notes/NoteCard';
 import { useNotes } from '@/hooks/useNotes';
+import { useClients } from '@/hooks/useClients';
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 
 const Notes = () => {
   const { notes, loading, fetchNotes, createNote, updateNote, deleteNote } = useNotes();
+  const { clients } = useClients();
   const [creating, setCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  
+  const [clientFilter, setClientFilter] = useState<string>('all');
+
   useEffect(() => {
     fetchNotes();
   }, []);
-  
-  const handleCreateNote = async (title: string, content: string) => {
-    const note = await createNote(title, content);
+
+  const handleCreateNote = async (title: string, content: string, clientId: string | null) => {
+    const note = await createNote(title, content, clientId);
     if (note) {
       setCreating(false);
     }
   };
-  
-  // Filtra as notas com base no termo de busca
-  const filteredNotes = notes.filter(note => 
-    note.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    note.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+  // Filtra as notas com base no termo de busca e no cliente vinculado
+  const filteredNotes = notes.filter(note => {
+    const matchesSearch =
+      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesClient =
+      clientFilter === 'all' ||
+      (clientFilter === 'none' ? !note.client_id : note.client_id === clientFilter);
+    return matchesSearch && matchesClient;
+  });
 
   return (
     <ResponsiveLayout
@@ -47,7 +56,20 @@ const Notes = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
+          <Select value={clientFilter} onValueChange={setClientFilter}>
+            <SelectTrigger className="w-full sm:w-56 h-11 sm:h-10">
+              <SelectValue placeholder="Filtrar por cliente" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os clientes</SelectItem>
+              <SelectItem value="none">Sem cliente vinculado</SelectItem>
+              {clients.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <div className="flex gap-2 w-full sm:w-auto justify-end">
             <Button 
               onClick={() => setCreating(!creating)} 
@@ -62,9 +84,10 @@ const Notes = () => {
         </div>
 
         {creating && (
-          <CreateNoteForm 
+          <CreateNoteForm
             onSubmit={handleCreateNote}
             onCancel={() => setCreating(false)}
+            clients={clients}
           />
         )}
 
@@ -99,6 +122,7 @@ const Notes = () => {
               <NoteCard
                 key={note.id}
                 note={note}
+                clients={clients}
                 onUpdate={updateNote}
                 onDelete={deleteNote}
               />

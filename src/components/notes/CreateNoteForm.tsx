@@ -4,17 +4,21 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, X, Loader2 } from "lucide-react";
 import { toast } from '@/components/ui/sonner';
+import { Client } from '@/hooks/useClients';
 
 interface CreateNoteFormProps {
-  onSubmit: (title: string, content: string) => Promise<void>;
+  onSubmit: (title: string, content: string, clientId: string | null) => Promise<void>;
   onCancel: () => void;
+  clients: Client[];
 }
 
-export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
+export const CreateNoteForm = ({ onSubmit, onCancel, clients }: CreateNoteFormProps) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [clientId, setClientId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -26,9 +30,10 @@ export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
     setIsSubmitting(true);
 
     try {
-      await onSubmit(title, content);
+      await onSubmit(title, content, clientId);
       setTitle('');
       setContent('');
+      setClientId(null);
     } catch (error) {
       console.error("Erro ao salvar nota:", error);
     } finally {
@@ -64,6 +69,23 @@ export const CreateNoteForm = ({ onSubmit, onCancel }: CreateNoteFormProps) => {
             className="resize-none focus:ring-2 focus:ring-plush-500"
             disabled={isSubmitting}
           />
+        </div>
+        <div className="space-y-2">
+          <Select
+            value={clientId ?? 'none'}
+            onValueChange={(v) => setClientId(v === 'none' ? null : v)}
+            disabled={isSubmitting}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Vincular a um cliente (opcional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Sem cliente vinculado</SelectItem>
+              {clients.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col sm:flex-row gap-2 p-4 sm:p-6 pt-2 sm:pt-2">
