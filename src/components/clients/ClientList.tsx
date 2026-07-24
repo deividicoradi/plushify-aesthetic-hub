@@ -62,6 +62,25 @@ const ClientList: React.FC<{
         filteredData = filteredData.filter(client => client.status === filters.status);
       }
 
+      // Apply last visit filter (o filtro existia na UI mas nunca era
+      // aplicado — selecionar "Hoje"/"Últimos 7 dias"/"Últimos 30 dias"
+      // não tinha efeito nenhum na lista)
+      if (filters.lastVisit !== "Todos") {
+        const now = new Date();
+        let cutoff: Date;
+        if (filters.lastVisit === "Hoje") {
+          cutoff = new Date(now);
+          cutoff.setHours(0, 0, 0, 0);
+        } else if (filters.lastVisit === "Últimos 7 dias") {
+          cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        } else {
+          cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        }
+        filteredData = filteredData.filter(
+          client => client.last_visit && new Date(client.last_visit) >= cutoff
+        );
+      }
+
       // Apply search filter
       if (searchTerm.trim()) {
         const searchLower = searchTerm.toLowerCase();
