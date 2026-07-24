@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar, Clock, User, CheckCircle, ArrowLeft, ArrowRight, Star, Heart, Sparkles, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { format, addDays, startOfDay } from "date-fns";
+import { format, addDays, startOfDay, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Link, useParams } from "react-router-dom";
@@ -200,12 +200,15 @@ export default function PublicBooking() {
     return time.slice(0, 5);
   };
 
+  // parseISO (não new Date) trata "yyyy-MM-dd" como data local, não UTC —
+  // new Date() faria a data "voltar" um dia em fusos negativos (ex: Brasil)
+  // ao formatar, dessincronizando o rótulo exibido da data enviada à RPC.
   const formatDate = (dateStr: string) => {
-    return format(new Date(dateStr), "dd 'de' MMMM", { locale: ptBR });
+    return format(parseISO(dateStr), "dd 'de' MMMM", { locale: ptBR });
   };
 
   const formatWeekday = (dateStr: string) => {
-    return format(new Date(dateStr), 'EEEE', { locale: ptBR });
+    return format(parseISO(dateStr), 'EEEE', { locale: ptBR });
   };
 
   const resetBooking = () => {
@@ -464,7 +467,7 @@ export default function PublicBooking() {
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {booking.date && format(new Date(booking.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                  {booking.date && format(parseISO(booking.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -538,7 +541,7 @@ export default function PublicBooking() {
                   <h3 className="font-semibold mb-2">Resumo do agendamento</h3>
                   <div className="space-y-1 text-sm">
                     <p><strong>Serviço:</strong> {booking.service?.name}</p>
-                    <p><strong>Data:</strong> {booking.date && format(new Date(booking.date), "dd/MM/yyyy")}</p>
+                    <p><strong>Data:</strong> {booking.date && format(parseISO(booking.date), "dd/MM/yyyy")}</p>
                     <p><strong>Horário:</strong> {booking.time && formatTime(booking.time)}</p>
                     <p><strong>Duração:</strong> {booking.service?.duration} min</p>
                     <p><strong>Valor:</strong> {booking.service && formatPrice(booking.service.price)}</p>
@@ -629,7 +632,7 @@ export default function PublicBooking() {
                   <div className="space-y-1 text-sm">
                     {appointmentId && <p><strong>Código:</strong> {appointmentId.slice(0, 8)}</p>}
                     <p><strong>Serviço:</strong> {booking.service?.name}</p>
-                    <p><strong>Data:</strong> {booking.date && format(new Date(booking.date), "dd/MM/yyyy")}</p>
+                    <p><strong>Data:</strong> {booking.date && format(parseISO(booking.date), "dd/MM/yyyy")}</p>
                     <p><strong>Horário:</strong> {booking.time && formatTime(booking.time)}</p>
                     <p><strong>Cliente:</strong> {booking.name}</p>
                     <p><strong>WhatsApp:</strong> {booking.phone}</p>
