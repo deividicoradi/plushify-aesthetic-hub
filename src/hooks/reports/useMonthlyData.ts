@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -44,7 +45,7 @@ export const useMonthlyData = () => {
           .from('cash_closures')
           .select('total_income, closure_date')
           .eq('user_id', user.id)
-          .gte('closure_date', sixMonthsAgo.toISOString().split('T')[0]),
+          .gte('closure_date', format(sixMonthsAgo, 'yyyy-MM-dd')),
         
         supabase
           .from('clients')
@@ -74,7 +75,7 @@ export const useMonthlyData = () => {
       for (let i = 5; i >= 0; i--) {
         const date = new Date();
         date.setMonth(date.getMonth() - i);
-        const monthKey = date.toISOString().slice(0, 7);
+        const monthKey = format(date, 'yyyy-MM');
         const monthName = date.toLocaleDateString('pt-BR', { month: 'short' });
         
         monthlyDataMap.set(monthKey, {
@@ -88,7 +89,9 @@ export const useMonthlyData = () => {
       // Agregar receitas dos pagamentos usando payment_date
       payments.forEach(payment => {
         if (payment.payment_date) {
-          const monthKey = payment.payment_date.slice(0, 7);
+          // payment_date é timestamptz (UTC); .slice(0,7) pegaria o mês errado
+          // pra pagamentos feitos nas últimas horas do dia no fuso do Brasil.
+          const monthKey = format(parseISO(payment.payment_date), 'yyyy-MM');
           const existing = monthlyDataMap.get(monthKey);
           if (existing) {
             const amount = Number(payment.paid_amount) || 0;
@@ -101,7 +104,7 @@ export const useMonthlyData = () => {
       // Agregar receitas dos fechamentos de caixa
       cashClosures.forEach(closure => {
         if (closure.closure_date) {
-          const monthKey = closure.closure_date.slice(0, 7);
+          const monthKey = format(parseISO(closure.closure_date), 'yyyy-MM');
           const existing = monthlyDataMap.get(monthKey);
           if (existing) {
             const amount = Number(closure.total_income) || 0;
@@ -113,7 +116,7 @@ export const useMonthlyData = () => {
 
       // Agregar agendamentos
       appointments.forEach(appointment => {
-        const monthKey = appointment.created_at.slice(0, 7);
+        const monthKey = format(parseISO(appointment.created_at), 'yyyy-MM');
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
           existing.appointments += 1;
@@ -122,7 +125,7 @@ export const useMonthlyData = () => {
 
       // Agregar novos clientes
       clients.forEach(client => {
-        const monthKey = client.created_at.slice(0, 7);
+        const monthKey = format(parseISO(client.created_at), 'yyyy-MM');
         const existing = monthlyDataMap.get(monthKey);
         if (existing) {
           existing.newClients += 1;

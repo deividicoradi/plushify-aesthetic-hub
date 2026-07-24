@@ -13,6 +13,7 @@ import { useServices } from '@/hooks/useServices';
 import { useProfessionals } from '@/hooks/useProfessionals';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useAvailableSlots } from '@/hooks/useAvailableSlots';
+import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 interface CreateAppointmentDialogProps {
@@ -46,8 +47,10 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
     notes: ''
   });
 
-  // Validação de data retroativa
-  const today = new Date().toISOString().split('T')[0];
+  // Validação de data retroativa (fuso local — perto da meia-noite no Brasil,
+  // toISOString().split('T')[0] "viraria" o dia seguinte e bloquearia agendar
+  // para hoje à noite, achando que a data já tinha passado)
+  const today = format(new Date(), 'yyyy-MM-dd');
 
   // Buscar profissionais quando serviço é selecionado
   useEffect(() => {

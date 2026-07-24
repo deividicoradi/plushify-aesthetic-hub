@@ -1,3 +1,4 @@
+import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface DashboardStats {
@@ -59,7 +60,7 @@ export async function fetchDashboardStats(userId: string): Promise<DashboardStat
       .from('appointments')
       .select('appointment_date')
       .eq('user_id', userId)
-      .gte('appointment_date', startOfWeek.toISOString().split('T')[0])
+      .gte('appointment_date', format(startOfWeek, 'yyyy-MM-dd'))
   ]);
 
   if (clientsData.error) throw clientsData.error;
@@ -105,8 +106,8 @@ export async function fetchChartData(
       .from('appointments')
       .select('appointment_date')
       .eq('user_id', userId)
-      .gte('appointment_date', start.toISOString().split('T')[0])
-      .lte('appointment_date', end.toISOString().split('T')[0]),
+      .gte('appointment_date', format(start, 'yyyy-MM-dd'))
+      .lte('appointment_date', format(end, 'yyyy-MM-dd')),
     
     supabase
       .from('payments')
@@ -138,20 +139,21 @@ export async function fetchChartData(
   for (let i = 0; i < daysToShow; i++) {
     const currentDay = new Date(start);
     currentDay.setDate(start.getDate() + i);
-    const dayString = currentDay.toISOString().split('T')[0];
+    // format() usa o dia local; payment_date/created_at são timestamptz, então
+    // comparar via toISOString().split('T')[0] (UTC) atribuía pagamentos e
+    // clientes das últimas horas do dia (fuso Brasil) ao dia seguinte no gráfico.
+    const dayString = format(currentDay, 'yyyy-MM-dd');
 
-    const agendamentos = appointmentsResult.data?.filter(a => 
+    const agendamentos = appointmentsResult.data?.filter(a =>
       a.appointment_date === dayString
     ).length || 0;
 
     const faturamento = paymentsResult.data?.filter(p => {
-      const paymentDate = new Date(p.payment_date);
-      return paymentDate.toISOString().split('T')[0] === dayString;
+      return format(parseISO(p.payment_date), 'yyyy-MM-dd') === dayString;
     }).reduce((sum, payment) => sum + Number(payment.amount), 0) || 0;
 
     const clientes = clientsResult.data?.filter(c => {
-      const clientDate = new Date(c.created_at);
-      return clientDate.toISOString().split('T')[0] === dayString;
+      return format(parseISO(c.created_at), 'yyyy-MM-dd') === dayString;
     }).length || 0;
 
     chartData.push({

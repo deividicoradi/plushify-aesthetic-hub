@@ -1,5 +1,6 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
@@ -38,8 +39,10 @@ export const useCashIntegration = () => {
 
       console.log('Método de pagamento encontrado:', paymentMethod);
 
-      // Verificar se existe um caixa aberto hoje
-      const today = new Date().toISOString().split('T')[0];
+      // Verificar se existe um caixa aberto hoje (fuso local, não UTC — perto
+      // da meia-noite no Brasil, toISOString().split('T')[0] "viraria" o dia
+      // seguinte e faria isso criar/atualizar o caixa do dia errado)
+      const today = format(new Date(), 'yyyy-MM-dd');
       const { data: existingCashOpening, error: queryError } = await supabase
         .from('cash_openings')
         .select('*')

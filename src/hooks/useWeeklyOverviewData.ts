@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -44,11 +45,14 @@ export const useWeeklyOverviewData = () => {
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       endOfWeek.setHours(23, 59, 59, 999);
 
+      const startDateOnly = format(startOfWeek, 'yyyy-MM-dd');
+      const endDateOnly = format(endOfWeek, 'yyyy-MM-dd');
+
       console.log('Week range:', {
         startOfWeek: startOfWeek.toISOString(),
         endOfWeek: endOfWeek.toISOString(),
-        startDate: startOfWeek.toISOString().split('T')[0],
-        endDate: endOfWeek.toISOString().split('T')[0]
+        startDate: startDateOnly,
+        endDate: endDateOnly
       });
 
       // Buscar agendamentos da semana
@@ -56,8 +60,8 @@ export const useWeeklyOverviewData = () => {
         .from('appointments')
         .select('*')
         .eq('user_id', user.id)
-        .gte('appointment_date', startOfWeek.toISOString().split('T')[0])
-        .lte('appointment_date', endOfWeek.toISOString().split('T')[0]);
+        .gte('appointment_date', startDateOnly)
+        .lte('appointment_date', endDateOnly);
 
       if (appointmentsError) {
         console.error('Error fetching appointments:', appointmentsError);

@@ -1,5 +1,6 @@
 
 import { useState, useCallback } from 'react';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -52,7 +53,7 @@ export const useAnalyticsData = () => {
       const dataToSave = {
         ...analysisData,
         user_id: user.id,
-        analysis_date: new Date().toISOString().split('T')[0],
+        analysis_date: format(new Date(), 'yyyy-MM-dd'),
       };
 
       // Verificar se já existe análise para hoje

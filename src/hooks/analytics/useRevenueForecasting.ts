@@ -1,5 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -38,7 +39,7 @@ export const useRevenueForecasting = () => {
         .select('price, appointment_date')
         .eq('user_id', user.id)
         .neq('status', 'cancelado')
-        .gte('appointment_date', oneYearAgo.toISOString().split('T')[0]);
+        .gte('appointment_date', format(oneYearAgo, 'yyyy-MM-dd'));
 
       if (paymentsError || appointmentsError) {
         throw paymentsError || appointmentsError;
