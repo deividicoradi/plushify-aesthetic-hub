@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +63,9 @@ const ClientTableRow: React.FC<ClientTableRowProps> = ({ client, onEdit, onDelet
           {client.status}
         </Badge>
       </TableCell>
-      <TableCell className="text-foreground">{client.last_visit || 'Sem visitas'}</TableCell>
+      <TableCell className="text-foreground">
+        {client.last_visit ? format(parseISO(client.last_visit), 'dd/MM/yyyy', { locale: ptBR }) : 'Sem visitas'}
+      </TableCell>
       <TableCell>
         <div className="flex justify-end">
           <ClientActions client={client} onEdit={onEdit} onDelete={onDelete} />
