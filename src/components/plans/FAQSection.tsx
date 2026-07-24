@@ -4,12 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const faqs = [
   {
-    question: 'Por que o plano Enterprise é o mais recomendado?',
-    answer: 'O Enterprise oferece todas as ferramentas necessárias para escalar seu negócio: analytics avançados, múltiplos usuários, consultoria mensal e suporte VIP. É o investimento que mais gera retorno.'
+    question: 'Por que o plano Premium é o mais recomendado?',
+    answer: 'O Premium oferece todas as ferramentas necessárias para escalar seu negócio: analytics avançados, múltiplos usuários, consultoria mensal e suporte VIP. É o investimento que mais gera retorno.'
   },
   {
     question: 'Como funciona a consultoria mensal gratuita?',
-    answer: 'Clientes Enterprise recebem 1 hora de consultoria mensal com nossos especialistas para otimizar processos, aumentar vendas e crescer o negócio.'
+    answer: 'Clientes Premium recebem 1 hora de consultoria mensal com nossos especialistas para otimizar processos, aumentar vendas e crescer o negócio.'
   },
   {
     question: 'Posso mudar de plano a qualquer momento?',

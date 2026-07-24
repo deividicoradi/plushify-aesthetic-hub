@@ -39,7 +39,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
           >
             <div className="flex items-center justify-center gap-3">
               <Crown className="w-6 h-6 flex-shrink-0" />
-              <span>{isLoading('premium_' + (isAnnual ? 'annual' : 'monthly')) ? "Processando..." : "Começar com Enterprise"}</span>
+              <span>{isLoading('premium_' + (isAnnual ? 'annual' : 'monthly')) ? "Processando..." : "Começar com Premium"}</span>
               {!isLoading('premium_' + (isAnnual ? 'annual' : 'monthly')) && <ArrowRight className="w-5 h-5 flex-shrink-0" />}
             </div>
           </Button>
