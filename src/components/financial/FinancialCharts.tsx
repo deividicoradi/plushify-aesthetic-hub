@@ -5,7 +5,6 @@ import { PeriodOption } from '@/components/dashboard/PeriodFilter';
 import { CashFlowChart } from './charts/CashFlowChart';
 import { RevenueExpensesChart } from './charts/RevenueExpensesChart';
 import { CategoryPieChart } from './charts/CategoryPieChart';
-import { CashFlowForecastChart } from './charts/CashFlowForecastChart';
 import { LoadingCharts } from './charts/LoadingCharts';
 
 interface FinancialChartsProps {
@@ -86,17 +85,10 @@ export const FinancialCharts = ({
         />
 
         {/* Receitas por Método de Pagamento */}
-        <CategoryPieChart 
+        <CategoryPieChart
           data={revenueByMethod}
           title="Receitas por Método"
           formatCurrency={formatCurrency}
-        />
-
-        {/* Previsão de Fluxo de Caixa */}
-        <CashFlowForecastChart 
-          data={monthlyData}
-          formatCurrency={formatCurrency}
-          chartConfig={chartConfig}
         />
       </div>
     </div>
