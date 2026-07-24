@@ -48,6 +48,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'SEM gestão financeira',
       'SEM relatórios avançados',
       'SEM controle de caixa',
+      'SEM programa de fidelidade',
       'SEM exportação de dados',
       'SEM suporte técnico',
       'Dados removidos após trial'
@@ -85,6 +86,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'SEM analytics avançados',
       'SEM exportação de relatórios',
       'SEM pagamentos recorrentes',
+      'SEM programa de fidelidade',
       'SEM backup automático'
     ],
     current: currentPlan === 'professional'
@@ -108,6 +110,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'TUDO do plano Profissional',
       'Serviços e produtos ilimitados',
       'Analytics avançados e preditivos',
+      'Programa de fidelidade completo (pontos, níveis, desafios e recompensas)',
       'Relatórios completos com exportação',
       'Pagamentos recorrentes e parcelamentos',
       'Gestão de equipe avançada',

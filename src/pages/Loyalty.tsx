@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Sparkles, Settings } from "lucide-react";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
+import { FeatureGuard } from '@/components/FeatureGuard';
 import { useLoyalty } from "@/hooks/useLoyalty";
 import { LoyaltyStatsCards } from "@/components/loyalty/LoyaltyStatsCards";
 import { TopClientsCard } from "@/components/loyalty/TopClientsCard";
@@ -81,6 +82,7 @@ export default function Loyalty() {
       subtitle="Transforme seus clientes em verdadeiros fãs com pontos, desafios e recompensas"
       icon={Sparkles}
     >
+      <FeatureGuard planFeature="hasLoyaltyProgram" showUpgradePrompt={true}>
       <div className="space-y-4 sm:space-y-6">
         <div className="flex justify-end">
           <Button variant="outline" size="sm" onClick={() => setConfigOpen(true)}>
@@ -118,6 +120,7 @@ export default function Loyalty() {
 
       <LoyaltyConfigDialog open={configOpen} onOpenChange={setConfigOpen} />
       <LoyaltyDetailsModal open={!!metric} onOpenChange={(o) => !o && setMetric(null)} metric={metric} />
+      </FeatureGuard>
     </ResponsiveLayout>
   );
 }

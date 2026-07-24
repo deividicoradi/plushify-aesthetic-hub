@@ -18,6 +18,7 @@ interface PlanLimits {
   hasReportsBasic: boolean;
   hasReportsDetailed: boolean;
   hasExportReports: boolean;
+  hasLoyaltyProgram: boolean;
   hasCashFlow: boolean;
   hasRecurringPayments: boolean;
   hasMultiplePaymentMethods: boolean;
@@ -41,6 +42,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasReportsBasic: false,
     hasReportsDetailed: false,
     hasExportReports: false,
+    hasLoyaltyProgram: false,
     hasCashFlow: false,
     hasRecurringPayments: false,
     hasMultiplePaymentMethods: false,
@@ -62,6 +64,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasReportsBasic: true,
     hasReportsDetailed: false, // "detalhado"/exportação é exclusivo do Premium — Professional só tem básico
     hasExportReports: false,
+    hasLoyaltyProgram: false, // programa de fidelidade é diferencial exclusivo do Premium
     hasCashFlow: true,
     hasRecurringPayments: false,
     hasMultiplePaymentMethods: true,
@@ -83,6 +86,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasReportsBasic: true,
     hasReportsDetailed: true,
     hasExportReports: true,
+    hasLoyaltyProgram: true,
     hasCashFlow: true,
     hasRecurringPayments: true,
     hasMultiplePaymentMethods: true,
@@ -104,6 +108,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasReportsBasic: true,
     hasReportsDetailed: true,
     hasExportReports: true,
+    hasLoyaltyProgram: true,
     hasCashFlow: true,
     hasRecurringPayments: true,
     hasMultiplePaymentMethods: true,
