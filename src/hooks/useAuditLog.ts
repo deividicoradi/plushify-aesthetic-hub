@@ -147,10 +147,14 @@ export const useAuditLog = () => {
   };
 
   const logExport = async (tableName: string, recordCount: number, reason?: string) => {
+    // record_id é uuid NOT NULL — 'bulk_export' não é um uuid válido e o
+    // insert falhava silenciosamente (erro só ia pro console). Usa o próprio
+    // user_id como record_id, já que exportações não têm um registro único.
+    if (!user?.id) return;
     return createAuditLog({
       action: 'EXPORT',
       tableName,
-      recordId: 'bulk_export',
+      recordId: user.id,
       newData: { record_count: recordCount },
       reason
     });

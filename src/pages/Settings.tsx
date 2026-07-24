@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,46 +9,106 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 
 const Settings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+  const { profile, saveProfile } = useProfile();
+
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
-  
-  // Mock data - replace with actual user data
-  const [profileData, setProfileData] = useState({
-    name: 'João Silva',
-    phone: '(11) 99999-9999',
-    profession: 'Designer'
-  });
-  
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  const [nameInput, setNameInput] = useState('');
+  const [phoneInput, setPhoneInput] = useState('');
+  const [professionInput, setProfessionInput] = useState('');
+
+  useEffect(() => {
+    setNameInput(profile.name ?? '');
+    setPhoneInput(profile.phone ?? '');
+    setProfessionInput(profile.profession ?? '');
+  }, [profile]);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Perfil atualizado",
-      description: "Suas informações foram salvas com sucesso.",
-    });
-    setIsEditingProfile(false);
+    setSavingProfile(true);
+    try {
+      const ok = await saveProfile({ name: nameInput, phone: phoneInput, profession: professionInput });
+      if (ok) setIsEditingProfile(false);
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const handleCancelProfile = () => {
+    setNameInput(profile.name ?? '');
+    setPhoneInput(profile.phone ?? '');
+    setProfessionInput(profile.profession ?? '');
     setIsEditingProfile(false);
   };
 
-  const handleSavePassword = (e: React.FormEvent) => {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [lastPasswordChange, setLastPasswordChange] = useState<string | null>(null);
+
+  const resetPasswordForm = () => {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
+  const handleSavePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Senha alterada",
-      description: "Sua senha foi alterada com sucesso.",
-    });
-    setIsEditingPassword(false);
+
+    if (!user?.email) {
+      toast({ title: "Erro", description: "Usuário não autenticado.", variant: "destructive" });
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast({ title: "Senha muito curta", description: "A nova senha deve ter pelo menos 6 caracteres.", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Senhas não conferem", description: "A confirmação não é igual à nova senha.", variant: "destructive" });
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      // Não existe API do Supabase pra "verificar a senha atual" isoladamente;
+      // reautenticar com signInWithPassword é a forma correta de confirmar
+      // que quem está trocando a senha realmente sabe a senha atual.
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+      if (verifyError) {
+        toast({ title: "Senha atual incorreta", description: "Verifique a senha atual e tente novamente.", variant: "destructive" });
+        return;
+      }
+
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      if (updateError) {
+        toast({ title: "Erro ao alterar senha", description: updateError.message, variant: "destructive" });
+        return;
+      }
+
+      setLastPasswordChange(new Date().toISOString());
+      toast({ title: "Senha alterada", description: "Sua senha foi alterada com sucesso." });
+      resetPasswordForm();
+      setIsEditingPassword(false);
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   const handleCancelPassword = () => {
+    resetPasswordForm();
     setIsEditingPassword(false);
   };
 
@@ -144,10 +204,11 @@ const Settings = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="name" className="text-sm font-medium">Nome Completo</Label>
-                        <Input 
-                          id="name" 
+                        <Input
+                          id="name"
                           placeholder="Seu nome completo"
-                          defaultValue={profileData.name}
+                          value={nameInput}
+                          onChange={(e) => setNameInput(e.target.value)}
                           className="bg-background"
                         />
                       </div>
@@ -164,30 +225,32 @@ const Settings = () => {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="phone" className="text-sm font-medium">Telefone</Label>
-                        <Input 
-                          id="phone" 
+                        <Input
+                          id="phone"
                           placeholder="(00) 00000-0000"
-                          defaultValue={profileData.phone}
+                          value={phoneInput}
+                          onChange={(e) => setPhoneInput(e.target.value)}
                           className="bg-background"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="profession" className="text-sm font-medium">Profissão</Label>
-                        <Input 
-                          id="profession" 
+                        <Input
+                          id="profession"
                           placeholder="Sua profissão"
-                          defaultValue={profileData.profession}
+                          value={professionInput}
+                          onChange={(e) => setProfessionInput(e.target.value)}
                           className="bg-background"
                         />
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-                      <Button variant="outline" type="button" onClick={handleCancelProfile} className="gap-2 w-full sm:w-auto">
+                      <Button variant="outline" type="button" onClick={handleCancelProfile} disabled={savingProfile} className="gap-2 w-full sm:w-auto">
                         <X className="w-4 h-4" />
                         Cancelar
                       </Button>
-                      <Button type="submit" className="gap-2 bg-primary hover:bg-primary/90 w-full sm:w-auto">
-                        <Save className="w-4 h-4" />
+                      <Button type="submit" disabled={savingProfile} className="gap-2 bg-primary hover:bg-primary/90 w-full sm:w-auto">
+                        {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         Salvar alterações
                       </Button>
                     </div>
@@ -197,7 +260,7 @@ const Settings = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">Nome Completo</Label>
-                        <p className="text-base font-medium">{profileData.name}</p>
+                        <p className="text-base font-medium">{profile.name || 'Não informado'}</p>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">E-mail</Label>
@@ -205,11 +268,11 @@ const Settings = () => {
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">Telefone</Label>
-                        <p className="text-base font-medium">{profileData.phone || 'Não informado'}</p>
+                        <p className="text-base font-medium">{profile.phone || 'Não informado'}</p>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">Profissão</Label>
-                        <p className="text-base font-medium">{profileData.profession || 'Não informado'}</p>
+                        <p className="text-base font-medium">{profile.profession || 'Não informado'}</p>
                       </div>
                     </div>
                   </div>
@@ -280,23 +343,46 @@ const Settings = () => {
                     <form onSubmit={handleSavePassword} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="current-password">Senha Atual</Label>
-                        <Input id="current-password" type="password" />
+                        <Input
+                          id="current-password"
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          disabled={changingPassword}
+                          required
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="new-password">Nova Senha</Label>
-                        <Input id="new-password" type="password" />
+                        <Input
+                          id="new-password"
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          disabled={changingPassword}
+                          required
+                          minLength={6}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-                        <Input id="confirm-password" type="password" />
+                        <Input
+                          id="confirm-password"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          disabled={changingPassword}
+                          required
+                          minLength={6}
+                        />
                       </div>
                       <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-                        <Button variant="outline" type="button" onClick={handleCancelPassword} className="gap-2 w-full sm:w-auto">
+                        <Button variant="outline" type="button" onClick={handleCancelPassword} disabled={changingPassword} className="gap-2 w-full sm:w-auto">
                           <X className="w-4 h-4" />
                           Cancelar
                         </Button>
-                        <Button type="submit" className="gap-2 bg-primary hover:bg-primary/90 w-full sm:w-auto">
-                          <Save className="w-4 h-4" />
+                        <Button type="submit" disabled={changingPassword} className="gap-2 bg-primary hover:bg-primary/90 w-full sm:w-auto">
+                          {changingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                           Alterar Senha
                         </Button>
                       </div>
@@ -307,7 +393,9 @@ const Settings = () => {
                         Sua senha está protegida. Clique em "Alterar Senha" para atualizar.
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Última alteração: Nunca
+                        Última alteração: {lastPasswordChange
+                          ? new Date(lastPasswordChange).toLocaleString('pt-BR')
+                          : 'Nunca nesta sessão'}
                       </p>
                     </div>
                   )}

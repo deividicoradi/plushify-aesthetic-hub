@@ -22,9 +22,13 @@ export const useWorkingHoursEnhanced = () => {
   const fetchWorkingHours = async () => {
     try {
       setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
       const { data, error } = await supabase
         .from('working_hours')
         .select('*')
+        .eq('user_id', user.id)
         .order('day_of_week');
 
       if (error) throw error;

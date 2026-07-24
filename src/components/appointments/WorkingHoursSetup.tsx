@@ -146,7 +146,7 @@ export const WorkingHoursSetup = () => {
                 </p>
               </div>
               <Switch
-                checked={editedHours.some(h => h.auto_confirm_appointments)}
+                checked={editedHours.length > 0 && editedHours.every(h => h.auto_confirm_appointments)}
                 onCheckedChange={(checked) => {
                   const newEditedHours = editedHours.map(h => ({
                     ...h,
@@ -166,7 +166,7 @@ export const WorkingHoursSetup = () => {
                 </p>
               </div>
               <Switch
-                checked={editedHours.some(h => h.auto_complete_appointments)}
+                checked={editedHours.length > 0 && editedHours.every(h => h.auto_complete_appointments)}
                 onCheckedChange={(checked) => {
                   const newEditedHours = editedHours.map(h => ({
                     ...h,
