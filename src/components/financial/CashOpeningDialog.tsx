@@ -261,15 +261,6 @@ const CashOpeningDialog = ({ open, onOpenChange, onSuccess, opening }: CashOpeni
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="machine_id">Máquina/Terminal</Label>
-            <Input
-              id="machine_id"
-              value={formData.machine_id}
-              onChange={(e) => handleChange('machine_id', e.target.value)}
-              placeholder="ID da máquina ou terminal"
-            />
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="notes">Observações</Label>
