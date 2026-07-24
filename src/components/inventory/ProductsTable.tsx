@@ -15,8 +15,8 @@ import { Edit, Trash2, AlertTriangle } from "lucide-react";
 
 interface ProductsTableProps {
   products: Product[];
-  onEdit: (product: Product) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (product: Product) => void;
+  onDelete?: (id: string) => void;
   isLoading?: boolean;
 }
 
@@ -112,25 +112,31 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-1 border-t border-border/50">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEdit(product)}
-                  className="h-8 px-3"
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  <span className="text-xs">Editar</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onDelete(product.id)}
-                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              {(onEdit || onDelete) && (
+                <div className="flex justify-end gap-2 pt-1 border-t border-border/50">
+                  {onEdit && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEdit(product)}
+                      className="h-8 px-3"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      <span className="text-xs">Editar</span>
+                    </Button>
+                  )}
+                  {onDelete && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDelete(product.id)}
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
@@ -222,6 +228,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end space-x-1 sm:space-x-2">
+                    {onEdit && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -230,6 +237,8 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
                     >
                       <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
+                    )}
+                    {onDelete && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -238,6 +247,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
                     >
                       <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

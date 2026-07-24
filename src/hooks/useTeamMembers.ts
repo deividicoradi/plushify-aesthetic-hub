@@ -49,7 +49,7 @@ export const useTeamMembers = () => {
     queryFn: async (): Promise<TeamMember[]> => {
       const { data, error } = await supabase
         .from('team_members')
-        .select('*')
+        .select('id,user_id,name,email,phone,role,permissions,avatar_url,status,hire_date,salary,created_at,updated_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

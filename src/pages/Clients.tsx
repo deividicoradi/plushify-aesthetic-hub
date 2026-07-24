@@ -9,6 +9,7 @@ import ClientsSearchAndFilters from '@/components/clients/ClientsSearchAndFilter
 import ClientsStatsCards from '@/components/clients/ClientsStatsCards';
 import { useClientStats } from '@/hooks/useClientStats';
 import { LimitAlert } from '@/components/LimitAlert';
+import { useStaffMode } from '@/contexts/StaffModeContext';
 
 const Clients = () => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
@@ -18,6 +19,8 @@ const Clients = () => {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const { totalClients, activeClients, newThisMonth, loading, refetch } = useClientStats();
+  const { isStaffMode, can } = useStaffMode();
+  const canManageClients = !isStaffMode || can('manage_clients');
 
   const handleClientAdded = () => {
     refetch();
@@ -39,7 +42,7 @@ const Clients = () => {
           onSearchChange={setSearchTerm}
           filters={filters}
           onFiltersChange={setFilters}
-          onNewClick={() => setDrawerOpen(true)}
+          onNewClick={canManageClients ? () => setDrawerOpen(true) : undefined}
         />
 
         {/* Stats Cards */}

@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, Calculator, Receipt, TrendingUp, FileText } from 'lucide-react';
+import { CreditCard, Calculator, Receipt, TrendingUp, FileText, Lock } from 'lucide-react';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { FeatureGuard } from '@/components/FeatureGuard';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useStaffMode } from '@/contexts/StaffModeContext';
 import PaymentsTab from '@/components/financial/PaymentsTab';
 import CashClosureTab from '@/components/financial/CashClosureTab';
 import InstallmentsTab from '@/components/financial/InstallmentsTab';
@@ -13,6 +15,20 @@ import { CashStatusProvider } from '@/components/financial/CashStatusProvider';
 
 const Financial = () => {
   const [activeTab, setActiveTab] = useState('cash-closure');
+  const { isStaffMode, can } = useStaffMode();
+
+  if (isStaffMode && !can('view_financial')) {
+    return (
+      <ResponsiveLayout title="Financeiro" icon={CreditCard}>
+        <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-900/20">
+          <Lock className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-800 dark:text-amber-200">
+            O cargo deste funcionário não tem acesso ao módulo Financeiro no Modo Funcionário.
+          </AlertDescription>
+        </Alert>
+      </ResponsiveLayout>
+    );
+  }
 
   return (
     <CashStatusProvider>
@@ -21,7 +37,7 @@ const Financial = () => {
         subtitle="Gerencie pagamentos, fechamento de caixa, parcelamentos e relatórios"
         icon={CreditCard}
       >
-        <FeatureGuard 
+        <FeatureGuard
           planFeature="hasFinancialManagement"
           showUpgradePrompt={true}
         >

@@ -10,6 +10,7 @@ import { LimitAlert } from '@/components/LimitAlert';
 import { StatsCards } from '@/components/inventory/StatsCards';
 import { ProductsTable } from '@/components/inventory/ProductsTable';
 import { ProductForm } from '@/components/inventory/ProductForm';
+import { useStaffMode } from '@/contexts/StaffModeContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +27,8 @@ const Inventory = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const { isStaffMode, can } = useStaffMode();
+  const canManageInventory = !isStaffMode || can('manage_inventory');
 
   const {
     products,
@@ -102,18 +105,20 @@ const Inventory = () => {
           />
         </div>
 
-        <Button onClick={handleCreateProduct} className="gap-2 w-full sm:w-auto h-11 sm:h-10 shrink-0">
-          <Plus className="w-4 h-4" />
-          <span>Novo Produto</span>
-        </Button>
+        {canManageInventory && (
+          <Button onClick={handleCreateProduct} className="gap-2 w-full sm:w-auto h-11 sm:h-10 shrink-0">
+            <Plus className="w-4 h-4" />
+            <span>Novo Produto</span>
+          </Button>
+        )}
       </div>
       
       <StatsCards products={products} />
       
       <ProductsTable
         products={filteredProducts}
-        onEdit={handleEditProduct}
-        onDelete={handleDeleteProduct}
+        onEdit={canManageInventory ? handleEditProduct : undefined}
+        onDelete={canManageInventory ? handleDeleteProduct : undefined}
         isLoading={isLoading}
       />
 

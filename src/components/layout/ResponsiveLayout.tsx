@@ -6,6 +6,7 @@ import { useResponsive } from '@/hooks/useResponsive';
 import DashboardSidebar from './DashboardSidebar';
 import { MobileSidebar } from './MobileSidebar';
 import { GlobalHeader } from './GlobalHeader';
+import { StaffModeBanner } from '@/components/team/StaffModeBanner';
 
 interface ResponsiveLayoutProps {
   children: React.ReactNode;
@@ -89,6 +90,8 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
             </div>
           </div>
         </header>
+
+        <StaffModeBanner />
 
         {/* Main Content */}
         <main className="flex-1 p-4 sm:p-6 space-y-6 overflow-x-hidden">

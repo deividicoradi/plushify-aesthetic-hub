@@ -11,12 +11,15 @@ import { WorkingHoursSetup } from '@/components/appointments/WorkingHoursSetup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LimitAlert } from '@/components/LimitAlert';
 import { useAppointments } from '@/hooks/useAppointments';
+import { useStaffMode } from '@/contexts/StaffModeContext';
 
 const Appointments = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<AppointmentFilters>({});
   const { appointments } = useAppointments();
+  const { isStaffMode, can } = useStaffMode();
+  const canManageAppointments = !isStaffMode || can('manage_appointments');
 
   return (
     <>
@@ -57,21 +60,23 @@ const Appointments = () => {
                     onClearFilters={() => setFilters({})}
                   />
                 </div>
-                <Button 
-                  onClick={() => setIsCreateDialogOpen(true)} 
-                  className="gap-2 touch-target"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">Novo</span>
-                  <span className="sm:hidden">Novo</span>
-                </Button>
+                {canManageAppointments && (
+                  <Button
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    className="gap-2 touch-target"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span className="hidden sm:inline">Novo</span>
+                    <span className="sm:hidden">Novo</span>
+                  </Button>
+                )}
               </div>
             </div>
             
-            <AppointmentsList 
-              searchQuery={searchQuery} 
+            <AppointmentsList
+              searchQuery={searchQuery}
               filters={filters}
-              onCreateNew={() => setIsCreateDialogOpen(true)}
+              onCreateNew={canManageAppointments ? () => setIsCreateDialogOpen(true) : undefined}
               onClearFilters={() => setFilters({})}
             />
           </TabsContent>

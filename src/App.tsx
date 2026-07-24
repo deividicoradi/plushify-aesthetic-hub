@@ -24,6 +24,7 @@ import Status from "./pages/Status";
 import Updates from "./pages/Updates";
 import PublicBooking from "./pages/PublicBooking";
 import { AuthProvider } from "./contexts/AuthContext";
+import { StaffModeProvider } from "./contexts/StaffModeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
 import { queryClient } from "@/lib/queryClient";
@@ -231,6 +232,7 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AuthProvider>
+            <StaffModeProvider>
             <SecurityProvider>
               <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                 <TooltipProvider>
@@ -246,6 +248,7 @@ const App = () => {
                 </TooltipProvider>
               </ThemeProvider>
             </SecurityProvider>
+            </StaffModeProvider>
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
