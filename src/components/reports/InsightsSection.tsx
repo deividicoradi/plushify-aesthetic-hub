@@ -104,15 +104,19 @@ export const InsightsSection = ({ metrics, loading = false }: InsightsSectionPro
 
   const allInsights = [...processedSavedInsights, ...realTimeInsights];
 
-  // Insight sobre meta de receita
-  const projectedRevenue = metrics.totalRevenue * (1 + Math.max(metrics.revenueGrowth, 0) / 100);
-  allInsights.push({
-    icon: Target,
-    title: '🎯 Projeção Estratégica',
-    message: `Baseado no crescimento atual, você pode alcançar R$ ${projectedRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} no próximo mês. Mantenha o foco nas estratégias que estão funcionando.`,
-    type: 'info',
-    priority: 'medium'
-  });
+  // Insight sobre meta de receita — projeta a partir da receita DESTE mês,
+  // não do total histórico acumulado (senão a projeção infla sem parar
+  // conforme o negócio acumula mais meses de uso).
+  if (metrics.currentMonthRevenue > 0) {
+    const projectedRevenue = metrics.currentMonthRevenue * (1 + Math.max(metrics.revenueGrowth, 0) / 100);
+    allInsights.push({
+      icon: Target,
+      title: '🎯 Projeção Estratégica',
+      message: `Baseado no crescimento atual, você pode alcançar R$ ${projectedRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} no próximo mês. Mantenha o foco nas estratégias que estão funcionando.`,
+      type: 'info',
+      priority: 'medium'
+    });
+  }
 
   // Insight motivacional
   allInsights.push({

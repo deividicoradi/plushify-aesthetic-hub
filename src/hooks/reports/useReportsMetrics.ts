@@ -7,6 +7,7 @@ import { getDateRange, handleAsyncError } from '@/utils/common';
 export interface ReportsMetrics {
   totalClients: number;
   totalRevenue: number;
+  currentMonthRevenue: number;
   totalAppointments: number;
   totalProducts: number;
   lowStockProducts: number;
@@ -113,6 +114,7 @@ export const useReportsMetrics = () => {
       return {
         totalClients,
         totalRevenue,
+        currentMonthRevenue: currentRevenue,
         totalAppointments,
         totalProducts,
         lowStockProducts,
