@@ -23,6 +23,7 @@ interface PlanLimits {
   hasCashFlow: boolean;
   hasRecurringPayments: boolean;
   hasMultiplePaymentMethods: boolean;
+  hasCommissions: boolean;
 }
 
 const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
@@ -48,6 +49,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasCashFlow: false,
     hasRecurringPayments: false,
     hasMultiplePaymentMethods: false,
+    hasCommissions: false,
   },
   professional: {
     clients: -1, // unlimited
@@ -71,6 +73,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasCashFlow: true,
     hasRecurringPayments: false,
     hasMultiplePaymentMethods: true,
+    hasCommissions: false, // comissão por profissional é diferencial exclusivo do Premium
   },
   premium: {
     clients: -1, // unlimited
@@ -94,6 +97,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasCashFlow: true,
     hasRecurringPayments: true,
     hasMultiplePaymentMethods: true,
+    hasCommissions: true,
   },
   enterprise: {
     clients: -1, // unlimited
@@ -117,6 +121,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasCashFlow: true,
     hasRecurringPayments: true,
     hasMultiplePaymentMethods: true,
+    hasCommissions: true,
   },
 };
 

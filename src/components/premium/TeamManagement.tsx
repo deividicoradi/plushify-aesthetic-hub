@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
-import { Users, UserPlus, Shield, Search } from 'lucide-react';
+import { Users, UserPlus, Shield, Search, Crown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useTeamMembers, TeamMember } from '@/hooks/useTeamMembers';
 import { useTeamLimits } from '@/hooks/useTeamLimits';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { TeamMemberCard } from '@/components/team/TeamMemberCard';
 import { TeamMemberForm } from '@/components/team/TeamMemberForm';
 import { UserLimitDisplay } from '@/components/team/UserLimitDisplay';
@@ -15,9 +17,19 @@ import { CommissionsPanel, StaffCommissionsPanel } from '@/components/team/Commi
 import { useStaffMode } from '@/contexts/StaffModeContext';
 import { useToast } from '@/hooks/use-toast';
 
+const CommissionsUpgradePrompt = () => (
+  <Alert className="border-plush-200 bg-plush-50 dark:bg-plush-950/30">
+    <Crown className="h-4 w-4 text-plush-600" />
+    <AlertDescription className="text-plush-800 dark:text-plush-200">
+      Comissão por profissional é exclusiva do plano Premium. Faça upgrade para pagar comissão automática por atendimento concluído.
+    </AlertDescription>
+  </Alert>
+);
+
 export const TeamManagement = () => {
   const { teamMembers, loading, createTeamMember, updateTeamMember, deleteTeamMember } = useTeamMembers();
   const { checkUserLimit, getUserLimitInfo } = useTeamLimits();
+  const { hasFeature } = usePlanLimits();
   const { isStaffMode } = useStaffMode();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
@@ -86,7 +98,7 @@ export const TeamManagement = () => {
   };
 
   if (isStaffMode) {
-    return <StaffCommissionsPanel />;
+    return hasFeature('hasCommissions') ? <StaffCommissionsPanel /> : <CommissionsUpgradePrompt />;
   }
 
   if (loading) {
@@ -110,7 +122,11 @@ export const TeamManagement = () => {
       </TabsList>
 
       <TabsContent value="commissions">
-        <CommissionsPanel memberNames={memberNames} canManage />
+        {hasFeature('hasCommissions') ? (
+          <CommissionsPanel memberNames={memberNames} canManage />
+        ) : (
+          <CommissionsUpgradePrompt />
+        )}
       </TabsContent>
 
       <TabsContent value="team" className="space-y-4 sm:space-y-6">

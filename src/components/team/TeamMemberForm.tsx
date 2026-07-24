@@ -259,24 +259,43 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs sm:text-sm">Comissão (%)</Label>
-              <input
-                id="team-member-commission-percent"
-                name="commission_percent"
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                value={watch('commission_percent')?.toString() || ''}
-                onChange={(e) => setValue('commission_percent', Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
-                placeholder="0.00"
-                className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-              <p className="text-[11px] sm:text-xs text-muted-foreground">
-                % aplicado sobre o valor de cada atendimento concluído por este profissional.
-              </p>
-            </div>
+            {hasFeature('hasCommissions') ? (
+              <div className="space-y-2">
+                <Label className="text-xs sm:text-sm">Comissão (%)</Label>
+                <input
+                  id="team-member-commission-percent"
+                  name="commission_percent"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  value={watch('commission_percent')?.toString() || ''}
+                  onChange={(e) => setValue('commission_percent', Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
+                  placeholder="0.00"
+                  className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <p className="text-[11px] sm:text-xs text-muted-foreground">
+                  % aplicado sobre o valor de cada atendimento concluído por este profissional.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-xs sm:text-sm flex items-center gap-1.5">
+                  Comissão (%)
+                  <span className="text-[10px] font-semibold uppercase tracking-wide bg-plush-100 text-plush-700 dark:bg-plush-900 dark:text-plush-300 px-1.5 py-0.5 rounded">
+                    Premium
+                  </span>
+                </Label>
+                <input
+                  disabled
+                  placeholder="Disponível no plano Premium"
+                  className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-xs sm:text-sm text-muted-foreground cursor-not-allowed"
+                />
+                <p className="text-[11px] sm:text-xs text-muted-foreground">
+                  Faça upgrade para o plano Premium para pagar comissão por atendimento a este profissional.
+                </p>
+              </div>
+            )}
 
             <FormField
               label="Especialidades"
