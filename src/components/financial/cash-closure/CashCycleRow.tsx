@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Calculator, Wallet, CreditCard, Smartphone, Banknote, MoreVertical, Edit, Trash2,
-  StickyNote, ChevronDown, ChevronUp, DoorOpen, Lock, TrendingUp, TrendingDown, AlertTriangle,
+  StickyNote, ChevronDown, ChevronUp, DoorOpen, Lock, TrendingUp, TrendingDown, AlertTriangle, FileText,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { CashCycleDetailsModal } from './CashCycleDetailsModal';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
@@ -73,6 +74,7 @@ const CashCycleRow: React.FC<CashCycleRowProps> = ({
   date, opening, closure, onEditOpening, onDeleteOpening, onEditClosure, onDeleteClosure,
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const isClosed = closure?.status === 'fechado';
   const difference = Number(closure?.difference) || 0;
@@ -112,6 +114,18 @@ const CashCycleRow: React.FC<CashCycleRowProps> = ({
       {/* Detalhe completo — só quando expandido */}
       {expanded && (
         <CardContent className="p-4 pt-0 space-y-4 border-t border-border/50">
+          <div className="pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => setDetailsOpen(true)}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              Ver detalhes do dia
+            </Button>
+          </div>
+
           {opening && (
             <div className="space-y-2 pt-4">
               <div className="flex items-center justify-between">
@@ -200,6 +214,8 @@ const CashCycleRow: React.FC<CashCycleRowProps> = ({
           )}
         </CardContent>
       )}
+
+      <CashCycleDetailsModal open={detailsOpen} onOpenChange={setDetailsOpen} date={date} />
     </Card>
   );
 };
