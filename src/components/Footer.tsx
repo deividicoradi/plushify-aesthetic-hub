@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/ui/Logo';
 import FooterNewsletterForm from './FooterNewsletterForm';
@@ -23,20 +23,9 @@ const Footer = () => {
               <Logo size="lg" />
             </Link>
             <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed">
-              Plataforma completa para gestão de salões de beleza e clínicas de estética. 
+              Plataforma completa para gestão de salões de beleza e clínicas de estética.
               Modernize seu negócio com tecnologia e segurança.
             </p>
-            <div className="flex space-x-4">
-              <a href="https://instagram.com/plushify" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="https://facebook.com/plushify" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="https://youtube.com/plushify" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Youtube className="w-5 h-5" />
-              </a>
-            </div>
           </div>
           
           <div>
@@ -79,9 +68,6 @@ const Footer = () => {
               <p className="text-muted-foreground text-sm">
                 &copy; {currentYear} Plushify Tecnologia Ltda. Todos os direitos reservados.
               </p>
-              <p className="text-muted-foreground text-xs mt-1">
-                CNPJ: 00.000.000/0001-00 • Responsável técnico: Equipe Plushify
-              </p>
             </div>
             
             <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
@@ -103,8 +89,8 @@ const Footer = () => {
               </p>
               <p>
                 Para exercer seus direitos sobre dados pessoais, entre em contato: 
-                <a href="mailto:suporte@plushify.com" className="text-primary hover:underline ml-1">
-                  suporte@plushify.com
+                <a href="mailto:suporte@plushify.com.br" className="text-primary hover:underline ml-1">
+                  suporte@plushify.com.br
                 </a>
               </p>
             </div>
