@@ -62,27 +62,31 @@ export const useWorkingHoursEnhanced = () => {
 
   const saveAllWorkingHours = async (updatedHours: WorkingHoursEnhanced[]) => {
     try {
-      const promises = updatedHours.map(hour => 
-        supabase
-          .from('working_hours')
-          .update({
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // upsert (não update): dias configurados pela primeira vez ainda não
+      // têm linha em working_hours, então não têm id para dar match num update.
+      const { data, error } = await supabase
+        .from('working_hours')
+        .upsert(
+          updatedHours.map(hour => ({
+            id: hour.id,
+            user_id: user.id,
+            day_of_week: hour.day_of_week,
             is_active: hour.is_active,
             start_time: hour.start_time,
             end_time: hour.end_time,
             auto_confirm_appointments: hour.auto_confirm_appointments,
             auto_complete_appointments: hour.auto_complete_appointments
-          })
-          .eq('id', hour.id)
-      );
+          })),
+          { onConflict: 'user_id,day_of_week' }
+        )
+        .select();
 
-      const results = await Promise.all(promises);
-      const errors = results.filter(result => result.error);
-      
-      if (errors.length > 0) {
-        throw new Error(`Erro ao salvar ${errors.length} configurações`);
-      }
+      if (error) throw error;
 
-      setWorkingHours(updatedHours);
+      setWorkingHours(data || updatedHours);
       toast({
         title: "Sucesso",
         description: "Configurações de horário salvas com sucesso"
