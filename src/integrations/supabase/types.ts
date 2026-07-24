@@ -171,8 +171,10 @@ export type Database = {
           created_at: string
           difference: number
           id: string
+          machine_id: string | null
           notes: string | null
           opening_balance: number
+          operator_id: string | null
           other_amount: number
           pix_amount: number
           status: string
@@ -190,8 +192,10 @@ export type Database = {
           created_at?: string
           difference?: number
           id?: string
+          machine_id?: string | null
           notes?: string | null
           opening_balance?: number
+          operator_id?: string | null
           other_amount?: number
           pix_amount?: number
           status?: string
@@ -209,8 +213,10 @@ export type Database = {
           created_at?: string
           difference?: number
           id?: string
+          machine_id?: string | null
           notes?: string | null
           opening_balance?: number
+          operator_id?: string | null
           other_amount?: number
           pix_amount?: number
           status?: string
@@ -227,10 +233,12 @@ export type Database = {
           cash_amount: number
           created_at: string
           id: string
+          machine_id: string | null
           notes: string | null
           opened_at: string
           opening_balance: number
           opening_date: string
+          operator_id: string | null
           other_amount: number
           pix_amount: number
           status: string
@@ -242,10 +250,12 @@ export type Database = {
           cash_amount?: number
           created_at?: string
           id?: string
+          machine_id?: string | null
           notes?: string | null
           opened_at?: string
           opening_balance?: number
           opening_date: string
+          operator_id?: string | null
           other_amount?: number
           pix_amount?: number
           status?: string
@@ -257,10 +267,12 @@ export type Database = {
           cash_amount?: number
           created_at?: string
           id?: string
+          machine_id?: string | null
           notes?: string | null
           opened_at?: string
           opening_balance?: number
           opening_date?: string
+          operator_id?: string | null
           other_amount?: number
           pix_amount?: number
           status?: string
@@ -817,6 +829,7 @@ export type Database = {
       }
       notes: {
         Row: {
+          client_id: string | null
           content: string | null
           created_at: string
           id: string
@@ -825,6 +838,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          client_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
@@ -833,6 +847,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          client_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
@@ -840,7 +855,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -1066,6 +1089,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+          phone: string | null
+          profession: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          name?: string | null
+          phone?: string | null
+          profession?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          phone?: string | null
+          profession?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       service_professionals: {
         Row: {
           created_at: string
@@ -1154,6 +1204,7 @@ export type Database = {
           name: string
           permissions: Json | null
           phone: string | null
+          pin_hash: string | null
           role: string
           salary: number | null
           status: string
@@ -1169,6 +1220,7 @@ export type Database = {
           name: string
           permissions?: Json | null
           phone?: string | null
+          pin_hash?: string | null
           role: string
           salary?: number | null
           status?: string
@@ -1184,6 +1236,7 @@ export type Database = {
           name?: string
           permissions?: Json | null
           phone?: string | null
+          pin_hash?: string | null
           role?: string
           salary?: number | null
           status?: string
@@ -1310,6 +1363,7 @@ export type Database = {
         Args: { p_day_of_week: number; p_user_id: string }
         Returns: boolean
       }
+      clear_team_member_pin: { Args: { p_member_id: string }; Returns: boolean }
       create_public_booking: {
         Args: {
           p_appointment_date: string
@@ -1434,9 +1488,17 @@ export type Database = {
         Returns: Database["public"]["Enums"]["plan_type"]
       }
       has_feature_access: { Args: { feature_name: string }; Returns: boolean }
+      redeem_loyalty_reward: {
+        Args: { p_client_id: string; p_reward_id: string }
+        Returns: string
+      }
       sanitize_input: { Args: { input_text: string }; Returns: string }
       set_authorization_password: {
         Args: { p_password: string }
+        Returns: boolean
+      }
+      set_team_member_pin: {
+        Args: { p_member_id: string; p_pin: string }
         Returns: boolean
       }
       slugify: { Args: { p_text: string }; Returns: string }
@@ -1458,6 +1520,10 @@ export type Database = {
       validate_phone: { Args: { phone: string }; Returns: boolean }
       verify_authorization_password: {
         Args: { p_password: string }
+        Returns: boolean
+      }
+      verify_team_member_pin: {
+        Args: { p_member_id: string; p_pin: string }
         Returns: boolean
       }
     }
