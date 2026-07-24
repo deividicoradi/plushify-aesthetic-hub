@@ -33,7 +33,7 @@ export const ChartsSection = ({ monthlyData, revenueByCategory, loading }: Chart
               <div className="h-80 flex items-center justify-center border border-dashed rounded-lg">
                 <div className="text-center">
                   <p className="text-muted-foreground">Gráficos avançados</p>
-                  <p className="text-sm text-muted-foreground">Disponível no plano Enterprise</p>
+                  <p className="text-sm text-muted-foreground">Disponível no plano Premium</p>
                 </div>
               </div>
             }

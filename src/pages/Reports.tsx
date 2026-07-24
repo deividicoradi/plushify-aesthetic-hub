@@ -30,8 +30,8 @@ const Reports = () => {
       subtitle="Análise detalhada do seu negócio"
       icon={BarChart3}
     >
-          <FeatureGuard 
-            planFeature="hasReportsDetailed"
+          <FeatureGuard
+            planFeature="hasReportsBasic"
             showUpgradePrompt={true}
           >
             <div className="space-y-5 sm:space-y-6 lg:space-y-8">

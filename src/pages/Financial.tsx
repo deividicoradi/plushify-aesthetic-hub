@@ -55,7 +55,7 @@ const Financial = () => {
                   <span>Despesas</span>
                 </TabsTrigger>
                 <FeatureGuard
-                  planFeature="hasReportsDetailed"
+                  planFeature="hasReportsBasic"
                   fallback={
                     <TabsTrigger value="reports" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 opacity-50 cursor-not-allowed text-[11px] sm:text-sm py-2" disabled>
                       <FileText className="w-4 h-4 shrink-0" />
@@ -94,7 +94,7 @@ const Financial = () => {
 
             <TabsContent value="reports" className="space-y-4 sm:space-y-6">
               <FeatureGuard 
-                planFeature="hasReportsDetailed"
+                planFeature="hasReportsBasic"
                 showUpgradePrompt={true}
               >
                 <ReportsTab />
