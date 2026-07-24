@@ -7,6 +7,7 @@ export const STAFF_PERMISSIONS = [
   'manage_inventory',
   'view_financial',
   'view_reports',
+  'view_commissions',
 ] as const;
 
 export type StaffPermissionKey = typeof STAFF_PERMISSIONS[number];
@@ -17,6 +18,7 @@ export const STAFF_PERMISSION_LABELS: Record<StaffPermissionKey, string> = {
   manage_inventory: 'Criar/editar produtos do estoque',
   view_financial: 'Ver módulo Financeiro',
   view_reports: 'Ver Relatórios',
+  view_commissions: 'Ver minhas comissões',
 };
 
 export interface StaffMember {

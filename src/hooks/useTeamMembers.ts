@@ -16,6 +16,9 @@ export interface TeamMember {
   status: string;
   hire_date?: string;
   salary?: number;
+  specialties?: string[];
+  active?: boolean;
+  commission_percent?: number;
   created_at: string;
   updated_at: string;
 }
@@ -30,6 +33,9 @@ export interface TeamMemberInput {
   status?: 'active' | 'inactive';
   hire_date?: string;
   salary?: number;
+  specialties?: string[];
+  active?: boolean;
+  commission_percent?: number;
 }
 
 // React Query (não state local): useTeamLimits() chama este hook de novo
@@ -49,7 +55,7 @@ export const useTeamMembers = () => {
     queryFn: async (): Promise<TeamMember[]> => {
       const { data, error } = await supabase
         .from('team_members')
-        .select('id,user_id,name,email,phone,role,permissions,avatar_url,status,hire_date,salary,created_at,updated_at')
+        .select('id,user_id,name,email,phone,role,permissions,avatar_url,status,hire_date,salary,specialties,active,commission_percent,created_at,updated_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

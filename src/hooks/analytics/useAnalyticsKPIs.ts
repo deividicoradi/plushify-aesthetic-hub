@@ -91,7 +91,7 @@ export const useAnalyticsKPIs = (range: Range) => {
             .eq('user_id', user.id)
             .gte('appointment_date', fromDate)
             .lte('appointment_date', toDate),
-          supabase.from('professionals').select('id, name').eq('user_id', user.id),
+          supabase.from('team_members').select('id, name').eq('user_id', user.id),
         ]);
 
         // Client lookup for revenue rows

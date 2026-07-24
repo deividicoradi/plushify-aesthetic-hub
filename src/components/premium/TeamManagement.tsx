@@ -4,17 +4,21 @@ import { Users, UserPlus, Shield, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useTeamMembers, TeamMember } from '@/hooks/useTeamMembers';
 import { useTeamLimits } from '@/hooks/useTeamLimits';
 import { TeamMemberCard } from '@/components/team/TeamMemberCard';
 import { TeamMemberForm } from '@/components/team/TeamMemberForm';
 import { UserLimitDisplay } from '@/components/team/UserLimitDisplay';
 import { UserLimitModal } from '@/components/team/UserLimitModal';
+import { CommissionsPanel, StaffCommissionsPanel } from '@/components/team/CommissionsPanel';
+import { useStaffMode } from '@/contexts/StaffModeContext';
 import { useToast } from '@/hooks/use-toast';
 
 export const TeamManagement = () => {
   const { teamMembers, loading, createTeamMember, updateTeamMember, deleteTeamMember } = useTeamMembers();
   const { checkUserLimit, getUserLimitInfo } = useTeamLimits();
+  const { isStaffMode } = useStaffMode();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formLoading, setFormLoading] = useState(false);
@@ -81,6 +85,10 @@ export const TeamManagement = () => {
     }
   };
 
+  if (isStaffMode) {
+    return <StaffCommissionsPanel />;
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -92,8 +100,20 @@ export const TeamManagement = () => {
     );
   }
 
+  const memberNames = Object.fromEntries(teamMembers.map((m) => [m.id, m.name]));
+
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <Tabs defaultValue="team" className="space-y-4 sm:space-y-6">
+      <TabsList>
+        <TabsTrigger value="team">Equipe</TabsTrigger>
+        <TabsTrigger value="commissions">Comissões</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="commissions">
+        <CommissionsPanel memberNames={memberNames} canManage />
+      </TabsContent>
+
+      <TabsContent value="team" className="space-y-4 sm:space-y-6">
       {/* Display de limite de usuários */}
       <UserLimitDisplay variant="inline" />
       
@@ -167,6 +187,7 @@ export const TeamManagement = () => {
           )}
         </CardContent>
       </Card>
+      </TabsContent>
 
       <TeamMemberForm
         open={isFormOpen}
@@ -181,6 +202,6 @@ export const TeamManagement = () => {
         onOpenChange={setShowLimitModal}
         onCancel={() => setShowLimitModal(false)}
       />
-    </div>
+    </Tabs>
   );
 };

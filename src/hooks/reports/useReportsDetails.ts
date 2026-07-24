@@ -145,7 +145,7 @@ export const useReportsDetails = (metric: ReportsMetricKey | null) => {
               )
               .eq('user_id', user.id),
             supabase
-              .from('professionals')
+              .from('team_members')
               .select('id, name')
               .eq('user_id', user.id),
           ]);

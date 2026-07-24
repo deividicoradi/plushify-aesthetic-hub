@@ -59,6 +59,9 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
       status: (member?.status as 'active' | 'inactive') || 'active',
       hire_date: member?.hire_date || '',
       salary: member?.salary || 0,
+      commission_percent: member?.commission_percent || 0,
+      active: member?.active ?? true,
+      specialties: member?.specialties || [],
       permissions: (member?.permissions as Record<string, boolean>) || {},
     }
   });
@@ -79,6 +82,9 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
         status: (member.status as 'active' | 'inactive') || 'active',
         hire_date: member.hire_date || '',
         salary: member.salary || 0,
+        commission_percent: member.commission_percent || 0,
+        active: member.active ?? true,
+        specialties: member.specialties || [],
         permissions: (member.permissions as Record<string, boolean>) || {},
       });
     } else {
@@ -90,6 +96,9 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
         status: 'active',
         hire_date: '',
         salary: 0,
+        commission_percent: 0,
+        active: true,
+        specialties: [],
         permissions: {},
       });
     }
@@ -98,6 +107,7 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
   const selectedRole = watch('role');
   const selectedStatus = watch('status');
   const permissions = watch('permissions') || {};
+  const specialtiesText = (watch('specialties') || []).join(', ');
 
   const togglePermission = (key: StaffPermissionKey, checked: boolean) => {
     setValue('permissions', { ...permissions, [key]: checked });
@@ -247,6 +257,44 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
                 placeholder="0.00"
                 className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs sm:text-sm">Comissão (%)</Label>
+              <input
+                id="team-member-commission-percent"
+                name="commission_percent"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                value={watch('commission_percent')?.toString() || ''}
+                onChange={(e) => setValue('commission_percent', Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
+                placeholder="0.00"
+                className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <p className="text-[11px] sm:text-xs text-muted-foreground">
+                % aplicado sobre o valor de cada atendimento concluído por este profissional.
+              </p>
+            </div>
+
+            <FormField
+              label="Especialidades"
+              name="specialties"
+              value={specialtiesText}
+              onChange={(value) => setValue('specialties', value.split(',').map((s) => s.trim()).filter(Boolean))}
+              placeholder="Ex: Manicure, Depilação"
+            />
+
+            <div className="space-y-2">
+              <Label className="text-xs sm:text-sm">Disponível para agendamento</Label>
+              <label className="flex items-center gap-2 text-xs sm:text-sm h-9 sm:h-10">
+                <Checkbox
+                  checked={!!watch('active')}
+                  onCheckedChange={(checked) => setValue('active', checked === true)}
+                />
+                Aparece como opção de profissional ao criar um agendamento
+              </label>
             </div>
           </div>
 

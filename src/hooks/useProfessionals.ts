@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+// "Profissional" hoje é a mesma entidade de team_members (Gestão de Equipe) —
+// professionals foi unificada em team_members para permitir comissão por
+// profissional. Este hook mantém a interface pública antiga (Professional,
+// create/update/delete/getProfessionalsByService) para não quebrar os
+// componentes de agenda/serviços que já consomem ele.
 export interface Professional {
   id: string;
   user_id: string;
@@ -21,11 +26,10 @@ export const useProfessionals = () => {
   const fetchProfessionals = async () => {
     try {
       setIsLoading(true);
-      // Usar função RPC segura com auditoria automática
       const { data, error } = await supabase
-        .rpc('get_professionals_secure', {
-          p_mask_sensitive: false
-        });
+        .from('team_members')
+        .select('id,user_id,name,email,phone,specialties,active,created_at,updated_at')
+        .order('name', { ascending: true });
 
       if (error) throw error;
       setProfessionals(data || []);
@@ -47,9 +51,15 @@ export const useProfessionals = () => {
       if (!user) throw new Error('Usuário não autenticado');
 
       const { data, error } = await supabase
-        .from('professionals')
-        .insert([{ ...professionalData, user_id: user.id }])
-        .select()
+        .from('team_members')
+        .insert([{
+          ...professionalData,
+          role: 'especialista',
+          permissions: {},
+          status: professionalData.active ? 'active' : 'inactive',
+          user_id: user.id,
+        }])
+        .select('id,user_id,name,email,phone,specialties,active,created_at,updated_at')
         .single();
 
       if (error) throw error;
@@ -74,10 +84,10 @@ export const useProfessionals = () => {
   const updateProfessional = async (id: string, updates: Partial<Professional>) => {
     try {
       const { data, error } = await supabase
-        .from('professionals')
+        .from('team_members')
         .update(updates)
         .eq('id', id)
-        .select()
+        .select('id,user_id,name,email,phone,specialties,active,created_at,updated_at')
         .single();
 
       if (error) throw error;
@@ -102,8 +112,8 @@ export const useProfessionals = () => {
   const deleteProfessional = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('professionals')
-        .update({ active: false })
+        .from('team_members')
+        .update({ active: false, status: 'inactive' })
         .eq('id', id);
 
       if (error) throw error;
