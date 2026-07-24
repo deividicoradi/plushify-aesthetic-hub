@@ -7,8 +7,9 @@ import CashClosureDialog from './CashClosureDialog';
 import CashOpeningDialog from './CashOpeningDialog';
 import CashSearchAndFilters from './CashSearchAndFilters';
 import { useCashStatus } from './CashStatusProvider';
-import CashClosureCard from './cash-closure/CashClosureCard';
-import CashOpeningCard from './cash-closure/CashOpeningCard';
+import CashCycleRow from './cash-closure/CashCycleRow';
+
+const PAGE_SIZE = 10;
 
 const CashClosureTab = () => {
   const [isClosureDialogOpen, setIsClosureDialogOpen] = useState(false);
@@ -34,22 +35,28 @@ const CashClosureTab = () => {
     deleteOpening,
   } = useCashClosureData();
 
-  // Filter data based on search and filters
-  const filteredData = () => {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  React.useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchTerm, filters.dateFrom, filters.dateTo, filters.type]);
+
+  // Agrupa abertura + fechamento do mesmo dia num único "ciclo de caixa" —
+  // antes cada evento virava um card gigante separado, dobrando a altura
+  // da lista pra cada dia trabalhado.
+  const cycles = () => {
     let openingsData = cashOpenings || [];
     let closuresData = cashClosures || [];
 
-    // Apply search filter
     if (searchTerm) {
-      openingsData = openingsData.filter(item => 
+      openingsData = openingsData.filter(item =>
         item.notes?.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      closuresData = closuresData.filter(item => 
+      closuresData = closuresData.filter(item =>
         item.notes?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Apply date filters
     if (filters.dateFrom) {
       openingsData = openingsData.filter(item => item.opening_date >= filters.dateFrom);
       closuresData = closuresData.filter(item => item.closure_date >= filters.dateFrom);
@@ -59,21 +66,24 @@ const CashClosureTab = () => {
       closuresData = closuresData.filter(item => item.closure_date <= filters.dateTo);
     }
 
-    // Apply type filter
-    let combinedData = [];
-    if (filters.type === 'all' || filters.type === 'opening') {
-      combinedData.push(...openingsData.map(item => ({ ...item, type: 'opening' })));
+    const byDate = new Map<string, { date: string; opening?: any; closure?: any }>();
+    for (const opening of openingsData) {
+      byDate.set(opening.opening_date, { date: opening.opening_date, opening });
     }
-    if (filters.type === 'all' || filters.type === 'closure') {
-      combinedData.push(...closuresData.map(item => ({ ...item, type: 'closure' })));
+    for (const closure of closuresData) {
+      const existing = byDate.get(closure.closure_date);
+      if (existing) {
+        existing.closure = closure;
+      } else {
+        byDate.set(closure.closure_date, { date: closure.closure_date, closure });
+      }
     }
 
-    // Sort by date
-    return combinedData.sort((a, b) => {
-      const dateA = parseISO(a.opening_date || a.closure_date);
-      const dateB = parseISO(b.opening_date || b.closure_date);
-      return dateB.getTime() - dateA.getTime();
-    });
+    let result = Array.from(byDate.values());
+    if (filters.type === 'opening') result = result.filter(c => c.opening);
+    if (filters.type === 'closure') result = result.filter(c => c.closure);
+
+    return result.sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
   };
 
   const handleCreateClosure = () => {
@@ -123,38 +133,39 @@ const CashClosureTab = () => {
       {loadingClosures || loadingOpenings ? (
         <div className="text-center py-8">Carregando dados...</div>
       ) : (
-        <div className="space-y-4">
-          {filteredData().map((item) => {
-            if (item.type === 'opening') {
-              return (
-                <CashOpeningCard
-                  key={`opening-${item.id}`}
-                  opening={item}
-                  onEdit={(opening) => {
-                    setEditingOpening(opening);
-                    setIsOpeningDialogOpen(true);
-                  }}
-                  onDelete={deleteOpening}
-                />
-              );
-            } else {
-              return (
-                <CashClosureCard
-                  key={`closure-${item.id}`}
-                  closure={item}
-                  onEdit={(closure) => {
-                    setEditingClosure(closure);
-                    setIsClosureDialogOpen(true);
-                  }}
-                  onDelete={deleteClosure}
-                />
-              );
-            }
-          })}
-        </div>
+        <>
+          <div className="space-y-3">
+            {cycles().slice(0, visibleCount).map((cycle) => (
+              <CashCycleRow
+                key={cycle.date}
+                date={cycle.date}
+                opening={cycle.opening}
+                closure={cycle.closure}
+                onEditOpening={(opening) => {
+                  setEditingOpening(opening);
+                  setIsOpeningDialogOpen(true);
+                }}
+                onDeleteOpening={deleteOpening}
+                onEditClosure={(closure) => {
+                  setEditingClosure(closure);
+                  setIsClosureDialogOpen(true);
+                }}
+                onDeleteClosure={deleteClosure}
+              />
+            ))}
+          </div>
+
+          {cycles().length > visibleCount && (
+            <div className="flex justify-center pt-2">
+              <Button variant="outline" onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}>
+                Carregar mais
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
-      {filteredData().length === 0 && !loadingClosures && !loadingOpenings && (
+      {cycles().length === 0 && !loadingClosures && !loadingOpenings && (
         <div className="text-center py-12 text-gray-500">
           <p>Nenhum registro de caixa encontrado.</p>
           <p className="text-sm">Comece abrindo um caixa.</p>
