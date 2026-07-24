@@ -83,14 +83,6 @@ export const PlanCardFooter: React.FC<PlanCardFooterProps> = ({
             </div>
           )}
         </Button>
-        
-        {plan.mostComplete && (
-          <div className="text-center">
-            <p className="text-xs text-primary font-medium animate-pulse">
-              Escolha de 89% dos nossos clientes de sucesso!
-            </p>
-          </div>
-        )}
       </div>
     </CardFooter>
   );

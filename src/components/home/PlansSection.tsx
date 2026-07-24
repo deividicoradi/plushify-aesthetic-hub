@@ -25,8 +25,8 @@ export const PlansSection = () => {
   const plans = sourcePlans.map(plan => ({
     ...plan,
     buttonText: plan.id === 'trial' ? 'Começar Grátis' : 
-                plan.id === 'professional' ? 'Escolher Professional' : 
-                'Escolher Enterprise',
+                plan.id === 'professional' ? 'Escolher Professional' :
+                'Escolher Premium',
     popular: plan.mostComplete || false
   }));
 

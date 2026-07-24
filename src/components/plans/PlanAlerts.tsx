@@ -55,7 +55,7 @@ export const PlanAlerts: React.FC<PlanAlertsProps> = ({
               </div>
               <div className="min-w-0">
                 <h3 className="text-base sm:text-lg font-semibold text-green-800 dark:text-green-200">
-                  Plano {currentPlan === 'professional' ? 'Professional' : 'Enterprise'} Ativo
+                  Plano {currentPlan === 'professional' ? 'Professional' : 'Premium'} Ativo
                 </h3>
                 <p className="text-sm sm:text-base text-green-700 dark:text-green-300">
                   Você está aproveitando todo o poder da nossa plataforma!

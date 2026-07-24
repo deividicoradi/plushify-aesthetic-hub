@@ -1,6 +1,5 @@
 
 import { useSubscription, PlanType } from './useSubscription';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface PlanLimits {
   clients: number;
@@ -53,7 +52,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasFinancialManagement: true,
     hasAdvancedReports: false,
     hasAdvancedAnalytics: false,
-    hasTeamManagement: true, // Habilitar gestão de equipe para Professional
+    hasTeamManagement: false, // has_feature_access('team_management') no banco só libera Premium
     hasAutomaticBackup: false,
     hasPrioritySupport: true,
     has24_7Support: false,
@@ -106,31 +105,20 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
   },
 };
 
-// E-mail do usuário de teste com acesso completo
-const TEST_USER_EMAIL = 'deividi@teste.com';
-
 export const usePlanLimits = () => {
   const { currentPlan } = useSubscription();
-  const { user } = useAuth();
-  
-  // Verificar se é o usuário de teste
-  const isTestUser = user?.email === TEST_USER_EMAIL;
-  
-  // Se for usuário de teste, usar limites do plano premium
-  const limits = isTestUser ? PLAN_LIMITS.premium : PLAN_LIMITS[currentPlan];
-  
+
+  const limits = PLAN_LIMITS[currentPlan];
+
   const isLimited = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services' | 'activeUsers'>) => {
-    if (isTestUser) return false; // Usuário de teste não tem limites
     return limits[type] !== -1;
   };
-  
+
   const getLimit = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services' | 'activeUsers'>) => {
-    if (isTestUser) return -1; // Usuário de teste tem limite infinito
     return limits[type];
   };
-  
+
   const hasReachedLimit = (type: keyof Pick<PlanLimits, 'clients' | 'appointments' | 'products' | 'services' | 'activeUsers'>, currentCount: number) => {
-    if (isTestUser) return false; // Usuário de teste nunca atinge limite
     const limit = limits[type];
     return limit !== -1 && currentCount >= limit;
   };
@@ -145,18 +133,16 @@ export const usePlanLimits = () => {
   };
 
   const hasFeature = (feature: keyof Omit<PlanLimits, 'clients' | 'appointments' | 'products' | 'services'>) => {
-    if (isTestUser) return true; // Usuário de teste tem todas as funcionalidades
     return limits[feature];
   };
 
   return {
     limits,
-    currentPlan: isTestUser ? 'premium' : currentPlan, // Mostrar como premium para usuário de teste
+    currentPlan,
     isLimited,
     getLimit,
     hasReachedLimit,
     hasFeature,
     getUserLimitsInfo,
-    isTestUser, // Expor se é usuário de teste
   };
 };

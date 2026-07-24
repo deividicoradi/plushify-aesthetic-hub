@@ -56,12 +56,12 @@ export const useTeamLimits = () => {
       case 2:
         return {
           currentPlan: 'Professional',
-          suggestedPlan: 'Enterprise',
+          suggestedPlan: 'Premium',
           suggestedLimit: '5 usuários'
         };
       default:
         return {
-          currentPlan: 'Enterprise',
+          currentPlan: 'Premium',
           suggestedPlan: null,
           suggestedLimit: null
         };
