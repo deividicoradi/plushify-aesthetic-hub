@@ -14,6 +14,7 @@ import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { getPendingCheckout, clearPendingCheckout } from '@/utils/pendingCheckout';
+import { capturePendingReferralFromUrl, getPendingReferralCode, clearPendingReferral } from '@/utils/referral';
 import { useAbacateCheckout } from '@/hooks/useAbacateCheckout';
 
 const Auth = () => {
@@ -35,6 +36,10 @@ const Auth = () => {
   const { user } = useAuth();
   const { createCheckout } = useAbacateCheckout();
   const resumingRef = useRef(false);
+
+  useEffect(() => {
+    capturePendingReferralFromUrl();
+  }, []);
 
   useEffect(() => {
     // Verificar se o usuário já está logado ao carregar a página
@@ -121,12 +126,15 @@ const Auth = () => {
         return;
       }
 
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
+      const referralCode = getPendingReferralCode();
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
         password,
         options: {
           data: {
             full_name: fullName,
+            ...(referralCode ? { referral_code: referralCode } : {}),
           },
           emailRedirectTo: `${window.location.origin}/dashboard`
         }
@@ -134,6 +142,7 @@ const Auth = () => {
       
       if (error) throw error;
       
+      if (referralCode) clearPendingReferral();
       toast.success("Cadastro realizado com sucesso! Verifique seu e-mail para confirmar sua conta.");
     } catch (error: any) {
       if (error.message.includes('already registered')) {

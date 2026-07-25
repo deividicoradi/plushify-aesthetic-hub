@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SEO } from '@/components/SEO';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
@@ -8,8 +8,13 @@ import Features from '../components/Features';
 import Testimonials from '../components/Testimonials';
 import Footer from '../components/Footer';
 import { PlansSection } from '../components/home/PlansSection';
+import { capturePendingReferralFromUrl } from '@/utils/referral';
 
 const Index = () => {
+  useEffect(() => {
+    capturePendingReferralFromUrl();
+  }, []);
+
   return (
     <div className="min-h-screen">
       <SEO

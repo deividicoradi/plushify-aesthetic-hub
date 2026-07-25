@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy, Loader2, Users, AlertCircle } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy, Loader2, Users, AlertCircle, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { FeatureGuard } from '@/components/FeatureGuard';
 import { TeamManagement as TeamManagementComponent } from '@/components/premium/TeamManagement';
+import { ReferralPanel } from '@/components/settings/ReferralPanel';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
@@ -160,7 +161,7 @@ const Settings = () => {
         </div>
         
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile" className="flex items-center gap-2 text-xs sm:text-sm">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Perfil</span>
@@ -175,6 +176,11 @@ const Settings = () => {
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">Equipe</span>
               <span className="sm:hidden">Equipe</span>
+            </TabsTrigger>
+            <TabsTrigger value="referrals" className="flex items-center gap-2 text-xs sm:text-sm">
+              <Gift className="w-4 h-4" />
+              <span className="hidden sm:inline">Indicações</span>
+              <span className="sm:hidden">Indicações</span>
             </TabsTrigger>
           </TabsList>
 
@@ -428,6 +434,10 @@ const Settings = () => {
             >
               <TeamManagementComponent />
             </FeatureGuard>
+          </TabsContent>
+
+          <TabsContent value="referrals" className="space-y-6">
+            <ReferralPanel />
           </TabsContent>
         </Tabs>
       </div>

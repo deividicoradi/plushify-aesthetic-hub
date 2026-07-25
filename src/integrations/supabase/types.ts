@@ -1424,6 +1424,57 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          referred_email: string | null
+          referred_id: string
+          referrer_id: string
+          rewarded_at: string | null
+          status: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          referred_email?: string | null
+          referred_id: string
+          referrer_id: string
+          rewarded_at?: string | null
+          status?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          referred_email?: string | null
+          referred_id?: string
+          referrer_id?: string
+          rewarded_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       service_packages: {
         Row: {
           active: boolean
@@ -1812,6 +1863,7 @@ export type Database = {
         }
       }
       get_or_create_booking_slug: { Args: never; Returns: string }
+      get_or_create_referral_code: { Args: never; Returns: string }
       get_professionals_secure: {
         Args: { p_mask_sensitive?: boolean }
         Returns: {
