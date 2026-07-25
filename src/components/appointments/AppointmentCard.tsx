@@ -131,14 +131,16 @@ export const AppointmentCard = ({ appointment, isSelected = false, onSelect }: A
   };
 
   const sendWhatsAppMessage = () => {
-    const message = `Olá ${appointment.client_name}! 
+    // Sem emoji de propósito: alguns (fora do plano básico Unicode) chegam
+    // corrompidos em determinados apps/navegadores que abrem o link wa.me.
+    const message = `Olá ${appointment.client_name}!
 
 Confirmo seu agendamento:
-📅 Data: ${formatDate(appointment.appointment_date)}
-⏰ Horário: ${appointment.appointment_time}
-✂️ Serviço: ${appointment.service_name}
-⏱️ Duração: ${appointment.duration} minutos
-💰 Valor: ${formatPrice(appointment.price)}
+Data: ${formatDate(appointment.appointment_date)}
+Horário: ${formatTime(appointment.appointment_time)}
+Serviço: ${appointment.service_name}
+Duração: ${appointment.duration} minutos
+Valor: ${formatPrice(appointment.price)}
 
 Nos vemos em breve!`;
 
