@@ -392,7 +392,6 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
                   type="time"
                   value={formData.appointment_time}
                   onChange={(e) => handleInputChange('appointment_time', e.target.value)}
-                  disabled={!selectedProfessional || !formData.appointment_date}
                   required
                 />
               )}
