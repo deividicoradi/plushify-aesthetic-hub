@@ -21,7 +21,7 @@ const formatCurrency = (value: number) =>
 
 const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
 
-const PackagesContent = () => {
+export const PackagesContent = () => {
   const { servicePackages, loading: loadingTemplates, createServicePackage, updateServicePackage } = useServicePackages();
   const { clientPackages, loading: loadingSold, purchasePackage } = useClientPackages();
   const { giftCards, loading: loadingGiftCards, purchaseGiftCard, redeemGiftCard } = useGiftCards();

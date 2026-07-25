@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -41,7 +41,6 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Notes = lazy(() => import("./pages/Notes"));
 const Loyalty = lazy(() => import("./pages/Loyalty"));
-const Packages = lazy(() => import("./pages/Packages"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const AdvancedAnalytics = lazy(() => import("./pages/AdvancedAnalytics"));
 const FinancialDashboard = lazy(() => import("./pages/FinancialDashboard"));
@@ -171,14 +170,8 @@ const AppContent = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/packages"
-        element={
-          <ProtectedRoute>
-            {Lazy(<Packages />)}
-          </ProtectedRoute>
-        }
-      />
+      {/* Pacotes de Serviços virou uma aba dentro de /services */}
+      <Route path="/packages" element={<Navigate to="/services" replace />} />
       <Route
         path="/inventory"
         element={

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, Wrench, Package, CheckCircle, XCircle, DollarSign } from 'lucide-react';
+import { Plus, Wrench, Package, CheckCircle, XCircle, DollarSign, Crown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServicesList } from '@/components/services/ServicesList';
@@ -11,6 +12,8 @@ import { Professional } from '@/hooks/useProfessionals';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { LimitAlert } from '@/components/LimitAlert';
+import { FeatureGuard } from '@/components/FeatureGuard';
+import { PackagesContent } from '@/pages/Packages';
 import { toast } from 'sonner';
 
 const Services = () => {
@@ -110,84 +113,112 @@ const Services = () => {
       subtitle="Gerencie os serviços oferecidos"
       icon={Wrench}
     >
-      {/* Limit Alert */}
-      <LimitAlert type="services" currentCount={services.length} action="criar" />
-      
-      {/* Search and Filters */}
-      <ServicesSearchAndFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onNewClick={() => setIsFormOpen(true)}
-      />
-      
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="border-border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium truncate">Total de Serviços</CardTitle>
-            <Package className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
-            <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium truncate">Serviços Ativos</CardTitle>
-            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 shrink-0" />
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.active}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium truncate">Serviços Inativos</CardTitle>
-            <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
-            <div className="text-xl sm:text-2xl font-bold text-gray-500">{stats.inactive}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium truncate">Preço Médio</CardTitle>
-            <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
-            <div className="text-xl sm:text-2xl font-bold truncate">
-              {new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-              }).format(stats.averagePrice)}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="lista" className="space-y-4 sm:space-y-6">
+        <TabsList>
+          <TabsTrigger value="lista">Serviços</TabsTrigger>
+          <TabsTrigger value="pacotes">Pacotes</TabsTrigger>
+        </TabsList>
 
-      {/* Services List */}
-      <Card className="border-border/60">
-        <CardHeader className="p-3 sm:p-4 lg:p-6 pb-0 sm:pb-0">
-          <CardTitle className="text-base sm:text-lg">Lista de Serviços</CardTitle>
-        </CardHeader>
-        <CardContent className="p-3 sm:p-4 lg:p-6 pt-3 sm:pt-4">
-          {isLoading ? (
-            <div className="text-center py-8">
-              <p className="text-sm text-muted-foreground">Carregando serviços...</p>
-            </div>
-          ) : (
-            <ServicesList
-              services={filteredServices}
-              onEdit={handleEdit}
-              onDelete={deleteService}
-              onToggleStatus={toggleServiceStatus}
-            />
-          )}
-        </CardContent>
-      </Card>
+        <TabsContent value="lista" className="space-y-4 sm:space-y-6">
+          {/* Limit Alert */}
+          <LimitAlert type="services" currentCount={services.length} action="criar" />
+
+          {/* Search and Filters */}
+          <ServicesSearchAndFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onNewClick={() => setIsFormOpen(true)}
+          />
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <Card className="border-border/60">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium truncate">Total de Serviços</CardTitle>
+                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
+                <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/60">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium truncate">Serviços Ativos</CardTitle>
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 shrink-0" />
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
+                <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.active}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/60">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium truncate">Serviços Inativos</CardTitle>
+                <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
+                <div className="text-xl sm:text-2xl font-bold text-gray-500">{stats.inactive}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/60">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium truncate">Preço Médio</CardTitle>
+                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
+                <div className="text-xl sm:text-2xl font-bold truncate">
+                  {new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                  }).format(stats.averagePrice)}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Services List */}
+          <Card className="border-border/60">
+            <CardHeader className="p-3 sm:p-4 lg:p-6 pb-0 sm:pb-0">
+              <CardTitle className="text-base sm:text-lg">Lista de Serviços</CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4 lg:p-6 pt-3 sm:pt-4">
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-muted-foreground">Carregando serviços...</p>
+                </div>
+              ) : (
+                <ServicesList
+                  services={filteredServices}
+                  onEdit={handleEdit}
+                  onDelete={deleteService}
+                  onToggleStatus={toggleServiceStatus}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="pacotes" className="space-y-4 sm:space-y-6">
+          <FeatureGuard
+            planFeature="hasServicePackages"
+            fallback={
+              <div className="text-center py-8 sm:py-12">
+                <Crown className="w-12 h-12 sm:w-16 sm:h-16 text-plush-500 mx-auto mb-3 sm:mb-4" />
+                <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-1 sm:mb-2">
+                  Pacotes de Serviços
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Esta funcionalidade está disponível apenas para assinantes Premium.
+                </p>
+              </div>
+            }
+          >
+            <PackagesContent />
+          </FeatureGuard>
+        </TabsContent>
+      </Tabs>
 
       {/* Service Form Modal */}
       <ServiceForm
