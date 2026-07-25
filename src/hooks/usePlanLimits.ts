@@ -22,6 +22,7 @@ interface PlanLimits {
   hasMultiplePaymentMethods: boolean;
   hasCommissions: boolean;
   hasServicePackages: boolean;
+  hasReturnReminders: boolean;
 }
 
 const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
@@ -46,6 +47,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasMultiplePaymentMethods: false,
     hasCommissions: false,
     hasServicePackages: false,
+    hasReturnReminders: false, // reengajamento de clientes é exclusivo de planos pagos
   },
   professional: {
     clients: -1, // unlimited
@@ -68,6 +70,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasMultiplePaymentMethods: true,
     hasCommissions: false, // comissão por profissional é diferencial exclusivo do Premium
     hasServicePackages: false, // pacotes de serviços é diferencial exclusivo do Premium
+    hasReturnReminders: true,
   },
   premium: {
     clients: -1, // unlimited
@@ -90,6 +93,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasMultiplePaymentMethods: true,
     hasCommissions: true,
     hasServicePackages: true,
+    hasReturnReminders: true,
   },
   enterprise: {
     clients: -1, // unlimited
@@ -112,6 +116,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasMultiplePaymentMethods: true,
     hasCommissions: true,
     hasServicePackages: true,
+    hasReturnReminders: true,
   },
 };
 

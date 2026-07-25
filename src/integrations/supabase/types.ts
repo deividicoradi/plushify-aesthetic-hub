@@ -422,6 +422,7 @@ export type Database = {
           neighborhood: string | null
           payment_method: string | null
           phone: string | null
+          return_reminder_sent_at: string | null
           state: string | null
           status: string | null
           updated_at: string
@@ -440,6 +441,7 @@ export type Database = {
           neighborhood?: string | null
           payment_method?: string | null
           phone?: string | null
+          return_reminder_sent_at?: string | null
           state?: string | null
           status?: string | null
           updated_at?: string
@@ -458,6 +460,7 @@ export type Database = {
           neighborhood?: string | null
           payment_method?: string | null
           phone?: string | null
+          return_reminder_sent_at?: string | null
           state?: string | null
           status?: string | null
           updated_at?: string
