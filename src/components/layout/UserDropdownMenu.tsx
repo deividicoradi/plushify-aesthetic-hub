@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, User, Crown, Settings } from 'lucide-react';
+import { LogOut, User, Crown, Settings, HelpCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +45,12 @@ export const UserDropdownMenu = () => {
           <Link to="/settings" className="flex items-center w-full">
             <Settings className="mr-2 h-4 w-4" />
             <span>Configurações</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/app/help" className="flex items-center w-full">
+            <HelpCircle className="mr-2 h-4 w-4" />
+            <span>Ajuda</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
