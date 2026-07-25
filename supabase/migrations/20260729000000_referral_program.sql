@@ -1,7 +1,12 @@
 -- Programa "Indique e Ganhe": cada usuário tem um código/link único de
 -- indicação. Quando alguém se cadastra usando esse link e depois assina um
--- plano pago (Professional/Premium) pela primeira vez, tanto quem indicou
--- quanto o indicado ganham +30 dias de assinatura, automaticamente.
+-- plano pago (Professional/Premium) pela primeira vez, quem indicou ganha
+-- +30 dias de assinatura, automaticamente.
+--
+-- Recompensa só pra quem indica (não pro indicado): o indicado já decidiu
+-- pagar por conta própria, sem precisar de incentivo — um bônus aplicado
+-- só depois do pagamento não influencia a decisão de assinar, só teria
+-- custo sem efeito de conversão.
 --
 -- Critério de indicação "válida" (evita fraude óbvia de contas fake em
 -- trial): só conta quando o indicado vira pagante de verdade, não no
@@ -123,8 +128,8 @@ CREATE TRIGGER on_auth_user_created_referral
   EXECUTE FUNCTION public.capture_referral_on_signup();
 
 -- 4. Recompensa quando o indicado assina um plano pago (Professional ou
--- Premium) pela primeira vez: +30 dias pra quem indicou e +30 dias de
--- bônus pro indicado, em cima do período que ele acabou de contratar.
+-- Premium) pela primeira vez: +30 dias pra quem indicou. O indicado não
+-- recebe bônus (ele já decidiu pagar sozinho, sem precisar de incentivo).
 -- O UNIQUE (referred_id) na tabela referrals garante que isso só acontece
 -- uma vez por indicação, mesmo com múltiplas chamadas de start_subscription
 -- (renovações futuras não re-disparam porque não há mais linha 'pending').
@@ -143,18 +148,11 @@ BEGIN
       FOR UPDATE SKIP LOCKED;
 
     IF FOUND THEN
-      -- Marca como recompensada ANTES de estender os prazos, pra evitar
-      -- loop: a própria UPDATE abaixo em user_subscriptions do indicado
-      -- dispara esse trigger de novo recursivamente.
       UPDATE public.referrals SET status = 'rewarded', rewarded_at = now() WHERE id = v_referral.id;
 
       UPDATE public.user_subscriptions
         SET expires_at = GREATEST(COALESCE(expires_at, now()), now()) + interval '30 days'
         WHERE user_id = v_referral.referrer_id;
-
-      UPDATE public.user_subscriptions
-        SET expires_at = COALESCE(expires_at, now()) + interval '30 days'
-        WHERE user_id = NEW.user_id;
     END IF;
   END IF;
 

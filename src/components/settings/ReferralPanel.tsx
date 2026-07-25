@@ -37,7 +37,7 @@ export const ReferralPanel = () => {
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             Compartilhe seu link. Quando a pessoa indicada assinar um plano pago (Professional ou Premium),
-            vocês dois ganham <strong>30 dias grátis</strong> de assinatura, automaticamente.
+            você ganha <strong>30 dias grátis</strong> de assinatura, automaticamente.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
