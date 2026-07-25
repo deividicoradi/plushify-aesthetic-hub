@@ -14,14 +14,17 @@ export const buildReminderMessage = (appointment: Appointment): string => {
   // UTC e a formatação em fuso negativo (Brasil) mostraria o dia anterior.
   const date = format(parseISO(appointment.appointment_date), "dd/MM/yyyy", { locale: ptBR });
 
-  return `Olá ${appointment.client_name}! 👋
+  // Sem emoji de propósito: alguns (fora do plano básico Unicode, tipo
+  // 👋😊📅) chegam corrompidos em determinados apps/navegadores que abrem o
+  // link wa.me, dependendo de como decodificam o parâmetro text.
+  return `Olá ${appointment.client_name}!
 
 Passando pra lembrar do seu horário amanhã:
-📅 Data: ${date}
-⏰ Horário: ${formatAppointmentTime(appointment.appointment_time)}
-✂️ Serviço: ${appointment.service_name}
+Data: ${date}
+Horário: ${formatAppointmentTime(appointment.appointment_time)}
+Serviço: ${appointment.service_name}
 
-Qualquer imprevisto, nos avise! Até lá 😊`;
+Qualquer imprevisto, nos avise! Até lá.`;
 };
 
 // Telefone é salvo em clients.phone com formatação livre (espaços,
