@@ -291,6 +291,79 @@ export type Database = {
         }
         Relationships: []
       }
+      client_packages: {
+        Row: {
+          client_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          package_name: string
+          price: number
+          purchased_at: string
+          service_id: string
+          service_package_id: string | null
+          sessions_used: number
+          status: string
+          total_sessions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          package_name: string
+          price: number
+          purchased_at?: string
+          service_id: string
+          service_package_id?: string | null
+          sessions_used?: number
+          status?: string
+          total_sessions: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          package_name?: string
+          price?: number
+          purchased_at?: string
+          service_id?: string
+          service_package_id?: string | null
+          sessions_used?: number
+          status?: string
+          total_sessions?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_packages_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_packages_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_packages_service_package_id_fkey"
+            columns: ["service_package_id"]
+            isOneToOne: false
+            referencedRelation: "service_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
@@ -401,171 +474,6 @@ export type Database = {
             columns: ["team_member_id"]
             isOneToOne: false
             referencedRelation: "team_members"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_packages: {
-        Row: {
-          active: boolean
-          created_at: string
-          id: string
-          name: string
-          price: number
-          service_id: string
-          total_sessions: number
-          updated_at: string
-          user_id: string
-          validity_days: number
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          name: string
-          price: number
-          service_id: string
-          total_sessions: number
-          updated_at?: string
-          user_id: string
-          validity_days: number
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          name?: string
-          price?: number
-          service_id?: string
-          total_sessions?: number
-          updated_at?: string
-          user_id?: string
-          validity_days?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_packages_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_packages: {
-        Row: {
-          client_id: string
-          created_at: string
-          expires_at: string
-          id: string
-          package_name: string
-          price: number
-          purchased_at: string
-          service_id: string
-          service_package_id: string | null
-          sessions_used: number
-          status: string
-          total_sessions: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          expires_at: string
-          id?: string
-          package_name: string
-          price: number
-          purchased_at?: string
-          service_id: string
-          service_package_id?: string | null
-          sessions_used?: number
-          status?: string
-          total_sessions: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          package_name?: string
-          price?: number
-          purchased_at?: string
-          service_id?: string
-          service_package_id?: string | null
-          sessions_used?: number
-          status?: string
-          total_sessions?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_packages_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_packages_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_packages_service_package_id_fkey"
-            columns: ["service_package_id"]
-            isOneToOne: false
-            referencedRelation: "service_packages"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      package_session_usages: {
-        Row: {
-          appointment_id: string
-          client_package_id: string
-          created_at: string
-          id: string
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          appointment_id: string
-          client_package_id: string
-          created_at?: string
-          id?: string
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          appointment_id?: string
-          client_package_id?: string
-          created_at?: string
-          id?: string
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "package_session_usages_appointment_id_fkey"
-            columns: ["appointment_id"]
-            isOneToOne: true
-            referencedRelation: "appointments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "package_session_usages_client_package_id_fkey"
-            columns: ["client_package_id"]
-            isOneToOne: false
-            referencedRelation: "client_packages"
             referencedColumns: ["id"]
           },
         ]
@@ -1151,6 +1059,51 @@ export type Database = {
         }
         Relationships: []
       }
+      package_session_usages: {
+        Row: {
+          appointment_id: string
+          client_package_id: string
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_id: string
+          client_package_id: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_id?: string
+          client_package_id?: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_session_usages_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_session_usages_client_package_id_fkey"
+            columns: ["client_package_id"]
+            isOneToOne: false
+            referencedRelation: "client_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           active: boolean
@@ -1241,17 +1194,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "payments_payment_method_id_fkey"
-            columns: ["payment_method_id"]
-            isOneToOne: false
-            referencedRelation: "payment_methods"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "payments_client_package_id_fkey"
             columns: ["client_package_id"]
             isOneToOne: false
             referencedRelation: "client_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
             referencedColumns: ["id"]
           },
         ]
@@ -1378,6 +1331,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      service_packages: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          price: number
+          service_id: string
+          total_sessions: number
+          updated_at: string
+          user_id: string
+          validity_days: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          price: number
+          service_id: string
+          total_sessions: number
+          updated_at?: string
+          user_id: string
+          validity_days: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          price?: number
+          service_id?: string
+          total_sessions?: number
+          updated_at?: string
+          user_id?: string
+          validity_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_packages_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_professionals: {
         Row: {
@@ -1761,7 +1761,11 @@ export type Database = {
       }
       has_feature_access: { Args: { feature_name: string }; Returns: boolean }
       purchase_client_package: {
-        Args: { p_client_id: string; p_service_package_id: string; p_payment_method_id: string }
+        Args: {
+          p_client_id: string
+          p_payment_method_id: string
+          p_service_package_id: string
+        }
         Returns: string
       }
       redeem_loyalty_reward: {

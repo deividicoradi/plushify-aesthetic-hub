@@ -12,7 +12,7 @@ interface PurchasePackageDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   servicePackages: ServicePackage[];
-  onPurchase: (clientId: string, servicePackageId: string, paymentMethodId: string) => Promise<void>;
+  onPurchase: (clientId: string, servicePackageId: string, paymentMethodId: string) => Promise<unknown>;
 }
 
 export const PurchasePackageDialog: React.FC<PurchasePackageDialogProps> = ({
