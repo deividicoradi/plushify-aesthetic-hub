@@ -82,18 +82,14 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   // SEGURANÇA: Verificar acesso a funcionalidades premium para usuários trial
-  const restrictedRoutes = ['/inventory'];
+  // Estoque saiu daqui de propósito: o Trial inclui estoque básico (até 10
+  // produtos, já limitado em useProductsData/LimitAlert) — bloquear a rota
+  // inteira contradizia a própria promessa do plano. Quem precisa de aviso
+  // de upgrade agora usa o mesmo padrão inline (FeatureGuard) de qualquer
+  // outra tela, em vez de um redirect forçado pra /app/planos.
   const financialAdvancedFeatures = ['/financial/installments', '/financial/reports'];
 
   if (currentPlan === 'trial') {
-    if (restrictedRoutes.some(route => location.pathname.startsWith(route))) {
-      console.log('SECURITY: Trial user blocked from premium features');
-      return <Navigate to="/app/planos" replace state={{ 
-        message: 'Esta funcionalidade requer um plano pago. Faça upgrade para continuar.',
-        from: location 
-      }} />;
-    }
-    
     if (financialAdvancedFeatures.some(route => location.pathname === route)) {
       console.log('SECURITY: Trial user blocked from advanced financial features');
       return <Navigate to="/financial" replace state={{ 
