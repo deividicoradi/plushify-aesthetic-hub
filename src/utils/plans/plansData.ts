@@ -79,8 +79,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'Controle de caixa',
       'Relatórios básicos',
       'Métodos de pagamento múltiplos',
-      'Dashboard com métricas',
-      'Suporte prioritário'
+      'Dashboard com métricas'
     ],
     limitations: [
       'SEM analytics avançados',
@@ -120,7 +119,6 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'Comissão por profissional em cada atendimento concluído',
       'Pacotes de serviços com sessões e validade',
       'Vale-presente com saldo em R$ por cliente',
-      'Suporte VIP 24/7',
       'Gestão de estoque avançada',
       'Dashboard executivo completo',
       'Análises de performance detalhadas'
