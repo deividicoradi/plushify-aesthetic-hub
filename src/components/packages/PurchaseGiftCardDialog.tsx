@@ -9,7 +9,7 @@ import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 interface PurchaseGiftCardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onPurchase: (clientId: string, value: number, paymentMethodId: string) => Promise<void>;
+  onPurchase: (clientId: string, value: number, paymentMethodId: string) => Promise<unknown>;
 }
 
 export const PurchaseGiftCardDialog: React.FC<PurchaseGiftCardDialogProps> = ({
