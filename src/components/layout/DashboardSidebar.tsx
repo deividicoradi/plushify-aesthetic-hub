@@ -9,7 +9,6 @@ import {
   Settings,
   Package,
   Wrench,
-  StickyNote,
   Heart,
   CreditCard,
   TrendingUp,
@@ -36,7 +35,6 @@ const DashboardSidebar = () => {
     { icon: CreditCard, label: 'Financeiro', path: '/financial' },
     { icon: PieChart, label: 'Painel Financeiro', path: '/financial-dashboard' },
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics', requiresFeature: 'hasAdvancedAnalytics' as const },
-    { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty', requiresFeature: 'hasLoyaltyProgram' as const },
   ];
 

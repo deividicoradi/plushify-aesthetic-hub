@@ -38,7 +38,6 @@ const Clients = lazy(() => import("./pages/Clients"));
 const Financial = lazy(() => import("./pages/Financial"));
 const Services = lazy(() => import("./pages/Services"));
 const Settings = lazy(() => import("./pages/Settings"));
-const Profile = lazy(() => import("./pages/Profile"));
 const Notes = lazy(() => import("./pages/Notes"));
 const Loyalty = lazy(() => import("./pages/Loyalty"));
 const Inventory = lazy(() => import("./pages/Inventory"));
@@ -145,14 +144,8 @@ const AppContent = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            {Lazy(<Profile />)}
-          </ProtectedRoute>
-        }
-      />
+      {/* Perfil virou uma aba dentro de /settings (evita duplicidade com Configuracoes) */}
+      <Route path="/profile" element={<Navigate to="/settings" replace />} />
       <Route
         path="/notes"
         element={

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, User, Crown, Settings, HelpCircle } from 'lucide-react';
+import { LogOut, StickyNote, Crown, Settings, HelpCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,9 +30,9 @@ export const UserDropdownMenu = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuItem asChild>
-          <Link to="/profile" className="flex items-center w-full">
-            <User className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
+          <Link to="/notes" className="flex items-center w-full">
+            <StickyNote className="mr-2 h-4 w-4" />
+            <span>Anotações</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
