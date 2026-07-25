@@ -1705,6 +1705,7 @@ export type Database = {
         Args: {
           p_abacate_checkout_id?: string
           p_abacate_subscription_id?: string
+          p_immediate?: boolean
           p_status?: string
           p_user_id: string
         }
