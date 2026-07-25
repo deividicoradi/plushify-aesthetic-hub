@@ -145,10 +145,15 @@ const Hero = () => {
         {/* Trust Indicators */}
         <div className="mt-20 text-center">
           <p className="text-muted-foreground mb-8 text-lg">Feito para negócios de estética em todo o Brasil</p>
-          <div className="flex flex-wrap justify-center items-center gap-8">
-            {["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador"].map((city, index) => (
-              <div key={index} className="px-6 py-3 bg-muted/50 rounded-lg border text-foreground font-medium">
-                {city}
+          <div className="flex flex-wrap justify-center items-center gap-4 max-w-3xl mx-auto">
+            {[
+              { icon: Shield, label: "Seus dados protegidos (LGPD)" },
+              { icon: Star, label: "3 dias grátis, sem cartão" },
+              { icon: Sparkles, label: "Cancele quando quiser" },
+            ].map((item, index) => (
+              <div key={index} className="flex items-center gap-2 px-5 py-3 bg-muted/50 rounded-full border text-foreground font-medium text-sm">
+                <item.icon className="w-4 h-4 text-primary" />
+                {item.label}
               </div>
             ))}
           </div>

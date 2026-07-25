@@ -210,7 +210,7 @@ export const PlansSection = () => {
         {/* CTA */}
         <div className="text-center mt-16">
           <p className="text-muted-foreground mb-6">
-            Comece hoje mesmo • Resultados garantidos • Suporte completo
+            3 dias grátis, sem cartão • Cancele quando quiser • Suporte completo
           </p>
           <Button 
             size="lg"

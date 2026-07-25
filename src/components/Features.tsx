@@ -34,46 +34,46 @@ const Features = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          <Feature 
+          <Feature
             icon={<Calendar className="w-4 h-4 text-white" />}
             title="Agenda Inteligente"
             description="Sistema completo de agendamentos com visualização por dia, semana e mês. Gerencie seus horários de forma eficiente."
-            path="/agendamentos"
+            path="/auth?tab=signup"
           />
-          
-          <Feature 
+
+          <Feature
             icon={<Users className="w-4 h-4 text-white" />}
             title="Gestão de Clientes"
             description="Cadastro completo de clientes com histórico, informações pessoais e controle de relacionamento."
-            path="/clientes"
+            path="/auth?tab=signup"
           />
-          
-          <Feature 
+
+          <Feature
             icon={<Box className="w-4 h-4 text-white" />}
             title="Controle de Estoque"
             description="Gerencie seus produtos, insumos e materiais com controle de entrada, saída e alertas de estoque baixo."
-            path="/estoque"
+            path="/auth?tab=signup"
           />
-          
-          <Feature 
+
+          <Feature
             icon={<CreditCard className="w-4 h-4 text-white" />}
             title="Gestão Financeira"
             description="Controle de pagamentos, parcelamentos, fechamento de caixa e controle de despesas do seu negócio."
-            path="/financeiro"
+            path="/auth?tab=signup"
           />
-          
-          <Feature 
+
+          <Feature
             icon={<BarChart3 className="w-4 h-4 text-white" />}
             title="Relatórios e Dashboard"
             description="Acompanhe o desempenho do seu negócio com relatórios detalhados e métricas importantes."
-            path="/dashboard"
+            path="/auth?tab=signup"
           />
 
-          <Feature 
+          <Feature
             icon={<Star className="w-4 h-4 text-white" />}
             title="Programa de Fidelidade"
             description="Sistema completo de pontuação e recompensas para fidelizar clientes e aumentar a retenção."
-            path="/loyalty"
+            path="/auth?tab=signup"
           />
         </div>
         

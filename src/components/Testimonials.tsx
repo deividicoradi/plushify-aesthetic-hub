@@ -1,6 +1,8 @@
 
 import React from 'react';
-import { Star } from 'lucide-react';
+import { Star, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Testimonial = ({ 
   quote, 
@@ -41,6 +43,7 @@ const Testimonial = ({
 };
 
 const Testimonials = () => {
+  const navigate = useNavigate();
   const testimonials: { quote: string; author: string; role: string; stars: number; callout?: string }[] = [];
 
   if (testimonials.length === 0) {
@@ -51,10 +54,18 @@ const Testimonials = () => {
             <h2 className="text-2xl md:text-3xl font-bold mb-3 font-serif text-foreground">
               Estamos no <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">início</span>
             </h2>
-            <p className="text-muted-foreground">
-              Seja um dos primeiros negócios a usar o Plushify e ajude a escrever
-              as primeiras histórias de sucesso.
+            <p className="text-muted-foreground mb-6">
+              Seja um dos primeiros negócios a usar o Plushify. Como cliente early-adopter,
+              seu feedback ajuda a moldar as próximas funcionalidades da plataforma.
             </p>
+            <Button
+              size="lg"
+              onClick={() => navigate('/auth?tab=signup')}
+              className="font-semibold"
+            >
+              Testar gratuitamente por 3 dias
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
           </div>
         </div>
       </section>

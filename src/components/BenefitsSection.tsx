@@ -45,7 +45,7 @@ const BenefitsSection = () => {
         <div className="text-center max-w-4xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 text-primary rounded-full text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" />
-            Resultados Comprovados
+            Feito para o seu dia a dia
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif text-foreground">
             Por que escolher o <span className="gradient-text">Plushify</span>?
@@ -108,7 +108,7 @@ const BenefitsSection = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <BarChart3 className="w-4 h-4 text-purple-500" />
-                  Resultados garantidos
+                  Cancele quando quiser
                 </div>
               </div>
             </CardContent>
