@@ -3,6 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Filter, X, Calendar, Clock, User, CheckCircle } from 'lucide-react';
@@ -141,22 +142,16 @@ export const AppointmentFiltersAdvanced = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-sm">De</Label>
-                  <Input
-                    type="date"
+                  <DatePickerField
                     value={localFilters.dateFrom || ''}
-                    onChange={(e) => updateFilter('dateFrom', e.target.value)}
-                    className="pointer-events-auto"
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={(value) => updateFilter('dateFrom', value)}
                   />
                 </div>
                 <div>
                   <Label className="text-sm">Até</Label>
-                  <Input
-                    type="date"
+                  <DatePickerField
                     value={localFilters.dateTo || ''}
-                    onChange={(e) => updateFilter('dateTo', e.target.value)}
-                    className="pointer-events-auto"
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={(value) => updateFilter('dateTo', value)}
                   />
                 </div>
               </div>

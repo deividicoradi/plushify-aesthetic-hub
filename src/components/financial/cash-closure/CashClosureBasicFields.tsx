@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Badge } from "@/components/ui/badge";
 
 interface CashClosureBasicFieldsProps {
@@ -56,13 +57,10 @@ const CashClosureBasicFields = ({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="closure_date" className="text-foreground">Data do Fechamento</Label>
-          <Input
+          <DatePickerField
             id="closure_date"
-            type="date"
             value={formData.closure_date}
-            onChange={(e) => onFieldChange('closure_date', e.target.value)}
-            required
-            className="bg-background border-border text-foreground"
+            onChange={(value) => onFieldChange('closure_date', value)}
           />
         </div>
 

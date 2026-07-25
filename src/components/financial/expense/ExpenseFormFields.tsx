@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ExpenseCategorySelect from './ExpenseCategorySelect';
@@ -72,11 +73,10 @@ const ExpenseFormFields = ({ formData, paymentMethods, onFieldChange }: ExpenseF
 
         <div className="space-y-2">
           <Label htmlFor="expense_date">Data da Despesa</Label>
-          <Input
+          <DatePickerField
             id="expense_date"
-            type="date"
             value={formData.expense_date}
-            onChange={(e) => onFieldChange('expense_date', e.target.value)}
+            onChange={(value) => onFieldChange('expense_date', value)}
           />
         </div>
       </div>

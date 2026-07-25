@@ -6,6 +6,7 @@ import { FormField } from '@/components/ui/form-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { KeyRound } from 'lucide-react';
@@ -234,13 +235,10 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
 
             <div className="space-y-2">
               <Label className="text-xs sm:text-sm">Data de Contratação</Label>
-              <input
+              <DatePickerField
                 id="team-member-hire-date"
-                name="hire_date"
-                type="date"
                 value={watch('hire_date') || ''}
-                onChange={(e) => setValue('hire_date', e.target.value)}
-                className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                onChange={(value) => setValue('hire_date', value)}
               />
             </div>
 

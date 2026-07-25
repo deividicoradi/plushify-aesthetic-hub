@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 
 interface PaymentDateFieldsProps {
   dueDate: string;
@@ -13,11 +13,10 @@ const PaymentDateFields = ({ dueDate, onFieldChange, disabled = false }: Payment
   return (
     <div className="space-y-2">
       <Label htmlFor="due_date">Data de Vencimento</Label>
-      <Input
+      <DatePickerField
         id="due_date"
-        type="date"
         value={dueDate}
-        onChange={(e) => onFieldChange('due_date', e.target.value)}
+        onChange={(value) => onFieldChange('due_date', value)}
         disabled={disabled}
       />
     </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Calendar, FolderOpen, Plus } from 'lucide-react';
 import { Input } from "@/components/ui/input";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -74,21 +75,19 @@ const CashSearchAndFilters: React.FC<CashSearchAndFiltersProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         <div className="space-y-2">
           <Label htmlFor="dateFrom">Data Inicial</Label>
-          <Input
+          <DatePickerField
             id="dateFrom"
-            type="date"
             value={filters.dateFrom}
-            onChange={(e) => onFiltersChange({ ...filters, dateFrom: e.target.value })}
+            onChange={(value) => onFiltersChange({ ...filters, dateFrom: value })}
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="dateTo">Data Final</Label>
-          <Input
+          <DatePickerField
             id="dateTo"
-            type="date"
             value={filters.dateTo}
-            onChange={(e) => onFiltersChange({ ...filters, dateTo: e.target.value })}
+            onChange={(value) => onFiltersChange({ ...filters, dateTo: value })}
           />
         </div>
         

@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -166,8 +167,8 @@ const ChallengesTab: React.FC<{ items: LoyaltyChallenge[]; upsert: (c: any) => v
               </Select>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <Input type="date" value={d.period_start ?? ''} onChange={e => set(c.id, { period_start: e.target.value || null })} />
-              <Input type="date" value={d.period_end ?? ''} onChange={e => set(c.id, { period_end: e.target.value || null })} />
+              <DatePickerField value={d.period_start ?? ''} onChange={v => set(c.id, { period_start: v || null })} placeholder="Início" />
+              <DatePickerField value={d.period_end ?? ''} onChange={v => set(c.id, { period_end: v || null })} placeholder="Fim" />
               <Input value={d.audience} onChange={e => set(c.id, { audience: e.target.value })} placeholder="Público" />
             </div>
             <Input value={d.reward ?? ''} onChange={e => set(c.id, { reward: e.target.value })} placeholder="Recompensa" />
