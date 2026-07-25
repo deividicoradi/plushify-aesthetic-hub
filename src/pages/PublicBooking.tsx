@@ -226,7 +226,7 @@ export default function PublicBooking() {
   if (!slug) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center px-4">
-        <Card className="max-w-md w-full">
+        <Card className="max-w-md w-full rounded-3xl border-border/60 shadow-sm">
           <CardContent className="text-center py-8">
             <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h2 className="text-lg font-bold mb-2">Link de agendamento inválido</h2>
@@ -247,7 +247,7 @@ export default function PublicBooking() {
           <div className="flex items-center justify-between">
             {/* Logo e Brand */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
                 <Heart className="w-5 h-5 text-white" />
               </div>
               <div className="flex flex-col">
@@ -334,17 +334,19 @@ export default function PublicBooking() {
         <div className="max-w-md mx-auto">
           {/* Etapa 1: Seleção de Serviço */}
           {step === 1 && (
-            <Card>
+            <Card className="rounded-3xl border-border/60 shadow-sm">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Star className="w-5 h-5 mr-2 text-primary" />
+                <CardTitle className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-primary">
+                    <Star className="w-5 h-5" />
+                  </span>
                   Escolha seu serviço
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Selecione o serviço que deseja agendar
                 </p>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 {!servicesLoaded ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -359,14 +361,14 @@ export default function PublicBooking() {
                   services.map((service) => (
                     <div
                       key={service.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:border-primary ${
-                        booking.service?.id === service.id ? 'border-primary bg-primary/5' : 'border-border'
+                      className={`p-4 border rounded-2xl cursor-pointer transition-all hover:border-primary/60 hover:shadow-sm ${
+                        booking.service?.id === service.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
                       }`}
                       onClick={() => setBooking(prev => ({ ...prev, service }))}
                     >
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-semibold">{service.name}</h3>
-                        <Badge variant="secondary">{formatPrice(service.price)}</Badge>
+                        <Badge variant="secondary" className="rounded-full">{formatPrice(service.price)}</Badge>
                       </div>
                       {service.description && (
                         <p className="text-sm text-muted-foreground mb-2">{service.description}</p>
@@ -378,11 +380,11 @@ export default function PublicBooking() {
                     </div>
                   ))
                 )}
-                
+
                 <Button
                   onClick={() => setStep(2)}
                   disabled={!booking.service}
-                  className="w-full"
+                  className="w-full rounded-xl"
                 >
                   Continuar
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -393,17 +395,20 @@ export default function PublicBooking() {
 
           {/* Etapa 2: Seleção de Data */}
           {step === 2 && (
-            <Card>
+            <Card className="rounded-3xl border-border/60 shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center">
-                    <Calendar className="w-5 h-5 mr-2 text-primary" />
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-primary">
+                      <Calendar className="w-5 h-5" />
+                    </span>
                     Escolha a data
                   </CardTitle>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setStep(1)}
+                    className="rounded-lg"
                   >
                     <ArrowLeft className="w-4 h-4" />
                   </Button>
@@ -417,8 +422,8 @@ export default function PublicBooking() {
                   {selectedDates.map((date) => (
                     <div
                       key={date}
-                      className={`p-3 border rounded-lg cursor-pointer text-center transition-all hover:border-primary ${
-                        booking.date === date ? 'border-primary bg-primary/5' : 'border-border'
+                      className={`p-3 border rounded-2xl cursor-pointer text-center transition-all hover:border-primary/60 hover:shadow-sm ${
+                        booking.date === date ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
                       }`}
                       onClick={() => setBooking(prev => ({ ...prev, date }))}
                     >
@@ -440,7 +445,7 @@ export default function PublicBooking() {
                     }
                   }}
                   disabled={!booking.date}
-                  className="w-full"
+                  className="w-full rounded-xl"
                 >
                   Continuar
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -451,17 +456,20 @@ export default function PublicBooking() {
 
           {/* Etapa 3: Seleção de Horário */}
           {step === 3 && (
-            <Card>
+            <Card className="rounded-3xl border-border/60 shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center">
-                    <Clock className="w-5 h-5 mr-2 text-primary" />
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-primary">
+                      <Clock className="w-5 h-5" />
+                    </span>
                     Escolha o horário
                   </CardTitle>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setStep(2)}
+                    className="rounded-lg"
                   >
                     <ArrowLeft className="w-4 h-4" />
                   </Button>
@@ -484,8 +492,8 @@ export default function PublicBooking() {
                         .map((slot) => (
                           <div
                             key={slot.slot_time}
-                            className={`p-2 border rounded-lg cursor-pointer text-center transition-all hover:border-primary ${
-                              booking.time === slot.slot_time ? 'border-primary bg-primary/5' : 'border-border'
+                            className={`p-2 border rounded-xl cursor-pointer text-center transition-all hover:border-primary/60 hover:shadow-sm ${
+                              booking.time === slot.slot_time ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
                             }`}
                             onClick={() => setBooking(prev => ({ ...prev, time: slot.slot_time }))}
                           >
@@ -506,7 +514,7 @@ export default function PublicBooking() {
                     <Button
                       onClick={() => setStep(4)}
                       disabled={!booking.time}
-                      className="w-full"
+                      className="w-full rounded-xl"
                     >
                       Continuar
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -519,17 +527,20 @@ export default function PublicBooking() {
 
           {/* Etapa 4: Dados do Cliente */}
           {step === 4 && (
-            <Card>
+            <Card className="rounded-3xl border-border/60 shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center">
-                    <User className="w-5 h-5 mr-2 text-primary" />
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-primary">
+                      <User className="w-5 h-5" />
+                    </span>
                     Seus dados
                   </CardTitle>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setStep(3)}
+                    className="rounded-lg"
                   >
                     <ArrowLeft className="w-4 h-4" />
                   </Button>
@@ -537,7 +548,7 @@ export default function PublicBooking() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Resumo do agendamento */}
-                <div className="bg-muted/30 p-4 rounded-lg">
+                <div className="bg-muted/40 border border-border/60 p-4 rounded-2xl">
                   <h3 className="font-semibold mb-2">Resumo do agendamento</h3>
                   <div className="space-y-1 text-sm">
                     <p><strong>Serviço:</strong> {booking.service?.name}</p>
@@ -601,7 +612,7 @@ export default function PublicBooking() {
                 <Button
                   onClick={confirmBooking}
                   disabled={!booking.name || !booking.phone || !booking.email || loading}
-                  className="w-full"
+                  className="w-full rounded-xl"
                 >
                   {loading ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -616,18 +627,18 @@ export default function PublicBooking() {
 
           {/* Etapa 5: Confirmação */}
           {step === 5 && (
-            <Card>
+            <Card className="rounded-3xl border-border/60 shadow-sm">
               <CardContent className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-green-600" />
+                <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-emerald-500" />
                 </div>
-                
+
                 <h2 className="text-xl font-bold mb-2">Agendamento confirmado!</h2>
                 <p className="text-muted-foreground mb-6">
                   Seu agendamento foi registrado com sucesso. Entraremos em contato em breve para confirmar.
                 </p>
 
-                <div className="bg-muted/30 p-4 rounded-lg text-left mb-6">
+                <div className="bg-muted/40 border border-border/60 p-4 rounded-2xl text-left mb-6">
                   <h3 className="font-semibold mb-2">Detalhes do agendamento</h3>
                   <div className="space-y-1 text-sm">
                     {appointmentId && <p><strong>Código:</strong> {appointmentId.slice(0, 8)}</p>}
@@ -646,7 +657,7 @@ export default function PublicBooking() {
                   <Button
                     onClick={resetBooking}
                     variant="outline"
-                    className="w-full"
+                    className="w-full rounded-xl"
                   >
                     Fazer novo agendamento
                   </Button>
