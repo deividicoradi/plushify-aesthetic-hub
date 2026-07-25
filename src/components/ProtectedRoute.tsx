@@ -4,9 +4,13 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 
+// Rotas acessíveis mesmo com o trial vencido — precisa conseguir assinar um
+// plano, pedir ajuda, ver/editar a conta e sair, mesmo sem acesso ao app.
+const TRIAL_EXPIRED_ALLOWED_ROUTES = ['/app/planos', '/app/help', '/settings', '/profile'];
+
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
-  const { currentPlan, loading: subLoading } = useSubscription();
+  const { currentPlan, subscription, loading: subLoading } = useSubscription();
   const [isLoading, setIsLoading] = useState(true);
   const [securityCheck, setSecurityCheck] = useState(false);
   const location = useLocation();
@@ -49,6 +53,25 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       replace 
       state={{ from: location }} 
     />;
+  }
+
+  // SEGURANÇA: trial vencido (trial_ends_at no passado) — bloqueia o app
+  // inteiro e redireciona pra assinatura, mantendo os dados já cadastrados
+  // (não apaga nada, só corta o acesso). trial_ends_at é gravado certo na
+  // criação do trial (start-trial → start_subscription, +3 dias), mas até
+  // aqui nada no sistema o consultava pra decidir acesso — o "teste de 3
+  // dias" nunca expirava de fato.
+  const isTrialExpired =
+    currentPlan === 'trial' &&
+    !!subscription?.trial_ends_at &&
+    new Date(subscription.trial_ends_at) < new Date();
+
+  if (isTrialExpired && !TRIAL_EXPIRED_ALLOWED_ROUTES.some(route => location.pathname.startsWith(route))) {
+    console.log('SECURITY: Trial expired, redirecting to plans');
+    return <Navigate to="/app/planos" replace state={{
+      message: 'Seu período de teste de 3 dias terminou. Escolha um plano para continuar usando o Plushify — seus dados continuam salvos.',
+      from: location
+    }} />;
   }
 
   // SEGURANÇA: Verificar acesso a funcionalidades premium para usuários trial
