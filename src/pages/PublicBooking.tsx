@@ -292,7 +292,7 @@ export default function PublicBooking() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 -mt-12 pb-10">
+      <div className="relative z-10 container mx-auto px-4 -mt-12 pb-10">
         <div className="max-w-md mx-auto">
           {/* Etapa 1: Seleção de Serviço */}
           {step === 1 && (
