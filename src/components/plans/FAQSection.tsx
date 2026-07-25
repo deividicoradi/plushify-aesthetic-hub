@@ -4,20 +4,20 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const faqs = [
   {
-    question: 'Por que o plano Premium é o mais recomendado?',
-    answer: 'O Premium oferece todas as ferramentas necessárias para escalar seu negócio: analytics avançados, múltiplos usuários, consultoria mensal e suporte VIP. É o investimento que mais gera retorno.'
+    question: 'Qual a diferença entre o plano Profissional e o Premium?',
+    answer: 'O Profissional cobre a operação do dia a dia: agenda, clientes, financeiro básico, controle de caixa e equipe com até 2 usuários. O Premium adiciona os diferenciais de crescimento: Analytics Avançado, Pacotes de Serviços, Vale-presente, Comissão por profissional, Programa de Fidelidade completo, Modo Funcionário com PIN, backup automático e suporte prioritário 24/7.'
   },
   {
-    question: 'Como funciona a consultoria mensal gratuita?',
-    answer: 'Clientes Premium recebem 1 hora de consultoria mensal com nossos especialistas para otimizar processos, aumentar vendas e crescer o negócio.'
+    question: 'Como funciona o teste grátis de 3 dias?',
+    answer: 'Você tem acesso ao sistema por 3 dias sem pagar nada, com limites reduzidos (até 5 clientes, 3 agendamentos, 2 serviços, 10 produtos e 1 usuário). Ao final do período, o acesso é bloqueado até você escolher um plano pago — seus dados cadastrados continuam salvos, nada é apagado.'
   },
   {
     question: 'Posso mudar de plano a qualquer momento?',
-    answer: 'Sim! Você pode fazer upgrade instantâneo. O downgrade acontece no próximo ciclo de cobrança.'
+    answer: 'Sim, o upgrade é liberado assim que o pagamento é confirmado. Hoje não existe downgrade automático: para migrar para um plano menor, é necessário assinar o novo plano diretamente na tela de Planos.'
   },
   {
     question: 'O que acontece se eu cancelar?',
-    answer: 'Sem pegadinhas! Você mantém acesso até o fim do período pago e pode reativar quando quiser.'
+    answer: 'Sem pegadinhas! Você mantém acesso até o fim do período já pago e pode reativar quando quiser.'
   }
 ];
 
