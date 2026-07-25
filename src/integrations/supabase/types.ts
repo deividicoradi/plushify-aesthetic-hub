@@ -335,41 +335,6 @@ export type Database = {
           },
         ]
       }
-      gift_card_redemptions: {
-        Row: {
-          amount: number
-          client_gift_card_id: string
-          created_at: string
-          id: string
-          note: string | null
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          client_gift_card_id: string
-          created_at?: string
-          id?: string
-          note?: string | null
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          client_gift_card_id?: string
-          created_at?: string
-          id?: string
-          note?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "gift_card_redemptions_client_gift_card_id_fkey"
-            columns: ["client_gift_card_id"]
-            isOneToOne: false
-            referencedRelation: "client_gift_cards"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       client_packages: {
         Row: {
           client_id: string
@@ -681,6 +646,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      gift_card_redemptions: {
+        Row: {
+          amount: number
+          client_gift_card_id: string
+          created_at: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          client_gift_card_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          client_gift_card_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_card_redemptions_client_gift_card_id_fkey"
+            columns: ["client_gift_card_id"]
+            isOneToOne: false
+            referencedRelation: "client_gift_cards"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       installments: {
         Row: {
@@ -1217,9 +1217,9 @@ export type Database = {
         Row: {
           amount: number
           appointment_id: string | null
+          client_gift_card_id: string | null
           client_id: string | null
           client_package_id: string | null
-          client_gift_card_id: string | null
           created_at: string
           description: string | null
           discount: number | null
@@ -1237,9 +1237,9 @@ export type Database = {
         Insert: {
           amount: number
           appointment_id?: string | null
+          client_gift_card_id?: string | null
           client_id?: string | null
           client_package_id?: string | null
-          client_gift_card_id?: string | null
           created_at?: string
           description?: string | null
           discount?: number | null
@@ -1257,9 +1257,9 @@ export type Database = {
         Update: {
           amount?: number
           appointment_id?: string | null
+          client_gift_card_id?: string | null
           client_id?: string | null
           client_package_id?: string | null
-          client_gift_card_id?: string | null
           created_at?: string
           description?: string | null
           discount?: number | null
@@ -1276,17 +1276,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "payments_client_package_id_fkey"
-            columns: ["client_package_id"]
-            isOneToOne: false
-            referencedRelation: "client_packages"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "payments_client_gift_card_id_fkey"
             columns: ["client_gift_card_id"]
             isOneToOne: false
             referencedRelation: "client_gift_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_client_package_id_fkey"
+            columns: ["client_package_id"]
+            isOneToOne: false
+            referencedRelation: "client_packages"
             referencedColumns: ["id"]
           },
           {
@@ -1858,11 +1858,15 @@ export type Database = {
         Returns: string
       }
       purchase_gift_card: {
-        Args: { p_client_id: string; p_value: number; p_payment_method_id: string }
+        Args: {
+          p_client_id: string
+          p_payment_method_id: string
+          p_value: number
+        }
         Returns: string
       }
       redeem_gift_card: {
-        Args: { p_gift_card_id: string; p_amount: number; p_note?: string }
+        Args: { p_amount: number; p_gift_card_id: string; p_note?: string }
         Returns: string
       }
       redeem_loyalty_reward: {

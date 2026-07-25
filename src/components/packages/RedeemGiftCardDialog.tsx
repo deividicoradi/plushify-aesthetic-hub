@@ -12,7 +12,7 @@ interface RedeemGiftCardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   giftCard: ClientGiftCard | null;
-  onRedeem: (giftCardId: string, amount: number, note?: string) => Promise<void>;
+  onRedeem: (giftCardId: string, amount: number, note?: string) => Promise<unknown>;
 }
 
 export const RedeemGiftCardDialog: React.FC<RedeemGiftCardDialogProps> = ({
