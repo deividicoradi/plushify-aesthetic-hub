@@ -570,6 +570,85 @@ export type Database = {
           },
         ]
       }
+      client_gift_cards: {
+        Row: {
+          balance: number
+          client_id: string
+          created_at: string
+          id: string
+          initial_value: number
+          purchased_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance: number
+          client_id: string
+          created_at?: string
+          id?: string
+          initial_value: number
+          purchased_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          client_id?: string
+          created_at?: string
+          id?: string
+          initial_value?: number
+          purchased_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_gift_cards_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_card_redemptions: {
+        Row: {
+          amount: number
+          client_gift_card_id: string
+          created_at: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          client_gift_card_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          client_gift_card_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_card_redemptions_client_gift_card_id_fkey"
+            columns: ["client_gift_card_id"]
+            isOneToOne: false
+            referencedRelation: "client_gift_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dashboard_analytics: {
         Row: {
           analysis_date: string
@@ -1187,6 +1266,7 @@ export type Database = {
           appointment_id: string | null
           client_id: string | null
           client_package_id: string | null
+          client_gift_card_id: string | null
           created_at: string
           description: string | null
           discount: number | null
@@ -1206,6 +1286,7 @@ export type Database = {
           appointment_id?: string | null
           client_id?: string | null
           client_package_id?: string | null
+          client_gift_card_id?: string | null
           created_at?: string
           description?: string | null
           discount?: number | null
@@ -1225,6 +1306,7 @@ export type Database = {
           appointment_id?: string | null
           client_id?: string | null
           client_package_id?: string | null
+          client_gift_card_id?: string | null
           created_at?: string
           description?: string | null
           discount?: number | null
@@ -1252,6 +1334,13 @@ export type Database = {
             columns: ["client_package_id"]
             isOneToOne: false
             referencedRelation: "client_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_client_gift_card_id_fkey"
+            columns: ["client_gift_card_id"]
+            isOneToOne: false
+            referencedRelation: "client_gift_cards"
             referencedColumns: ["id"]
           },
         ]
@@ -1762,6 +1851,14 @@ export type Database = {
       has_feature_access: { Args: { feature_name: string }; Returns: boolean }
       purchase_client_package: {
         Args: { p_client_id: string; p_service_package_id: string; p_payment_method_id: string }
+        Returns: string
+      }
+      purchase_gift_card: {
+        Args: { p_client_id: string; p_value: number; p_payment_method_id: string }
+        Returns: string
+      }
+      redeem_gift_card: {
+        Args: { p_gift_card_id: string; p_amount: number; p_note?: string }
         Returns: string
       }
       redeem_loyalty_reward: {
