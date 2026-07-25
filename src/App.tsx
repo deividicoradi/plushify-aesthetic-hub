@@ -44,7 +44,6 @@ const Loyalty = lazy(() => import("./pages/Loyalty"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const AdvancedAnalytics = lazy(() => import("./pages/AdvancedAnalytics"));
 const FinancialDashboard = lazy(() => import("./pages/FinancialDashboard"));
-const TeamManagement = lazy(() => import("./pages/TeamManagement"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 const PlansInternal = lazy(() => import("./pages/PlansInternal"));
 
@@ -188,14 +187,8 @@ const AppContent = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/team"
-        element={
-          <ProtectedRoute>
-            {Lazy(<TeamManagement />)}
-          </ProtectedRoute>
-        }
-      />
+      {/* Gestão de Equipe virou uma aba dentro de /settings */}
+      <Route path="/team" element={<Navigate to="/settings" replace />} />
       <Route
         path="/app/help"
         element={

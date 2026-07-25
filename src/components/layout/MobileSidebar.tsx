@@ -44,7 +44,6 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose })
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics', requiresFeature: 'hasAdvancedAnalytics' as const },
     { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty', requiresFeature: 'hasLoyaltyProgram' as const },
-    { icon: Users, label: 'Equipe', path: '/team', requiresFeature: 'hasTeamManagement' as const },
     { icon: Crown, label: 'Planos', path: '/app/planos' },
     { icon: HelpCircle, label: 'Ajuda', path: '/app/help' },
     { icon: Settings, label: 'Configurações', path: '/settings' },

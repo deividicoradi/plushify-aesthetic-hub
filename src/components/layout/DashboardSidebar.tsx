@@ -39,7 +39,6 @@ const DashboardSidebar = () => {
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics', requiresFeature: 'hasAdvancedAnalytics' as const },
     { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty', requiresFeature: 'hasLoyaltyProgram' as const },
-    { icon: Users, label: 'Equipe', path: '/team', requiresFeature: 'hasTeamManagement' as const },
     { icon: HelpCircle, label: 'Ajuda', path: '/app/help' },
   ];
 

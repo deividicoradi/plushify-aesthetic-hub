@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy, Loader2 } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy, Loader2, Users, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
+import { FeatureGuard } from '@/components/FeatureGuard';
+import { TeamManagement as TeamManagementComponent } from '@/components/premium/TeamManagement';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
@@ -158,7 +160,7 @@ const Settings = () => {
         </div>
         
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile" className="flex items-center gap-2 text-xs sm:text-sm">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Perfil</span>
@@ -169,8 +171,13 @@ const Settings = () => {
               <span className="hidden sm:inline">Conta</span>
               <span className="sm:hidden">Conta</span>
             </TabsTrigger>
+            <TabsTrigger value="team" className="flex items-center gap-2 text-xs sm:text-sm">
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Equipe</span>
+              <span className="sm:hidden">Equipe</span>
+            </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="profile" className="space-y-6">
             <Card className="border shadow-sm">
               <CardHeader className="pb-4">
@@ -402,6 +409,25 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="team" className="space-y-6">
+            <FeatureGuard
+              planFeature="hasTeamManagement"
+              fallback={
+                <div className="text-center py-8 sm:py-12">
+                  <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                  <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-1 sm:mb-2">
+                    Gestão de Equipe
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Esta funcionalidade está disponível apenas para assinantes Premium.
+                  </p>
+                </div>
+              }
+            >
+              <TeamManagementComponent />
+            </FeatureGuard>
           </TabsContent>
         </Tabs>
       </div>
