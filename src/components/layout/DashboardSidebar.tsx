@@ -20,12 +20,14 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const DashboardSidebar = () => {
   const location = useLocation();
   const { signOut } = useAuth();
+  const { hasFeature } = usePlanLimits();
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -35,11 +37,11 @@ const DashboardSidebar = () => {
     { icon: Package, label: 'Estoque', path: '/inventory' },
     { icon: CreditCard, label: 'Financeiro', path: '/financial' },
     { icon: PieChart, label: 'Painel Financeiro', path: '/financial-dashboard' },
-    { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics', premium: true },
+    { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics', requiresFeature: 'hasAdvancedAnalytics' as const },
     { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty' },
-    { icon: Ticket, label: 'Pacotes', path: '/packages', premium: true },
-    { icon: Users, label: 'Equipe', path: '/team', premium: true },
+    { icon: Ticket, label: 'Pacotes', path: '/packages', requiresFeature: 'hasServicePackages' as const },
+    { icon: Users, label: 'Equipe', path: '/team', requiresFeature: 'hasTeamManagement' as const },
     { icon: HelpCircle, label: 'Ajuda', path: '/app/help' },
   ];
 
@@ -82,8 +84,11 @@ const DashboardSidebar = () => {
                   aria-hidden="true"
                   />
                   <span className="truncate">{item.label}</span>
-                  {item.premium && (
-                    <Crown className="h-4 w-4 text-yellow-500 ml-auto flex-shrink-0" />
+                  {item.requiresFeature && !hasFeature(item.requiresFeature) && (
+                    <Crown
+                      className="h-4 w-4 text-yellow-500 ml-auto flex-shrink-0"
+                      aria-label="Recurso exclusivo de planos superiores"
+                    />
                   )}
                 </Link>
               </li>
