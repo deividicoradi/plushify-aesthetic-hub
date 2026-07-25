@@ -3,8 +3,8 @@ import { useTeamMembers } from './useTeamMembers';
 import { useToast } from './use-toast';
 
 export const useTeamLimits = () => {
-  const { getUserLimitsInfo, hasReachedLimit } = usePlanLimits();
-  const { teamMembers } = useTeamMembers();
+  const { getUserLimitsInfo, hasReachedLimit, loading: planLoading } = usePlanLimits();
+  const { teamMembers, loading: teamLoading } = useTeamMembers();
   const { toast } = useToast();
 
   const activeTeamMembers = teamMembers.filter(member => member.status === 'active');
@@ -71,6 +71,7 @@ export const useTeamLimits = () => {
   return {
     currentActiveUsers,
     activeUsersLimit,
+    loading: planLoading || teamLoading,
     checkUserLimit,
     getUserLimitInfo,
     getUpgradeInfo,

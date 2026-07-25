@@ -15,14 +15,28 @@ export const UserLimitDisplay = ({
   showUpgradeButton = true, 
   variant = 'card' 
 }: UserLimitDisplayProps) => {
-  const { getUserLimitInfo, getUpgradeInfo } = useTeamLimits();
+  const { getUserLimitInfo, getUpgradeInfo, loading } = useTeamLimits();
   const navigate = useNavigate();
-  
+
   const limitInfo = getUserLimitInfo();
   const upgradeInfo = getUpgradeInfo();
-  
+
   const isAtLimit = limitInfo.current >= (limitInfo.limit as number);
   const isNearLimit = limitInfo.percentage >= 80;
+
+  // Enquanto o plano ainda está carregando, activeUsersLimit vem do valor
+  // inicial de useSubscription (sempre 'trial'/1) até a busca real
+  // terminar — sem isso, uma conta Professional/Premium via "plano Trial"
+  // piscando por ~1-3s toda vez que entra nesta tela, mesmo com os números
+  // corretos no fim.
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
+        <Users className="w-4 h-4" />
+        <span>Carregando uso de usuários...</span>
+      </div>
+    );
+  }
 
   if (variant === 'minimal') {
     return (

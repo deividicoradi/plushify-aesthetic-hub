@@ -131,7 +131,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
 };
 
 export const usePlanLimits = () => {
-  const { currentPlan } = useSubscription();
+  const { currentPlan, loading } = useSubscription();
 
   const limits = PLAN_LIMITS[currentPlan];
 
@@ -164,6 +164,7 @@ export const usePlanLimits = () => {
   return {
     limits,
     currentPlan,
+    loading,
     isLimited,
     getLimit,
     hasReachedLimit,
