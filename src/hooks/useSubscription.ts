@@ -54,7 +54,18 @@ export const useSubscription = () => {
 
       if (data) {
         setSubscription(data);
-        setCurrentPlan(data.plan_type);
+        // Mesma lógica de public.get_user_plan() no banco: trial_ends_at ou
+        // expires_at vencidos rebaixam o plano efetivo pra 'trial' mesmo com
+        // a linha ainda status='active' (nada re-escreve plan_type no banco
+        // quando vence — o rebaixamento é só de leitura, em todo lugar que
+        // decide o plano). Antes disso, currentPlan usava plan_type cru e
+        // ignorava as duas datas: uma assinatura paga vencida continuava
+        // liberada no app indefinidamente.
+        const now = new Date();
+        const trialActive = !!data.trial_ends_at && new Date(data.trial_ends_at) > now;
+        const notExpired = !data.expires_at || new Date(data.expires_at) > now;
+        const effectivePlan: PlanType = trialActive ? 'trial' : (notExpired ? data.plan_type : 'trial');
+        setCurrentPlan(effectivePlan);
       } else {
         // No active subscription found, default to trial
         setCurrentPlan('trial');

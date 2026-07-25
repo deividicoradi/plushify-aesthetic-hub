@@ -6,7 +6,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 
 // Rotas acessíveis mesmo com o trial vencido — precisa conseguir assinar um
 // plano, pedir ajuda, ver/editar a conta e sair, mesmo sem acesso ao app.
-const TRIAL_EXPIRED_ALLOWED_ROUTES = ['/app/planos', '/app/help', '/settings', '/profile'];
+const PLAN_EXPIRED_ALLOWED_ROUTES = ['/app/planos', '/app/help', '/settings', '/profile'];
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
@@ -55,23 +55,30 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     />;
   }
 
-  // SEGURANÇA: trial vencido (trial_ends_at no passado) — bloqueia o app
-  // inteiro e redireciona pra assinatura, mantendo os dados já cadastrados
-  // (não apaga nada, só corta o acesso). trial_ends_at é gravado certo na
-  // criação do trial (start-trial → start_subscription, +3 dias), mas até
-  // aqui nada no sistema o consultava pra decidir acesso — o "teste de 3
-  // dias" nunca expirava de fato.
+  // SEGURANÇA: trial ou plano pago vencido — bloqueia o app inteiro e
+  // redireciona pra assinatura, mantendo os dados já cadastrados (não apaga
+  // nada, só corta o acesso). Usa subscription.plan_type (o valor cru salvo
+  // no banco) em vez de currentPlan porque currentPlan já vem rebaixado pra
+  // 'trial' pelo useSubscription quando a data vence — precisamos saber que
+  // o plano ERA pago pra mostrar a mensagem certa ("assinatura venceu" em
+  // vez de "teste acabou").
   const isTrialExpired =
-    currentPlan === 'trial' &&
+    subscription?.plan_type === 'trial' &&
     !!subscription?.trial_ends_at &&
     new Date(subscription.trial_ends_at) < new Date();
 
-  if (isTrialExpired && !TRIAL_EXPIRED_ALLOWED_ROUTES.some(route => location.pathname.startsWith(route))) {
-    console.log('SECURITY: Trial expired, redirecting to plans');
-    return <Navigate to="/app/planos" replace state={{
-      message: 'Seu período de teste de 3 dias terminou. Escolha um plano para continuar usando o Plushify — seus dados continuam salvos.',
-      from: location
-    }} />;
+  const isPaidPlanExpired =
+    !!subscription &&
+    subscription.plan_type !== 'trial' &&
+    !!subscription.expires_at &&
+    new Date(subscription.expires_at) < new Date();
+
+  if ((isTrialExpired || isPaidPlanExpired) && !PLAN_EXPIRED_ALLOWED_ROUTES.some(route => location.pathname.startsWith(route))) {
+    console.log('SECURITY: Plan expired, redirecting to plans', { isTrialExpired, isPaidPlanExpired });
+    const message = isPaidPlanExpired
+      ? 'Sua assinatura venceu. Renove seu plano para continuar usando o Plushify — seus dados continuam salvos.'
+      : 'Seu período de teste de 3 dias terminou. Escolha um plano para continuar usando o Plushify — seus dados continuam salvos.';
+    return <Navigate to="/app/planos" replace state={{ message, from: location }} />;
   }
 
   // SEGURANÇA: Verificar acesso a funcionalidades premium para usuários trial

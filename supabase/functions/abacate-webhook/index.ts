@@ -43,9 +43,12 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 // fica só no webhookSecret da URL — camada única, mas real e funcional.
 //
 // REVOGAÇÃO (cancelamento, reembolso, disputa): as três chamam a mesma RPC
-// cancel_subscription, cada uma com um status diferente ('cancelled' /
-// 'refunded' / 'disputed') — get_user_plan() já ignora linhas não-ativas e
-// volta pro trial automaticamente, então não precisa mexer em plan_type.
+// cancel_subscription. Reembolso/disputa cortam o acesso na hora (status
+// vira 'refunded'/'disputed', get_user_plan() ignora linhas não-ativas e
+// volta pro trial automaticamente). Cancelamento voluntário é gracioso —
+// mantém status='active' e marca cancel_at_period_end=true, então o acesso
+// segue liberado até expires_at vencer sozinho (mesma lógica de sempre,
+// sem precisar mexer em plan_type nem status antes da hora).
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -171,11 +174,17 @@ Deno.serve(async (req) => {
         auth: { autoRefreshToken: false, persistSession: false },
       })
 
+      // Cancelamento voluntário (subscription.cancelled) honra o acesso até
+      // o fim do período pago (immediate=false); reembolso/disputa revogam
+      // na hora, pois o dinheiro já voltou.
+      const immediate = revocationStatus !== 'cancelled'
+
       const { data: cancelled, error: cancelError } = await admin.rpc('cancel_subscription', {
         p_user_id: cancelUserId,
         p_abacate_subscription_id: cancelSubscriptionId,
         p_abacate_checkout_id: cancelCheckoutId,
         p_status: revocationStatus,
+        p_immediate: immediate,
       })
 
       if (cancelError) {
@@ -252,8 +261,10 @@ Deno.serve(async (req) => {
     const abacateCheckoutId = checkoutObj.id ? String(checkoutObj.id) : null
 
     // AJUSTAR: nome real do campo de próxima cobrança de assinatura mensal
-    // não confirmado na documentação.
-    let currentPeriodEnd = sub.nextBillingDate ? String(sub.nextBillingDate) : null
+    // não confirmado na documentação — tentamos as variações mais prováveis.
+    let currentPeriodEnd = (sub.nextBillingDate ?? sub.next_billing_date ?? sub.currentPeriodEnd ?? sub.current_period_end)
+      ? String(sub.nextBillingDate ?? sub.next_billing_date ?? sub.currentPeriodEnd ?? sub.current_period_end)
+      : null
 
     // Checkout anual é pagamento único — não existe "próxima cobrança" vinda da
     // AbacatePay. Calculamos nós mesmos: acesso válido por 1 ano a partir de agora.
@@ -261,6 +272,20 @@ Deno.serve(async (req) => {
       const oneYearFromNow = new Date()
       oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1)
       currentPeriodEnd = oneYearFromNow.toISOString()
+    }
+
+    // Fallback de segurança pra assinatura mensal: se nenhuma das variações
+    // acima bateu com o payload real, currentPeriodEnd ficaria NULL — que pro
+    // banco (get_user_plan) significa "nunca expira". Antes desta mudança,
+    // uma falha de cobrança silenciosa (cartão vencido sem a AbacatePay
+    // nunca mandar subscription.cancelled) deixava o usuário com acesso pago
+    // de graça pra sempre. +1 mês é conservador: se o campo certo vier numa
+    // renovação futura, a data real substitui esta; se nunca vier, o pior
+    // caso é perder acesso até 1 mês depois do esperado — não nunca.
+    if (!isAnnualCheckout && !currentPeriodEnd) {
+      const oneMonthFromNow = new Date()
+      oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1)
+      currentPeriodEnd = oneMonthFromNow.toISOString()
     }
 
     // CONFIRMADO via payload real: checkout.completed não tem "method" singular —
