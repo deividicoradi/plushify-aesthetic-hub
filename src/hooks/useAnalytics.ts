@@ -37,7 +37,6 @@ const getPageName = (pathname: string): string => {
     '/financial': 'Financeiro',
     '/financial-dashboard': 'Dashboard Financeiro',
     '/services': 'Serviços',
-    '/reports': 'Relatórios',
     '/settings': 'Configurações',
     '/notes': 'Notas',
     '/loyalty': 'Fidelidade',

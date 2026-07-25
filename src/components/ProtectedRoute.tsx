@@ -52,7 +52,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   // SEGURANÇA: Verificar acesso a funcionalidades premium para usuários trial
-  const restrictedRoutes = ['/inventory', '/reports'];
+  const restrictedRoutes = ['/inventory'];
   const financialAdvancedFeatures = ['/financial/installments', '/financial/reports'];
 
   if (currentPlan === 'trial') {
@@ -74,7 +74,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   // SEGURANÇA: Verificar se é uma rota que requer assinatura paga
-  const paidRoutes = ['/dashboard', '/clients', '/appointments', '/financial', '/inventory', '/reports'];
+  const paidRoutes = ['/dashboard', '/clients', '/appointments', '/financial', '/inventory'];
   const requiresPaidPlan = paidRoutes.some(route => location.pathname.startsWith(route));
   
   if (requiresPaidPlan && currentPlan === 'trial') {

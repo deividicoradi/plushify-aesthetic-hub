@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
+import { FeatureGuard } from '@/components/FeatureGuard';
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Download, TrendingUp } from 'lucide-react';
 import { useFinancialData } from '@/hooks/useFinancialData';
@@ -79,24 +80,26 @@ const FinancialDashboard = () => {
         </div>
       }
     >
-      {/* Métricas principais */}
-      {metrics && (
-        <MetricsCards metrics={metrics} loading={loading} dateRange={dateRange} />
-      )}
+      <FeatureGuard planFeature="hasFinancialManagement" showUpgradePrompt={true}>
+        {/* Métricas principais */}
+        {metrics && (
+          <MetricsCards metrics={metrics} loading={loading} dateRange={dateRange} />
+        )}
 
-      {/* Alertas */}
-      {metrics && (
-        <FinancialAlerts metrics={metrics} loading={loading} />
-      )}
+        {/* Alertas */}
+        {metrics && (
+          <FinancialAlerts metrics={metrics} loading={loading} />
+        )}
 
-      {/* Gráficos */}
-      <FinancialCharts 
-        monthlyData={monthlyData}
-        expensesByCategory={expensesByCategory}
-        revenueByMethod={revenueByMethod}
-        loading={loading}
-        selectedPeriod={selectedPeriod}
-      />
+        {/* Gráficos */}
+        <FinancialCharts
+          monthlyData={monthlyData}
+          expensesByCategory={expensesByCategory}
+          revenueByMethod={revenueByMethod}
+          loading={loading}
+          selectedPeriod={selectedPeriod}
+        />
+      </FeatureGuard>
     </ResponsiveLayout>
   );
 };

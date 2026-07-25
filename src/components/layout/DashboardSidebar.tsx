@@ -8,7 +8,6 @@ import {
   Users,
   Settings,
   Package,
-  BarChart3,
   Wrench,
   StickyNote,
   Heart,
@@ -36,7 +35,6 @@ const DashboardSidebar = () => {
     { icon: Package, label: 'Estoque', path: '/inventory' },
     { icon: CreditCard, label: 'Financeiro', path: '/financial' },
     { icon: PieChart, label: 'Painel Financeiro', path: '/financial-dashboard' },
-    { icon: BarChart3, label: 'Relatórios', path: '/reports' },
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics', premium: true },
     { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty' },
@@ -84,6 +82,9 @@ const DashboardSidebar = () => {
                   aria-hidden="true"
                   />
                   <span className="truncate">{item.label}</span>
+                  {item.premium && (
+                    <Crown className="h-4 w-4 text-yellow-500 ml-auto flex-shrink-0" />
+                  )}
                 </Link>
               </li>
             );

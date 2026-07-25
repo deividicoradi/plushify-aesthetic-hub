@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useReportsData } from '@/hooks/useReportsData';
+import { useFinancialOverview } from '@/hooks/financial/useFinancialOverview';
 import { useAnalyticsChartData } from '@/hooks/analytics/useAnalyticsData';
 import { useAnalyticsKPIs } from '@/hooks/analytics/useAnalyticsKPIs';
 import { useTimeAnalysis } from '@/hooks/analytics/useTimeAnalysis';
@@ -16,11 +16,9 @@ import { DetailsListModal, DetailsSection } from '@/components/common/DetailsLis
 import AnalyticsPipelineCharts from './AnalyticsPipelineCharts';
 import AnalyticsPerformanceCharts from './AnalyticsPerformanceCharts';
 import AnalyticsInsights from './AnalyticsInsights';
-import PaymentMethodChart from './PaymentMethodChart';
 import AppointmentStatusChart from './AppointmentStatusChart';
 import ClientGrowthChart from './ClientGrowthChart';
 import WeeklyPatternChart from './WeeklyPatternChart';
-import RevenueVsExpensesChart from './RevenueVsExpensesChart';
 import ServicePerformanceChart from './ServicePerformanceChart';
 
 const currency = (v: number) =>
@@ -42,17 +40,15 @@ export const AnalyticsDashboard: React.FC = () => {
     startDate: range.startDate,
     endDate: range.endDate,
   });
-  const reportsData = useReportsData();
+  const { metrics: financialOverview, loading: overviewLoading } = useFinancialOverview(range);
   const {
     pipelineByAmountData,
     pipelineByCountData,
     quarterlyData,
     monthlyRevenueData,
-    paymentMethodData,
     appointmentStatusData,
     clientGrowthData,
     weeklyPatternData,
-    revenueVsExpensesData,
     servicePerformanceData,
     loading: chartLoading,
   } = useAnalyticsChartData({ startDate: range.startDate, endDate: range.endDate });
@@ -90,7 +86,7 @@ export const AnalyticsDashboard: React.FC = () => {
     />
   );
 
-  if (kpisLoading || reportsData.loading || chartLoading || !kpis) {
+  if (kpisLoading || overviewLoading || chartLoading || !kpis) {
     return (
       <div className="space-y-4 sm:space-y-6">
         {filterBar}
@@ -245,7 +241,7 @@ export const AnalyticsDashboard: React.FC = () => {
         monthlyRevenue={kpis.monthlyRevenue}
         weeklyAppointments={kpis.weeklyAppointments}
         ticketMedio={kpis.ticketMedio}
-        revenueGrowth={reportsData.metrics?.revenueGrowth}
+        revenueGrowth={financialOverview?.crescimentoReceitas}
         onCardClick={(k) => setOpenCard(k)}
       />
 
@@ -260,12 +256,6 @@ export const AnalyticsDashboard: React.FC = () => {
         quarterlyData={quarterlyData}
         monthlyRevenueData={monthlyRevenueData}
       />
-
-      {/* Análises Financeiras */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-        <PaymentMethodChart data={paymentMethodData} />
-        <RevenueVsExpensesChart data={revenueVsExpensesData} />
-      </div>
 
       {/* Análises de Agendamentos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">

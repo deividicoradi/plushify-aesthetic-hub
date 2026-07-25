@@ -37,7 +37,6 @@ const Appointments = lazy(() => import("./pages/Appointments"));
 const Clients = lazy(() => import("./pages/Clients"));
 const Financial = lazy(() => import("./pages/Financial"));
 const Services = lazy(() => import("./pages/Services"));
-const Reports = lazy(() => import("./pages/Reports"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Notes = lazy(() => import("./pages/Notes"));
@@ -137,14 +136,6 @@ const AppContent = () => {
         element={
           <ProtectedRoute>
             {Lazy(<Services />)}
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/reports"
-        element={
-          <ProtectedRoute>
-            {Lazy(<Reports />)}
           </ProtectedRoute>
         }
       />
