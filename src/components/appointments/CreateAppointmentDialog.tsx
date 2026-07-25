@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, Package, UserCheck, Search } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Package, UserCheck, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useServices } from '@/hooks/useServices';
 import { useProfessionals } from '@/hooks/useProfessionals';
@@ -194,7 +196,7 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
+            <CalendarIcon className="w-5 h-5" />
             Novo Agendamento
           </DialogTitle>
         </DialogHeader>
@@ -354,17 +356,36 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
             {/* Date */}
             <div className="space-y-2">
               <Label htmlFor="date" className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+                <CalendarIcon className="w-4 h-4" />
                 Data *
               </Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.appointment_date}
-                onChange={(e) => handleInputChange('appointment_date', e.target.value)}
-                min={today}
-                required
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="date"
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.appointment_date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.appointment_date
+                      ? format(new Date(`${formData.appointment_date}T00:00:00`), 'dd/MM/yyyy')
+                      : 'Selecionar data'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.appointment_date ? new Date(`${formData.appointment_date}T00:00:00`) : undefined}
+                    onSelect={(date) => handleInputChange('appointment_date', date ? format(date, 'yyyy-MM-dd') : '')}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Time */}
