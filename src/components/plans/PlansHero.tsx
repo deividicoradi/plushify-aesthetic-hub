@@ -8,7 +8,7 @@ export const PlansHero: React.FC = () => {
       {/* Badge */}
       <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 text-primary rounded-full text-sm font-medium shadow-lg backdrop-blur-sm hover:scale-105 transition-transform duration-300">
         <Rocket className="w-4 h-4" />
-        <span>🔥 Oferta Limitada - Apenas este mês!</span>
+        <span>Comece com 3 dias grátis</span>
       </div>
 
       {/* Main Title */}
@@ -36,7 +36,7 @@ export const PlansHero: React.FC = () => {
         
         <div className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800 shadow-md hover:shadow-lg transition-shadow">
           <Shield className="w-5 h-5" />
-          <span className="font-semibold">Garantia de 30 dias</span>
+          <span className="font-semibold">Cancele quando quiser</span>
         </div>
       </div>
 
@@ -44,7 +44,7 @@ export const PlansHero: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
         <div className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
           <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
-          <span className="text-sm font-medium">Agendamento Automático</span>
+          <span className="text-sm font-medium">Agenda Online para Clientes</span>
         </div>
         <div className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
           <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
@@ -52,7 +52,7 @@ export const PlansHero: React.FC = () => {
         </div>
         <div className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
           <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
-          <span className="text-sm font-medium">Relatórios Inteligentes</span>
+          <span className="text-sm font-medium">Relatórios Detalhados</span>
         </div>
       </div>
     </div>

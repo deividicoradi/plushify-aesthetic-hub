@@ -11,9 +11,6 @@ interface PlanLimits {
   hasAdvancedReports: boolean;
   hasAdvancedAnalytics: boolean;
   hasTeamManagement: boolean;
-  hasAutomaticBackup: boolean;
-  hasPrioritySupport: boolean;
-  has24_7Support: boolean;
   hasInventoryAdvanced: boolean;
   hasReportsBasic: boolean;
   hasReportsDetailed: boolean;
@@ -38,9 +35,6 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasAdvancedReports: false,
     hasAdvancedAnalytics: false,
     hasTeamManagement: false,
-    hasAutomaticBackup: false,
-    hasPrioritySupport: false,
-    has24_7Support: false,
     hasInventoryAdvanced: false,
     hasReportsBasic: false,
     hasReportsDetailed: false,
@@ -63,9 +57,6 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasAdvancedReports: false,
     hasAdvancedAnalytics: false,
     hasTeamManagement: true, // has_feature_access('team_management') no banco também libera Professional (até 2 usuários)
-    hasAutomaticBackup: false,
-    hasPrioritySupport: true,
-    has24_7Support: false,
     hasInventoryAdvanced: false,
     hasReportsBasic: true,
     hasReportsDetailed: false, // "detalhado"/exportação é exclusivo do Premium — Professional só tem básico
@@ -88,9 +79,6 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasAdvancedReports: true,
     hasAdvancedAnalytics: true,
     hasTeamManagement: true,
-    hasAutomaticBackup: true,
-    hasPrioritySupport: true,
-    has24_7Support: true,
     hasInventoryAdvanced: true,
     hasReportsBasic: true,
     hasReportsDetailed: true,
@@ -113,9 +101,6 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasAdvancedReports: true,
     hasAdvancedAnalytics: true,
     hasTeamManagement: true,
-    hasAutomaticBackup: true,
-    hasPrioritySupport: true,
-    has24_7Support: true,
     hasInventoryAdvanced: true,
     hasReportsBasic: true,
     hasReportsDetailed: true,

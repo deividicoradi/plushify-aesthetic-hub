@@ -44,7 +44,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
             </div>
           </Button>
           <div className="text-sm text-muted-foreground">
-            Comece hoje mesmo • Sem cartão de crédito • Suporte direto com o fundador
+            Comece hoje mesmo • Sem cartão de crédito • Cancele quando quiser
           </div>
         </div>
       </CardContent>
