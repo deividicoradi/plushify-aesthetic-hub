@@ -1,11 +1,20 @@
 import React from 'react';
-import { UserX, Send, Check } from 'lucide-react';
+import { UserX, Send, Check, Phone, Calendar } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useReturnReminders } from '@/hooks/clients/useReturnReminders';
 import { buildReturnReminderMessage } from '@/utils/clients/returnReminderMessage';
 import { buildWhatsAppLink } from '@/utils/appointments/reminderMessage';
+
+const getInitials = (name: string) =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
 
 export const ReturnRemindersPanel = () => {
   const { lapsedClients, isLoading, markReminderSent, thresholdDays } = useReturnReminders();
@@ -50,12 +59,23 @@ export const ReturnRemindersPanel = () => {
                   key={client.id}
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-md border p-3 text-sm"
                 >
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{client.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Sem visita há {client.daysSinceVisit} dias
-                      {!client.phone && ' · sem telefone cadastrado'}
-                    </p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="shrink-0 w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
+                      {getInitials(client.name)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{client.name}</p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          Última visita: {format(parseISO(client.last_visit), 'dd/MM/yyyy')} ({client.daysSinceVisit} dias)
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Phone className="w-3 h-3" />
+                          {client.phone || 'sem telefone cadastrado'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {wasSent && (
