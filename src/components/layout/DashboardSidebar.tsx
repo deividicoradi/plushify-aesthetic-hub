@@ -16,7 +16,8 @@ import {
   CreditCard,
   TrendingUp,
   Crown,
-  PieChart
+  PieChart,
+  Ticket
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,6 +40,7 @@ const DashboardSidebar = () => {
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics', premium: true },
     { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty' },
+    { icon: Ticket, label: 'Pacotes', path: '/packages', premium: true },
     { icon: Users, label: 'Equipe', path: '/team', premium: true },
     { icon: HelpCircle, label: 'Ajuda', path: '/app/help' },
   ];

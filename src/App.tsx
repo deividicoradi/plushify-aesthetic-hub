@@ -42,6 +42,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Notes = lazy(() => import("./pages/Notes"));
 const Loyalty = lazy(() => import("./pages/Loyalty"));
+const Packages = lazy(() => import("./pages/Packages"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const AdvancedAnalytics = lazy(() => import("./pages/AdvancedAnalytics"));
 const FinancialDashboard = lazy(() => import("./pages/FinancialDashboard"));
@@ -176,6 +177,14 @@ const AppContent = () => {
         element={
           <ProtectedRoute>
             {Lazy(<Loyalty />)}
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/packages"
+        element={
+          <ProtectedRoute>
+            {Lazy(<Packages />)}
           </ProtectedRoute>
         }
       />

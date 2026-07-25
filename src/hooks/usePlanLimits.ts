@@ -24,6 +24,7 @@ interface PlanLimits {
   hasRecurringPayments: boolean;
   hasMultiplePaymentMethods: boolean;
   hasCommissions: boolean;
+  hasServicePackages: boolean;
 }
 
 const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
@@ -50,6 +51,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasRecurringPayments: false,
     hasMultiplePaymentMethods: false,
     hasCommissions: false,
+    hasServicePackages: false,
   },
   professional: {
     clients: -1, // unlimited
@@ -74,6 +76,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasRecurringPayments: false,
     hasMultiplePaymentMethods: true,
     hasCommissions: false, // comissão por profissional é diferencial exclusivo do Premium
+    hasServicePackages: false, // pacotes de serviços é diferencial exclusivo do Premium
   },
   premium: {
     clients: -1, // unlimited
@@ -98,6 +101,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasRecurringPayments: true,
     hasMultiplePaymentMethods: true,
     hasCommissions: true,
+    hasServicePackages: true,
   },
   enterprise: {
     clients: -1, // unlimited
@@ -122,6 +126,7 @@ const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     hasRecurringPayments: true,
     hasMultiplePaymentMethods: true,
     hasCommissions: true,
+    hasServicePackages: true,
   },
 };
 

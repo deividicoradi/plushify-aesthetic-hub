@@ -16,7 +16,8 @@ import {
   CreditCard,
   TrendingUp,
   Crown,
-  PieChart
+  PieChart,
+  Ticket
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -44,6 +45,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose })
     { icon: TrendingUp, label: 'Analytics Avançado', path: '/analytics', premium: true },
     { icon: StickyNote, label: 'Anotações', path: '/notes' },
     { icon: Heart, label: 'Fidelidade', path: '/loyalty' },
+    { icon: Ticket, label: 'Pacotes', path: '/packages', premium: true },
     { icon: Users, label: 'Equipe', path: '/team', premium: true },
     { icon: Crown, label: 'Planos', path: '/app/planos' },
     { icon: HelpCircle, label: 'Ajuda', path: '/app/help' },

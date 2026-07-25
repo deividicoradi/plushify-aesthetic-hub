@@ -13,6 +13,9 @@ import { useServices } from '@/hooks/useServices';
 import { useProfessionals } from '@/hooks/useProfessionals';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useAvailableSlots } from '@/hooks/useAvailableSlots';
+import { useClients } from '@/hooks/useClients';
+import { useClientPackageBalance } from '@/hooks/packages/useClientPackages';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -25,18 +28,21 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
   const { createAppointment, appointments } = useAppointments();
   const { services } = useServices();
   const { professionals, getProfessionalsByService } = useProfessionals();
+  const { clients } = useClients();
   const { hasReachedLimit } = usePlanLimits();
   const { slots, fetchAvailableSlots } = useAvailableSlots();
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serviceSearchOpen, setServiceSearchOpen] = useState(false);
   const [professionalSearchOpen, setProfessionalSearchOpen] = useState(false);
+  const [clientSearchOpen, setClientSearchOpen] = useState(false);
   const [availableProfessionals, setAvailableProfessionals] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [selectedProfessional, setSelectedProfessional] = useState<any>(null);
-  
+
   const [formData, setFormData] = useState({
     client_name: '',
+    client_id: '',
     service_id: '',
     service_name: '',
     professional_id: '',
@@ -46,6 +52,8 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
     price: 0,
     notes: ''
   });
+
+  const { activePackage } = useClientPackageBalance(formData.client_id || undefined, formData.service_id || undefined);
 
   // Validação de data retroativa (fuso local — perto da meia-noite no Brasil,
   // toISOString().split('T')[0] "viraria" o dia seguinte e bloquearia agendar
@@ -139,6 +147,7 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
     try {
       const appointmentPayload = {
         client_name: formData.client_name,
+        client_id: formData.client_id || undefined,
         service_name: formData.service_name,
         service_id: formData.service_id,
         professional_id: formData.professional_id,
@@ -156,6 +165,7 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
         // Reset form
         setFormData({
           client_name: '',
+          client_id: '',
           service_id: '',
           service_name: '',
           professional_id: '',
@@ -193,17 +203,55 @@ export const CreateAppointmentDialog = ({ open, onOpenChange }: CreateAppointmen
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Client */}
             <div className="space-y-2">
-              <Label htmlFor="client" className="flex items-center gap-2">
+              <Label className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Cliente *
               </Label>
-              <Input
-                id="client"
-                placeholder="Nome do cliente"
-                value={formData.client_name}
-                onChange={(e) => handleInputChange('client_name', e.target.value)}
-                required
-              />
+              <Popover open={clientSearchOpen} onOpenChange={setClientSearchOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between font-normal"
+                  >
+                    <span className="truncate">{formData.client_name || 'Nome do cliente'}</span>
+                    <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Buscar cliente ou digitar novo nome..."
+                      value={formData.client_name}
+                      onValueChange={(value) => {
+                        setFormData((prev) => ({ ...prev, client_name: value, client_id: '' }));
+                      }}
+                    />
+                    <CommandEmpty>Nenhum cliente cadastrado com esse nome — será salvo sem cadastro vinculado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup>
+                        {clients.map((client) => (
+                          <CommandItem
+                            key={client.id}
+                            value={client.name}
+                            onSelect={() => {
+                              setFormData((prev) => ({ ...prev, client_name: client.name, client_id: client.id }));
+                              setClientSearchOpen(false);
+                            }}
+                          >
+                            {client.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {activePackage && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  Pacote ativo: {activePackage.sessions_used}/{activePackage.total_sessions} sessões usadas
+                </Badge>
+              )}
             </div>
 
             {/* Service Search */}
