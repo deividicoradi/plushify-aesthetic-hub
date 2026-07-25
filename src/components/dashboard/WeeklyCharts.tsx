@@ -11,6 +11,7 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
+import { useTheme } from '@/components/theme-provider';
 
 interface WeeklyChartsProps {
   chartData: Array<{
@@ -20,15 +21,6 @@ interface WeeklyChartsProps {
   }>;
   formatCurrency: (value: number) => string;
 }
-
-const tooltipStyle = {
-  backgroundColor: '#1a1322',
-  border: '1px solid rgba(214,94,154,0.3)',
-  borderRadius: '12px',
-  color: '#fff',
-  fontSize: '12px',
-  padding: '8px 12px',
-};
 
 const ChartShell = ({
   Icon,
@@ -41,17 +33,17 @@ const ChartShell = ({
   subtitle: string;
   children: React.ReactNode;
 }) => (
-  <div className="bg-[#1a1322] border border-white/5 rounded-3xl p-6 flex flex-col">
+  <div className="bg-card dark:bg-[#1a1322] border border-border dark:border-white/5 rounded-3xl p-6 flex flex-col">
     <div className="flex items-center justify-between mb-5">
       <div className="flex items-center gap-3">
         <div className="p-2 bg-[#D65E9A]/10 rounded-xl">
           <Icon className="w-5 h-5 text-[#D65E9A]" />
         </div>
         <div>
-          <h3 className="text-white font-bold font-[Sora,system-ui,sans-serif] text-base leading-tight">
+          <h3 className="text-foreground dark:text-white font-bold font-[Sora,system-ui,sans-serif] text-base leading-tight">
             {title}
           </h3>
-          <p className="text-gray-500 text-xs mt-0.5">{subtitle}</p>
+          <p className="text-muted-foreground text-xs mt-0.5">{subtitle}</p>
         </div>
       </div>
     </div>
@@ -60,11 +52,24 @@ const ChartShell = ({
 );
 
 const EmptyState = ({ message }: { message: string }) => (
-  <div className="h-full flex items-center justify-center text-gray-500 text-sm">{message}</div>
+  <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{message}</div>
 );
 
 export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) => {
   const hasData = chartData && chartData.length > 0;
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
+  const gridStroke = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
+  const tickFill = isDark ? '#94a3b8' : '#64748b';
+  const tooltipStyle = {
+    backgroundColor: isDark ? '#1a1322' : '#ffffff',
+    border: '1px solid rgba(214,94,154,0.3)',
+    borderRadius: '12px',
+    color: isDark ? '#fff' : '#1a1322',
+    fontSize: '12px',
+    padding: '8px 12px',
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -82,9 +87,9 @@ export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) =
                   <stop offset="100%" stopColor="#D65E9A" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+              <XAxis dataKey="day" tick={{ fontSize: 11, fill: tickFill }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: tickFill }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: '#D65E9A', strokeOpacity: 0.3 }} />
               <Area
                 type="monotone"
@@ -93,7 +98,7 @@ export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) =
                 strokeWidth={3}
                 fill="url(#agArea)"
                 dot={{ fill: '#D65E9A', strokeWidth: 0, r: 4 }}
-                activeDot={{ r: 6, fill: '#D65E9A', stroke: '#1a1322', strokeWidth: 3 }}
+                activeDot={{ r: 6, fill: '#D65E9A', stroke: isDark ? '#1a1322' : '#ffffff', strokeWidth: 3 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -116,10 +121,10 @@ export const WeeklyCharts = ({ chartData, formatCurrency }: WeeklyChartsProps) =
                   <stop offset="100%" stopColor="#D65E9A" stopOpacity={0.35} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+              <XAxis dataKey="day" tick={{ fontSize: 11, fill: tickFill }} axisLine={false} tickLine={false} />
               <YAxis
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: tickFill }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(value) => formatCurrency(value)}

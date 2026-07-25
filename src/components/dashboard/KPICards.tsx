@@ -28,7 +28,7 @@ const KpiCard = ({ label, value, delta, Icon, onClick }: KpiProps) => (
   <button
     type="button"
     onClick={onClick}
-    className="group text-left bg-[#1a1322] hover:bg-[#2a1a2e] border border-white/5 hover:border-[#D65E9A]/30 p-6 rounded-3xl flex flex-col justify-between transition-all duration-300 min-h-[140px]"
+    className="group text-left bg-card hover:bg-muted dark:bg-[#1a1322] dark:hover:bg-[#2a1a2e] border border-border dark:border-white/5 hover:border-[#D65E9A]/30 p-6 rounded-3xl flex flex-col justify-between transition-all duration-300 min-h-[140px]"
   >
     <div className="flex justify-between items-start">
       <div className="p-2 bg-[#D65E9A]/10 rounded-xl group-hover:bg-[#D65E9A]/20 transition-colors">
@@ -48,8 +48,8 @@ const KpiCard = ({ label, value, delta, Icon, onClick }: KpiProps) => (
       )}
     </div>
     <div className="mt-4">
-      <p className="text-gray-400 text-sm">{label}</p>
-      <h3 className="text-2xl font-bold text-white mt-1 font-[Sora,system-ui,sans-serif] tracking-tight">
+      <p className="text-muted-foreground text-sm">{label}</p>
+      <h3 className="text-2xl font-bold text-foreground dark:text-white mt-1 font-[Sora,system-ui,sans-serif] tracking-tight">
         {value}
       </h3>
     </div>

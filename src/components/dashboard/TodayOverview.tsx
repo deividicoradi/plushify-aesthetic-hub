@@ -65,7 +65,7 @@ export const TodayOverview = () => {
   }, [appointments]);
 
   return (
-    <div className="relative overflow-hidden bg-[#1a1322] border border-white/5 rounded-3xl p-6 md:p-8">
+    <div className="relative overflow-hidden bg-card dark:bg-[#1a1322] border border-border dark:border-white/5 rounded-3xl p-6 md:p-8">
       <div className="absolute top-0 right-0 w-56 h-56 bg-[#D65E9A]/10 blur-3xl rounded-full pointer-events-none" />
 
       <div className="relative flex items-start justify-between gap-4 mb-6">
@@ -74,10 +74,10 @@ export const TodayOverview = () => {
             <Calendar className="w-4 h-4" />
             Hoje
           </div>
-          <h2 className="text-white text-lg md:text-xl font-bold font-[Sora,system-ui,sans-serif] mt-1 capitalize">
+          <h2 className="text-foreground dark:text-white text-lg md:text-xl font-bold font-[Sora,system-ui,sans-serif] mt-1 capitalize">
             {todayLabel}
           </h2>
-          <p className="text-gray-400 text-xs mt-1">Sua agenda e desempenho do dia</p>
+          <p className="text-muted-foreground text-xs mt-1">Sua agenda e desempenho do dia</p>
         </div>
         <button
           onClick={() => navigate('/appointments')}
@@ -104,15 +104,15 @@ export const TodayOverview = () => {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-wider text-[#D65E9A] font-semibold">Próximo</p>
-              <p className="text-white font-semibold truncate mt-0.5">{nextAppt.client_name}</p>
-              <p className="text-gray-400 text-xs truncate">{nextAppt.service_name}</p>
+              <p className="text-foreground dark:text-white font-semibold truncate mt-0.5">{nextAppt.client_name}</p>
+              <p className="text-muted-foreground text-xs truncate">{nextAppt.service_name}</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="text-right">
-                <p className="text-white font-bold tabular-nums font-[Sora,system-ui,sans-serif]">
+                <p className="text-foreground dark:text-white font-bold tabular-nums font-[Sora,system-ui,sans-serif]">
                   {formatHour(nextAppt.appointment_time)}
                 </p>
-                <p className="text-gray-500 text-[10px]">{nextAppt.duration} min</p>
+                <p className="text-muted-foreground text-[10px]">{nextAppt.duration} min</p>
               </div>
               <ArrowUpRight className="w-4 h-4 text-[#D65E9A] opacity-60 group-hover:opacity-100 transition" />
             </div>
@@ -123,7 +123,7 @@ export const TodayOverview = () => {
       {/* Schedule list */}
       <div className="relative space-y-2">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Agenda do dia</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Agenda do dia</h3>
           <button
             onClick={() => navigate('/appointments')}
             className="text-xs text-[#D65E9A] hover:underline font-medium"
@@ -133,12 +133,12 @@ export const TodayOverview = () => {
         </div>
 
         {isLoading ? (
-          <div className="text-gray-500 text-sm py-6 text-center">Carregando…</div>
+          <div className="text-muted-foreground text-sm py-6 text-center">Carregando…</div>
         ) : todays.length === 0 ? (
-          <div className="text-center py-8 px-4 rounded-2xl border border-dashed border-white/10">
-            <Clock className="w-6 h-6 text-gray-500 mx-auto mb-2" />
-            <p className="text-gray-300 text-sm font-medium">Nenhum agendamento hoje</p>
-            <p className="text-gray-500 text-xs mt-0.5">Aproveite para planejar a semana ✨</p>
+          <div className="text-center py-8 px-4 rounded-2xl border border-dashed border-border dark:border-white/10">
+            <Clock className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-foreground/80 dark:text-gray-300 text-sm font-medium">Nenhum agendamento hoje</p>
+            <p className="text-muted-foreground text-xs mt-0.5">Aproveite para planejar a semana ✨</p>
             <button
               onClick={() => navigate('/appointments')}
               className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-[#D65E9A] hover:bg-[#c44d87] text-white transition-all"
@@ -147,19 +147,19 @@ export const TodayOverview = () => {
             </button>
           </div>
         ) : (
-          <ul className="divide-y divide-white/5 max-h-80 overflow-y-auto pr-1">
+          <ul className="divide-y divide-border dark:divide-white/5 max-h-80 overflow-y-auto pr-1">
             {todays.slice(0, 6).map((a) => {
               const s = statusStyles[a.status] || statusStyles.agendado;
               return (
                 <li key={a.id} className="py-2.5 flex items-center gap-3">
                   <div className="w-14 shrink-0 text-center">
-                    <p className="text-white font-semibold tabular-nums font-[Sora,system-ui,sans-serif] text-sm">
+                    <p className="text-foreground dark:text-white font-semibold tabular-nums font-[Sora,system-ui,sans-serif] text-sm">
                       {formatHour(a.appointment_time)}
                     </p>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-white text-sm font-medium truncate">{a.client_name}</p>
-                    <p className="text-gray-500 text-xs truncate">{a.service_name}</p>
+                    <p className="text-foreground dark:text-white text-sm font-medium truncate">{a.client_name}</p>
+                    <p className="text-muted-foreground text-xs truncate">{a.service_name}</p>
                   </div>
                   <span className={`shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full ${s.cls}`}>
                     <s.Icon className="w-3 h-3" />
@@ -186,12 +186,12 @@ const Stat = ({
   accent?: boolean;
   small?: boolean;
 }) => (
-  <div className="bg-[#0f0a17]/60 border border-white/5 rounded-2xl p-3">
-    <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">{label}</p>
+  <div className="bg-muted/50 dark:bg-[#0f0a17]/60 border border-border dark:border-white/5 rounded-2xl p-3">
+    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{label}</p>
     <p
       className={`mt-1 font-bold font-[Sora,system-ui,sans-serif] tabular-nums ${
         small ? 'text-base' : 'text-xl'
-      } ${accent ? 'text-emerald-400' : 'text-white'}`}
+      } ${accent ? 'text-emerald-400' : 'text-foreground dark:text-white'}`}
     >
       {value}
     </p>
