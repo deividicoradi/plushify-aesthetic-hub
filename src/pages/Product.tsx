@@ -45,8 +45,8 @@ const Product = () => {
     },
     {
       icon: Shield,
-      title: "Segurança e Backup",
-      description: "Proteção completa dos dados com backup automático, criptografia avançada e conformidade com a LGPD para garantir a segurança das informações."
+      title: "Segurança e Conformidade",
+      description: "Proteção dos dados com criptografia e isolamento por conta, em conformidade com a LGPD para garantir a segurança das informações."
     }
   ];
 

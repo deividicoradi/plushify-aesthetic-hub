@@ -34,8 +34,7 @@ const Updates = () => {
       improvements: [
         "Autenticação de dois fatores aprimorada",
         "Criptografia end-to-end para dados sensíveis",
-        "Cache inteligente reduzindo tempo de carregamento",
-        "Backup automático diário"
+        "Cache inteligente reduzindo tempo de carregamento"
       ],
       fixes: [
         "Corrigido problema de sincronização em agendamentos",

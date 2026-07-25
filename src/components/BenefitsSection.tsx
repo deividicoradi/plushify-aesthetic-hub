@@ -31,7 +31,7 @@ const BenefitsSection = () => {
     {
       icon: Shield,
       title: "Seguro e Confiável",
-      description: "Seus dados protegidos com criptografia e backups automáticos",
+      description: "Seus dados protegidos com criptografia e isolamento por conta",
       stat: "100%",
       color: "text-orange-500",
       bgColor: "bg-orange-50 dark:bg-orange-900/20"

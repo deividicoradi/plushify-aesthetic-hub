@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 const faqs = [
   {
     question: 'Qual a diferença entre o plano Profissional e o Premium?',
-    answer: 'O Profissional cobre a operação do dia a dia: agenda, clientes, financeiro básico, controle de caixa e equipe com até 2 usuários. O Premium adiciona os diferenciais de crescimento: Analytics Avançado, Pacotes de Serviços, Vale-presente, Comissão por profissional, Programa de Fidelidade completo, Modo Funcionário com PIN, backup automático e suporte prioritário 24/7.'
+    answer: 'O Profissional cobre a operação do dia a dia: agenda, clientes, financeiro básico, controle de caixa e equipe com até 2 usuários. O Premium adiciona os diferenciais de crescimento: Analytics Avançado, Pacotes de Serviços, Vale-presente, Comissão por profissional, Programa de Fidelidade completo, Modo Funcionário com PIN e suporte prioritário 24/7.'
   },
   {
     question: 'Como funciona o teste grátis de 3 dias?',

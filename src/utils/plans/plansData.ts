@@ -90,8 +90,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'SEM permissões por cargo (Modo Funcionário)',
       'SEM comissão por profissional',
       'SEM pacotes de serviços',
-      'SEM vale-presente',
-      'SEM backup automático'
+      'SEM vale-presente'
     ],
     current: currentPlan === 'professional'
   },
@@ -121,7 +120,6 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'Comissão por profissional em cada atendimento concluído',
       'Pacotes de serviços com sessões e validade',
       'Vale-presente com saldo em R$ por cliente',
-      'Backup automático',
       'Suporte VIP 24/7',
       'Gestão de estoque avançada',
       'Dashboard executivo completo',
