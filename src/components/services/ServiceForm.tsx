@@ -193,9 +193,13 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
                 id="price"
                 type="number"
                 step="0.01"
-                value={formData.price}
-                onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
+                value={formData.price === 0 ? '' : formData.price}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  handleChange('price', raw === '' ? 0 : parseFloat(raw) || 0);
+                }}
                 min="0"
+                placeholder="0,00"
                 required
               />
             </div>
