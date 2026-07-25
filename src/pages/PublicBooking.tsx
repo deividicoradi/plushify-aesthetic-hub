@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, User, CheckCircle, ArrowLeft, ArrowRight, Star, Heart, Sparkles, Home, Scissors, Phone, Mail, MessageSquare } from "lucide-react";
+import { Calendar, Clock, User, CheckCircle, ArrowLeft, ArrowRight, Star, Sparkles, Home, Scissors, Phone, Mail, MessageSquare, CalendarCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format, addDays, startOfDay, parseISO } from "date-fns";
@@ -223,8 +223,10 @@ export default function PublicBooking() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center px-4">
         <Card className="max-w-md w-full rounded-3xl border-border/60 shadow-xl shadow-black/5 bg-card">
-          <CardContent className="text-center py-8">
-            <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+          <CardContent className="text-center py-10">
+            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-7 h-7 text-muted-foreground" />
+            </div>
             <h2 className="text-lg font-bold mb-2">Link de agendamento inválido</h2>
             <p className="text-sm text-muted-foreground">
               Peça ao profissional o link correto de agendamento.
@@ -235,65 +237,96 @@ export default function PublicBooking() {
     );
   }
 
-  const progressPct = (step / 4) * 100;
+  const stepLabels = ["Serviço", "Data", "Horário", "Dados"];
 
   return (
     <div className="min-h-screen bg-muted/20">
       {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-[#9c3d70] pb-20 pt-6">
-        <div className="absolute -top-10 -right-10 w-64 h-64 bg-white/10 blur-3xl rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-48 h-48 bg-white/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-[#9c3d70] pb-28 pt-5">
+        <div className="absolute -top-16 -right-10 w-72 h-72 bg-white/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute -bottom-10 left-1/4 w-56 h-56 bg-white/10 blur-3xl rounded-full pointer-events-none" />
 
         <div className="container mx-auto px-4 relative">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <Button
               variant="ghost"
               size="sm"
               asChild
-              className="h-9 w-9 p-0 text-white hover:bg-white/15 hover:text-white"
+              className="h-9 w-9 p-0 rounded-full text-white hover:bg-white/15 hover:text-white"
             >
               <Link to="/">
                 <Home className="h-4 w-4" />
                 <span className="sr-only">Início</span>
               </Link>
             </Button>
-            <div className="text-white [&_button]:text-white [&_button]:hover:bg-white/15">
+            <div className="text-white [&_button]:text-white [&_button]:hover:bg-white/15 [&_button]:rounded-full">
               <ThemeToggle />
             </div>
           </div>
 
           <div className="flex flex-col items-center text-center gap-3">
-            <div className="w-16 h-16 bg-white/15 backdrop-blur rounded-2xl flex items-center justify-center shadow-lg ring-1 ring-white/20">
-              <Heart className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 bg-white/15 backdrop-blur rounded-2xl flex items-center justify-center shadow-lg ring-1 ring-white/25">
+              <CalendarCheck className="w-8 h-8 text-white" />
             </div>
             <div>
               <div className="flex items-center justify-center gap-2">
-                <h1 className="text-xl font-bold text-white">Plushify — Agendamento Online</h1>
-                <Sparkles className="w-4 h-4 text-white/80 animate-pulse" />
+                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Agendamento Online</h1>
+                <Sparkles className="w-4 h-4 text-white/80" />
               </div>
-              <p className="text-sm text-white/70 mt-0.5">Reserve seu horário em poucos passos</p>
+              <p className="text-sm text-white/75 mt-1">Reserve seu horário em poucos passos</p>
             </div>
           </div>
-
-          {step <= 4 && (
-            <div className="max-w-md mx-auto mt-7">
-              <div className="flex items-center justify-between text-xs font-medium text-white/70 mb-1.5">
-                <span>Etapa {step} de 4</span>
-                <span>{Math.round(progressPct)}%</span>
-              </div>
-              <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-white rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 -mt-12 pb-10">
+      <div className="relative z-10 container mx-auto px-4 -mt-20 pb-12">
         <div className="max-w-md mx-auto">
+          {/* Stepper */}
+          {step <= 4 && (
+            <div className="mb-5 px-1">
+              <div className="flex items-center justify-between">
+                {stepLabels.map((label, idx) => {
+                  const n = idx + 1;
+                  const isDone = step > n;
+                  const isActive = step === n;
+                  return (
+                    <div key={label} className="flex items-center flex-1 last:flex-none">
+                      <div className="flex flex-col items-center gap-1.5">
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ring-2 transition-all ${
+                            isDone
+                              ? "bg-white text-primary ring-white"
+                              : isActive
+                              ? "bg-white text-primary ring-white scale-110 shadow-lg shadow-black/10"
+                              : "bg-white/20 text-white/80 ring-white/30"
+                          }`}
+                        >
+                          {isDone ? <CheckCircle className="w-4 h-4" /> : n}
+                        </div>
+                        <span
+                          className={`text-[10px] font-medium ${
+                            isActive ? "text-white" : "text-white/70"
+                          }`}
+                        >
+                          {label}
+                        </span>
+                      </div>
+                      {idx < stepLabels.length - 1 && (
+                        <div className="flex-1 h-0.5 mx-1 -mt-4 rounded-full bg-white/25 overflow-hidden">
+                          <div
+                            className={`h-full bg-white rounded-full transition-all duration-500 ${
+                              step > n ? "w-full" : "w-0"
+                            }`}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Etapa 1: Seleção de Serviço */}
           {step === 1 && (
             <Card className="rounded-3xl border-border/60 shadow-xl shadow-black/5 bg-card">
