@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, User, CheckCircle, ArrowLeft, ArrowRight, Star, Heart, Sparkles, Home } from "lucide-react";
+import { Calendar, Clock, User, CheckCircle, ArrowLeft, ArrowRight, Star, Heart, Sparkles, Home, Scissors, Phone, Mail, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format, addDays, startOfDay, parseISO } from "date-fns";
@@ -203,10 +203,6 @@ export default function PublicBooking() {
   // parseISO (não new Date) trata "yyyy-MM-dd" como data local, não UTC —
   // new Date() faria a data "voltar" um dia em fusos negativos (ex: Brasil)
   // ao formatar, dessincronizando o rótulo exibido da data enviada à RPC.
-  const formatDate = (dateStr: string) => {
-    return format(parseISO(dateStr), "dd 'de' MMMM", { locale: ptBR });
-  };
-
   const formatWeekday = (dateStr: string) => {
     return format(parseISO(dateStr), 'EEEE', { locale: ptBR });
   };
@@ -226,7 +222,7 @@ export default function PublicBooking() {
   if (!slug) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center px-4">
-        <Card className="max-w-md w-full rounded-3xl border-border/60 shadow-sm">
+        <Card className="max-w-md w-full rounded-3xl border-border/60 shadow-xl shadow-black/5 bg-card">
           <CardContent className="text-center py-8">
             <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h2 className="text-lg font-bold mb-2">Link de agendamento inválido</h2>
@@ -239,102 +235,68 @@ export default function PublicBooking() {
     );
   }
 
+  const progressPct = (step / 4) * 100;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-      {/* Header Moderno */}
-      <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Logo e Brand */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-                <Heart className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center space-x-2">
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                    Plushify — Agendamento Online
-                  </h1>
-                  <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-                </div>
-                <p className="text-xs text-muted-foreground font-medium">
-                  Agendamento Online
-                </p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-muted/20">
+      {/* Hero */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-[#9c3d70] pb-20 pt-6">
+        <div className="absolute -top-10 -right-10 w-64 h-64 bg-white/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-48 h-48 bg-white/10 blur-3xl rounded-full pointer-events-none" />
 
-            {/* Ações do Header */}
-            <div className="flex items-center space-x-4">
-              {/* Progresso do Agendamento */}
-              <div className="hidden sm:flex items-center space-x-3">
-                <div className="flex space-x-1.5">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                        step >= i 
-                          ? 'bg-primary shadow-sm' 
-                          : step === i - 1 
-                            ? 'bg-primary/40 animate-pulse' 
-                            : 'bg-muted'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm font-medium text-muted-foreground">
-                  {step}/4
-                </span>
-              </div>
-
-              {/* Botões de Ação */}
-              <div className="flex items-center space-x-2">
-                {/* Botão Home */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="h-9 w-9 p-0 hover:bg-accent hidden sm:flex"
-                >
-                  <Link to="/">
-                    <Home className="h-4 w-4" />
-                    <span className="sr-only">Início</span>
-                  </Link>
-                </Button>
-
-                {/* Toggle de Tema */}
-                <ThemeToggle />
-              </div>
+        <div className="container mx-auto px-4 relative">
+          <div className="flex items-center justify-between mb-8">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="h-9 w-9 p-0 text-white hover:bg-white/15 hover:text-white"
+            >
+              <Link to="/">
+                <Home className="h-4 w-4" />
+                <span className="sr-only">Início</span>
+              </Link>
+            </Button>
+            <div className="text-white [&_button]:text-white [&_button]:hover:bg-white/15">
+              <ThemeToggle />
             </div>
           </div>
 
-          {/* Progresso Mobile */}
-          <div className="sm:hidden mt-3 flex items-center justify-center space-x-2">
-            <div className="flex space-x-1.5">
-              {[1, 2, 3, 4].map((i) => (
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="w-16 h-16 bg-white/15 backdrop-blur rounded-2xl flex items-center justify-center shadow-lg ring-1 ring-white/20">
+              <Heart className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-xl font-bold text-white">Plushify — Agendamento Online</h1>
+                <Sparkles className="w-4 h-4 text-white/80 animate-pulse" />
+              </div>
+              <p className="text-sm text-white/70 mt-0.5">Reserve seu horário em poucos passos</p>
+            </div>
+          </div>
+
+          {step <= 4 && (
+            <div className="max-w-md mx-auto mt-7">
+              <div className="flex items-center justify-between text-xs font-medium text-white/70 mb-1.5">
+                <span>Etapa {step} de 4</span>
+                <span>{Math.round(progressPct)}%</span>
+              </div>
+              <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
                 <div
-                  key={i}
-                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                    step >= i 
-                      ? 'bg-primary shadow-sm' 
-                      : step === i - 1 
-                        ? 'bg-primary/40 animate-pulse' 
-                        : 'bg-muted'
-                  }`}
+                  className="h-full bg-white rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progressPct}%` }}
                 />
-              ))}
+              </div>
             </div>
-            <span className="text-sm font-medium text-muted-foreground ml-3">
-              Etapa {step} de 4
-            </span>
-          </div>
+          )}
         </div>
-      </header>
+      </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 -mt-12 pb-10">
         <div className="max-w-md mx-auto">
           {/* Etapa 1: Seleção de Serviço */}
           {step === 1 && (
-            <Card className="rounded-3xl border-border/60 shadow-sm">
+            <Card className="rounded-3xl border-border/60 shadow-xl shadow-black/5 bg-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-primary">
@@ -358,27 +320,35 @@ export default function PublicBooking() {
                     <p>Nenhum serviço disponível para agendamento neste link.</p>
                   </div>
                 ) : (
-                  services.map((service) => (
-                    <div
-                      key={service.id}
-                      className={`p-4 border rounded-2xl cursor-pointer transition-all hover:border-primary/60 hover:shadow-sm ${
-                        booking.service?.id === service.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
-                      }`}
-                      onClick={() => setBooking(prev => ({ ...prev, service }))}
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold">{service.name}</h3>
-                        <Badge variant="secondary" className="rounded-full">{formatPrice(service.price)}</Badge>
+                  services.map((service) => {
+                    const isSelected = booking.service?.id === service.id;
+                    return (
+                      <div
+                        key={service.id}
+                        className={`flex gap-3 p-4 border rounded-2xl cursor-pointer transition-all hover:border-primary/60 hover:shadow-sm ${
+                          isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
+                        }`}
+                        onClick={() => setBooking(prev => ({ ...prev, service }))}
+                      >
+                        <div className={`shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${isSelected ? 'bg-primary text-white' : 'bg-primary/10 text-primary'}`}>
+                          <Scissors className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start gap-2 mb-1">
+                            <h3 className="font-semibold truncate">{service.name}</h3>
+                            <Badge variant="secondary" className="rounded-full shrink-0">{formatPrice(service.price)}</Badge>
+                          </div>
+                          {service.description && (
+                            <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{service.description}</p>
+                          )}
+                          <div className="flex items-center text-xs text-muted-foreground">
+                            <Clock className="w-3.5 h-3.5 mr-1" />
+                            {service.duration} min
+                          </div>
+                        </div>
                       </div>
-                      {service.description && (
-                        <p className="text-sm text-muted-foreground mb-2">{service.description}</p>
-                      )}
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {service.duration} min
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
 
                 <Button
@@ -395,7 +365,7 @@ export default function PublicBooking() {
 
           {/* Etapa 2: Seleção de Data */}
           {step === 2 && (
-            <Card className="rounded-3xl border-border/60 shadow-sm">
+            <Card className="rounded-3xl border-border/60 shadow-xl shadow-black/5 bg-card">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
@@ -418,23 +388,30 @@ export default function PublicBooking() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {selectedDates.map((date) => (
-                    <div
-                      key={date}
-                      className={`p-3 border rounded-2xl cursor-pointer text-center transition-all hover:border-primary/60 hover:shadow-sm ${
-                        booking.date === date ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
-                      }`}
-                      onClick={() => setBooking(prev => ({ ...prev, date }))}
-                    >
-                      <div className="text-sm font-medium capitalize">
-                        {formatWeekday(date)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {formatDate(date)}
-                      </div>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-3 gap-2">
+                  {selectedDates.map((date) => {
+                    const isSelected = booking.date === date;
+                    return (
+                      <button
+                        type="button"
+                        key={date}
+                        className={`p-3 border rounded-2xl cursor-pointer text-center transition-all hover:border-primary/60 hover:shadow-sm ${
+                          isSelected ? 'border-primary bg-primary shadow-sm' : 'border-border'
+                        }`}
+                        onClick={() => setBooking(prev => ({ ...prev, date }))}
+                      >
+                        <div className={`text-[11px] uppercase tracking-wide font-medium ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}>
+                          {formatWeekday(date).slice(0, 3)}
+                        </div>
+                        <div className={`text-lg font-bold mt-0.5 ${isSelected ? 'text-white' : 'text-foreground'}`}>
+                          {format(parseISO(date), 'dd')}
+                        </div>
+                        <div className={`text-[11px] ${isSelected ? 'text-white/70' : 'text-muted-foreground'}`}>
+                          {format(parseISO(date), 'MMM', { locale: ptBR })}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <Button
@@ -456,7 +433,7 @@ export default function PublicBooking() {
 
           {/* Etapa 3: Seleção de Horário */}
           {step === 3 && (
-            <Card className="rounded-3xl border-border/60 shadow-sm">
+            <Card className="rounded-3xl border-border/60 shadow-xl shadow-black/5 bg-card">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
@@ -486,22 +463,26 @@ export default function PublicBooking() {
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {availableSlots
                         .filter(slot => slot.is_available)
-                        .map((slot) => (
-                          <div
-                            key={slot.slot_time}
-                            className={`p-2 border rounded-xl cursor-pointer text-center transition-all hover:border-primary/60 hover:shadow-sm ${
-                              booking.time === slot.slot_time ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
-                            }`}
-                            onClick={() => setBooking(prev => ({ ...prev, time: slot.slot_time }))}
-                          >
-                            <div className="text-sm font-medium">
-                              {formatTime(slot.slot_time)}
-                            </div>
-                          </div>
-                        ))}
+                        .map((slot) => {
+                          const isSelected = booking.time === slot.slot_time;
+                          return (
+                            <button
+                              type="button"
+                              key={slot.slot_time}
+                              className={`px-4 py-2 border rounded-full cursor-pointer text-center transition-all hover:border-primary/60 hover:shadow-sm ${
+                                isSelected ? 'border-primary bg-primary text-white shadow-sm' : 'border-border'
+                              }`}
+                              onClick={() => setBooking(prev => ({ ...prev, time: slot.slot_time }))}
+                            >
+                              <div className="text-sm font-medium">
+                                {formatTime(slot.slot_time)}
+                              </div>
+                            </button>
+                          );
+                        })}
                     </div>
 
                     {availableSlots.filter(slot => slot.is_available).length === 0 && (
@@ -527,7 +508,7 @@ export default function PublicBooking() {
 
           {/* Etapa 4: Dados do Cliente */}
           {step === 4 && (
-            <Card className="rounded-3xl border-border/60 shadow-sm">
+            <Card className="rounded-3xl border-border/60 shadow-xl shadow-black/5 bg-card">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
@@ -548,62 +529,86 @@ export default function PublicBooking() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Resumo do agendamento */}
-                <div className="bg-muted/40 border border-border/60 p-4 rounded-2xl">
-                  <h3 className="font-semibold mb-2">Resumo do agendamento</h3>
-                  <div className="space-y-1 text-sm">
-                    <p><strong>Serviço:</strong> {booking.service?.name}</p>
-                    <p><strong>Data:</strong> {booking.date && format(parseISO(booking.date), "dd/MM/yyyy")}</p>
-                    <p><strong>Horário:</strong> {booking.time && formatTime(booking.time)}</p>
-                    <p><strong>Duração:</strong> {booking.service?.duration} min</p>
-                    <p><strong>Valor:</strong> {booking.service && formatPrice(booking.service.price)}</p>
+                <div className="bg-gradient-to-br from-primary/10 via-muted/30 to-transparent border border-primary/15 p-4 rounded-2xl">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Scissors className="w-4 h-4 text-primary" />
+                    {booking.service?.name}
+                  </h3>
+                  <div className="space-y-1.5 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3.5 h-3.5 text-primary" />
+                      {booking.date && format(parseISO(booking.date), "dd/MM/yyyy")} às {booking.time && formatTime(booking.time)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-primary" />
+                      {booking.service?.duration} min
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-dashed border-primary/20 flex items-center justify-between">
+                    <span className="text-sm font-medium">Total</span>
+                    <span className="text-lg font-bold text-primary">
+                      {booking.service && formatPrice(booking.service.price)}
+                    </span>
                   </div>
                 </div>
 
                 {/* Formulário */}
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="name">Nome completo *</Label>
+                    <Label htmlFor="name" className="flex items-center gap-1.5 mb-1.5">
+                      <User className="w-3.5 h-3.5" /> Nome completo *
+                    </Label>
                     <Input
                       id="name"
                       type="text"
                       value={booking.name}
                       onChange={(e) => setBooking(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="Seu nome completo"
+                      className="rounded-xl"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="phone">WhatsApp *</Label>
+                    <Label htmlFor="phone" className="flex items-center gap-1.5 mb-1.5">
+                      <Phone className="w-3.5 h-3.5" /> WhatsApp *
+                    </Label>
                     <Input
                       id="phone"
                       type="tel"
                       value={booking.phone}
                       onChange={(e) => setBooking(prev => ({ ...prev, phone: e.target.value }))}
                       placeholder="(11) 99999-9999"
+                      className="rounded-xl"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="email">E-mail *</Label>
+                    <Label htmlFor="email" className="flex items-center gap-1.5 mb-1.5">
+                      <Mail className="w-3.5 h-3.5" /> E-mail *
+                    </Label>
                     <Input
                       id="email"
                       type="email"
                       value={booking.email}
                       onChange={(e) => setBooking(prev => ({ ...prev, email: e.target.value }))}
                       placeholder="seu@email.com"
+                      className="rounded-xl"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="notes">Observações (opcional)</Label>
+                    <Label htmlFor="notes" className="flex items-center gap-1.5 mb-1.5">
+                      <MessageSquare className="w-3.5 h-3.5" /> Observações (opcional)
+                    </Label>
                     <Textarea
                       id="notes"
                       value={booking.notes}
                       onChange={(e) => setBooking(prev => ({ ...prev, notes: e.target.value }))}
                       placeholder="Alguma observação especial..."
+                      className="rounded-xl"
                       rows={3}
                     />
                   </div>
@@ -627,31 +632,48 @@ export default function PublicBooking() {
 
           {/* Etapa 5: Confirmação */}
           {step === 5 && (
-            <Card className="rounded-3xl border-border/60 shadow-sm">
-              <CardContent className="text-center py-8">
-                <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-emerald-500" />
+            <Card className="rounded-3xl border-border/60 shadow-xl shadow-black/5 bg-card overflow-hidden">
+              <div className="bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent pt-10 pb-8 px-6 text-center relative">
+                <div className="absolute inset-x-0 top-0 h-1 bg-emerald-500" />
+                <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30 ring-8 ring-emerald-500/10">
+                  <CheckCircle className="w-10 h-10 text-white" />
                 </div>
-
-                <h2 className="text-xl font-bold mb-2">Agendamento confirmado!</h2>
-                <p className="text-muted-foreground mb-6">
-                  Seu agendamento foi registrado com sucesso. Entraremos em contato em breve para confirmar.
+                <h2 className="text-xl font-bold mb-1">Agendamento confirmado!</h2>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                  Entraremos em contato em breve para confirmar os detalhes.
                 </p>
+              </div>
 
-                <div className="bg-muted/40 border border-border/60 p-4 rounded-2xl text-left mb-6">
-                  <h3 className="font-semibold mb-2">Detalhes do agendamento</h3>
-                  <div className="space-y-1 text-sm">
-                    {appointmentId && <p><strong>Código:</strong> {appointmentId.slice(0, 8)}</p>}
-                    <p><strong>Serviço:</strong> {booking.service?.name}</p>
-                    <p><strong>Data:</strong> {booking.date && format(parseISO(booking.date), "dd/MM/yyyy")}</p>
-                    <p><strong>Horário:</strong> {booking.time && formatTime(booking.time)}</p>
-                    <p><strong>Cliente:</strong> {booking.name}</p>
-                    <p><strong>WhatsApp:</strong> {booking.phone}</p>
+              <CardContent className="pt-6 pb-8">
+                <div className="border border-border/60 rounded-2xl overflow-hidden mb-6">
+                  {appointmentId && (
+                    <div className="flex items-center justify-between px-4 py-3 bg-muted/40 border-b border-border/60">
+                      <span className="text-xs text-muted-foreground">Código</span>
+                      <span className="text-sm font-mono font-semibold tracking-wide">{appointmentId.slice(0, 8).toUpperCase()}</span>
+                    </div>
+                  )}
+                  <div className="divide-y divide-border/60 text-sm">
+                    <div className="flex items-center justify-between px-4 py-2.5">
+                      <span className="text-muted-foreground flex items-center gap-2"><Scissors className="w-3.5 h-3.5" /> Serviço</span>
+                      <span className="font-medium">{booking.service?.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-4 py-2.5">
+                      <span className="text-muted-foreground flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> Data</span>
+                      <span className="font-medium">{booking.date && format(parseISO(booking.date), "dd/MM/yyyy")} às {booking.time && formatTime(booking.time)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-4 py-2.5">
+                      <span className="text-muted-foreground flex items-center gap-2"><User className="w-3.5 h-3.5" /> Cliente</span>
+                      <span className="font-medium">{booking.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-4 py-2.5">
+                      <span className="text-muted-foreground flex items-center gap-2"><Phone className="w-3.5 h-3.5" /> WhatsApp</span>
+                      <span className="font-medium">{booking.phone}</span>
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-center text-muted-foreground">
                     Guarde este código para consultas futuras
                   </p>
                   <Button
