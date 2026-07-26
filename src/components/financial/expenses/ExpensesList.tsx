@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import ExpenseCard from './ExpenseCard';
+import ExpenseListRow from './ExpenseListRow';
 
 interface ExpensesListProps {
   expenses: any[];
@@ -28,9 +28,9 @@ const ExpensesList = ({ expenses, isLoading, onEdit, onDelete }: ExpensesListPro
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="space-y-2">
       {expenses.map((expense) => (
-        <ExpenseCard
+        <ExpenseListRow
           key={expense.id}
           expense={expense}
           onEdit={onEdit}
