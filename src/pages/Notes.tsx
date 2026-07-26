@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus, Search, FileText } from "lucide-react";
 import { CreateNoteForm } from '@/components/notes/CreateNoteForm';
-import { NoteCard } from '@/components/notes/NoteCard';
+import { NoteListRow } from '@/components/notes/NoteListRow';
 import { useNotes } from '@/hooks/useNotes';
 import { useClients } from '@/hooks/useClients';
 import { Input } from "@/components/ui/input";
@@ -117,9 +117,9 @@ const Notes = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 animate-in fade-in duration-300">
+          <div className="space-y-2 animate-in fade-in duration-300">
             {filteredNotes.map((note) => (
-              <NoteCard
+              <NoteListRow
                 key={note.id}
                 note={note}
                 clients={clients}
