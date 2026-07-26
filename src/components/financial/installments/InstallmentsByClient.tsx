@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Phone, Mail } from 'lucide-react';
-import InstallmentCard from '../InstallmentCard';
+import InstallmentListRow from './InstallmentListRow';
 
 interface InstallmentsByClientProps {
   clientData: {
@@ -69,9 +69,9 @@ const InstallmentsByClient = ({ clientData, onEdit, onUpdate }: InstallmentsByCl
       </CardHeader>
       
       <CardContent className="p-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-2">
           {clientData.installments.map((installment: any) => (
-            <InstallmentCard
+            <InstallmentListRow
               key={installment.id}
               installment={installment}
               paymentData={installment.payment}
