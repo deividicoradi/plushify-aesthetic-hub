@@ -27,8 +27,8 @@ export const HelpContent = () => {
                   </div>
                   <div>
                     <span className="font-semibold">Email:</span>
-                    <a href="mailto:suporte@plushify.com.br" className="ml-2 text-primary hover:underline">
-                      suporte@plushify.com.br
+                    <a href="mailto:plushify.suporte@gmail.com" className="ml-2 text-primary hover:underline">
+                      plushify.suporte@gmail.com
                     </a>
                   </div>
                 </div>
