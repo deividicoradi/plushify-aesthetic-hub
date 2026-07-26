@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       p_user_id: userId,
       p_plan_code: 'trial',
       p_billing_interval: 'month',
-      p_trial_days: 3,
+      p_trial_days: 7,
     })
 
     if (error) {

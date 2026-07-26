@@ -58,7 +58,7 @@ export const PlansSection = () => {
 
         toast({
           title: 'Trial ativado com sucesso!',
-          description: 'Você tem 3 dias para explorar a plataforma.',
+          description: 'Você tem 7 dias para explorar a plataforma.',
         });
         navigate('/dashboard');
       } catch (error: any) {
@@ -210,7 +210,7 @@ export const PlansSection = () => {
         {/* CTA */}
         <div className="text-center mt-16">
           <p className="text-muted-foreground mb-6">
-            3 dias grátis, sem cartão • Cancele quando quiser • Suporte completo
+            7 dias grátis, sem cartão • Cancele quando quiser • Suporte completo
           </p>
           <Button 
             size="lg"

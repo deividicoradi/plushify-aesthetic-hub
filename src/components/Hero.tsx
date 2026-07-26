@@ -127,7 +127,7 @@ const Hero = () => {
                   onClick={handleStartFree}
                   className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground h-12 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                 >
-                  Experimente Grátis por 3 dias
+                  Experimente Grátis por 7 dias
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
@@ -148,7 +148,7 @@ const Hero = () => {
           <div className="flex flex-wrap justify-center items-center gap-4 max-w-3xl mx-auto">
             {[
               { icon: Shield, label: "Seus dados protegidos (LGPD)" },
-              { icon: Star, label: "3 dias grátis, sem cartão" },
+              { icon: Star, label: "7 dias grátis, sem cartão" },
               { icon: Sparkles, label: "Cancele quando quiser" },
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-2 px-5 py-3 bg-muted/50 rounded-full border text-foreground font-medium text-sm">

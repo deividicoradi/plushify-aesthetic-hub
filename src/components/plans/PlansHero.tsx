@@ -8,7 +8,7 @@ export const PlansHero: React.FC = () => {
       {/* Badge */}
       <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 text-primary rounded-full text-sm font-medium shadow-lg backdrop-blur-sm hover:scale-105 transition-transform duration-300">
         <Rocket className="w-4 h-4" />
-        <span>Comece com 3 dias grátis</span>
+        <span>Comece com 7 dias grátis</span>
       </div>
 
       {/* Main Title */}

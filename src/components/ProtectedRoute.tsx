@@ -77,7 +77,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     console.log('SECURITY: Plan expired, redirecting to plans', { isTrialExpired, isPaidPlanExpired });
     const message = isPaidPlanExpired
       ? 'Sua assinatura venceu. Renove seu plano para continuar usando o Plushify — seus dados continuam salvos.'
-      : 'Seu período de teste de 3 dias terminou. Escolha um plano para continuar usando o Plushify — seus dados continuam salvos.';
+      : 'Seu período de teste de 7 dias terminou. Escolha um plano para continuar usando o Plushify — seus dados continuam salvos.';
     return <Navigate to="/app/planos" replace state={{ message, from: location }} />;
   }
 

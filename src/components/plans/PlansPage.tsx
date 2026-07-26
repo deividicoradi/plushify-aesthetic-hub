@@ -94,7 +94,7 @@ export const PlansPage: React.FC = () => {
 
         toast({
           title: "Trial ativado com sucesso!",
-          description: "Você tem 3 dias para explorar a plataforma.",
+          description: "Você tem 7 dias para explorar a plataforma.",
         });
 
         // Atualizar status da assinatura
@@ -137,7 +137,7 @@ export const PlansPage: React.FC = () => {
           if (data?.error) throw new Error(data.message || data.error);
           toast({
             title: 'Trial ativado com sucesso!',
-            description: 'Você tem 3 dias para explorar a plataforma.',
+            description: 'Você tem 7 dias para explorar a plataforma.',
           });
           await checkSubscriptionStatus();
         } catch (err: any) {

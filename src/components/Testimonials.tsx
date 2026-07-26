@@ -63,7 +63,7 @@ const Testimonials = () => {
               onClick={() => navigate('/auth?tab=signup')}
               className="font-semibold"
             >
-              Testar gratuitamente por 3 dias
+              Testar gratuitamente por 7 dias
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

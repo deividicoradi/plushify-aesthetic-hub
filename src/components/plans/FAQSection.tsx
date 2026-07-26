@@ -8,8 +8,8 @@ const faqs = [
     answer: 'O Profissional cobre a operação do dia a dia: agenda, clientes, financeiro básico, controle de caixa e equipe com até 2 usuários. O Premium adiciona os diferenciais de crescimento: Analytics Avançado, Pacotes de Serviços, Vale-presente, Comissão por profissional, Programa de Fidelidade completo, Modo Funcionário com PIN.'
   },
   {
-    question: 'Como funciona o teste grátis de 3 dias?',
-    answer: 'Você tem acesso ao sistema por 3 dias sem pagar nada, com limites reduzidos (até 5 clientes, 3 agendamentos, 2 serviços, 10 produtos e 1 usuário). Ao final do período, o acesso é bloqueado até você escolher um plano pago — seus dados cadastrados continuam salvos, nada é apagado.'
+    question: 'Como funciona o teste grátis de 7 dias?',
+    answer: 'Você tem acesso ao sistema por 7 dias sem pagar nada, com limites reduzidos (até 5 clientes, 3 agendamentos, 2 serviços, 10 produtos e 1 usuário). Ao final do período, o acesso é bloqueado até você escolher um plano pago — seus dados cadastrados continuam salvos, nada é apagado.'
   },
   {
     question: 'Posso mudar de plano a qualquer momento?',

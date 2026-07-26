@@ -35,7 +35,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
     subtitle: 'Funcionalidades limitadas',
     icon: Clock,
     features: [
-      'Apenas 3 dias de teste',
+      'Apenas 7 dias de teste',
       '1 usuário',
       'Até 5 clientes',
       'Até 3 agendamentos',
@@ -44,7 +44,7 @@ export const createPlansData = (currentPlan: string): PlanFeature[] => [
       'Dashboard básico'
     ],
     limitations: [
-      'Acesso limitado a 3 dias',
+      'Acesso limitado a 7 dias',
       'SEM gestão financeira',
       'SEM relatórios avançados',
       'SEM controle de caixa',
