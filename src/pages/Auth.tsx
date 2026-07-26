@@ -18,6 +18,12 @@ import { getPendingCheckout, clearPendingCheckout } from '@/utils/pendingCheckou
 import { capturePendingReferralFromUrl, getPendingReferralCode, clearPendingReferral } from '@/utils/referral';
 import { useAbacateCheckout } from '@/hooks/useAbacateCheckout';
 
+// Deve bater com a data de "Última atualização" exibida em /terms e /privacy.
+// Atualizar aqui sempre que o conteúdo dessas páginas mudar de forma
+// relevante, para o registro de aceite refletir a versão correta.
+const TERMS_VERSION = '2026-07-26';
+const PRIVACY_VERSION = '2026-07-26';
+
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -141,6 +147,9 @@ const Auth = () => {
         options: {
           data: {
             full_name: fullName,
+            terms_accepted: 'true',
+            terms_version: TERMS_VERSION,
+            privacy_version: PRIVACY_VERSION,
             ...(referralCode ? { referral_code: referralCode } : {}),
           },
           emailRedirectTo: `${window.location.origin}/dashboard`

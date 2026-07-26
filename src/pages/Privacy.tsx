@@ -26,7 +26,7 @@ const Privacy = () => {
               Política de Privacidade
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Última atualização: 25 de junho de 2025
+              Última atualização: 26 de julho de 2026
             </p>
           </div>
 
