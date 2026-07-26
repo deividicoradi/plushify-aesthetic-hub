@@ -17,6 +17,9 @@ const categoryConfig: Record<string, { label: string; variant: any }> = {
   equipamento: { label: 'Equipamento', variant: 'secondary' },
   marketing: { label: 'Marketing', variant: 'outline' },
   aluguel: { label: 'Aluguel', variant: 'destructive' },
+  salario: { label: 'Salário', variant: 'destructive' },
+  servicos: { label: 'Serviços', variant: 'outline' },
+  impostos: { label: 'Impostos', variant: 'destructive' },
   outros: { label: 'Outros', variant: 'secondary' },
 };
 
