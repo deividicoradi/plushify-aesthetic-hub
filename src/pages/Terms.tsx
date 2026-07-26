@@ -119,8 +119,22 @@ const Terms = () => {
                     parceiros de pagamento.
                   </p>
                   <p>
-                    <strong>Política de Cancelamento:</strong> Você pode cancelar sua assinatura a qualquer momento 
-                    através das configurações da sua conta. O cancelamento será efetivo no final do período de cobrança atual.
+                    <strong>Política de Cancelamento (planos mensais):</strong> Você pode cancelar sua assinatura
+                    a qualquer momento através das configurações da sua conta. O cancelamento será efetivo no
+                    final do período de cobrança atual, sem multa.
+                  </p>
+                  <p>
+                    <strong>Política de Cancelamento (planos anuais):</strong> Ao cancelar um plano anual antes
+                    do fim do período contratado, você recebe o reembolso proporcional aos meses ainda não
+                    utilizados, descontada uma multa de 50% sobre esse valor proporcional a título de
+                    cancelamento antecipado. Exemplo: ao cancelar no 3º mês de um plano anual de 12 meses,
+                    os 9 meses restantes seriam reembolsados, mas com 50% de desconto sobre esse valor.
+                  </p>
+                  <p>
+                    <strong>Reajuste de Preços:</strong> Os valores dos planos podem ser reajustados a qualquer
+                    momento, a nosso critério. Qualquer reajuste será comunicado com no mínimo 30 dias de
+                    antecedência antes de entrar em vigor, dando tempo para você decidir se deseja continuar
+                    com o plano nas novas condições.
                   </p>
                 </div>
               </section>
@@ -180,7 +194,7 @@ const Terms = () => {
                 Se você tiver alguma dúvida sobre estes Termos de Serviço, entre em contato conosco:
               </p>
               <div className="bg-background rounded-lg p-4 border border-primary/20">
-                <p><strong>E-mail:</strong> suporte@plushify.com.br</p>
+                <p><strong>E-mail:</strong> plushify.suporte@gmail.com</p>
                 <p><strong>Assunto:</strong> "Dúvidas sobre Termos de Serviço"</p>
                 <p><strong>Horário de Atendimento:</strong> Segunda a Sexta, 9h às 18h</p>
               </div>
