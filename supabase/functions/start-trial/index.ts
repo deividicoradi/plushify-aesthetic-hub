@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
     const { data, error } = await admin.rpc('start_subscription', {
       p_user_id: userId,
       p_plan_code: 'trial',
+      p_payment_kind: 'trial',
       p_billing_interval: 'month',
       p_trial_days: 7,
     })
