@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { AppointmentCard } from './AppointmentCard';
+import { AppointmentsTimeline } from './AppointmentsTimeline';
 import { AppointmentsEmptyState } from './AppointmentsEmptyState';
-import { useAppointments } from '@/hooks/useAppointments';
+import { useAppointments, type Appointment } from '@/hooks/useAppointments';
 import { format, isToday, isTomorrow, parseISO, isWithinInterval, differenceInHours } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -247,6 +248,10 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
     );
   }
 
+  const renderTimeline = (appointmentsList: Appointment[]) => (
+    <AppointmentsTimeline appointments={appointmentsList} />
+  );
+
   const renderAppointmentsList = (appointmentsList: any[], tabKey: string) => (
     <div className="space-y-4">
       {/* Select All Checkbox - More elegant */}
@@ -465,7 +470,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
               <p className="text-gray-500">Nenhum agendamento para hoje</p>
             </div>
           ) : (
-            renderAppointmentsList(todayAppointments, 'today')
+            renderTimeline(todayAppointments)
           )}
         </TabsContent>
 
@@ -475,7 +480,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
               <p className="text-gray-500">Nenhum agendamento para amanhã</p>
             </div>
           ) : (
-            renderAppointmentsList(tomorrowAppointments, 'tomorrow')
+            renderTimeline(tomorrowAppointments)
           )}
         </TabsContent>
 
@@ -544,7 +549,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
                   </Button>
                 </div>
               ) : (
-                renderAppointmentsList(dateFilteredAppointments, 'date')
+                renderTimeline(dateFilteredAppointments)
               );
             })()
           ) : (
