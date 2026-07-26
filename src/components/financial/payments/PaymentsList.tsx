@@ -1,6 +1,6 @@
 
 import React from 'react';
-import PaymentCard from './PaymentCard';
+import PaymentListRow from './PaymentListRow';
 import PaymentsLoadingState from './PaymentsLoadingState';
 import PaymentsEmptyState from './PaymentsEmptyState';
 import PaymentSecureActions from './PaymentSecureActions';
@@ -25,9 +25,9 @@ const PaymentsList = ({ payments, isLoading, getClientName, onEdit, onDelete }: 
   return (
     <PaymentSecureActions onEdit={onEdit} onSuccess={() => {}}>
       {({ handleSecureAction, isDeleting }) => (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-2">
           {payments.map((payment) => (
-            <PaymentCard
+            <PaymentListRow
               key={payment.id}
               payment={payment}
               clientName={getClientName(payment.client_id)}
