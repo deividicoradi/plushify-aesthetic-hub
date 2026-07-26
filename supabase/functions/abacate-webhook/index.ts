@@ -1,4 +1,18 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { timingSafeEqual } from 'https://deno.land/std@0.190.0/crypto/timing_safe_equal.ts'
+
+// Comparação de tempo constante: !== normal vaza, por diferença de tempo de
+// resposta, quantos caracteres do início da string batem — em teoria permite
+// a um atacante paciente descobrir o segredo caractere por caractere medindo
+// latência. timingSafeEqual sempre compara todos os bytes, tempo constante
+// independente de onde a diferença está.
+const secretsMatch = (a: string, b: string): boolean => {
+  const encoder = new TextEncoder()
+  const bufA = encoder.encode(a)
+  const bufB = encoder.encode(b)
+  if (bufA.length !== bufB.length) return false
+  return timingSafeEqual(bufA, bufB)
+}
 
 // Recebe as notificações de pagamento do AbacatePay e ativa/renova/revoga o
 // plano pago do usuário. Sem esta função, um pagamento aprovado nunca é
@@ -106,7 +120,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    if (receivedSecret !== expectedSecret) {
+    if (!receivedSecret || !secretsMatch(receivedSecret, expectedSecret)) {
       log('AUTH: webhookSecret inválido ou ausente')
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,

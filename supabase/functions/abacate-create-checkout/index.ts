@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createRemoteJWKSet, jwtVerify } from "https://esm.sh/jose@5.9.6";
+import { buildCorsHeaders } from "../_shared/cors.ts";
 
 // Checkout de pagamento ÚNICO (Pix ou cartão parcelado em até 12x) para o
 // plano ANUAL. Assinatura recorrente da AbacatePay só aceita CARD sem
@@ -10,11 +11,6 @@ import { createRemoteJWKSet, jwtVerify } from "https://esm.sh/jose@5.9.6";
 // Mesmo padrão de segurança de abacate-create-subscription: JWT validado via
 // JWKS, plano/preço conferidos contra o catálogo real da AbacatePay antes de
 // abrir o checkout (evita manipulação de preço pelo cliente).
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 // Mesmos produtos anuais de abacate-create-subscription/abacate-verify-plans.
 export const EXPECTED_ANNUAL_PLANS = {
@@ -54,6 +50,8 @@ const defaultVerify: VerifyToken = async (token) => {
 };
 
 export const createHandler = (verify: VerifyToken = defaultVerify) => async (req: Request): Promise<Response> => {
+  const corsHeaders = buildCorsHeaders(req.headers.get("origin"));
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

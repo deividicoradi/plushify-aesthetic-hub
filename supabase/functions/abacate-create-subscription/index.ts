@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createRemoteJWKSet, jwtVerify } from "https://esm.sh/jose@5.9.6";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { buildCorsHeaders } from "../_shared/cors.ts";
 
 // Mapeamento oficial plano/ciclo -> produto AbacatePay
 // Referência: catálogo real na conta AbacatePay (verificado via /v2/products/list).
@@ -78,6 +74,8 @@ const defaultVerify: VerifyToken = async (token) => {
 };
 
 export const createHandler = (verify: VerifyToken = defaultVerify) => async (req: Request): Promise<Response> => {
+  const corsHeaders = buildCorsHeaders(req.headers.get("origin"));
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
