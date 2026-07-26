@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { AppointmentCard } from './AppointmentCard';
+import { AppointmentListRow } from './AppointmentListRow';
 import { AppointmentsTimeline } from './AppointmentsTimeline';
 import { AppointmentsEmptyState } from './AppointmentsEmptyState';
 import { useAppointments, type Appointment } from '@/hooks/useAppointments';
@@ -272,11 +273,11 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
         </div>
       )}
 
-      {/* Appointments Cards */}
-      <div className="grid gap-3">
+      {/* Lista compacta - detalhe completo abre em modal ao clicar */}
+      <div className="space-y-2">
         {appointmentsList.map((appointment) => (
-          <AppointmentCard 
-            key={`${tabKey}-${appointment.id}`} 
+          <AppointmentListRow
+            key={`${tabKey}-${appointment.id}`}
             appointment={appointment}
             isSelected={selectedAppointments.includes(appointment.id)}
             onSelect={(checked) => handleSelectAppointment(appointment.id, checked)}
