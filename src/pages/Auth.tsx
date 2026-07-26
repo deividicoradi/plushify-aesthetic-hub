@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SEO } from '@/components/SEO';
 import { Logo } from '@/components/ui/Logo';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [recoveryMode, setRecoveryMode] = useState(false);
@@ -123,6 +125,11 @@ const Auth = () => {
 
       if (!fullName.trim()) {
         toast.error("Por favor, insira seu nome completo.");
+        return;
+      }
+
+      if (!acceptedTerms) {
+        toast.error("Você precisa concordar com os Termos de Uso e a Política de Privacidade para criar uma conta.");
         return;
       }
 
@@ -524,10 +531,25 @@ const Auth = () => {
                     </button>
                   </div>
                 </div>
-                <Button 
-                  type="submit" 
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="signup-terms"
+                    checked={acceptedTerms}
+                    onCheckedChange={(v) => setAcceptedTerms(!!v)}
+                    required
+                    className="mt-0.5"
+                  />
+                  <Label htmlFor="signup-terms" className="text-sm text-muted-foreground font-normal leading-snug">
+                    Li e concordo com os{' '}
+                    <Link to="/terms" target="_blank" className="underline hover:text-primary">Termos de Uso</Link>
+                    {' '}e a{' '}
+                    <Link to="/privacy" target="_blank" className="underline hover:text-primary">Política de Privacidade</Link>
+                  </Label>
+                </div>
+                <Button
+                  type="submit"
                   className="w-full bg-plush-600 hover:bg-plush-700"
-                  disabled={loading}
+                  disabled={loading || !acceptedTerms}
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
                   {loading ? "Criando conta..." : "Criar conta"}
