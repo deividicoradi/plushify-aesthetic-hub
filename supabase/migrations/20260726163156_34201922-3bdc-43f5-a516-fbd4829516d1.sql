@@ -1,0 +1,36 @@
+REVOKE EXECUTE ON FUNCTION public.start_subscription(uuid, text, text, text, integer, text, text, text, timestamptz) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.cancel_subscription(uuid, text, text, text, boolean) FROM PUBLIC;
+
+REVOKE EXECUTE ON FUNCTION public.purchase_client_package(uuid, uuid, uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.purchase_gift_card(uuid, numeric, uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.redeem_gift_card(uuid, numeric, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.redeem_loyalty_reward(uuid, uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.set_team_member_pin(uuid, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.clear_team_member_pin(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.verify_team_member_pin(uuid, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.get_or_create_referral_code() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.set_authorization_password(text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.verify_authorization_password(text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.get_clients_masked(boolean) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.get_client_data_secure(uuid, boolean) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.get_professionals_secure(boolean) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.check_pending_appointments_for_day(uuid, integer) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.get_or_create_booking_slug() FROM PUBLIC;
+
+GRANT EXECUTE ON FUNCTION public.start_subscription(uuid, text, text, text, integer, text, text, text, timestamptz) TO service_role;
+GRANT EXECUTE ON FUNCTION public.cancel_subscription(uuid, text, text, text, boolean) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.purchase_client_package(uuid, uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.purchase_gift_card(uuid, numeric, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.redeem_gift_card(uuid, numeric, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.redeem_loyalty_reward(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.set_team_member_pin(uuid, text) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.clear_team_member_pin(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.verify_team_member_pin(uuid, text) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_or_create_referral_code() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.set_authorization_password(text) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.verify_authorization_password(text) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_clients_masked(boolean) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_client_data_secure(uuid, boolean) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_professionals_secure(boolean) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.check_pending_appointments_for_day(uuid, integer) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_or_create_booking_slug() TO authenticated;
