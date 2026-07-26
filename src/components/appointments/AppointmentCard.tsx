@@ -209,7 +209,7 @@ Nos vemos em breve!`;
               </div>
 
               {/* Service, time and professional info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 <div className="flex items-center gap-2 min-w-0">
                   <Package className="w-4 h-4 text-gray-400 shrink-0" />
                   <span className="text-sm font-medium truncate">{appointment.service_name}</span>

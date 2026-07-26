@@ -73,7 +73,7 @@ export const AppointmentListRow = ({ appointment, isSelected = false, onSelect }
       </div>
 
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
-        <DialogContent className="max-w-lg p-0">
+        <DialogContent className="max-w-2xl p-0 max-h-[85vh] overflow-y-auto">
           <AppointmentCard appointment={appointment} />
         </DialogContent>
       </Dialog>
