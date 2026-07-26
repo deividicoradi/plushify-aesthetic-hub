@@ -1431,6 +1431,27 @@ export type Database = {
         }
         Relationships: []
       }
+      public_rate_limits: {
+        Row: {
+          endpoint: string
+          identifier: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          endpoint: string
+          identifier: string
+          request_count?: number
+          window_start?: string
+        }
+        Update: {
+          endpoint?: string
+          identifier?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       referral_codes: {
         Row: {
           code: string
@@ -1784,6 +1805,15 @@ export type Database = {
       }
       check_pending_appointments_for_day: {
         Args: { p_day_of_week: number; p_user_id: string }
+        Returns: boolean
+      }
+      check_public_rate_limit: {
+        Args: {
+          p_endpoint: string
+          p_identifier: string
+          p_max_requests: number
+          p_window_minutes: number
+        }
         Returns: boolean
       }
       clear_team_member_pin: { Args: { p_member_id: string }; Returns: boolean }
