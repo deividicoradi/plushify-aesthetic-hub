@@ -160,7 +160,7 @@ const Cookies = () => {
                 Se você tiver alguma dúvida sobre nossa política de cookies, entre em contato conosco:
               </p>
               <div className="bg-background rounded-lg p-4 border border-primary/20">
-                <p><strong>E-mail:</strong> suporte@plushify.com.br</p>
+                <p><strong>E-mail:</strong> plushify.suporte@gmail.com</p>
                 <p><strong>Assunto:</strong> "Dúvidas sobre Cookies"</p>
               </div>
             </div>

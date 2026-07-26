@@ -112,6 +112,17 @@ const Privacy = () => {
                     <li>Para proteger nossos direitos legais</li>
                     <li>Com seu consentimento explícito</li>
                   </ul>
+                  <p>
+                    <strong>Processamento de Pagamentos:</strong> Os dados necessários para cobrança (como
+                    número de cartão) são processados diretamente pela AbacatePay, nossa parceira de
+                    pagamentos. Não armazenamos dados completos de cartão de crédito em nossos servidores.
+                  </p>
+                  <p>
+                    <strong>Transferência Internacional:</strong> Nossa infraestrutura de hospedagem e banco
+                    de dados (Supabase, sobre AWS) pode armazenar ou processar dados em servidores localizados
+                    fora do Brasil. Nesses casos, exigimos que os provedores mantenham padrões de segurança e
+                    proteção de dados compatíveis com a LGPD.
+                  </p>
                 </div>
               </section>
 
@@ -153,9 +164,9 @@ const Privacy = () => {
                 Para exercer seus direitos ou esclarecer dúvidas sobre esta política, entre em contato:
               </p>
               <div className="bg-background rounded-lg p-4 border border-primary/20">
-                <p><strong>E-mail:</strong> suporte@plushify.com.br</p>
-                <p><strong>Encarregado de Dados:</strong> Equipe Plushify</p>
-                <p><strong>Endereço:</strong> São Paulo, Brasil</p>
+                <p><strong>E-mail:</strong> plushify.suporte@gmail.com</p>
+                <p><strong>Encarregado de Dados (DPO):</strong> Equipe Plushify</p>
+                <p><strong>Razão Social / CNPJ:</strong> [a ser incluído após abertura da empresa]</p>
               </div>
             </div>
 

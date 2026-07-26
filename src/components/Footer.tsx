@@ -71,7 +71,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row md:justify-between items-center">
             <div className="mb-4 md:mb-0">
               <p className="text-muted-foreground text-sm">
-                &copy; {currentYear} Plushify Tecnologia Ltda. Todos os direitos reservados.
+                &copy; {currentYear} Plushify. Todos os direitos reservados.
               </p>
             </div>
             
@@ -94,8 +94,8 @@ const Footer = () => {
               </p>
               <p>
                 Para exercer seus direitos sobre dados pessoais, entre em contato: 
-                <a href="mailto:suporte@plushify.com.br" className="text-primary hover:underline ml-1">
-                  suporte@plushify.com.br
+                <a href="mailto:plushify.suporte@gmail.com" className="text-primary hover:underline ml-1">
+                  plushify.suporte@gmail.com
                 </a>
               </p>
             </div>

@@ -216,8 +216,8 @@ export class AppErrorBoundary extends Component<Props, State> {
                 <p className="text-xs text-muted-foreground text-center">
                   Se o problema persistir, reporte o erro ID: <strong>{this.state.errorId}</strong>
                   <br />
-                  Contato: <a href="mailto:suporte@plushify.com.br" className="text-primary hover:underline">
-                    suporte@plushify.com.br
+                  Contato: <a href="mailto:plushify.suporte@gmail.com" className="text-primary hover:underline">
+                    plushify.suporte@gmail.com
                   </a>
                 </p>
               </div>
