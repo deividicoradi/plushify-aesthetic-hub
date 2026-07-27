@@ -2156,6 +2156,10 @@ export type Database = {
         }
         Returns: string
       }
+      subscribe_to_newsletter: {
+        Args: { p_email: string; p_name: string }
+        Returns: undefined
+      }
       validate_email: { Args: { email: string }; Returns: boolean }
       validate_phone: { Args: { phone: string }; Returns: boolean }
       verify_authorization_password: {
