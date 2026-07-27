@@ -5,6 +5,13 @@
 -- A tabela public.professionals é mantida (sem uso) nesta migration para
 -- permitir rollback fácil; será removida numa migration de limpeza futura,
 -- depois que a camada de aplicação estiver 100% migrada para team_members.
+--
+-- NOTA: esta migration é byte-a-byte equivalente (menos comentários) à
+-- migration anterior 20260724224451_d132a06e-...sql, que já foi aplicada em
+-- produção primeiro. Reescrita aqui de forma idempotente (IF NOT EXISTS /
+-- DO blocks com EXCEPTION) só pra garantir que uma reaplicação do histórico
+-- completo de migrations do zero (novo ambiente, restore, CI) não quebre
+-- tentando recriar os mesmos objetos.
 
 -- 1. Novas colunas em team_members
 ALTER TABLE public.team_members
@@ -32,9 +39,12 @@ WHERE NOT EXISTS (SELECT 1 FROM public.team_members tm WHERE tm.id = p.id)
 ON CONFLICT (id) DO NOTHING;
 
 -- 3. Repontar FKs de professionals -> team_members (mantém o nome da coluna)
-ALTER TABLE public.appointments
-  ADD CONSTRAINT appointments_professional_id_fkey
-  FOREIGN KEY (professional_id) REFERENCES public.team_members(id) ON DELETE SET NULL;
+DO $$ BEGIN
+  ALTER TABLE public.appointments
+    ADD CONSTRAINT appointments_professional_id_fkey
+    FOREIGN KEY (professional_id) REFERENCES public.team_members(id) ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 ALTER TABLE public.service_professionals
   DROP CONSTRAINT IF EXISTS service_professionals_professional_id_fkey;
@@ -43,7 +53,7 @@ ALTER TABLE public.service_professionals
   FOREIGN KEY (professional_id) REFERENCES public.team_members(id) ON DELETE CASCADE;
 
 -- 4. Tabela de comissões (histórico imutável do % aplicado em cada atendimento)
-CREATE TABLE public.commissions (
+CREATE TABLE IF NOT EXISTS public.commissions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   team_member_id uuid NOT NULL REFERENCES public.team_members(id) ON DELETE CASCADE,
@@ -60,8 +70,15 @@ CREATE TABLE public.commissions (
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.commissions TO authenticated;
 GRANT ALL ON public.commissions TO service_role;
 ALTER TABLE public.commissions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY commissions_owner ON public.commissions FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE INDEX idx_commissions_team_member ON public.commissions(team_member_id, created_at DESC);
+
+DO $$ BEGIN
+  CREATE POLICY commissions_owner ON public.commissions FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_commissions_team_member ON public.commissions(team_member_id, created_at DESC);
+
+DROP TRIGGER IF EXISTS update_commissions_updated_at ON public.commissions;
 CREATE TRIGGER update_commissions_updated_at BEFORE UPDATE ON public.commissions FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- 5. Cálculo automático de comissão na conclusão do agendamento.
@@ -103,6 +120,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trg_calculate_commission ON public.appointments;
 CREATE TRIGGER trg_calculate_commission
 AFTER UPDATE ON public.appointments
 FOR EACH ROW EXECUTE FUNCTION public.calculate_commission_on_completion();

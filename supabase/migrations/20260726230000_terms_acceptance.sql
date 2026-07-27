@@ -18,9 +18,15 @@ CREATE INDEX IF NOT EXISTS terms_acceptances_user_id_idx ON public.terms_accepta
 
 ALTER TABLE public.terms_acceptances ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Usuário vê apenas seu próprio aceite"
-  ON public.terms_acceptances FOR SELECT
-  USING (auth.uid() = user_id);
+-- Equivalente à migration anterior (20260726191827_034087f0-...sql, já
+-- aplicada em produção primeiro) que recria a mesma policy; guardado num DO
+-- block pra não quebrar se o histórico for reaplicado do zero.
+DO $$ BEGIN
+  CREATE POLICY "Usuário vê apenas seu próprio aceite"
+    ON public.terms_acceptances FOR SELECT
+    USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Sem policy de INSERT/UPDATE/DELETE para authenticated: só o trigger
 -- abaixo (SECURITY DEFINER, disparado no cadastro) grava aqui.

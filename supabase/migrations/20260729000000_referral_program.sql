@@ -21,9 +21,15 @@ CREATE TABLE IF NOT EXISTS public.referral_codes (
 
 ALTER TABLE public.referral_codes ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Usuário vê apenas o próprio código de indicação"
-  ON public.referral_codes FOR SELECT
-  USING (auth.uid() = user_id);
+-- Esta migration é próxima o suficiente da anterior (20260725212109_9d0c37f0-
+-- ...sql, já aplicada em produção primeiro) que recria a mesma policy;
+-- guardado num DO block pra não quebrar se o histórico for reaplicado do zero.
+DO $$ BEGIN
+  CREATE POLICY "Usuário vê apenas o próprio código de indicação"
+    ON public.referral_codes FOR SELECT
+    USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Sem policy de INSERT/UPDATE/DELETE para authenticated: só a RPC
 -- get_or_create_referral_code (SECURITY DEFINER) grava nessa tabela.
@@ -76,9 +82,12 @@ CREATE TABLE IF NOT EXISTS public.referrals (
 
 ALTER TABLE public.referrals ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Usuário vê as indicações que fez"
-  ON public.referrals FOR SELECT
-  USING (auth.uid() = referrer_id);
+DO $$ BEGIN
+  CREATE POLICY "Usuário vê as indicações que fez"
+    ON public.referrals FOR SELECT
+    USING (auth.uid() = referrer_id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Sem policy de INSERT/UPDATE para authenticated: só os triggers abaixo
 -- (SECURITY DEFINER) gravam nessa tabela.
