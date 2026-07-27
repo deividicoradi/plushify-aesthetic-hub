@@ -13,6 +13,7 @@ import { FeatureGuard } from '@/components/FeatureGuard';
 import { useClientStats } from '@/hooks/useClientStats';
 import { LimitAlert } from '@/components/LimitAlert';
 import { useStaffMode } from '@/contexts/StaffModeContext';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const Clients = () => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
@@ -21,6 +22,7 @@ const Clients = () => {
     lastVisit: 'Todos'
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm);
   const { totalClients, activeClients, newThisMonth, loading, refetch } = useClientStats();
   const { isStaffMode, can } = useStaffMode();
   const canManageClients = !isStaffMode || can('manage_clients');
@@ -72,7 +74,7 @@ const Clients = () => {
                 </p>
               </div>
               <div className="p-3 sm:p-4 lg:p-6">
-                <ClientList filters={filters} searchTerm={searchTerm} onClientUpdate={refetch} />
+                <ClientList filters={filters} searchTerm={debouncedSearchTerm} onClientUpdate={refetch} />
               </div>
             </div>
           </TabsContent>

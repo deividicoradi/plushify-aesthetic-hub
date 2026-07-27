@@ -7,6 +7,7 @@ import { Sparkles, Search } from 'lucide-react';
 import { LoyaltyClient } from '@/hooks/useLoyalty';
 import { Reward } from '@/hooks/useRewards';
 import { useRedeemReward } from '@/hooks/loyalty/useRedeemReward';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 interface Props {
   open: boolean;
@@ -18,14 +19,15 @@ interface Props {
 
 export const RedeemRewardDialog: React.FC<Props> = ({ open, onOpenChange, reward, clients, onRedeemed }) => {
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { redeem, redeeming } = useRedeemReward();
 
   const filtered = useMemo(() => {
-    const term = search.trim().toLowerCase();
+    const term = debouncedSearch.trim().toLowerCase();
     if (!term) return clients;
     return clients.filter(c => c.name.toLowerCase().includes(term));
-  }, [clients, search]);
+  }, [clients, debouncedSearch]);
 
   const selectedClient = clients.find(c => c.id === selectedId) || null;
   const hasEnoughPoints = !!selectedClient && !!reward && selectedClient.totalPoints >= reward.pointsCost;

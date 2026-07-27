@@ -13,10 +13,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LimitAlert } from '@/components/LimitAlert';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useStaffMode } from '@/contexts/StaffModeContext';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const Appointments = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebouncedValue(searchQuery);
   const [filters, setFilters] = useState<AppointmentFilters>({});
   const { appointments } = useAppointments();
   const { isStaffMode, can } = useStaffMode();
@@ -76,7 +78,7 @@ const Appointments = () => {
             </div>
             
             <AppointmentsList
-              searchQuery={searchQuery}
+              searchQuery={debouncedSearchQuery}
               filters={filters}
               onCreateNew={canManageAppointments ? () => setIsCreateDialogOpen(true) : undefined}
               onClearFilters={() => setFilters({})}

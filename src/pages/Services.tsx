@@ -15,12 +15,14 @@ import { LimitAlert } from '@/components/LimitAlert';
 import { FeatureGuard } from '@/components/FeatureGuard';
 import { PackagesContent } from '@/pages/Packages';
 import { toast } from 'sonner';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const Services = () => {
   const { user } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm);
   const { services, isLoading, createService, updateService, deleteService, toggleServiceStatus } = useServices();
 
   const saveServiceProfessionals = async (serviceId: string, professionals: Professional[]) => {
@@ -88,9 +90,9 @@ const Services = () => {
 
   // Filter services based on search term
   const filteredServices = services.filter(service => {
-    if (!searchTerm) return true;
-    
-    const searchLower = searchTerm.toLowerCase();
+    if (!debouncedSearchTerm) return true;
+
+    const searchLower = debouncedSearchTerm.toLowerCase();
     return (
       service.name.toLowerCase().includes(searchLower) ||
       service.category?.toLowerCase().includes(searchLower) ||

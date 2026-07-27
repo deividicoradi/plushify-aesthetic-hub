@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,18 +65,23 @@ export const CashStatusProvider: React.FC<CashStatusProviderProps> = ({ children
   const canOpenCash = !isOpen;
   const canCloseCash = isOpen && currentOpening;
 
-  const refreshStatus = () => {
+  const refreshStatus = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
+
+  // Sem useMemo, todo re-render deste provider (ex.: qualquer refetch do
+  // React Query) recriava o objeto e re-renderizava TODAS as abas
+  // financeiras (Pagamentos, Despesas, Parcelamentos, Caixa) de uma vez.
+  const value = useMemo(() => ({
+    isOpen,
+    currentOpening,
+    canOpenCash,
+    canCloseCash,
+    refreshStatus,
+  }), [isOpen, currentOpening, canOpenCash, canCloseCash, refreshStatus]);
 
   return (
-    <CashStatusContext.Provider value={{
-      isOpen,
-      currentOpening,
-      canOpenCash,
-      canCloseCash,
-      refreshStatus,
-    }}>
+    <CashStatusContext.Provider value={value}>
       {children}
     </CashStatusContext.Provider>
   );

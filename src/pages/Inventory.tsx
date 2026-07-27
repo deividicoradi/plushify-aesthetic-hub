@@ -21,9 +21,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
@@ -42,10 +44,10 @@ const Inventory = () => {
   } = useProductsData();
 
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.brand?.toLowerCase().includes(searchTerm.toLowerCase())
+    product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    product.sku?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    product.category?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    product.brand?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   const handleCreateProduct = () => {

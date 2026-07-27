@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,13 +26,13 @@ export const CacheOptimizerProvider: React.FC<CacheOptimizerProviderProps> = ({ 
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const clearUserCache = () => {
+  const clearUserCache = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
     queryClient.invalidateQueries({ queryKey: ['financial-metrics'] });
     queryClient.invalidateQueries({ queryKey: ['monthly-data'] });
-  };
+  }, [queryClient]);
 
-  const prefetchData = async () => {
+  const prefetchData = useCallback(async () => {
     if (!user) return;
 
     // Prefetch dashboard data
@@ -40,7 +40,7 @@ export const CacheOptimizerProvider: React.FC<CacheOptimizerProviderProps> = ({ 
       queryKey: ['dashboard-data', user.id],
       staleTime: 2 * 60 * 1000,
     });
-  };
+  }, [queryClient, user]);
 
   useEffect(() => {
     // Remover cache listeners para evitar múltiplas invalidações
@@ -49,8 +49,10 @@ export const CacheOptimizerProvider: React.FC<CacheOptimizerProviderProps> = ({ 
     };
   }, [user]);
 
+  const value = useMemo(() => ({ clearUserCache, prefetchData }), [clearUserCache, prefetchData]);
+
   return (
-    <CacheOptimizerContext.Provider value={{ clearUserCache, prefetchData }}>
+    <CacheOptimizerContext.Provider value={value}>
       {children}
     </CacheOptimizerContext.Provider>
   );

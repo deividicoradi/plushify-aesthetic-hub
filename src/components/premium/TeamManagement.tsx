@@ -16,6 +16,7 @@ import { UserLimitModal } from '@/components/team/UserLimitModal';
 import { CommissionsPanel, StaffCommissionsPanel } from '@/components/team/CommissionsPanel';
 import { useStaffMode } from '@/contexts/StaffModeContext';
 import { useToast } from '@/hooks/use-toast';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const CommissionsUpgradePrompt = () => (
   <Alert className="border-plush-200 bg-plush-50 dark:bg-plush-950/30">
@@ -36,15 +37,16 @@ export const TeamManagement = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm);
   const { toast } = useToast();
-  
+
   const limitInfo = getUserLimitInfo();
 
   // Filtrar membros baseado na busca
   const filteredMembers = teamMembers.filter(member =>
-    member.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.role?.toLowerCase().includes(searchTerm.toLowerCase())
+    member.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    member.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    member.role?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   const handleAddMember = () => {

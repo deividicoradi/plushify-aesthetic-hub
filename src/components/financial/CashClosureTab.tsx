@@ -8,6 +8,7 @@ import CashOpeningDialog from './CashOpeningDialog';
 import CashSearchAndFilters from './CashSearchAndFilters';
 import { useCashStatus } from './CashStatusProvider';
 import CashCycleRow from './cash-closure/CashCycleRow';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const PAGE_SIZE = 10;
 
@@ -17,6 +18,7 @@ const CashClosureTab = () => {
   const [editingClosure, setEditingClosure] = useState<any>(null);
   const [editingOpening, setEditingOpening] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm);
   const [filters, setFilters] = useState({
     dateFrom: '',
     dateTo: '',
@@ -39,7 +41,7 @@ const CashClosureTab = () => {
 
   React.useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [searchTerm, filters.dateFrom, filters.dateTo, filters.type]);
+  }, [debouncedSearchTerm, filters.dateFrom, filters.dateTo, filters.type]);
 
   // Agrupa abertura + fechamento do mesmo dia num único "ciclo de caixa" —
   // antes cada evento virava um card gigante separado, dobrando a altura
@@ -48,12 +50,12 @@ const CashClosureTab = () => {
     let openingsData = cashOpenings || [];
     let closuresData = cashClosures || [];
 
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       openingsData = openingsData.filter(item =>
-        item.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+        item.notes?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
       closuresData = closuresData.filter(item =>
-        item.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+        item.notes?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
     }
 

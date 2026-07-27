@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
@@ -45,9 +45,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Função para atualizar a sessão (removida para evitar refresh desnecessário)
-  const refreshSession = async () => {
+  const refreshSession = useCallback(async () => {
     if (import.meta.env.DEV) console.log('Refresh session called - but skipping to avoid rate limits');
-  };
+  }, []);
 
   useEffect(() => {
     // Prevenir múltiplas inicializações
@@ -302,13 +302,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const value = {
+  // Sem useMemo aqui, esse objeto novo a cada render re-renderiza TODA a
+  // árvore de consumidores do AuthContext (praticamente o app inteiro).
+  const value = useMemo(() => ({
     user,
     session,
     loading,
     signOut,
     refreshSession,
-  };
+  }), [user, session, loading, signOut, refreshSession]);
 
   return (
     <AuthContext.Provider value={value}>

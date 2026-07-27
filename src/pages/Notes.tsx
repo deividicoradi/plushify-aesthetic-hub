@@ -9,12 +9,14 @@ import { useClients } from '@/hooks/useClients';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const Notes = () => {
   const { notes, loading, fetchNotes, createNote, updateNote, deleteNote } = useNotes();
   const { clients } = useClients();
   const [creating, setCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebouncedValue(searchTerm);
   const [clientFilter, setClientFilter] = useState<string>('all');
 
   useEffect(() => {
@@ -31,8 +33,8 @@ const Notes = () => {
   // Filtra as notas com base no termo de busca e no cliente vinculado
   const filteredNotes = notes.filter(note => {
     const matchesSearch =
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchTerm.toLowerCase());
+      note.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      note.content.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
     const matchesClient =
       clientFilter === 'all' ||
       (clientFilter === 'none' ? !note.client_id : note.client_id === clientFilter);

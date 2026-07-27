@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import PaymentDialog from './PaymentDialog';
 import ConfirmationDialog from '@/components/ui/confirmation-dialog';
 import PaymentsHeader from './payments/PaymentsHeader';
@@ -7,6 +7,7 @@ import PaymentsList from './payments/PaymentsList';
 import { usePaymentsData } from '@/hooks/financial/usePaymentsData';
 import { useCashStatus } from './CashStatusProvider';
 import { toast } from "@/hooks/use-toast";
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const PaymentsTab = () => {
   const { payments, isLoading, getClientName } = usePaymentsData();
@@ -14,6 +15,7 @@ const PaymentsTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm);
 
   // Bloqueia ANTES de abrir o formulário (não só no submit): sem isso o
   // usuário preenche tudo e só descobre que o caixa está fechado ao salvar,
@@ -40,10 +42,10 @@ const PaymentsTab = () => {
     setEditingPayment(null);
   };
 
-  const filteredPayments = payments?.filter(payment =>
-    payment.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getClientName(payment.client_id)?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPayments = useMemo(() => payments?.filter(payment =>
+    payment.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    getClientName(payment.client_id)?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+  ), [payments, debouncedSearchTerm, getClientName]);
 
   return (
     <div className="space-y-6">
@@ -55,7 +57,7 @@ const PaymentsTab = () => {
       />
 
       <PaymentsList
-        payments={filteredPayments || []}
+        payments={filteredPayments ?? []}
         isLoading={isLoading}
         getClientName={getClientName}
         onEdit={handleEdit}

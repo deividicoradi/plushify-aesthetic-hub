@@ -11,6 +11,7 @@ import { ExportButtons } from './ExportButtons';
 import { AdvancedFilters, FilterOptions } from './AdvancedFilters';
 import ComparativeReport from './ComparativeReport';
 import ReportsTab from './ReportsTab';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const EnhancedReportsTab = () => {
   const { user } = useAuth();
@@ -28,13 +29,18 @@ const EnhancedReportsTab = () => {
     includeExpenses: true,
     includeInstallments: true
   });
+  // searchTerm é o único campo destes filtros que muda por digitação (os
+  // demais mudam por clique/seleção) — sem debounce, cada tecla disparava
+  // 3 queries ao Supabase (payments/expenses/installments) na hora.
+  const debouncedSearchTerm = useDebouncedValue(filters.searchTerm);
+  const queryFilters = { ...filters, searchTerm: debouncedSearchTerm };
 
   // Buscar dados com filtros aplicados
   const { data: filteredData, isLoading } = useQuery({
-    queryKey: ['filtered-financial-data', user?.id, filters],
+    queryKey: ['filtered-financial-data', user?.id, queryFilters],
     queryFn: async () => {
-      const fromDate = filters.dateRange.from?.toISOString();
-      const toDate = filters.dateRange.to?.toISOString();
+      const fromDate = queryFilters.dateRange.from?.toISOString();
+      const toDate = queryFilters.dateRange.to?.toISOString();
 
       // Construir query para pagamentos
       let paymentsQuery = supabase
@@ -89,59 +95,59 @@ const EnhancedReportsTab = () => {
       let installments = installmentsResult.data || [];
 
       // Aplicar filtros de busca
-      if (filters.searchTerm) {
-        const searchLower = filters.searchTerm.toLowerCase();
-        payments = payments.filter(p => 
+      if (queryFilters.searchTerm) {
+        const searchLower = queryFilters.searchTerm.toLowerCase();
+        payments = payments.filter(p =>
           p.description?.toLowerCase().includes(searchLower) ||
           (p.clients as any)?.name?.toLowerCase().includes(searchLower)
         );
-        expenses = expenses.filter(e => 
+        expenses = expenses.filter(e =>
           e.description?.toLowerCase().includes(searchLower) ||
           e.category?.toLowerCase().includes(searchLower)
         );
       }
 
       // Aplicar filtros de status
-      if (filters.status.length > 0) {
-        payments = payments.filter(p => filters.status.includes(p.status));
-        installments = installments.filter(i => filters.status.includes(i.status));
+      if (queryFilters.status.length > 0) {
+        payments = payments.filter(p => queryFilters.status.includes(p.status));
+        installments = installments.filter(i => queryFilters.status.includes(i.status));
       }
 
       // Aplicar filtros de métodos de pagamento
-      if (filters.paymentMethods.length > 0) {
+      if (queryFilters.paymentMethods.length > 0) {
         payments = payments.filter(p => {
           const methodName = (p.payment_methods as any)?.name;
-          return methodName && filters.paymentMethods.includes(methodName);
+          return methodName && queryFilters.paymentMethods.includes(methodName);
         });
         expenses = expenses.filter(e => {
           const methodName = (e.payment_methods as any)?.name;
-          return methodName && filters.paymentMethods.includes(methodName);
+          return methodName && queryFilters.paymentMethods.includes(methodName);
         });
       }
 
       // Aplicar filtros de categorias (apenas para despesas)
-      if (filters.categories.length > 0) {
-        expenses = expenses.filter(e => e.category && filters.categories.includes(e.category));
+      if (queryFilters.categories.length > 0) {
+        expenses = expenses.filter(e => e.category && queryFilters.categories.includes(e.category));
       }
 
       // Aplicar filtros de valor
-      if (filters.amountRange.min !== null || filters.amountRange.max !== null) {
-        if (filters.amountRange.min !== null) {
-          payments = payments.filter(p => Number(p.amount) >= filters.amountRange.min!);
-          expenses = expenses.filter(e => Number(e.amount) >= filters.amountRange.min!);
-          installments = installments.filter(i => Number(i.amount) >= filters.amountRange.min!);
+      if (queryFilters.amountRange.min !== null || queryFilters.amountRange.max !== null) {
+        if (queryFilters.amountRange.min !== null) {
+          payments = payments.filter(p => Number(p.amount) >= queryFilters.amountRange.min!);
+          expenses = expenses.filter(e => Number(e.amount) >= queryFilters.amountRange.min!);
+          installments = installments.filter(i => Number(i.amount) >= queryFilters.amountRange.min!);
         }
-        if (filters.amountRange.max !== null) {
-          payments = payments.filter(p => Number(p.amount) <= filters.amountRange.max!);
-          expenses = expenses.filter(e => Number(e.amount) <= filters.amountRange.max!);
-          installments = installments.filter(i => Number(i.amount) <= filters.amountRange.max!);
+        if (queryFilters.amountRange.max !== null) {
+          payments = payments.filter(p => Number(p.amount) <= queryFilters.amountRange.max!);
+          expenses = expenses.filter(e => Number(e.amount) <= queryFilters.amountRange.max!);
+          installments = installments.filter(i => Number(i.amount) <= queryFilters.amountRange.max!);
         }
       }
 
       // Aplicar filtros de tipo de transação
-      if (!filters.includePayments) payments = [];
-      if (!filters.includeExpenses) expenses = [];
-      if (!filters.includeInstallments) installments = [];
+      if (!queryFilters.includePayments) payments = [];
+      if (!queryFilters.includeExpenses) expenses = [];
+      if (!queryFilters.includeInstallments) installments = [];
 
       return {
         payments,

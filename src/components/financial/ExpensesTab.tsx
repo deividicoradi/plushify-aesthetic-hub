@@ -10,6 +10,7 @@ import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 import { useExpensesByType } from '@/hooks/financial/useExpensesByType';
 import { useCashStatus } from './CashStatusProvider';
 import { toast } from "@/hooks/use-toast";
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const ExpensesTab = () => {
   const { expenses, isLoading, deleteExpense } = useExpensesData();
@@ -17,6 +18,7 @@ const ExpensesTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
 
@@ -75,8 +77,8 @@ const ExpensesTab = () => {
   };
 
   const filteredExpenses = expenses?.filter(expense =>
-    expense.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    expense.category?.toLowerCase().includes(searchTerm.toLowerCase())
+    expense.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    expense.category?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   const totalExpenses = filteredExpenses?.reduce((sum, expense) => sum + Number(expense.amount), 0) || 0;
