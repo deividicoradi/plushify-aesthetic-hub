@@ -16,6 +16,7 @@ import { queryClient } from "@/lib/queryClient";
 import ScrollToTop from "./components/ScrollToTop";
 import { PerformanceMonitor } from "./components/PerformanceMonitor";
 import { CacheOptimizerProvider } from "./components/CacheOptimizer";
+import { RouteFallback } from "./components/layout/RouteFallback";
 
 // Lazy-loaded public/institutional pages (code-splitting) — só o layout
 // de rota (App.tsx) precisa carregar de cara; marketing/legal/auth pesam
@@ -50,7 +51,10 @@ const FinancialDashboard = lazy(() => import("./pages/FinancialDashboard"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 const PlansInternal = lazy(() => import("./pages/PlansInternal"));
 
-const RouteFallback = () => (
+// Fallback simples (só spinner) pras páginas públicas/institucionais —
+// elas não têm sidebar/header do app, então o skeleton "cheio" (usado nas
+// páginas internas via Lazy()) ficaria com a forma errada aqui.
+const PublicRouteFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary" />
   </div>
@@ -58,6 +62,10 @@ const RouteFallback = () => (
 
 const Lazy = (node: React.ReactNode) => (
   <Suspense fallback={<RouteFallback />}>{node}</Suspense>
+);
+
+const LazyPublic = (node: React.ReactNode) => (
+  <Suspense fallback={<PublicRouteFallback />}>{node}</Suspense>
 );
 
 
@@ -79,19 +87,19 @@ const AppContent = () => {
   
   return (
     <Routes>
-      <Route path="/" element={Lazy(<Index />)} />
-      <Route path="/product" element={Lazy(<Product />)} />
-      <Route path="/about" element={Lazy(<About />)} />
-      <Route path="/planos" element={Lazy(<Plans />)} />
-      <Route path="/auth" element={Lazy(<Auth />)} />
-      <Route path="/signup" element={Lazy(<Signup />)} />
-      <Route path="/terms" element={Lazy(<Terms />)} />
-      <Route path="/privacy" element={Lazy(<Privacy />)} />
-      <Route path="/lgpd" element={Lazy(<LGPD />)} />
-      <Route path="/cookies" element={Lazy(<Cookies />)} />
-      <Route path="/help" element={Lazy(<Help />)} />
-      <Route path="/updates" element={Lazy(<Updates />)} />
-      <Route path="/agendar/:slug" element={Lazy(<PublicBooking />)} />
+      <Route path="/" element={LazyPublic(<Index />)} />
+      <Route path="/product" element={LazyPublic(<Product />)} />
+      <Route path="/about" element={LazyPublic(<About />)} />
+      <Route path="/planos" element={LazyPublic(<Plans />)} />
+      <Route path="/auth" element={LazyPublic(<Auth />)} />
+      <Route path="/signup" element={LazyPublic(<Signup />)} />
+      <Route path="/terms" element={LazyPublic(<Terms />)} />
+      <Route path="/privacy" element={LazyPublic(<Privacy />)} />
+      <Route path="/lgpd" element={LazyPublic(<LGPD />)} />
+      <Route path="/cookies" element={LazyPublic(<Cookies />)} />
+      <Route path="/help" element={LazyPublic(<Help />)} />
+      <Route path="/updates" element={LazyPublic(<Updates />)} />
+      <Route path="/agendar/:slug" element={LazyPublic(<PublicBooking />)} />
       <Route
         path="/dashboard"
         element={
@@ -202,7 +210,7 @@ const AppContent = () => {
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={Lazy(<NotFound />)} />
+      <Route path="*" element={LazyPublic(<NotFound />)} />
     </Routes>
   );
 };
