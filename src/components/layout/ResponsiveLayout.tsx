@@ -3,6 +3,7 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useResponsive } from '@/hooks/useResponsive';
+import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed';
 import DashboardSidebar from './DashboardSidebar';
 import { MobileSidebar } from './MobileSidebar';
 import { GlobalHeader } from './GlobalHeader';
@@ -25,6 +26,7 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
 }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { isMobile } = useResponsive();
+  const { collapsed } = useSidebarCollapsed();
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -39,8 +41,8 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
 
       {/* Main Content */}
       <div className={cn(
-        "min-h-screen flex flex-col",
-        !isMobile && "ml-64"
+        "min-h-screen flex flex-col transition-[margin] duration-200 ease-in-out",
+        !isMobile && (collapsed ? "ml-16" : "ml-64")
       )}>
         {/* Header */}
         <header className="flex items-center gap-2 sm:gap-4 border-b bg-background px-3 sm:px-4 py-3 sticky top-0 z-30">
