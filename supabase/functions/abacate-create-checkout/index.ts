@@ -6,28 +6,32 @@ import { buildCorsHeaders } from "../_shared/cors.ts";
 // plano ANUAL. Assinatura recorrente da AbacatePay só aceita CARD sem
 // parcelamento (ver /v2/subscriptions/create) — por isso o plano mensal
 // continua usando abacate-create-subscription, e só o anual passa por aqui,
-// via /v2/checkouts/create. PIX removido dos métodos (ver comentário mais
-// abaixo, na criação do checkout).
+// via /v2/checkouts/create.
 //
-// Validado de ponta a ponta em produção em 2026-07-27: checkout do
-// Premium Anual (prod_FWGcbH5Puu5eua6M0652RRNy) pago com sucesso
-// (bill_ZQzZwp1jULxjHTN2nULPDkun), webhook confirmado e plano ativado.
+// IMPORTANTE (doc oficial, /pages/payment/installments): parcelamento
+// (card.maxInstallments) só é suportado em checkouts ONE_TIME — produtos
+// com `cycle` definido (tipo "Assinatura") geram checkout tipo SUBSCRIPTION
+// por trás, que NÃO suporta parcelamento. Usar produto "Assinatura" aqui
+// (como tentamos em 2026-07-27) deixa o seletor de parcelas num estado
+// inválido no front da AbacatePay, quebrando a página ao clicar nele
+// (removeChild NotFoundError). Por isso os produtos abaixo são os
+// "Pagamento avulso" (sem cycle) — únicos compatíveis com parcelamento.
 //
 // Mesmo padrão de segurança de abacate-create-subscription: JWT validado via
 // JWKS, plano/preço conferidos contra o catálogo real da AbacatePay antes de
 // abrir o checkout (evita manipulação de preço pelo cliente).
 export const EXPECTED_ANNUAL_PLANS = {
   professional: {
-    productId: "prod_bM42yN1t65DCWRxj5d0NNQdx",
-    name: "Plushify Profissional (Anual)",
+    productId: "prod_hLaqZTpStG1uMjdJBErKPc6c",
+    name: "Plushify Profissional 1 ano",
     amount: 89000,
-    cycle: "ANNUALLY",
+    cycle: null,
   },
   premium: {
-    productId: "prod_FWGcbH5Puu5eua6M0652RRNy",
-    name: "Plushify Premium (Anual)",
+    productId: "prod_HFwLzxRtcTRSY4YdgQfRmNTY",
+    name: "Plushify Premium 1 ano",
     amount: 179000,
-    cycle: "ANNUALLY",
+    cycle: null,
   },
 } as const;
 
@@ -101,7 +105,7 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
     const mismatches: string[] = [];
     if (remote.price !== expected.amount) mismatches.push(`price ${remote.price} != ${expected.amount}`);
     if (remote.name !== expected.name) mismatches.push(`name "${remote.name}" != "${expected.name}"`);
-    if (remote.cycle !== expected.cycle) mismatches.push(`cycle ${remote.cycle} != ${expected.cycle}`);
+    if ((remote.cycle ?? null) !== expected.cycle) mismatches.push(`cycle ${remote.cycle} != ${expected.cycle}`);
     if (remote.status !== "ACTIVE") mismatches.push(`status ${remote.status} != ACTIVE`);
     if (mismatches.length) {
       throw new Error(`VERIFY: ${planType}/annual mismatch — ${mismatches.join("; ")}`);
@@ -124,9 +128,6 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
       },
       body: JSON.stringify({
         items: [{ id: productId, quantity: 1 }],
-        // PIX removido: produtos "Assinatura" usados em /v2/checkouts/create
-        // (pagamento único) exigem "PIX Automático", não habilitado pra
-        // esta loja. Usando só CARD, o checkout funciona normalmente.
         methods: ["CARD"],
         card: { maxInstallments: 12 },
         returnUrl,
