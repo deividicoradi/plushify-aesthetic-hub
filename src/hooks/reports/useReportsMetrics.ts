@@ -1,8 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { getDateRange, handleAsyncError } from '@/utils/common';
+import { getDateRange } from '@/utils/common';
 
 export interface ReportsMetrics {
   totalClients: number;
@@ -18,20 +18,14 @@ export interface ReportsMetrics {
 
 export const useReportsMetrics = () => {
   const { user } = useAuth();
-  const [metrics, setMetrics] = useState<ReportsMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const queryKey = ['reports-metrics', user?.id];
 
-  const fetchMetrics = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const result = await handleAsyncError(async () => {
+  const { data: metrics, isLoading, error } = useQuery({
+    queryKey,
+    enabled: !!user,
+    staleTime: 60_000,
+    queryFn: async (): Promise<ReportsMetrics> => {
       // getDateRange('month') é uma janela rolante (últimos ~30 dias), não o
       // mês calendário. Chamar a mesma função duas vezes pra "mês passado"
       // fazia lastMonthStart cair DEPOIS de lastMonthEnd (mesmo início da
@@ -54,45 +48,45 @@ export const useReportsMetrics = () => {
       ] = await Promise.all([
         // Use secure RPC for clients data
         supabase.rpc('get_clients_masked', { p_mask_sensitive: false }),
-        supabase.from('payments').select('paid_amount, status').eq('user_id', user.id),
-        supabase.from('appointments').select('id').eq('user_id', user.id),
-        supabase.from('products').select('id, stock_quantity, min_stock_level').eq('user_id', user.id),
-        supabase.from('cash_closures').select('total_income').eq('user_id', user.id),
-        
+        supabase.from('payments').select('paid_amount, status').eq('user_id', user!.id),
+        supabase.from('appointments').select('id').eq('user_id', user!.id),
+        supabase.from('products').select('id, stock_quantity, min_stock_level').eq('user_id', user!.id),
+        supabase.from('cash_closures').select('total_income').eq('user_id', user!.id),
+
         // Current month aggregated data
         Promise.all([
-          supabase.from('payments').select('paid_amount, status').eq('user_id', user.id).gte('payment_date', currentMonthStart.toISOString()),
-          supabase.rpc('get_clients_masked', { p_mask_sensitive: false }).then(r => ({ 
-            data: r.data?.filter(c => new Date(c.created_at) >= currentMonthStart) || [] 
+          supabase.from('payments').select('paid_amount, status').eq('user_id', user!.id).gte('payment_date', currentMonthStart.toISOString()),
+          supabase.rpc('get_clients_masked', { p_mask_sensitive: false }).then(r => ({
+            data: r.data?.filter(c => new Date(c.created_at) >= currentMonthStart) || []
           })),
-          supabase.from('appointments').select('id').eq('user_id', user.id).gte('created_at', currentMonthStart.toISOString())
+          supabase.from('appointments').select('id').eq('user_id', user!.id).gte('created_at', currentMonthStart.toISOString())
         ]),
-        
+
         // Last month aggregated data
         Promise.all([
-          supabase.from('payments').select('paid_amount, status').eq('user_id', user.id).gte('payment_date', lastMonthStart.toISOString()).lte('payment_date', lastMonthEnd.toISOString()),
-          supabase.rpc('get_clients_masked', { p_mask_sensitive: false }).then(r => ({ 
+          supabase.from('payments').select('paid_amount, status').eq('user_id', user!.id).gte('payment_date', lastMonthStart.toISOString()).lte('payment_date', lastMonthEnd.toISOString()),
+          supabase.rpc('get_clients_masked', { p_mask_sensitive: false }).then(r => ({
             data: r.data?.filter(c => {
               const created = new Date(c.created_at);
               return created >= lastMonthStart && created <= lastMonthEnd;
-            }) || [] 
+            }) || []
           })),
-          supabase.from('appointments').select('id').eq('user_id', user.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString())
+          supabase.from('appointments').select('id').eq('user_id', user!.id).gte('created_at', lastMonthStart.toISOString()).lte('created_at', lastMonthEnd.toISOString())
         ])
       ]);
 
       // Calculate metrics
       const totalClients = clientsResult.data?.length || 0;
-      
+
       // Calculate total revenue from payments and cash closures separately
       const revenueFromPayments = paymentsResult.data?.filter(p => p.status === 'pago')
         .reduce((sum, payment) => sum + (Number(payment.paid_amount) || 0), 0) || 0;
-      
+
       const revenueFromCashClosures = cashClosuresResult.data
         ?.reduce((sum, closure) => sum + (Number(closure.total_income) || 0), 0) || 0;
-      
+
       const totalRevenue = revenueFromPayments + revenueFromCashClosures;
-      
+
       const totalAppointments = appointmentsResult.data?.length || 0;
       const totalProducts = productsResult.data?.length || 0;
       const lowStockProducts = productsResult.data?.filter(
@@ -108,7 +102,7 @@ export const useReportsMetrics = () => {
       const lastRevenue = lastPayments.data?.filter(p => p.status === 'pago')
         .reduce((sum, p) => sum + (Number(p.paid_amount) || 0), 0) || 0;
 
-      const calculateGrowth = (current: number, previous: number) => 
+      const calculateGrowth = (current: number, previous: number) =>
         previous > 0 ? ((current - previous) / previous) * 100 : 0;
 
       return {
@@ -122,20 +116,13 @@ export const useReportsMetrics = () => {
         revenueGrowth: calculateGrowth(currentRevenue, lastRevenue),
         appointmentsGrowth: calculateGrowth(currentAppointments.data?.length || 0, lastAppointments.data?.length || 0)
       };
-    });
+    },
+  });
 
-    if (result) {
-      setMetrics(result);
-    } else {
-      setError('Erro ao carregar métricas');
-    }
-    
-    setLoading(false);
+  return {
+    metrics: metrics ?? null,
+    loading: isLoading,
+    error: error ? 'Erro ao carregar métricas' : null,
+    refetch: () => queryClient.invalidateQueries({ queryKey }),
   };
-
-  useEffect(() => {
-    fetchMetrics();
-  }, [user]);
-
-  return { metrics, loading, error, refetch: fetchMetrics };
 };

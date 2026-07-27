@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,8 +54,6 @@ interface Range {
 
 export const useAnalyticsKPIs = (range: Range) => {
   const { user } = useAuth();
-  const [data, setData] = useState<AnalyticsKPIsData | null>(null);
-  const [loading, setLoading] = useState(true);
 
   const fromISO = range.startDate.toISOString();
   const toISO = range.endDate.toISOString();
@@ -64,101 +62,91 @@ export const useAnalyticsKPIs = (range: Range) => {
   const fromDate = format(range.startDate, 'yyyy-MM-dd');
   const toDate = format(range.endDate, 'yyyy-MM-dd');
 
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    const run = async () => {
-      setLoading(true);
-      try {
-        const [clientsRes, paymentsRes, methodsRes, apptsRes, profsRes] = await Promise.all([
-          supabase
-            .from('clients')
-            .select('id, name, email, phone, status, created_at')
-            .eq('user_id', user.id)
-            .gte('created_at', fromISO)
-            .lte('created_at', toISO),
-          supabase
-            .from('payments')
-            .select('id, description, amount, payment_date, created_at, status, client_id, payment_method_id')
-            .eq('user_id', user.id)
-            .eq('status', 'pago')
-            .gte('payment_date', fromISO)
-            .lte('payment_date', toISO),
-          supabase.from('payment_methods').select('id, name').eq('user_id', user.id),
-          supabase
-            .from('appointments')
-            .select('id, client_name, service_name, appointment_date, appointment_time, status, price, professional_id, client_id')
-            .eq('user_id', user.id)
-            .gte('appointment_date', fromDate)
-            .lte('appointment_date', toDate),
-          supabase.from('team_members').select('id, name').eq('user_id', user.id),
-        ]);
-
-        // Client lookup for revenue rows
-        const clientMap = new Map<string, string>();
-        const { data: allClients } = await supabase
+  const { data, isLoading } = useQuery({
+    queryKey: ['analytics-kpis', user?.id, fromISO, toISO, fromDate, toDate],
+    enabled: !!user,
+    staleTime: 60_000,
+    queryFn: async (): Promise<AnalyticsKPIsData> => {
+      const [clientsRes, paymentsRes, methodsRes, apptsRes, profsRes] = await Promise.all([
+        supabase
           .from('clients')
-          .select('id, name')
-          .eq('user_id', user.id);
-        (allClients || []).forEach((c: any) => clientMap.set(c.id, c.name));
+          .select('id, name, email, phone, status, created_at')
+          .eq('user_id', user!.id)
+          .gte('created_at', fromISO)
+          .lte('created_at', toISO),
+        supabase
+          .from('payments')
+          .select('id, description, amount, payment_date, created_at, status, client_id, payment_method_id')
+          .eq('user_id', user!.id)
+          .eq('status', 'pago')
+          .gte('payment_date', fromISO)
+          .lte('payment_date', toISO),
+        supabase.from('payment_methods').select('id, name').eq('user_id', user!.id),
+        supabase
+          .from('appointments')
+          .select('id, client_name, service_name, appointment_date, appointment_time, status, price, professional_id, client_id')
+          .eq('user_id', user!.id)
+          .gte('appointment_date', fromDate)
+          .lte('appointment_date', toDate),
+        supabase.from('team_members').select('id, name').eq('user_id', user!.id),
+      ]);
 
-        const methodMap = new Map<string, string>();
-        (methodsRes.data || []).forEach((m: any) => methodMap.set(m.id, m.name));
+      // Client lookup for revenue rows
+      const clientMap = new Map<string, string>();
+      const { data: allClients } = await supabase
+        .from('clients')
+        .select('id, name')
+        .eq('user_id', user!.id);
+      (allClients || []).forEach((c: any) => clientMap.set(c.id, c.name));
 
-        const profMap = new Map<string, string>();
-        (profsRes.data || []).forEach((p: any) => profMap.set(p.id, p.name));
+      const methodMap = new Map<string, string>();
+      (methodsRes.data || []).forEach((m: any) => methodMap.set(m.id, m.name));
 
-        const clients: AnalyticsClientRow[] = (clientsRes.data || []) as any;
+      const profMap = new Map<string, string>();
+      (profsRes.data || []).forEach((p: any) => profMap.set(p.id, p.name));
 
-        const revenues: AnalyticsRevenueRow[] = (paymentsRes.data || []).map((p: any) => ({
-          id: p.id,
-          description: p.description,
-          amount: Number(p.amount) || 0,
-          payment_date: p.payment_date,
-          created_at: p.created_at,
-          status: p.status,
-          client_name: p.client_id ? clientMap.get(p.client_id) ?? null : null,
-          payment_method_name: methodMap.get(p.payment_method_id) ?? null,
-        }));
+      const clients: AnalyticsClientRow[] = (clientsRes.data || []) as any;
 
-        const appointments: AnalyticsAppointmentRow[] = (apptsRes.data || []).map((a: any) => ({
-          id: a.id,
-          client_name: a.client_name,
-          service_name: a.service_name,
-          appointment_date: a.appointment_date,
-          appointment_time: a.appointment_time,
-          status: a.status,
-          price: Number(a.price) || 0,
-          professional_id: a.professional_id,
-          professional_name: a.professional_id ? profMap.get(a.professional_id) ?? null : null,
-        }));
+      const revenues: AnalyticsRevenueRow[] = (paymentsRes.data || []).map((p: any) => ({
+        id: p.id,
+        description: p.description,
+        amount: Number(p.amount) || 0,
+        payment_date: p.payment_date,
+        created_at: p.created_at,
+        status: p.status,
+        client_name: p.client_id ? clientMap.get(p.client_id) ?? null : null,
+        payment_method_name: methodMap.get(p.payment_method_id) ?? null,
+      }));
 
-        const monthlyRevenue = revenues.reduce((s, r) => s + r.amount, 0);
-        const ticketCount = revenues.length;
-        const ticketMedio = ticketCount > 0 ? monthlyRevenue / ticketCount : 0;
+      const appointments: AnalyticsAppointmentRow[] = (apptsRes.data || []).map((a: any) => ({
+        id: a.id,
+        client_name: a.client_name,
+        service_name: a.service_name,
+        appointment_date: a.appointment_date,
+        appointment_time: a.appointment_time,
+        status: a.status,
+        price: Number(a.price) || 0,
+        professional_id: a.professional_id,
+        professional_name: a.professional_id ? profMap.get(a.professional_id) ?? null : null,
+      }));
 
-        if (!cancelled) {
-          setData({
-            clients,
-            revenues,
-            appointments,
-            totalClients: clients.length,
-            monthlyRevenue,
-            weeklyAppointments: appointments.length,
-            ticketMedio,
-            ticketCount,
-            ticketSum: monthlyRevenue,
-          });
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [user, fromISO, toISO, fromDate, toDate]);
+      const monthlyRevenue = revenues.reduce((s, r) => s + r.amount, 0);
+      const ticketCount = revenues.length;
+      const ticketMedio = ticketCount > 0 ? monthlyRevenue / ticketCount : 0;
 
-  return { data, loading };
+      return {
+        clients,
+        revenues,
+        appointments,
+        totalClients: clients.length,
+        monthlyRevenue,
+        weeklyAppointments: appointments.length,
+        ticketMedio,
+        ticketCount,
+        ticketSum: monthlyRevenue,
+      };
+    },
+  });
+
+  return { data: data ?? null, loading: isLoading };
 };

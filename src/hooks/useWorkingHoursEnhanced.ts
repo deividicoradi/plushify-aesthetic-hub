@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 export interface WorkingHoursEnhanced {
@@ -16,34 +17,27 @@ export interface WorkingHoursEnhanced {
 }
 
 export const useWorkingHoursEnhanced = () => {
-  const [workingHours, setWorkingHours] = useState<WorkingHoursEnhanced[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const queryKey = ['working-hours', user?.id];
 
-  const fetchWorkingHours = async () => {
-    try {
-      setIsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
-
+  const { data: workingHours = [], isLoading, refetch } = useQuery({
+    queryKey,
+    enabled: !!user,
+    staleTime: 60_000,
+    queryFn: async (): Promise<WorkingHoursEnhanced[]> => {
       const { data, error } = await supabase
         .from('working_hours')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user!.id)
         .order('day_of_week');
 
       if (error) throw error;
-      setWorkingHours(data || []);
-    } catch (error) {
-      console.error('Error fetching working hours:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar horários de trabalho",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return data || [];
+    },
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey });
 
   const updateWorkingHours = async (id: string, updates: Partial<WorkingHoursEnhanced>) => {
     try {
@@ -56,7 +50,7 @@ export const useWorkingHoursEnhanced = () => {
 
       if (error) throw error;
 
-      setWorkingHours(prev => prev.map(wh => wh.id === id ? data : wh));
+      await invalidate();
       return data;
     } catch (error) {
       console.error('Error updating working hours:', error);
@@ -66,13 +60,13 @@ export const useWorkingHoursEnhanced = () => {
 
   const saveAllWorkingHours = async (updatedHours: WorkingHoursEnhanced[]) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error('Usuário não autenticado');
 
       // upsert (não update): dias configurados pela primeira vez ainda não
       // têm linha em working_hours, então não têm id para dar match num update.
       const toRow = (hour: WorkingHoursEnhanced) => ({
-        user_id: user.id,
+        user_id: authUser.id,
         day_of_week: hour.day_of_week,
         is_active: hour.is_active,
         start_time: hour.start_time,
@@ -106,8 +100,7 @@ export const useWorkingHoursEnhanced = () => {
       const error = results.find(r => r.error)?.error;
       if (error) throw error;
 
-      const data = results.flatMap(r => r.data || []);
-      setWorkingHours(data.length > 0 ? data : updatedHours);
+      await invalidate();
       toast({
         title: "Sucesso",
         description: "Configurações de horário salvas com sucesso"
@@ -126,12 +119,12 @@ export const useWorkingHoursEnhanced = () => {
 
   const checkPendingAppointments = async (dayOfWeek: number) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error('Usuário não autenticado');
 
       const { data, error } = await supabase
         .rpc('check_pending_appointments_for_day', {
-          p_user_id: user.id,
+          p_user_id: authUser.id,
           p_day_of_week: dayOfWeek
         });
 
@@ -146,7 +139,7 @@ export const useWorkingHoursEnhanced = () => {
   const deactivateDay = async (id: string, dayOfWeek: number) => {
     try {
       const hasPendingAppointments = await checkPendingAppointments(dayOfWeek);
-      
+
       if (hasPendingAppointments) {
         toast({
           title: "Não é possível desativar",
@@ -168,14 +161,10 @@ export const useWorkingHoursEnhanced = () => {
     }
   };
 
-  useEffect(() => {
-    fetchWorkingHours();
-  }, []);
-
   return {
     workingHours,
     isLoading,
-    fetchWorkingHours,
+    fetchWorkingHours: refetch,
     updateWorkingHours,
     saveAllWorkingHours,
     checkPendingAppointments,

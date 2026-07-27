@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,17 +12,14 @@ export interface Referral {
 
 export const useReferrals = () => {
   const { user } = useAuth();
-  const [code, setCode] = useState<string | null>(null);
-  const [referrals, setReferrals] = useState<Referral[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const queryKey = ['referrals', user?.id];
 
-  const fetchAll = useCallback(async () => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
+  const { data, isLoading } = useQuery({
+    queryKey,
+    enabled: !!user?.id,
+    staleTime: 60_000,
+    queryFn: async () => {
       const [{ data: codeData, error: codeError }, { data: referralsData, error: referralsError }] = await Promise.all([
         supabase.rpc('get_or_create_referral_code'),
         supabase
@@ -34,19 +31,15 @@ export const useReferrals = () => {
       if (codeError) throw codeError;
       if (referralsError) throw referralsError;
 
-      setCode(codeData as string);
-      setReferrals((referralsData || []) as Referral[]);
-    } catch (error) {
-      console.error('Erro ao carregar dados de indicação:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.id]);
+      return {
+        code: codeData as string,
+        referrals: (referralsData || []) as Referral[],
+      };
+    },
+  });
 
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
-
+  const code = data?.code ?? null;
+  const referrals = data?.referrals ?? [];
   const referralLink = code ? `${window.location.origin}/?ref=${code}` : '';
   const rewardedCount = referrals.filter((r) => r.status === 'rewarded').length;
   const pendingCount = referrals.filter((r) => r.status === 'pending').length;
@@ -57,7 +50,7 @@ export const useReferrals = () => {
     referrals,
     rewardedCount,
     pendingCount,
-    loading,
-    refetch: fetchAll,
+    loading: isLoading,
+    refetch: () => queryClient.invalidateQueries({ queryKey }),
   };
 };
