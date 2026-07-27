@@ -2,49 +2,36 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createRemoteJWKSet, jwtVerify } from "https://esm.sh/jose@5.9.6";
 import { buildCorsHeaders } from "../_shared/cors.ts";
 
-// Checkout de pagamento ÚNICO (sem recorrência automática) para os 4 planos
-// (Professional/Premium x Mensal/Anual). Usa /v2/checkouts/create com os
-// produtos "Pagamento avulso" do catálogo (sem cycle) — produtos "Assinatura"
-// nesse mesmo endpoint disparavam "PIX Automático is not available for this
-// store". Como não há recorrência automática aqui, o usuário precisa comprar
-// de novo manualmente quando o período expirar.
+// Checkout de pagamento ÚNICO (cartão parcelado em até 12x) para o
+// plano ANUAL. Assinatura recorrente da AbacatePay só aceita CARD sem
+// parcelamento (ver /v2/subscriptions/create) — por isso o plano mensal
+// continua usando abacate-create-subscription, e só o anual passa por aqui,
+// via /v2/checkouts/create. PIX removido dos métodos (ver comentário mais
+// abaixo, na criação do checkout).
+//
+// Validado de ponta a ponta em produção em 2026-07-27: checkout do
+// Premium Anual (prod_FWGcbH5Puu5eua6M0652RRNy) pago com sucesso
+// (bill_ZQzZwp1jULxjHTN2nULPDkun), webhook confirmado e plano ativado.
 //
 // Mesmo padrão de segurança de abacate-create-subscription: JWT validado via
 // JWKS, plano/preço conferidos contra o catálogo real da AbacatePay antes de
 // abrir o checkout (evita manipulação de preço pelo cliente).
-export const EXPECTED_PLANS = {
+export const EXPECTED_ANNUAL_PLANS = {
   professional: {
-    monthly: {
-      productId: "prod_yT55aw266gN4U0aKWypwAfSD",
-      name: "Plushify Profissional 1 mês",
-      amount: 8900,
-      cycle: null,
-    },
-    annual: {
-      productId: "prod_hLaqZTpStG1uMjdJBErKPc6c",
-      name: "Plushify Profissional 1 ano",
-      amount: 89000,
-      cycle: null,
-    },
+    productId: "prod_bM42yN1t65DCWRxj5d0NNQdx",
+    name: "Plushify Profissional (Anual)",
+    amount: 89000,
+    cycle: "ANNUALLY",
   },
   premium: {
-    monthly: {
-      productId: "prod_5dtqUL31bTqUDzf3TfgDwQbA",
-      name: "Plushify Premium 1 mês",
-      amount: 17900,
-      cycle: null,
-    },
-    annual: {
-      productId: "prod_HFwLzxRtcTRSY4YdgQfRmNTY",
-      name: "Plushify Premium 1 ano",
-      amount: 179000,
-      cycle: null,
-    },
+    productId: "prod_FWGcbH5Puu5eua6M0652RRNy",
+    name: "Plushify Premium (Anual)",
+    amount: 179000,
+    cycle: "ANNUALLY",
   },
 } as const;
 
-type PlanKey = keyof typeof EXPECTED_PLANS;
-type CycleKey = keyof typeof EXPECTED_PLANS["professional"];
+type PlanKey = keyof typeof EXPECTED_ANNUAL_PLANS;
 
 const log = (step: string, details?: unknown) => {
   const suffix = details === undefined ? "" : ` - ${JSON.stringify(details)}`;
@@ -91,10 +78,9 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
 
     const body = await req.json().catch(() => ({}));
     const planType = String(body.plan_type ?? "") as PlanKey;
-    const billingPeriod = String(body.billing_period ?? "monthly") as CycleKey;
 
-    const expected = EXPECTED_PLANS[planType]?.[billingPeriod];
-    if (!expected) throw new Error(`INPUT: invalid plan ${planType}/${billingPeriod}`);
+    const expected = EXPECTED_ANNUAL_PLANS[planType];
+    if (!expected) throw new Error(`INPUT: invalid annual plan ${planType}`);
     const productId = expected.productId;
 
     // Mesma checagem contra o catálogo real da AbacatePay antes do checkout.
@@ -110,25 +96,25 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
       (p) => p.id === productId,
     );
     if (!remote) {
-      throw new Error(`VERIFY: product ${productId} not found on AbacatePay for ${planType}/${billingPeriod}`);
+      throw new Error(`VERIFY: product ${productId} not found on AbacatePay for ${planType}/annual`);
     }
     const mismatches: string[] = [];
     if (remote.price !== expected.amount) mismatches.push(`price ${remote.price} != ${expected.amount}`);
     if (remote.name !== expected.name) mismatches.push(`name "${remote.name}" != "${expected.name}"`);
-    if ((remote.cycle ?? null) !== expected.cycle) mismatches.push(`cycle ${remote.cycle} != ${expected.cycle}`);
+    if (remote.cycle !== expected.cycle) mismatches.push(`cycle ${remote.cycle} != ${expected.cycle}`);
     if (remote.status !== "ACTIVE") mismatches.push(`status ${remote.status} != ACTIVE`);
     if (mismatches.length) {
-      throw new Error(`VERIFY: ${planType}/${billingPeriod} mismatch — ${mismatches.join("; ")}`);
+      throw new Error(`VERIFY: ${planType}/annual mismatch — ${mismatches.join("; ")}`);
     }
     log("verified", { productId, name: remote.name, price: remote.price, cycle: remote.cycle });
 
     const origin = req.headers.get("origin") ?? "https://plushify-aesthetic-hub.lovable.app";
     const returnUrl = `${origin}/`;
-    const completionUrl = `${origin}/planos?success=true&plan=${planType}&billing=${billingPeriod}`;
+    const completionUrl = `${origin}/planos?success=true&plan=${planType}&billing=annual`;
 
-    const externalId = ["plushify", user.id, planType, billingPeriod, crypto.randomUUID()].join(":");
+    const externalId = ["plushify", user.id, planType, "annual", crypto.randomUUID()].join(":");
 
-    log("creating checkout", { userId: user.id, planType, billingPeriod, productId, externalId });
+    log("creating checkout", { userId: user.id, planType, productId, externalId });
 
     const res = await fetch("https://api.abacatepay.com/v2/checkouts/create", {
       method: "POST",
@@ -138,14 +124,11 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
       },
       body: JSON.stringify({
         items: [{ id: productId, quantity: 1 }],
-        // PIX removido: descoberto em teste real (2026-07-27) que "PIX
-        // Automático" não está habilitado pra esta loja na AbacatePay
-        // ("PIX Automático is not available for this store") quando o
-        // produto referenciado é do tipo Assinatura. Usando produtos
-        // avulsos (sem cycle) o erro não ocorre, mas o CARD parcelado
-        // continua sendo o método usado.
+        // PIX removido: produtos "Assinatura" usados em /v2/checkouts/create
+        // (pagamento único) exigem "PIX Automático", não habilitado pra
+        // esta loja. Usando só CARD, o checkout funciona normalmente.
         methods: ["CARD"],
-        card: { maxInstallments: billingPeriod === "annual" ? 12 : 1 },
+        card: { maxInstallments: 12 },
         returnUrl,
         completionUrl,
         externalId,
@@ -153,7 +136,7 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
           user_id: user.id,
           user_email: user.email,
           plan_type: planType,
-          billing_period: billingPeriod,
+          billing_period: "annual",
         },
       }),
     });

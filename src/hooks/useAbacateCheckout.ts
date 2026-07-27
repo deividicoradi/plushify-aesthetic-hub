@@ -57,13 +57,20 @@ export const useAbacateCheckout = () => {
         userId: user.id 
       });
 
-      // Mensal e anual usam o mesmo endpoint de assinatura recorrente —
-      // os 4 produtos (Professional/Premium x Mensal/Anual) são do tipo
-      // "Assinatura" na AbacatePay. abacate-create-checkout (pagamento
-      // avulso) não é mais usado: sem recorrência automática, o usuário
-      // precisaria comprar de novo manualmente a cada expiração.
-      const { data, error } = await supabase.functions.invoke('abacate-create-subscription', {
-        body: { plan_type: planType, billing_period: billingPeriod }
+      // Mensal = assinatura recorrente (/v2/subscriptions/create). Anual =
+      // cobrança única (/v2/checkouts/create) com o produto "Assinatura" e
+      // só CARD nos métodos — testado de ponta a ponta em produção em
+      // 2026-07-27 (bill_ZQzZwp1jULxjHTN2nULPDkun, pago e plano ativado).
+      // IMPORTANTE: anual não renova automaticamente; usuário precisa
+      // comprar de novo manualmente quando expirar.
+      const functionName = billingPeriod === 'annual'
+        ? 'abacate-create-checkout'
+        : 'abacate-create-subscription';
+
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: billingPeriod === 'annual'
+          ? { plan_type: planType }
+          : { plan_type: planType, billing_period: billingPeriod }
       });
 
       if (error) {
