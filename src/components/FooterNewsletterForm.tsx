@@ -24,13 +24,16 @@ const FooterNewsletterForm: React.FC = () => {
     setEnviando(true);
     setErro(null);
     try {
-      const { error } = await sb
-        .from('newsletter_subscribers')
-        .insert({ name: nome, email });
+      // RPC (rate-limited + sempre "sucesso", mesmo se o e-mail já existir)
+      // em vez de INSERT direto na tabela — evita tanto spam de inserções
+      // quanto um oráculo de "esse e-mail já está cadastrado" via erro de
+      // constraint única.
+      const { error } = await sb.rpc('subscribe_to_newsletter', {
+        p_name: nome,
+        p_email: email,
+      });
 
-      // Código 23505 = e-mail já inscrito (índice único) — trata como
-      // sucesso, não precisa incomodar quem já está na lista.
-      if (error && error.code !== '23505') throw error;
+      if (error) throw error;
 
       setEnviado(true);
       setNome('');
