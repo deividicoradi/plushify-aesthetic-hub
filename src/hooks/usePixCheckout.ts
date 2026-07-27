@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +29,17 @@ export const usePixCheckout = () => {
       pollRef.current = null;
     }
   }, []);
+
+  // BUG encontrado em teste real (2026-07-27): fechar o modal via overlay/X
+  // desmonta PixCheckoutDialog diretamente (o pai zera o estado que controla
+  // a renderização condicional) — o efeito que reagia a `open` virar false
+  // nunca chega a rodar antes do componente sumir, e o setInterval do polling
+  // fica vazando em segundo plano pra sempre. Se depois disso o usuário troca
+  // de conta (logout/login), esse intervalo vazado continua chamando
+  // abacate-check-pix-status com o externalId da cobrança ANTIGA mas o token
+  // da sessão NOVA — a checagem de segurança rejeita (dono do externalId não
+  // bate com quem está logado agora), e o usuário nunca vê o QR virar pago.
+  useEffect(() => stopPolling, [stopPolling]);
 
   const createPixCharge = async (
     planType: 'professional' | 'premium',
