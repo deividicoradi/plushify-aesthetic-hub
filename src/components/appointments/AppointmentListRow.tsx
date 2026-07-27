@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 interface AppointmentListRowProps {
   appointment: Appointment;
   isSelected?: boolean;
-  onSelect?: (checked: boolean) => void;
+  onSelect?: (id: string, checked: boolean) => void;
 }
 
 const statusColors: Record<Appointment['status'], string> = {
@@ -27,7 +27,7 @@ const statusLabels: Record<Appointment['status'], string> = {
   cancelado: 'Cancelado',
 };
 
-export const AppointmentListRow = ({ appointment, isSelected = false, onSelect }: AppointmentListRowProps) => {
+export const AppointmentListRow = React.memo(({ appointment, isSelected = false, onSelect }: AppointmentListRowProps) => {
   const [showDetail, setShowDetail] = useState(false);
 
   const formatPrice = (price: number) =>
@@ -49,7 +49,10 @@ export const AppointmentListRow = ({ appointment, isSelected = false, onSelect }
       >
         {onSelect && (
           <div onClick={(e) => e.stopPropagation()}>
-            <Checkbox checked={isSelected} onCheckedChange={onSelect} />
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={(checked) => onSelect(appointment.id, checked === true)}
+            />
           </div>
         )}
 
@@ -79,4 +82,5 @@ export const AppointmentListRow = ({ appointment, isSelected = false, onSelect }
       </Dialog>
     </>
   );
-};
+});
+AppointmentListRow.displayName = 'AppointmentListRow';

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Calendar, Loader2, CalendarDays, Check, X, Trash2, Clock, CalendarIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -117,13 +117,15 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
     });
   }, [filteredAppointments]);
 
-  const handleSelectAppointment = (appointmentId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedAppointments(prev => [...prev, appointmentId]);
-    } else {
-      setSelectedAppointments(prev => prev.filter(id => id !== appointmentId));
-    }
-  };
+  // useCallback (identidade estável) em vez de recriar a cada render: a
+  // linha (AppointmentListRow, memoizada) recebe essa função direto como
+  // prop, sem fechamento inline por linha — senão toda linha da lista
+  // re-renderiza a cada busca/filtro/seleção, mesmo sem mudança real nela.
+  const handleSelectAppointment = useCallback((appointmentId: string, checked: boolean) => {
+    setSelectedAppointments(prev =>
+      checked ? [...prev, appointmentId] : prev.filter(id => id !== appointmentId)
+    );
+  }, []);
 
   const handleSelectAll = (appointments: any[], checked: boolean) => {
     if (checked) {
@@ -279,7 +281,7 @@ export const AppointmentsList = ({ searchQuery, filters = {}, onCreateNew, onCle
             key={`${tabKey}-${appointment.id}`}
             appointment={appointment}
             isSelected={selectedAppointments.includes(appointment.id)}
-            onSelect={(checked) => handleSelectAppointment(appointment.id, checked)}
+            onSelect={handleSelectAppointment}
           />
         ))}
       </div>
