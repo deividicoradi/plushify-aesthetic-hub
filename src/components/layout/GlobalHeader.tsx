@@ -8,14 +8,14 @@ import { useStaffMode } from '@/contexts/StaffModeContext';
 import { StaffModeDialog } from '@/components/team/StaffModeDialog';
 
 export const GlobalHeader = () => {
-  const { hasFeature } = usePlanLimits();
+  const { hasFeature, loading: planLoading } = usePlanLimits();
   const { isStaffMode } = useStaffMode();
   const [staffDialogOpen, setStaffDialogOpen] = useState(false);
 
   return (
     <div className="flex items-center gap-1 sm:gap-2">
       {/* Modo Funcionário (Premium) */}
-      {hasFeature('hasStaffPinMode') && !isStaffMode && (
+      {!planLoading && hasFeature('hasStaffPinMode') && !isStaffMode && (
         <Button
           variant="ghost"
           size="icon"

@@ -29,7 +29,7 @@ interface MobileSidebarProps {
 export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { signOut } = useAuth();
-  const { hasFeature } = usePlanLimits();
+  const { hasFeature, loading: planLoading } = usePlanLimits();
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -113,7 +113,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose })
                     aria-hidden="true"
                     />
                     <span className="truncate">{item.label}</span>
-                    {item.requiresFeature && !hasFeature(item.requiresFeature) && (
+                    {item.requiresFeature && !planLoading && !hasFeature(item.requiresFeature) && (
                       <Crown
                         className="h-4 w-4 text-yellow-500 ml-auto flex-shrink-0"
                         aria-label="Recurso exclusivo de planos superiores"
