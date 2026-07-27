@@ -19,11 +19,13 @@ import { TestimonialsSection } from './TestimonialsSection';
 import { FAQSection } from './FAQSection';
 import { CTASection } from './CTASection';
 import { createPlansData } from '@/utils/plans/plansData';
+import { PixCheckoutDialog } from './PixCheckoutDialog';
 import Navbar from '../Navbar';
 import Footer from '../Footer';
 
 export const PlansPage: React.FC = () => {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [pixDialog, setPixDialog] = useState<{ planType: 'professional' | 'premium'; planName: string } | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { currentPlan, subscription, loading, checkSubscriptionStatus } = useSubscription();
@@ -120,6 +122,22 @@ export const PlansPage: React.FC = () => {
     await openCustomerPortal();
   };
 
+  const handlePixSelection = (planId: string) => {
+    if (!user) {
+      const billingPeriod = isAnnual ? 'annual' : 'monthly';
+      setPendingCheckout(planId as 'trial' | 'professional' | 'premium', billingPeriod);
+      toast({
+        title: 'Faça login para continuar',
+        description: 'Após entrar, seu plano será retomado automaticamente.',
+      });
+      navigate('/auth?tab=signup&redirect=checkout');
+      return;
+    }
+    if (planId !== 'professional' && planId !== 'premium') return;
+    const plan = plans.find((p) => p.id === planId);
+    setPixDialog({ planType: planId, planName: plan?.name ?? planId });
+  };
+
   // Retomar checkout pendente após autenticação
   useEffect(() => {
     if (!user || loading) return;
@@ -181,8 +199,23 @@ export const PlansPage: React.FC = () => {
         plans={plans}
         isAnnual={isAnnual}
         onPlanSelection={handlePlanSelection}
+        onPixSelection={handlePixSelection}
         isLoading={isLoading}
       />
+
+      {pixDialog && (
+        <PixCheckoutDialog
+          open={!!pixDialog}
+          onOpenChange={(open) => !open && setPixDialog(null)}
+          planType={pixDialog.planType}
+          billingPeriod={isAnnual ? 'annual' : 'monthly'}
+          planName={pixDialog.planName}
+          onPaid={() => {
+            checkSubscriptionStatus();
+            setTimeout(() => setPixDialog(null), 2000);
+          }}
+        />
+      )}
 
       {/* FAQ Section */}
       <div className="pt-8">

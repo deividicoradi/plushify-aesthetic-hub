@@ -133,7 +133,7 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
 
     const origin = req.headers.get("origin") ?? "https://plushify-aesthetic-hub.lovable.app";
     const returnUrl = `${origin}/`;
-    const completionUrl = `${origin}/planos?success=true&plan=${planType}&billing=${billingPeriod}`;
+    const completionUrl = `${origin}/dashboard?success=true&plan=${planType}&billing=${billingPeriod}`;
 
     // AbacatePay treats externalId as an idempotency/reference key. Reusing only
     // the user id can return a previous pending checkout, which makes every plan

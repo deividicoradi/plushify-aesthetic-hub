@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check, Crown, ArrowRight, Rocket } from 'lucide-react';
+import { Check, Crown, ArrowRight, Rocket, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CardFooter } from '@/components/ui/card';
 import { PlanFeature } from '@/utils/plans/plansData';
@@ -9,12 +9,14 @@ interface PlanCardFooterProps {
   plan: PlanFeature;
   isPlanLoading: boolean;
   onPlanSelection: (planId: string) => void;
+  onPixSelection?: (planId: string) => void;
 }
 
 export const PlanCardFooter: React.FC<PlanCardFooterProps> = ({
   plan,
   isPlanLoading,
-  onPlanSelection
+  onPlanSelection,
+  onPixSelection
 }) => {
   // Verificação de segurança
   if (!plan) {
@@ -83,6 +85,18 @@ export const PlanCardFooter: React.FC<PlanCardFooterProps> = ({
             </div>
           )}
         </Button>
+
+        {onPixSelection && (plan.id === 'professional' || plan.id === 'premium') && !(plan.current && !plan.trial) && (
+          <Button
+            variant="outline"
+            className="w-full h-11 text-sm font-medium"
+            disabled={isPlanLoading}
+            onClick={() => onPixSelection(plan.id)}
+          >
+            <QrCode className="w-4 h-4 mr-2" />
+            Pagar com PIX
+          </Button>
+        )}
       </div>
     </CardFooter>
   );

@@ -75,14 +75,14 @@ const log = (step: string, details?: unknown) => {
   console.log(`[ABACATE-WEBHOOK] ${step}${suffix}`)
 }
 
-const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed', 'checkout.completed'])
+const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed', 'checkout.completed', 'transparent.completed'])
 
 // CONFIRMADO via https://docs.abacatepay.com/pages/webhooks (2026-07-23): a AbacatePay
 // dispara eventos de reembolso (`*.refunded`) e disputa/chargeback (`*.disputed`) — antes
 // desta mudança, nenhum dos dois revogava o plano: um estorno ou chargeback deixava o
 // usuário com acesso pago para sempre, mesmo sem o pagamento estar mais confirmado.
-// `transparent.*` cobre o checkout transparente (Pix/Boleto avulso via /transparents/create),
-// não usado hoje pelo Plushify, mas tratado aqui para não deixar a lacuna se for adotado.
+// `transparent.*` cobre o checkout transparente (Pix avulso via /transparents/create),
+// usado por abacate-create-pix-charge desde 2026-07-27.
 const REVOCATION_EVENTS: Record<string, 'cancelled' | 'refunded' | 'disputed'> = {
   'subscription.cancelled': 'cancelled',
   'checkout.refunded': 'refunded',
@@ -159,11 +159,22 @@ Deno.serve(async (req) => {
     // também usa este objeto. Mantemos os fallbacks antigos por segurança.
     const checkoutObj = (dataRoot.checkout ?? {}) as Record<string, unknown>
 
+    // Checkout Transparente (PIX avulso via /v2/transparents/create, usado por
+    // abacate-create-pix-charge) — formato do payload de webhook não documentado
+    // pela AbacatePay (confirmado em 2026-07-27, doc só lista os nomes dos eventos,
+    // sem exemplo de "data"). A resposta de criação do próprio /transparents/create
+    // é FLAT (id/amount/status/metadata direto em data, sem container), então
+    // tentamos primeiro esse formato (dataRoot em si) e, por segurança, também os
+    // nomes mais prováveis de um container aninhado, caso a AbacatePay use um.
+    const transparentObj = (
+      (dataRoot.pixQrCode ?? dataRoot.transparent ?? dataRoot.charge ?? dataRoot.pix ?? {}) as Record<string, unknown>
+    )
+
     const revocationStatus = REVOCATION_EVENTS[eventType]
     if (revocationStatus) {
-      const cancelExternalId = (checkoutObj.externalId ?? sub.externalId ?? dataRoot.externalId ?? null) as string | null
+      const cancelExternalId = (checkoutObj.externalId ?? sub.externalId ?? transparentObj.externalId ?? dataRoot.externalId ?? null) as string | null
       const cancelParsed = parseExternalId(cancelExternalId)
-      const cancelMetadata = (checkoutObj.metadata ?? sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
+      const cancelMetadata = (checkoutObj.metadata ?? sub.metadata ?? transparentObj.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
       const cancelUserId = cancelParsed?.userId ?? (cancelMetadata.user_id ? String(cancelMetadata.user_id) : null)
       const cancelSubscriptionId = sub.id ? String(sub.id) : null
       // checkout.refunded/disputed (plano anual) não têm abacate_subscription_id —
@@ -230,12 +241,13 @@ Deno.serve(async (req) => {
       })
     }
 
-    // externalId e metadata vêm em data.checkout (ver checkoutObj acima).
-    const externalId = (checkoutObj.externalId ?? sub.externalId ?? dataRoot.externalId ?? null) as string | null
+    // externalId e metadata vêm em data.checkout (ver checkoutObj acima) para
+    // checkout.*/subscription.*; para transparent.* (PIX avulso), ver transparentObj.
+    const externalId = (checkoutObj.externalId ?? sub.externalId ?? transparentObj.externalId ?? dataRoot.externalId ?? null) as string | null
     let parsed = parseExternalId(externalId)
 
     if (!parsed) {
-      const metadata = (checkoutObj.metadata ?? sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
+      const metadata = (checkoutObj.metadata ?? sub.metadata ?? transparentObj.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
       const userId = metadata.user_id ? String(metadata.user_id) : null
       const planType = metadata.plan_type ? String(metadata.plan_type) : null
       const billingPeriod = metadata.billing_period ? String(metadata.billing_period) : 'monthly'
@@ -278,8 +290,13 @@ Deno.serve(async (req) => {
     const customerIdRaw = customerObj.id ?? checkoutObj.customerId ?? sub.customerId ?? null
     const abacateCustomerId = customerIdRaw ? String(customerIdRaw) : null
     // CONFIRMADO via payload real: id do bill (bill_...) vem em data.checkout.id
-    // em ambos os eventos (subscription.completed e checkout.completed).
-    const abacateCheckoutId = checkoutObj.id ? String(checkoutObj.id) : null
+    // em ambos os eventos (subscription.completed e checkout.completed). Para
+    // transparent.completed, guardamos o id da cobrança PIX (pix_char_...) em
+    // vez disso — não confirmado o container real, mas dataRoot.id cobre o
+    // caso do payload vir flat (mesmo formato da resposta de /transparents/create).
+    const abacateCheckoutId = (checkoutObj.id ?? transparentObj.id ?? (eventType.startsWith('transparent.') ? dataRoot.id : null))
+      ? String(checkoutObj.id ?? transparentObj.id ?? dataRoot.id)
+      : null
 
     // AJUSTAR: nome real do campo de próxima cobrança de assinatura mensal
     // não confirmado na documentação — tentamos as variações mais prováveis.
@@ -314,7 +331,11 @@ Deno.serve(async (req) => {
     // installmentsCount ainda não confirmado (só vimos pagamento à vista em
     // teste); mantemos leitura best-effort.
     let paymentKind: 'recurring_card' | 'pix' | 'installments' = 'recurring_card'
-    if (isAnnualCheckout) {
+    if (eventType.startsWith('transparent.')) {
+      // Checkout Transparente só existe pra PIX hoje (abacate-create-pix-charge
+      // só chama method:"PIX") — não precisa inspecionar o payload pra saber o método.
+      paymentKind = 'pix'
+    } else if (isAnnualCheckout) {
       const installmentsCount = Number(checkoutObj.installmentsCount ?? 0)
       const methods = Array.isArray(checkoutObj.methods) ? (checkoutObj.methods as unknown[]) : []
       const usedPix = methods.some((m) => String(m).toUpperCase() === 'PIX')
