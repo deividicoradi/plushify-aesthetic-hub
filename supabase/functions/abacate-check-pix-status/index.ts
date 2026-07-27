@@ -65,7 +65,7 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
       throw new Error("AUTH: externalId does not belong to this user");
     }
 
-    const res = await fetch(`https://api.abacatepay.com/v2/transparents/get?id=${encodeURIComponent(id)}`, {
+    const res = await fetch(`https://api.abacatepay.com/v2/transparents/check?id=${encodeURIComponent(id)}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
     const json = await res.json();
