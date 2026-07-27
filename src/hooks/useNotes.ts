@@ -14,12 +14,19 @@ export type Note = {
   updated_at?: string;
 };
 
+const PAGE_SIZE = 200;
+
 export const useNotes = () => {
   const { user } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
+  // Sem limite, essa tela buscava TODAS as notas do usuário a cada
+  // carregamento — cresce sem parar com o tempo de uso da conta.
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const [hasMore, setHasMore] = useState(false);
 
-  const fetchNotes = async () => {
+  const fetchNotes = async (overrideLimit?: number) => {
+    const effectiveLimit = overrideLimit ?? limit;
     try {
       if (!user) {
         setLoading(false);
@@ -32,7 +39,8 @@ export const useNotes = () => {
         .from('notes')
         .select('*, clients(name)')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(0, effectiveLimit - 1);
 
       if (error) throw error;
       const mapped: Note[] = (data || []).map((row: any) => ({
@@ -40,12 +48,19 @@ export const useNotes = () => {
         client_name: row.clients?.name ?? null,
       }));
       setNotes(mapped);
+      setHasMore(mapped.length >= effectiveLimit);
     } catch (error: any) {
       console.error("Erro ao carregar notas:", error);
       toast.error("Erro ao carregar notas: " + (error.message || "Erro desconhecido"));
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadMore = () => {
+    const next = limit + PAGE_SIZE;
+    setLimit(next);
+    fetchNotes(next);
   };
 
   const createNote = async (title: string, content: string, clientId?: string | null) => {
@@ -154,6 +169,8 @@ export const useNotes = () => {
     fetchNotes,
     createNote,
     updateNote,
-    deleteNote
+    deleteNote,
+    hasMore,
+    loadMore,
   };
 };

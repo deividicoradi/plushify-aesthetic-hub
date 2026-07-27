@@ -12,7 +12,7 @@ import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 const Notes = () => {
-  const { notes, loading, fetchNotes, createNote, updateNote, deleteNote } = useNotes();
+  const { notes, loading, fetchNotes, createNote, updateNote, deleteNote, hasMore, loadMore } = useNotes();
   const { clients } = useClients();
   const [creating, setCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -129,6 +129,11 @@ const Notes = () => {
                 onDelete={deleteNote}
               />
             ))}
+            {hasMore && !debouncedSearchTerm && clientFilter === 'all' && (
+              <div className="flex justify-center pt-2">
+                <Button variant="outline" onClick={loadMore}>Carregar mais</Button>
+              </div>
+            )}
           </div>
         )}
       </div>

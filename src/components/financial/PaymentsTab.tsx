@@ -8,9 +8,10 @@ import { usePaymentsData } from '@/hooks/financial/usePaymentsData';
 import { useCashStatus } from './CashStatusProvider';
 import { toast } from "@/hooks/use-toast";
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { Button } from '@/components/ui/button';
 
 const PaymentsTab = () => {
-  const { payments, isLoading, getClientName } = usePaymentsData();
+  const { payments, isLoading, getClientName, hasMore, loadMore } = usePaymentsData();
   const { isOpen: isCashOpen } = useCashStatus();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<any>(null);
@@ -64,7 +65,13 @@ const PaymentsTab = () => {
         onDelete={() => {}} // Agora a exclusão é feita internamente no PaymentsList
       />
 
-      <PaymentDialog 
+      {hasMore && !debouncedSearchTerm && (
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={loadMore}>Carregar mais</Button>
+        </div>
+      )}
+
+      <PaymentDialog
         open={isDialogOpen} 
         onOpenChange={handleCloseDialog}
         payment={editingPayment}

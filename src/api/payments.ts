@@ -1,11 +1,22 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export async function fetchPayments(userId: string) {
-  const { data, error } = await supabase
+// `limit` é opcional e por padrão busca tudo (comportamento antigo mantido)
+// porque useInstallmentsData usa o retorno completo como tabela de consulta
+// (resolve a descrição de um pagamento pelo id, inclusive de parcelamentos
+// antigos) — paginar ali quebraria esse lookup silenciosamente. A tela de
+// listagem (usePaymentsData/PaymentsTab) passa um limite explícito.
+export async function fetchPayments(userId: string, limit?: number) {
+  let query = supabase
     .from('payments')
-    .select(`*, payment_methods (name, type)`) 
+    .select(`*, payment_methods (name, type)`)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
+
+  if (limit) {
+    query = query.range(0, limit - 1);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
   return data;
 }
