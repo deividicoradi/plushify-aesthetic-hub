@@ -2,11 +2,12 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createRemoteJWKSet, jwtVerify } from "https://esm.sh/jose@5.9.6";
 import { buildCorsHeaders } from "../_shared/cors.ts";
 
-// Checkout de pagamento ÚNICO (Pix ou cartão parcelado em até 12x) para o
+// Checkout de pagamento ÚNICO (cartão parcelado em até 12x) para o
 // plano ANUAL. Assinatura recorrente da AbacatePay só aceita CARD sem
 // parcelamento (ver /v2/subscriptions/create) — por isso o plano mensal
 // continua usando abacate-create-subscription, e só o anual passa por aqui,
-// via /v2/checkouts/create.
+// via /v2/checkouts/create. PIX removido dos métodos (ver comentário mais
+// abaixo, na criação do checkout) — não habilitado pra esta loja ainda.
 //
 // Mesmo padrão de segurança de abacate-create-subscription: JWT validado via
 // JWKS, plano/preço conferidos contra o catálogo real da AbacatePay antes de
@@ -121,7 +122,13 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
       },
       body: JSON.stringify({
         items: [{ id: productId, quantity: 1 }],
-        methods: ["PIX", "CARD"],
+        // PIX removido: descoberto em teste real (2026-07-27) que "PIX
+        // Automático" não está habilitado pra esta loja na AbacatePay
+        // ("PIX Automático is not available for this store"), o que
+        // derrubava TODO checkout anual (Professional e Premium) com
+        // erro 400, mesmo pagando só de cartão. Assim que a AbacatePay
+        // habilitar PIX pra essa loja, reavaliar se dá pra reincluir.
+        methods: ["CARD"],
         card: { maxInstallments: 12 },
         returnUrl,
         completionUrl,
