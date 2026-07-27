@@ -35,7 +35,26 @@ export default defineConfig(({ mode }) => ({
     sourcemap: mode === 'production' ? 'hidden' : true,
     rollupOptions: {
       output: {
-        manualChunks: undefined,
+        // Sem isso, o Rollup empacota TODA lib de node_modules (react,
+        // react-router, @supabase, @tanstack/react-query, @radix-ui...)
+        // dentro do chunk de entrada — daí o App-*.js de ~680KB. Separar
+        // por vendor permite que o navegador reaproveite o cache dessas
+        // libs entre deploys (elas mudam bem menos que o código da app) e
+        // reduz o que precisa ser baixado/parseado antes do primeiro paint.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('react-router')) return 'vendor-router';
+          if (/[\\/]react(-dom)?[\\/]|scheduler/.test(id)) return 'vendor-react';
+          if (id.includes('@supabase')) return 'vendor-supabase';
+          if (id.includes('@tanstack')) return 'vendor-query';
+          if (id.includes('@radix-ui')) return 'vendor-radix';
+          if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
+          if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('xlsx')) return 'vendor-export';
+          if (id.includes('@sentry')) return 'vendor-sentry';
+          // Deixa o Rollup decidir o resto automaticamente (evita os chunks
+          // "vendor" genéricos criarem dependência circular com os acima).
+          return undefined;
+        },
         // Configurar nomes de arquivo para cache busting
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',

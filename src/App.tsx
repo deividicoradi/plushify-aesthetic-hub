@@ -8,20 +8,6 @@ import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 import { PWAProvider } from "@/components/pwa/PWAProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import Index from "./pages/Index";
-import Plans from "./pages/Plans";
-import Auth from "./pages/Auth";
-import Signup from "./pages/Signup";
-import NotFound from "./pages/NotFound";
-import Help from "./pages/Help";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import LGPD from "./pages/LGPD";
-import Cookies from "./pages/Cookies";
-import Product from "./pages/Product";
-import About from "./pages/About";
-import Updates from "./pages/Updates";
-import PublicBooking from "./pages/PublicBooking";
 import { AuthProvider } from "./contexts/AuthContext";
 import { StaffModeProvider } from "./contexts/StaffModeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -30,6 +16,24 @@ import { queryClient } from "@/lib/queryClient";
 import ScrollToTop from "./components/ScrollToTop";
 import { PerformanceMonitor } from "./components/PerformanceMonitor";
 import { CacheOptimizerProvider } from "./components/CacheOptimizer";
+
+// Lazy-loaded public/institutional pages (code-splitting) — só o layout
+// de rota (App.tsx) precisa carregar de cara; marketing/legal/auth pesam
+// no chunk de entrada sem benefício pra quem já está logado.
+const Index = lazy(() => import("./pages/Index"));
+const Plans = lazy(() => import("./pages/Plans"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Signup = lazy(() => import("./pages/Signup"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Help = lazy(() => import("./pages/Help"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const LGPD = lazy(() => import("./pages/LGPD"));
+const Cookies = lazy(() => import("./pages/Cookies"));
+const Product = lazy(() => import("./pages/Product"));
+const About = lazy(() => import("./pages/About"));
+const Updates = lazy(() => import("./pages/Updates"));
+const PublicBooking = lazy(() => import("./pages/PublicBooking"));
 
 // Lazy-loaded protected pages (code-splitting)
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -75,19 +79,19 @@ const AppContent = () => {
   
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/product" element={<Product />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/planos" element={<Plans />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/lgpd" element={<LGPD />} />
-      <Route path="/cookies" element={<Cookies />} />
-      <Route path="/help" element={<Help />} />
-      <Route path="/updates" element={<Updates />} />
-      <Route path="/agendar/:slug" element={<PublicBooking />} />
+      <Route path="/" element={Lazy(<Index />)} />
+      <Route path="/product" element={Lazy(<Product />)} />
+      <Route path="/about" element={Lazy(<About />)} />
+      <Route path="/planos" element={Lazy(<Plans />)} />
+      <Route path="/auth" element={Lazy(<Auth />)} />
+      <Route path="/signup" element={Lazy(<Signup />)} />
+      <Route path="/terms" element={Lazy(<Terms />)} />
+      <Route path="/privacy" element={Lazy(<Privacy />)} />
+      <Route path="/lgpd" element={Lazy(<LGPD />)} />
+      <Route path="/cookies" element={Lazy(<Cookies />)} />
+      <Route path="/help" element={Lazy(<Help />)} />
+      <Route path="/updates" element={Lazy(<Updates />)} />
+      <Route path="/agendar/:slug" element={Lazy(<PublicBooking />)} />
       <Route
         path="/dashboard"
         element={
@@ -198,7 +202,7 @@ const AppContent = () => {
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={Lazy(<NotFound />)} />
     </Routes>
   );
 };
