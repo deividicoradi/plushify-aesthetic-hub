@@ -260,7 +260,14 @@ Deno.serve(async (req) => {
 
     const { userId, planType, billingPeriod } = parsed
     const billingInterval = billingPeriod === 'annual' ? 'year' : 'month'
-    const isAnnualCheckout = eventType === 'checkout.completed'
+    // BUG encontrado em teste real (2026-07-27): para uma assinatura MENSAL, a
+    // AbacatePay dispara os dois eventos subscription.completed E checkout.completed
+    // pra mesma compra (confirmado via payload real) — não só pra plano anual como
+    // o comentário original assumia. Usar eventType pra decidir "é anual" fazia o
+    // checkout.completed de uma compra mensal também cair aqui, sobrescrevendo a
+    // validade correta (+1 mês) por 1 ano inteiro. A informação real de "é anual"
+    // já vem no billingPeriod (parseado do externalId/metadata), não no eventType.
+    const isAnnualCheckout = billingPeriod === 'annual'
 
     // Checkout avulso (anual): não é uma "assinatura" AbacatePay, então não tem
     // abacate_subscription_id — guardamos só o id do checkout (bill_...).
