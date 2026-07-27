@@ -57,12 +57,12 @@ export const useAbacateCheckout = () => {
         userId: user.id 
       });
 
-      // Mensal e anual usam o mesmo endpoint de pagamento avulso (sem
-      // recorrência automática) — os 4 produtos (Professional/Premium x
-      // Mensal/Anual) são do tipo "Pagamento avulso" na AbacatePay.
-      // abacate-create-subscription (produtos "Assinatura") não é mais
-      // usado: disparava "PIX Automático is not available for this store".
-      const { data, error } = await supabase.functions.invoke('abacate-create-checkout', {
+      // Mensal e anual usam o mesmo endpoint de assinatura recorrente —
+      // os 4 produtos (Professional/Premium x Mensal/Anual) são do tipo
+      // "Assinatura" na AbacatePay. abacate-create-checkout (pagamento
+      // avulso) não é mais usado: sem recorrência automática, o usuário
+      // precisaria comprar de novo manualmente a cada expiração.
+      const { data, error } = await supabase.functions.invoke('abacate-create-subscription', {
         body: { plan_type: planType, billing_period: billingPeriod }
       });
 
