@@ -1,112 +1,58 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface PixCharge {
-  id: string;
-  brCode: string;
-  brCodeBase64: string;
-  expiresAt: string;
-  externalId: string;
-}
-
-// Fluxo de pagamento PIX avulso (QR Code), separado do checkout com cartão
-// (useAbacateCheckout) — usa abacate-create-pix-charge (endpoint /v2/transparents/create
-// da AbacatePay, o único que aceita PIX pra esta loja hoje; o checkout normal com
-// PIX retorna "PIX Automático is not available for this store").
+// Pagamento com PIX via checkout hospedado da AbacatePay (redirect, mesmo
+// padrão de useAbacateCheckout) — troca feita em 2026-07-27 depois de
+// confirmar que produtos com ciclo de assinatura bloqueiam PIX ("PIX
+// Automático is not available for this store"), mas os produtos avulsos
+// (sem ciclo) aceitam PIX normalmente. abacate-create-pix-charge usa esse
+// catálogo avulso e devolve a URL do checkout hospedado, que já mostra PIX
+// e cartão juntos na mesma tela.
 export const usePixCheckout = () => {
   const [loading, setLoading] = useState(false);
-  const [charge, setCharge] = useState<PixCharge | null>(null);
-  const [status, setStatus] = useState<'idle' | 'pending' | 'paid' | 'expired'>('idle');
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const stopPolling = useCallback(() => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-  }, []);
-
-  // BUG encontrado em teste real (2026-07-27): fechar o modal via overlay/X
-  // desmonta PixCheckoutDialog diretamente (o pai zera o estado que controla
-  // a renderização condicional) — o efeito que reagia a `open` virar false
-  // nunca chega a rodar antes do componente sumir, e o setInterval do polling
-  // fica vazando em segundo plano pra sempre. Se depois disso o usuário troca
-  // de conta (logout/login), esse intervalo vazado continua chamando
-  // abacate-check-pix-status com o externalId da cobrança ANTIGA mas o token
-  // da sessão NOVA — a checagem de segurança rejeita (dono do externalId não
-  // bate com quem está logado agora), e o usuário nunca vê o QR virar pago.
-  useEffect(() => stopPolling, [stopPolling]);
-
-  const createPixCharge = async (
+  const createPixCheckout = async (
     planType: 'professional' | 'premium',
     billingPeriod: 'monthly' | 'annual',
-    onPaid: () => void,
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     if (!user) {
       toast({ title: 'Erro de Autenticação', description: 'Você precisa estar logado para continuar.', variant: 'destructive' });
-      return;
+      return false;
     }
 
+    if (loading) return false;
+
     setLoading(true);
-    setStatus('idle');
-    setCharge(null);
     try {
       const { data, error } = await supabase.functions.invoke('abacate-create-pix-charge', {
         body: { plan_type: planType, billing_period: billingPeriod },
       });
 
       if (error) throw error;
-      if (!data?.brCode) throw new Error('QR Code PIX não recebido');
+      if (!data?.url) throw new Error('URL de checkout não recebida');
 
-      setCharge(data as PixCharge);
-      setStatus('pending');
+      const checkoutUrl = new URL(data.url);
+      if (!checkoutUrl.hostname.endsWith('abacatepay.com')) {
+        throw new Error('URL de checkout inválida');
+      }
 
-      // Expira em 1h (expiresIn=3600 configurado no backend) — paramos o
-      // polling um pouco antes pra não ficar chamando a API indefinidamente.
-      const expiresAtMs = new Date(data.expiresAt).getTime();
-
-      pollRef.current = setInterval(async () => {
-        if (Date.now() > expiresAtMs) {
-          setStatus('expired');
-          stopPolling();
-          return;
-        }
-        try {
-          const { data: statusData, error: statusError } = await supabase.functions.invoke('abacate-check-pix-status', {
-            body: { id: data.id, externalId: data.externalId },
-          });
-          if (statusError) return;
-          if (statusData?.status === 'PAID') {
-            setStatus('paid');
-            stopPolling();
-            toast({ title: 'Pagamento confirmado!', description: 'Seu plano foi ativado com sucesso.' });
-            onPaid();
-          }
-        } catch {
-          // Silencioso: um erro de polling isolado não deve interromper o fluxo,
-          // a próxima tentativa (3s depois) pode funcionar normalmente.
-        }
-      }, 3000);
+      window.location.href = data.url;
+      return true;
     } catch (error: any) {
       toast({
-        title: 'Erro ao gerar PIX',
-        description: error?.message ?? 'Não foi possível gerar a cobrança PIX. Tente novamente.',
+        title: 'Erro ao iniciar pagamento PIX',
+        description: error?.message ?? 'Não foi possível iniciar o checkout. Tente novamente.',
         variant: 'destructive',
       });
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const reset = useCallback(() => {
-    stopPolling();
-    setCharge(null);
-    setStatus('idle');
-  }, [stopPolling]);
-
-  return { createPixCharge, charge, status, loading, reset };
+  return { createPixCheckout, loading };
 };

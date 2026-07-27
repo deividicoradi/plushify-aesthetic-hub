@@ -19,18 +19,18 @@ import { TestimonialsSection } from './TestimonialsSection';
 import { FAQSection } from './FAQSection';
 import { CTASection } from './CTASection';
 import { createPlansData } from '@/utils/plans/plansData';
-import { PixCheckoutDialog } from './PixCheckoutDialog';
+import { usePixCheckout } from '@/hooks/usePixCheckout';
 import Navbar from '../Navbar';
 import Footer from '../Footer';
 
 export const PlansPage: React.FC = () => {
   const [isAnnual, setIsAnnual] = useState(false);
-  const [pixDialog, setPixDialog] = useState<{ planType: 'professional' | 'premium'; planName: string } | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { currentPlan, subscription, loading, checkSubscriptionStatus } = useSubscription();
   const { createCheckout, openCustomerPortal, loading: checkoutLoading } = useAbacateCheckout();
-  const isLoading = (_planKey: string) => checkoutLoading;
+  const { createPixCheckout, loading: pixLoading } = usePixCheckout();
+  const isLoading = (_planKey: string) => checkoutLoading || pixLoading;
   const { toast } = useToast();
 
   // Check for success/cancel parameters in URL
@@ -122,7 +122,7 @@ export const PlansPage: React.FC = () => {
     await openCustomerPortal();
   };
 
-  const handlePixSelection = (planId: string) => {
+  const handlePixSelection = async (planId: string) => {
     if (!user) {
       const billingPeriod = isAnnual ? 'annual' : 'monthly';
       setPendingCheckout(planId as 'trial' | 'professional' | 'premium', billingPeriod);
@@ -134,8 +134,8 @@ export const PlansPage: React.FC = () => {
       return;
     }
     if (planId !== 'professional' && planId !== 'premium') return;
-    const plan = plans.find((p) => p.id === planId);
-    setPixDialog({ planType: planId, planName: plan?.name ?? planId });
+    const billingPeriod = isAnnual ? 'annual' : 'monthly';
+    await createPixCheckout(planId, billingPeriod);
   };
 
   // Retomar checkout pendente após autenticação
@@ -202,20 +202,6 @@ export const PlansPage: React.FC = () => {
         onPixSelection={handlePixSelection}
         isLoading={isLoading}
       />
-
-      {pixDialog && (
-        <PixCheckoutDialog
-          open={!!pixDialog}
-          onOpenChange={(open) => !open && setPixDialog(null)}
-          planType={pixDialog.planType}
-          billingPeriod={isAnnual ? 'annual' : 'monthly'}
-          planName={pixDialog.planName}
-          onPaid={() => {
-            checkSubscriptionStatus();
-            setTimeout(() => setPixDialog(null), 2000);
-          }}
-        />
-      )}
 
       {/* FAQ Section */}
       <div className="pt-8">

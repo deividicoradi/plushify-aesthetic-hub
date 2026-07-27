@@ -330,12 +330,14 @@ Deno.serve(async (req) => {
     // o método vem em checkout.methods (array, ex.: ["CARD"] ou ["PIX"]).
     // installmentsCount ainda não confirmado (só vimos pagamento à vista em
     // teste); mantemos leitura best-effort.
+    // Checa checkoutObj.methods sempre que existir (não só pra plano anual) —
+    // abacate-create-pix-charge desde 2026-07-27 usa /v2/checkouts/create com
+    // produtos "-onetime" (sem ciclo) pra oferecer PIX tanto no plano mensal
+    // quanto anual, então um checkout.completed com methods:["PIX"] pode vir
+    // com billingPeriod='monthly' — gatear em isAnnualCheckout deixava esses
+    // casos caírem no default 'recurring_card' incorretamente.
     let paymentKind: 'recurring_card' | 'pix' | 'installments' = 'recurring_card'
-    if (eventType.startsWith('transparent.')) {
-      // Checkout Transparente só existe pra PIX hoje (abacate-create-pix-charge
-      // só chama method:"PIX") — não precisa inspecionar o payload pra saber o método.
-      paymentKind = 'pix'
-    } else if (isAnnualCheckout) {
+    if (checkoutObj.id) {
       const installmentsCount = Number(checkoutObj.installmentsCount ?? 0)
       const methods = Array.isArray(checkoutObj.methods) ? (checkoutObj.methods as unknown[]) : []
       const usedPix = methods.some((m) => String(m).toUpperCase() === 'PIX')
