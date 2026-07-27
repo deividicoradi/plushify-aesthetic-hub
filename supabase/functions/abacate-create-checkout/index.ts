@@ -13,23 +13,22 @@ import { buildCorsHeaders } from "../_shared/cors.ts";
 // JWKS, plano/preço conferidos contra o catálogo real da AbacatePay antes de
 // abrir o checkout (evita manipulação de preço pelo cliente).
 
-// Produtos "Pagamento avulso" (sem cycle) — descoberto em teste real
-// (2026-07-27) que os produtos "Assinatura" (com cycle=ANNUALLY) disparam
-// exigência de "PIX Automático" ao serem usados em /v2/checkouts/create
-// (pagamento único), mesmo pedindo só CARD. Trocado para os produtos avulsos
-// equivalentes (mesmo preço), que não têm cycle e não têm essa exigência.
+// NÃO USADO MAIS: o checkout anual passou a usar abacate-create-subscription
+// (mesmo endpoint do mensal, /v2/subscriptions/create), pois produtos
+// "Assinatura" nesse fluxo de pagamento avulso disparavam exigência de
+// "PIX Automático" (ver useAbacateCheckout.ts). Mantido só por referência.
 export const EXPECTED_ANNUAL_PLANS = {
   professional: {
-    productId: "prod_hLaqZTpStG1uMjdJBErKPc6c",
-    name: "Plushify Profissional 1 ano",
+    productId: "prod_bM42yN1t65DCWRxj5d0NNQdx",
+    name: "Plushify Profissional (Anual)",
     amount: 89000,
-    cycle: null,
+    cycle: "ANNUALLY",
   },
   premium: {
-    productId: "prod_HFwLzxRtcTRSY4YdgQfRmNTY",
-    name: "Plushify Premium 1 ano",
+    productId: "prod_FWGcbH5Puu5eua6M0652RRNy",
+    name: "Plushify Premium (Anual)",
     amount: 179000,
-    cycle: null,
+    cycle: "ANNUALLY",
   },
 } as const;
 
