@@ -8,15 +8,18 @@ import { useExpensesData } from '@/hooks/financial/useExpensesData';
 import { ExpenseComparisonCharts } from './charts/ExpenseComparisonCharts';
 import { usePeriodFilter } from '@/hooks/usePeriodFilter';
 import { useExpensesByType } from '@/hooks/financial/useExpensesByType';
-import { useCashStatus } from './CashStatusProvider';
-import { toast } from "@/hooks/use-toast";
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useCashGuardedDialog } from '@/hooks/financial/useCashGuardedDialog';
 
 const ExpensesTab = () => {
   const { expenses, isLoading, deleteExpense } = useExpensesData();
-  const { isOpen: isCashOpen } = useCashStatus();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingExpense, setEditingExpense] = useState<any>(null);
+  const {
+    isCashOpen,
+    open: isDialogOpen,
+    editing: editingExpense,
+    openDialog,
+    closeDialog: handleCloseDialog,
+  } = useCashGuardedDialog<any>('Abra o caixa de hoje antes de lançar uma nova despesa.');
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebouncedValue(searchTerm);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -39,26 +42,6 @@ const ExpensesTab = () => {
     }).format(value);
   };
 
-  // Bloqueia ANTES de abrir o formulário (não só no submit): sem isso o
-  // usuário preenche tudo e só descobre que o caixa está fechado ao salvar,
-  // perdendo o preenchimento à toa.
-  const handleNewExpense = () => {
-    if (!isCashOpen) {
-      toast({
-        title: "Caixa fechado",
-        description: "Abra o caixa de hoje antes de lançar uma nova despesa.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setIsDialogOpen(true);
-  };
-
-  const handleEdit = (expense: any) => {
-    setEditingExpense(expense);
-    setIsDialogOpen(true);
-  };
-
   const handleDelete = (expenseId: string) => {
     setExpenseToDelete(expenseId);
     setDeleteConfirmOpen(true);
@@ -69,11 +52,6 @@ const ExpensesTab = () => {
       deleteExpense(expenseToDelete);
       setExpenseToDelete(null);
     }
-  };
-
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-    setEditingExpense(null);
   };
 
   const filteredExpenses = expenses?.filter(expense =>
@@ -88,7 +66,7 @@ const ExpensesTab = () => {
       <ExpensesHeader
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        onNewExpense={handleNewExpense}
+        onNewExpense={() => openDialog()}
         totalExpenses={totalExpenses}
         disabled={!isCashOpen}
       />
@@ -103,7 +81,7 @@ const ExpensesTab = () => {
       <ExpensesList
         expenses={filteredExpenses || []}
         isLoading={isLoading}
-        onEdit={handleEdit}
+        onEdit={(expense) => openDialog(expense)}
         onDelete={handleDelete}
       />
 

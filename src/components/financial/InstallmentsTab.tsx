@@ -1,18 +1,21 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import InstallmentDialog from './InstallmentDialog';
 import InstallmentsHeader from './installments/InstallmentsHeader';
 import InstallmentsEmptyState from './installments/InstallmentsEmptyState';
 import InstallmentsByClient from './installments/InstallmentsByClient';
 import InstallmentsNoClient from './installments/InstallmentsNoClient';
 import { useInstallmentsDataByClient } from '@/hooks/financial/useInstallmentsDataByClient';
-import { useCashStatus } from './CashStatusProvider';
-import { toast } from "@/hooks/use-toast";
+import { useCashGuardedDialog } from '@/hooks/financial/useCashGuardedDialog';
 
 const InstallmentsTab = () => {
-  const { isOpen: isCashOpen } = useCashStatus();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingInstallment, setEditingInstallment] = useState<any>(null);
+  const {
+    isCashOpen,
+    open: dialogOpen,
+    editing: editingInstallment,
+    openDialog: handleOpenDialog,
+    closeDialog: handleCloseDialog,
+  } = useCashGuardedDialog<any>('Abra o caixa de hoje antes de criar um novo parcelamento.');
 
   const {
     clientGroups,
@@ -21,27 +24,6 @@ const InstallmentsTab = () => {
     isLoading,
     refetch
   } = useInstallmentsDataByClient();
-
-  // Bloqueia ANTES de abrir o formulário (não só no submit) só pra parcelamento
-  // NOVO — editar um parcelamento existente segue permitido (a regra de caixa
-  // aberto se aplica à data do registro, não à de hoje).
-  const handleOpenDialog = (installment?: any) => {
-    if (!installment && !isCashOpen) {
-      toast({
-        title: "Caixa fechado",
-        description: "Abra o caixa de hoje antes de criar um novo parcelamento.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setEditingInstallment(installment || null);
-    setDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setEditingInstallment(null);
-  };
 
   const handleSuccess = () => {
     refetch();
