@@ -48,11 +48,12 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('@supabase')) return 'vendor-supabase';
           if (id.includes('@tanstack')) return 'vendor-query';
           if (id.includes('@radix-ui')) return 'vendor-radix';
-          if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
-          if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('xlsx')) return 'vendor-export';
-          if (id.includes('@sentry')) return 'vendor-sentry';
-          // Deixa o Rollup decidir o resto automaticamente (evita os chunks
-          // "vendor" genéricos criarem dependência circular com os acima).
+          // recharts/d3 (e o resto) ficaram de fora de propósito: agrupar
+          // manualmente causou "ReferenceError: Cannot access 'X' before
+          // initialization" em produção — dependência circular entre os
+          // vários submódulos d3-* quando forçados num único chunk
+          // artificial. Deixa o Rollup decidir a divisão automaticamente,
+          // que preserva a ordem de inicialização correta.
           return undefined;
         },
         // Configurar nomes de arquivo para cache busting
