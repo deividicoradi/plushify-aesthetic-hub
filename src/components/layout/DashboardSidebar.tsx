@@ -153,16 +153,17 @@ const DashboardSidebar = () => {
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Tema</span>
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-medium text-muted-foreground">Tema</span>
               <ThemeToggle />
             </div>
             <Button
               onClick={signOut}
               variant="ghost"
-              className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
               aria-label="Sair da conta"
             >
+              <LogOut className="h-4 w-4" />
               Sair
             </Button>
           </>
