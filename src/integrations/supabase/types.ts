@@ -1395,6 +1395,51 @@ export type Database = {
           },
         ]
       }
+      plan_upgrade_consents: {
+        Row: {
+          accepted_at: string
+          charge_now_cents: number
+          checkout_external_id: string
+          created_at: string
+          credit_cents: number
+          id: string
+          new_billing_interval: string
+          new_plan_type: string
+          new_price_cents: number
+          previous_billing_interval: string
+          previous_plan_type: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          charge_now_cents: number
+          checkout_external_id: string
+          created_at?: string
+          credit_cents: number
+          id?: string
+          new_billing_interval: string
+          new_plan_type: string
+          new_price_cents: number
+          previous_billing_interval: string
+          previous_plan_type: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          charge_now_cents?: number
+          checkout_external_id?: string
+          created_at?: string
+          credit_cents?: number
+          id?: string
+          new_billing_interval?: string
+          new_plan_type?: string
+          new_price_cents?: number
+          previous_billing_interval?: string
+          previous_plan_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           acquisition_date: string | null
