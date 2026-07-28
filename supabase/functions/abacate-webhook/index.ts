@@ -417,6 +417,13 @@ Deno.serve(async (req) => {
               <p style="color: #999; font-size: 12px; margin-top: 24px;">Dúvidas? Responda este e-mail ou fale com plushify.suporte@gmail.com</p>
             </div>
           `
+          // API de e-mail da Lovable exige run_id (e-mails de auth) OU
+          // idempotency_key (e-mails de app com purpose=transactional) —
+          // confirmado via erro real em produção (2026-07-28): sem isso,
+          // TODA tentativa falha com 400 "Missing run_id or idempotency_key",
+          // esgota as 5 tentativas e a mensagem vai pra DLQ sem nunca ser
+          // enviada, mesmo o enqueue_email tendo retornado sucesso.
+          const upgradeMessageId = `upgrade-${abacateCheckoutId ?? crypto.randomUUID()}`
           const { error: enqueueError } = await admin.rpc('enqueue_email', {
             queue_name: 'transactional_emails',
             payload: {
@@ -428,7 +435,8 @@ Deno.serve(async (req) => {
               text: `Seu plano mudou de ${previousPlanType} para ${planType}. Crédito aplicado: ${formatBRL(creditCents)}. Cobrado hoje: ${formatBRL(chargedCents)}.`,
               purpose: 'transactional',
               label: 'plan_upgrade_confirmation',
-              message_id: `upgrade-${abacateCheckoutId ?? crypto.randomUUID()}`,
+              message_id: upgradeMessageId,
+              idempotency_key: upgradeMessageId,
               queued_at: new Date().toISOString(),
             },
           })
