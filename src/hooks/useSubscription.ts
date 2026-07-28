@@ -18,6 +18,7 @@ export interface UserSubscription {
   abacate_subscription_id?: string | null;
   abacate_customer_id?: string | null;
   abacate_checkout_id?: string | null;
+  billing_interval?: 'month' | 'year' | null;
   created_at: string;
   updated_at: string;
 }
