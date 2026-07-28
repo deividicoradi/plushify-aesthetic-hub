@@ -2,8 +2,10 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Users, UserPlus, DollarSign, UserMinus, ShieldAlert } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { AdminCustomersTable } from '@/components/admin/AdminCustomersTable';
 
 interface OverviewStats {
   total_users: number;
@@ -47,6 +49,13 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
+      <Tabs defaultValue="overview">
+        <TabsList>
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="customers">Clientes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6 mt-4">
       {isLoading && <p className="text-muted-foreground">Carregando métricas...</p>}
 
       {!!error && (
@@ -123,6 +132,12 @@ const AdminDashboard: React.FC = () => {
           </p>
         </>
       )}
+        </TabsContent>
+
+        <TabsContent value="customers" className="mt-4">
+          <AdminCustomersTable />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
