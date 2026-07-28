@@ -157,6 +157,26 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
       throw new Error(`ABACATE: ${json?.error ?? res.statusText}`);
     }
 
+    // Registro auditável do aceite — gravado só agora, depois que o checkout
+    // foi criado de verdade (ou seja, o cliente já viu a tela de resumo e
+    // clicou em "Confirmar upgrade" com o checkbox marcado, já que o botão
+    // fica desabilitado até isso). Falha aqui não deve derrubar o checkout
+    // já criado, só fica registrada no log.
+    const { error: consentError } = await admin.from("plan_upgrade_consents").insert({
+      user_id: user.id,
+      previous_plan_type: quote.current_plan_type,
+      previous_billing_interval: quote.current_billing_interval,
+      new_plan_type: newPlanType,
+      new_billing_interval: newBillingInterval,
+      credit_cents: quote.credit_cents,
+      new_price_cents: quote.new_price_cents,
+      charge_now_cents: chargeNow,
+      checkout_external_id: externalId,
+    });
+    if (consentError) {
+      log("WARN: falha ao gravar plan_upgrade_consents", consentError);
+    }
+
     return new Response(
       JSON.stringify({ url: json.data.url, id: json.data.id, externalId, quote }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
