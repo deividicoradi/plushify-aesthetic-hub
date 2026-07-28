@@ -2000,6 +2000,22 @@ export type Database = {
     }
     Functions: {
       admin_get_overview_stats: { Args: never; Returns: Json }
+      admin_list_customers: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          billing_interval: string
+          email: string
+          expires_at: string
+          payment_kind: string
+          plan_type: string
+          signed_up_at: string
+          started_at: string
+          status: string
+          total_count: number
+          trial_ends_at: string
+          user_id: string
+        }[]
+      }
       calculate_upgrade_quote: {
         Args: {
           p_new_billing_interval: string
