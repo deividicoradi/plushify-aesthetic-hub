@@ -120,18 +120,7 @@ export const PlansPage: React.FC = () => {
       const billingPeriod = isAnnual ? 'annual' : 'monthly';
       const billingInterval = isAnnual ? 'year' : 'month';
 
-      // Upgrade de plano pago existente (ex: Profissional -> Premium, mesmo
-      // ciclo) usa crédito proporcional em vez de cobrar o valor cheio de
-      // novo — ver usePlanUpgrade/UpgradeQuoteDialog. Só se aplica quando o
-      // plano atual já é pago, o novo é realmente "maior", e o ciclo de
-      // cobrança é o mesmo (trocar mensal<->anual não é suportado ainda).
-      const isPaidPlanActive = subscription?.status === 'active'
-        && (subscription.plan_type === 'professional' || subscription.plan_type === 'premium');
-      const isRealUpgrade = isPaidPlanActive
-        && PLAN_RANK[planId] > PLAN_RANK[subscription!.plan_type]
-        && subscription!.billing_interval === billingInterval;
-
-      if (isRealUpgrade) {
+      if (isRealUpgrade(planId, billingInterval)) {
         setUpgradeDialog({ planType: planId as 'professional' | 'premium', billingInterval });
         return;
       }
@@ -142,6 +131,21 @@ export const PlansPage: React.FC = () => {
 
   const handleManageSubscription = async () => {
     await openCustomerPortal();
+  };
+
+  // Upgrade de plano pago existente (ex: Profissional -> Premium, mesmo
+  // ciclo) usa crédito proporcional em vez de cobrar o valor cheio de novo —
+  // ver usePlanUpgrade/UpgradeQuoteDialog. Só se aplica quando o plano atual
+  // já é pago, o novo é realmente "maior", e o ciclo de cobrança é o mesmo
+  // (trocar mensal<->anual não é suportado ainda). Compartilhado pelos
+  // botões de cartão e PIX — o checkout de upgrade já oferece os dois
+  // métodos juntos na mesma tela hospedada da AbacatePay.
+  const isRealUpgrade = (planId: string, billingInterval: 'month' | 'year'): boolean => {
+    const isPaidPlanActive = subscription?.status === 'active'
+      && (subscription.plan_type === 'professional' || subscription.plan_type === 'premium');
+    return !!isPaidPlanActive
+      && PLAN_RANK[planId] > PLAN_RANK[subscription!.plan_type]
+      && subscription!.billing_interval === billingInterval;
   };
 
   const handlePixSelection = async (planId: string) => {
@@ -157,6 +161,15 @@ export const PlansPage: React.FC = () => {
     }
     if (planId !== 'professional' && planId !== 'premium') return;
     const billingPeriod = isAnnual ? 'annual' : 'monthly';
+    const billingInterval = isAnnual ? 'year' : 'month';
+
+    // Mesmo upgrade com crédito do botão de cartão — o checkout gerado por
+    // abacate-create-upgrade-checkout já inclui PIX como opção de pagamento.
+    if (isRealUpgrade(planId, billingInterval)) {
+      setUpgradeDialog({ planType: planId as 'professional' | 'premium', billingInterval });
+      return;
+    }
+
     await createPixCheckout(planId, billingPeriod);
   };
 
