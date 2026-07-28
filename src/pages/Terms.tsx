@@ -26,7 +26,7 @@ const Terms = () => {
               Termos de Serviço
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Última atualização: 26 de julho de 2026
+              Última atualização: 28 de julho de 2026
             </p>
           </div>
 
@@ -135,6 +135,15 @@ const Terms = () => {
                     momento, a nosso critério. Qualquer reajuste será comunicado com no mínimo 30 dias de
                     antecedência antes de entrar em vigor, dando tempo para você decidir se deseja continuar
                     com o plano nas novas condições.
+                  </p>
+                  <p>
+                    <strong>Upgrade de Plano (planos anuais):</strong> Ao migrar para um plano anual de valor
+                    superior antes do fim do período contratado, o valor já pago pelos dias não utilizados do
+                    plano atual é convertido integralmente em crédito (sem multa, diferente do cancelamento) e
+                    abatido do valor cheio do novo plano. Você paga apenas a diferença, calculada
+                    proporcionalmente aos dias restantes do seu ciclo atual, e visualiza esse valor antes de
+                    confirmar a cobrança. A partir da confirmação, seu plano é alterado imediatamente e um novo
+                    período de 12 meses tem início a partir da data do upgrade.
                   </p>
                 </div>
               </section>
