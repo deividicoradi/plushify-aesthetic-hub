@@ -1871,6 +1871,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           abacate_checkout_id: string | null
@@ -1972,6 +1999,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_overview_stats: { Args: never; Returns: Json }
       calculate_upgrade_quote: {
         Args: {
           p_new_billing_interval: string
@@ -2150,6 +2178,13 @@ export type Database = {
         Returns: Database["public"]["Enums"]["plan_type"]
       }
       has_feature_access: { Args: { feature_name: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -2232,6 +2267,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "user"
       plan_type: "trial" | "professional" | "premium"
     }
     CompositeTypes: {
@@ -2360,6 +2396,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       plan_type: ["trial", "professional", "premium"],
     },
   },
