@@ -79,7 +79,8 @@ export const useSubscription = () => {
         return { subscription: null, currentPlan: 'trial' };
       }
 
-      return { subscription: data, currentPlan: computeEffectivePlan(data) };
+      const sub = data as unknown as UserSubscription;
+      return { subscription: sub, currentPlan: computeEffectivePlan(sub) };
     },
   });
 
