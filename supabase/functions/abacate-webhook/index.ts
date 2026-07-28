@@ -389,6 +389,60 @@ Deno.serve(async (req) => {
 
     log('subscription activated', { userId, planType, billingInterval, paymentKind, subscriptionId })
 
+    // E-mail de confirmação de upgrade — só quando abacate-create-upgrade-checkout
+    // marcou is_upgrade:"true" no metadata (não dispara pra assinatura nova/renovação
+    // normal, só pra troca de plano com crédito). Falha de envio nunca derruba a
+    // ativação do plano em si (já concluída acima) — só loga o erro.
+    const upgradeMetadata = (checkoutObj.metadata ?? {}) as Record<string, unknown>
+    if (upgradeMetadata.is_upgrade === 'true') {
+      try {
+        const recipientEmail = upgradeMetadata.user_email ? String(upgradeMetadata.user_email) : null
+        const previousPlanType = upgradeMetadata.previous_plan_type ? String(upgradeMetadata.previous_plan_type) : null
+        const creditCents = upgradeMetadata.credit_applied_cents ? Number(upgradeMetadata.credit_applied_cents) : 0
+        const chargedCents = Number(checkoutObj.paidAmount ?? checkoutObj.amount ?? 0)
+        const planLabels: Record<string, string> = { professional: 'Profissional', premium: 'Premium' }
+        const formatBRL = (cents: number) => (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+        if (recipientEmail) {
+          const subject = `Upgrade confirmado: seu plano agora é ${planLabels[planType] ?? planType}`
+          const html = `
+            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+              <h2>Upgrade confirmado! 🎉</h2>
+              <p>Seu plano na Plushify mudou de <strong>${planLabels[previousPlanType ?? ''] ?? previousPlanType}</strong> para <strong>${planLabels[planType] ?? planType}</strong>.</p>
+              <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                <tr><td style="padding: 8px 0; color: #666;">Crédito do plano anterior</td><td style="text-align: right;">− ${formatBRL(creditCents)}</td></tr>
+                <tr><td style="padding: 8px 0; color: #666; border-top: 1px solid #eee;">Valor cobrado hoje</td><td style="text-align: right; border-top: 1px solid #eee; font-weight: bold;">${formatBRL(chargedCents)}</td></tr>
+              </table>
+              ${checkoutObj.receiptUrl ? `<p><a href="${checkoutObj.receiptUrl}">Ver comprovante de pagamento</a></p>` : ''}
+              <p style="color: #999; font-size: 12px; margin-top: 24px;">Dúvidas? Responda este e-mail ou fale com plushify.suporte@gmail.com</p>
+            </div>
+          `
+          const { error: enqueueError } = await admin.rpc('enqueue_email', {
+            queue_name: 'transactional_emails',
+            payload: {
+              to: recipientEmail,
+              from: 'Plushify <naoresponda@notify.plushify.com.br>',
+              sender_domain: 'notify.plushify.com.br',
+              subject,
+              html,
+              text: `Seu plano mudou de ${previousPlanType} para ${planType}. Crédito aplicado: ${formatBRL(creditCents)}. Cobrado hoje: ${formatBRL(chargedCents)}.`,
+              purpose: 'transactional',
+              label: 'plan_upgrade_confirmation',
+              message_id: `upgrade-${abacateCheckoutId ?? crypto.randomUUID()}`,
+              queued_at: new Date().toISOString(),
+            },
+          })
+          if (enqueueError) {
+            log('WARN: falha ao enfileirar e-mail de confirmação de upgrade', enqueueError)
+          } else {
+            log('upgrade confirmation email enqueued', { recipientEmail })
+          }
+        }
+      } catch (emailErr) {
+        log('WARN: erro inesperado ao montar e-mail de upgrade', emailErr instanceof Error ? emailErr.message : String(emailErr))
+      }
+    }
+
     return new Response(JSON.stringify({ received: true, subscription_id: subscriptionId }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
