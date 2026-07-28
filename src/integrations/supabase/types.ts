@@ -1831,11 +1831,13 @@ export type Database = {
           abacate_checkout_id: string | null
           abacate_customer_id: string | null
           abacate_subscription_id: string | null
+          billing_interval: string | null
           cancel_at_period_end: boolean
           created_at: string
           expires_at: string | null
           id: string
           payment_kind: string | null
+          plan_amount_paid: number | null
           plan_type: Database["public"]["Enums"]["plan_type"]
           started_at: string
           status: string
@@ -1847,11 +1849,13 @@ export type Database = {
           abacate_checkout_id?: string | null
           abacate_customer_id?: string | null
           abacate_subscription_id?: string | null
+          billing_interval?: string | null
           cancel_at_period_end?: boolean
           created_at?: string
           expires_at?: string | null
           id?: string
           payment_kind?: string | null
+          plan_amount_paid?: number | null
           plan_type?: Database["public"]["Enums"]["plan_type"]
           started_at?: string
           status?: string
@@ -1863,11 +1867,13 @@ export type Database = {
           abacate_checkout_id?: string | null
           abacate_customer_id?: string | null
           abacate_subscription_id?: string | null
+          billing_interval?: string | null
           cancel_at_period_end?: boolean
           created_at?: string
           expires_at?: string | null
           id?: string
           payment_kind?: string | null
+          plan_amount_paid?: number | null
           plan_type?: Database["public"]["Enums"]["plan_type"]
           started_at?: string
           status?: string
@@ -1921,6 +1927,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_upgrade_quote: {
+        Args: {
+          p_new_billing_interval: string
+          p_new_plan_type: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       cancel_subscription: {
         Args: {
           p_abacate_checkout_id?: string
@@ -2150,6 +2164,7 @@ export type Database = {
           p_billing_interval?: string
           p_current_period_end?: string
           p_payment_kind?: string
+          p_plan_amount_paid?: number
           p_plan_code: string
           p_trial_days?: number
           p_user_id: string
