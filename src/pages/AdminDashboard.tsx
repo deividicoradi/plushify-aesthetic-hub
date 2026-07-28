@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { AdminCustomersTable } from '@/components/admin/AdminCustomersTable';
+import { AdminAuditTable } from '@/components/admin/AdminAuditTable';
 
 interface OverviewStats {
   total_users: number;
@@ -53,6 +54,7 @@ const AdminDashboard: React.FC = () => {
         <TabsList>
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="customers">Clientes</TabsTrigger>
+          <TabsTrigger value="audit">Auditoria</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-4">
@@ -136,6 +138,10 @@ const AdminDashboard: React.FC = () => {
 
         <TabsContent value="customers" className="mt-4">
           <AdminCustomersTable />
+        </TabsContent>
+
+        <TabsContent value="audit" className="mt-4">
+          <AdminAuditTable />
         </TabsContent>
       </Tabs>
     </div>
