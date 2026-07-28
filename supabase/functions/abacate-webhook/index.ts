@@ -354,6 +354,17 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
+    // Preço de CATÁLOGO do plano/ciclo sendo ativado — não o valor realmente
+    // cobrado nesta transação (checkoutObj.paidAmount), que em um upgrade já
+    // vem com desconto do crédito proporcional aplicado. Guardar o valor de
+    // catálogo aqui garante que um upgrade FUTURO calcule o crédito sobre o
+    // preço cheio do plano atual, nunca "desconto sobre desconto".
+    const CATALOG_PRICES: Record<string, Record<string, number>> = {
+      professional: { month: 8900, year: 89000 },
+      premium: { month: 17900, year: 179000 },
+    }
+    const planAmountPaid = CATALOG_PRICES[planType]?.[billingInterval] ?? null
+
     const { data: subscriptionId, error } = await admin.rpc('start_subscription', {
       p_user_id: userId,
       p_plan_code: planType,
@@ -364,6 +375,7 @@ Deno.serve(async (req) => {
       p_abacate_customer_id: abacateCustomerId,
       p_abacate_checkout_id: abacateCheckoutId,
       p_current_period_end: currentPeriodEnd,
+      p_plan_amount_paid: planAmountPaid,
     })
 
     if (error) {
