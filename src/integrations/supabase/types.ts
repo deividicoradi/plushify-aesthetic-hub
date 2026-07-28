@@ -2016,6 +2016,20 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_upgrade_consents: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          accepted_at: string
+          charge_now_cents: number
+          credit_cents: number
+          email: string
+          id: string
+          new_plan_type: string
+          new_price_cents: number
+          previous_plan_type: string
+          total_count: number
+        }[]
+      }
       calculate_upgrade_quote: {
         Args: {
           p_new_billing_interval: string
