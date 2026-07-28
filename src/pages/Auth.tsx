@@ -22,7 +22,7 @@ import { useAbacateCheckout } from '@/hooks/useAbacateCheckout';
 // Atualizar aqui sempre que o conteúdo dessas páginas mudar de forma
 // relevante, para o registro de aceite refletir a versão correta.
 const TERMS_VERSION = '2026-07-28';
-const PRIVACY_VERSION = '2026-07-26';
+const PRIVACY_VERSION = '2026-07-28';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);

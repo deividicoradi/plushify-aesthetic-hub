@@ -26,7 +26,7 @@ const Privacy = () => {
               Política de Privacidade
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Última atualização: 26 de julho de 2026
+              Última atualização: 28 de julho de 2026
             </p>
           </div>
 
@@ -51,6 +51,12 @@ const Privacy = () => {
                   </p>
                   <p>
                     <strong>Dados de Pagamento:</strong> Informações de cobrança processadas através de nossos parceiros de pagamento seguros.
+                  </p>
+                  <p>
+                    <strong>Registro de Consentimento:</strong> Ao aceitar os Termos de Uso no cadastro ou confirmar
+                    a mudança de plano (upgrade), registramos o momento do aceite, a versão dos termos vigente e,
+                    no caso de upgrade, os valores exibidos e cobrados — usado exclusivamente como comprovação em
+                    caso de contestação de cobrança, nunca para outra finalidade.
                   </p>
                   <p>
                     <strong>Dados Técnicos:</strong> Endereço IP, tipo de navegador, sistema operacional e identificadores de dispositivo.
