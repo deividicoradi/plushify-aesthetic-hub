@@ -31,9 +31,9 @@ interface ActiveSubscriptionRow {
   user_id: string;
   email: string;
   plan_type: string;
-  billing_interval: string;
-  plan_amount_paid: number;
-  mrr_contribution_cents: number;
+  billing_interval: string | null;
+  plan_amount_paid: number | null;
+  mrr_contribution_cents: number | null;
   started_at: string;
 }
 
@@ -72,6 +72,7 @@ const STATUS_LABELS: Record<string, string> = {
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
   const [openCard, setOpenCard] = useState<OverviewCardKey | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-overview-stats'],
@@ -89,7 +90,7 @@ const AdminDashboard: React.FC = () => {
       if (error) throw error;
       return data as unknown as OverviewDetails;
     },
-    enabled: openCard !== null,
+    enabled: openCard !== null || selectedPlan !== null,
   });
 
   const userRow = (row: UserRow) => (
@@ -106,10 +107,13 @@ const AdminDashboard: React.FC = () => {
       <div className="min-w-0">
         <p className="text-sm font-medium truncate">{row.email}</p>
         <p className="text-xs text-muted-foreground">
-          {PLAN_LABELS[row.plan_type] ?? row.plan_type} · {row.billing_interval === 'year' ? 'Anual' : 'Mensal'}
+          {PLAN_LABELS[row.plan_type] ?? row.plan_type}
+          {row.billing_interval ? ` · ${row.billing_interval === 'year' ? 'Anual' : 'Mensal'}` : ''}
         </p>
       </div>
-      <p className="text-sm font-medium shrink-0 ml-3">{formatBRL(row.mrr_contribution_cents)}</p>
+      <p className="text-sm font-medium shrink-0 ml-3">
+        {row.mrr_contribution_cents != null ? formatBRL(row.mrr_contribution_cents) : '—'}
+      </p>
     </div>
   );
 
@@ -124,6 +128,10 @@ const AdminDashboard: React.FC = () => {
         <p className="text-xs text-muted-foreground mt-1">{new Date(row.updated_at).toLocaleDateString('pt-BR')}</p>
       </div>
     </div>
+  );
+
+  const paidActiveSubscriptions = (details?.active_subscriptions ?? []).filter(
+    (row) => row.plan_amount_paid != null,
   );
 
   const modalConfig: Record<OverviewCardKey, {
@@ -167,12 +175,12 @@ const AdminDashboard: React.FC = () => {
       title: 'MRR estimado',
       headerTotal: formatBRL(data?.mrr_cents ?? 0),
       headerTotalLabel: 'Receita recorrente mensal',
-      headerCount: details?.active_subscriptions.length ?? 0,
+      headerCount: paidActiveSubscriptions.length,
       sections: [
         {
           key: 'active_subscriptions',
-          title: 'Assinaturas ativas',
-          items: details?.active_subscriptions ?? [],
+          title: 'Assinaturas ativas (pagas)',
+          items: paidActiveSubscriptions,
           getDate: (item: ActiveSubscriptionRow) => item.started_at,
           render: subscriptionRow,
         },
@@ -195,7 +203,34 @@ const AdminDashboard: React.FC = () => {
     },
   };
 
-  const activeModal = openCard ? modalConfig[openCard] : null;
+  const planSubscriptions = selectedPlan
+    ? (details?.active_subscriptions ?? []).filter((row) => row.plan_type === selectedPlan)
+    : [];
+
+  const planModal = selectedPlan
+    ? {
+        title: `Assinaturas ativas — ${PLAN_LABELS[selectedPlan] ?? selectedPlan}`,
+        headerTotal: String(data?.active_by_plan[selectedPlan] ?? planSubscriptions.length),
+        headerTotalLabel: 'Assinaturas ativas',
+        headerCount: planSubscriptions.length,
+        sections: [
+          {
+            key: 'plan_subscriptions',
+            title: PLAN_LABELS[selectedPlan] ?? selectedPlan,
+            items: planSubscriptions,
+            getDate: (item: ActiveSubscriptionRow) => item.started_at,
+            render: subscriptionRow,
+          },
+        ] as DetailsSection[],
+      }
+    : null;
+
+  const activeModal = openCard ? modalConfig[openCard] : planModal;
+  const isModalOpen = openCard !== null || selectedPlan !== null;
+  const closeModal = () => {
+    setOpenCard(null);
+    setSelectedPlan(null);
+  };
 
   return (
     <ResponsiveLayout
@@ -345,7 +380,19 @@ const AdminDashboard: React.FC = () => {
                       <p className="text-sm text-muted-foreground">Nenhuma assinatura ativa ainda.</p>
                     )}
                     {Object.entries(data.active_by_plan).map(([plan, count]) => (
-                      <div key={plan} className="flex items-center justify-between text-sm border-b border-border py-2 last:border-0">
+                      <div
+                        key={plan}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedPlan(plan)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setSelectedPlan(plan);
+                          }
+                        }}
+                        className="flex items-center justify-between text-sm border-b border-border py-2 last:border-0 cursor-pointer rounded-md px-2 -mx-2 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      >
                         <Badge variant="secondary">{PLAN_LABELS[plan] ?? plan}</Badge>
                         <span className="font-medium text-foreground">{count}</span>
                       </div>
@@ -372,8 +419,8 @@ const AdminDashboard: React.FC = () => {
 
       {activeModal && (
         <DetailsListModal
-          open={openCard !== null}
-          onOpenChange={(open) => !open && setOpenCard(null)}
+          open={isModalOpen}
+          onOpenChange={(open) => !open && closeModal()}
           title={activeModal.title}
           loading={detailsLoading}
           headerTotal={activeModal.headerTotal}

@@ -50,7 +50,7 @@ BEGIN
       s.started_at
     FROM public.user_subscriptions s
     JOIN auth.users u ON u.id = s.user_id
-    WHERE s.status = 'active' AND s.plan_amount_paid IS NOT NULL
+    WHERE s.status = 'active'
       AND NOT EXISTS (SELECT 1 FROM public.user_roles r WHERE r.user_id = u.id AND r.role = 'admin')
     ORDER BY s.started_at DESC
     LIMIT 300
