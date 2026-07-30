@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users, CheckCircle2, Clock } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CustomerRow {
@@ -53,13 +55,78 @@ export const AdminCustomersTable: React.FC = () => {
 
   const totalCount = data?.[0]?.total_count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const rows = data ?? [];
+  const activeCount = rows.filter((r) => r.status === 'active').length;
+  const trialCount = rows.filter((r) => r.plan_type === 'trial').length;
 
-  if (isLoading) return <p className="text-muted-foreground">Carregando clientes...</p>;
+  if (isLoading) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="bg-card border-border">
+              <CardContent className="p-6">
+                <Skeleton className="h-16 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card className="bg-card border-border">
+          <CardContent className="p-6">
+            <Skeleton className="h-48 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   if (error) return <p className="text-destructive text-sm">Erro ao carregar clientes: {(error as Error).message}</p>;
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border border-border overflow-x-auto">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">Total de clientes</CardTitle>
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-blue-900 dark:text-blue-100">{totalCount}</div>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2 hidden sm:block">Contas registradas</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">Ativos nesta página</CardTitle>
+            <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-green-900 dark:text-green-100">{activeCount}</div>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-2 hidden sm:block">Assinaturas ativas</p>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-2 lg:col-span-1 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-950/30 dark:to-violet-950/30 border-purple-200 dark:border-purple-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-purple-700 dark:text-purple-300">Em trial</CardTitle>
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600 dark:text-purple-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-purple-900 dark:text-purple-100">{trialCount}</div>
+            <p className="text-xs text-purple-600 dark:text-purple-400 mt-2 hidden sm:block">Período de teste</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
+            Clientes
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-md border border-border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -97,9 +164,9 @@ export const AdminCustomersTable: React.FC = () => {
             )}
           </TableBody>
         </Table>
-      </div>
+          </div>
 
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
           Página {page + 1} de {totalPages} — {totalCount} clientes
         </span>
@@ -116,7 +183,9 @@ export const AdminCustomersTable: React.FC = () => {
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
