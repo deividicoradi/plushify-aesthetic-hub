@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, ArrowRight, FileText, TrendingUp, DollarSign } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, FileText, TrendingUp, DollarSign, ShieldAlert } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,6 +20,22 @@ interface ConsentRow {
   total_count: number;
 }
 
+interface ActionLogRow {
+  id: string;
+  admin_email: string;
+  target_email: string;
+  action: string;
+  reason: string | null;
+  details: Record<string, unknown> | null;
+  created_at: string;
+  total_count: number;
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  extend_trial: 'Estendeu trial',
+  force_cancel: 'Cancelou assinatura',
+};
+
 const PLAN_LABELS: Record<string, string> = {
   professional: 'Profissional',
   premium: 'Premium',
@@ -31,6 +48,7 @@ const PAGE_SIZE = 25;
 
 export const AdminAuditTable: React.FC = () => {
   const [page, setPage] = useState(0);
+  const [actionsPage, setActionsPage] = useState(0);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-upgrade-consents', page],
@@ -43,6 +61,21 @@ export const AdminAuditTable: React.FC = () => {
       return (data ?? []) as ConsentRow[];
     },
   });
+
+  const { data: actionsData, isLoading: actionsLoading } = useQuery({
+    queryKey: ['admin-actions-log', actionsPage],
+    queryFn: async (): Promise<ActionLogRow[]> => {
+      const { data, error } = await supabase.rpc('admin_list_actions_log', {
+        p_limit: PAGE_SIZE,
+        p_offset: actionsPage * PAGE_SIZE,
+      });
+      if (error) throw error;
+      return (data ?? []) as ActionLogRow[];
+    },
+  });
+
+  const actionsTotalCount = actionsData?.[0]?.total_count ?? 0;
+  const actionsTotalPages = Math.max(1, Math.ceil(actionsTotalCount / PAGE_SIZE));
 
   const totalCount = data?.[0]?.total_count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -178,6 +211,80 @@ export const AdminAuditTable: React.FC = () => {
           </Button>
         </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-primary" />
+            Ações administrativas
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Toda ação manual feita por um admin em conta de cliente (estender trial, cancelar) fica registrada aqui.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {actionsLoading ? (
+            <Skeleton className="h-32 w-full" />
+          ) : (
+            <>
+              <div className="rounded-md border border-border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Admin</TableHead>
+                      <TableHead>Ação</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Motivo</TableHead>
+                      <TableHead>Quando</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(actionsData ?? []).map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell className="text-muted-foreground">{row.admin_email}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{ACTION_LABELS[row.action] ?? row.action}</Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">{row.target_email}</TableCell>
+                        <TableCell className="text-muted-foreground max-w-[220px] truncate">{row.reason ?? '—'}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {new Date(row.created_at).toLocaleString('pt-BR')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {(actionsData ?? []).length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
+                          Nenhuma ação administrativa registrada ainda.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>
+                  Página {actionsPage + 1} de {actionsTotalPages} — {actionsTotalCount} registros
+                </span>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" disabled={actionsPage === 0} onClick={() => setActionsPage((p) => p - 1)}>
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={actionsPage + 1 >= actionsTotalPages}
+                    onClick={() => setActionsPage((p) => p + 1)}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

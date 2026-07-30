@@ -1,6 +1,6 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowRight, Clock, Ban } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -8,9 +8,24 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface SubscriptionEntry {
   id: string;
@@ -72,6 +87,12 @@ interface Props {
 }
 
 export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange }) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [extendDays, setExtendDays] = useState('7');
+  const [extendReason, setExtendReason] = useState('');
+  const [cancelReason, setCancelReason] = useState('');
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-customer-detail', userId],
     queryFn: async (): Promise<CustomerDetail> => {
@@ -81,6 +102,55 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
     },
     enabled: !!userId,
   });
+
+  const invalidateAfterAction = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-customer-detail', userId] });
+    queryClient.invalidateQueries({ queryKey: ['admin-customers'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-overview-stats'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-overview-details'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-actions-log'] });
+  };
+
+  const extendTrialMutation = useMutation({
+    mutationFn: async () => {
+      const days = parseInt(extendDays, 10);
+      const { error } = await supabase.rpc('admin_extend_trial', {
+        p_user_id: userId,
+        p_days: days,
+        p_reason: extendReason || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: 'Trial estendido com sucesso' });
+      setExtendReason('');
+      invalidateAfterAction();
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Erro ao estender trial', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  const forceCancelMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('admin_force_cancel_subscription', {
+        p_user_id: userId,
+        p_reason: cancelReason,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: 'Assinatura cancelada' });
+      setCancelReason('');
+      invalidateAfterAction();
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Erro ao cancelar assinatura', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  const hasActiveTrial = data?.subscriptions.some((s) => s.status === 'trial_active');
+  const hasActiveSubscription = data?.subscriptions.some((s) => s.status === 'active' || s.status === 'trial_active');
 
   return (
     <Dialog open={!!userId} onOpenChange={onOpenChange}>
@@ -102,6 +172,84 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
         {data && (
           <ScrollArea className="flex-1 -mx-2 px-2">
             <div className="space-y-6 py-2">
+              {hasActiveSubscription && (
+                <div className="rounded-md border border-border p-3 space-y-3">
+                  <h4 className="text-sm font-semibold">Ações administrativas</h4>
+
+                  {hasActiveTrial && (
+                    <div className="flex flex-wrap items-end gap-2">
+                      <div className="space-y-1">
+                        <label className="text-xs text-muted-foreground">Estender trial (dias)</label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={90}
+                          value={extendDays}
+                          onChange={(e) => setExtendDays(e.target.value)}
+                          className="w-24 h-8"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-[160px] space-y-1">
+                        <label className="text-xs text-muted-foreground">Motivo (opcional)</label>
+                        <Input
+                          value={extendReason}
+                          onChange={(e) => setExtendReason(e.target.value)}
+                          placeholder="Ex: cortesia, teste"
+                          className="h-8"
+                        />
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={extendTrialMutation.isPending}
+                        onClick={() => extendTrialMutation.mutate()}
+                      >
+                        <Clock className="w-3.5 h-3.5 mr-1.5" />
+                        Estender
+                      </Button>
+                    </div>
+                  )}
+
+                  <AlertDialog>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Motivo do cancelamento (obrigatório)</label>
+                      <Textarea
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                        placeholder="Ex: solicitação do cliente via suporte, fraude, etc."
+                        className="text-sm min-h-[60px]"
+                      />
+                    </div>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={forceCancelMutation.isPending || !cancelReason.trim()}
+                      >
+                        <Ban className="w-3.5 h-3.5 mr-1.5" />
+                        Cancelar assinatura
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Cancelar assinatura de {data.email}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Isso encerra o acesso pago desse cliente imediatamente. Essa ação fica registrada na
+                          auditoria com seu usuário e o motivo informado. Não cancela nem estorna nada na AbacatePay
+                          — só encerra o acesso no nosso sistema.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Voltar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => forceCancelMutation.mutate()}>
+                          Confirmar cancelamento
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
+
               <div>
                 <h4 className="text-sm font-semibold mb-2">Histórico de assinaturas</h4>
                 {data.subscriptions.length === 0 ? (
