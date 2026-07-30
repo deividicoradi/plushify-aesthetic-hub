@@ -1999,6 +1999,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_overview_details: { Args: never; Returns: Json }
       admin_get_overview_stats: { Args: never; Returns: Json }
       admin_list_customers: {
         Args: { p_limit?: number; p_offset?: number }
