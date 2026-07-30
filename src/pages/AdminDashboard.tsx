@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Users, UserPlus, DollarSign, UserMinus, ShieldAlert, Layers } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
+import { DetailsListModal, DetailsSection } from '@/components/common/DetailsListModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { AdminCustomersTable } from '@/components/admin/AdminCustomersTable';
@@ -20,6 +21,39 @@ interface OverviewStats {
   generated_at: string;
 }
 
+interface UserRow {
+  user_id: string;
+  email: string;
+  signed_up_at: string;
+}
+
+interface ActiveSubscriptionRow {
+  user_id: string;
+  email: string;
+  plan_type: string;
+  billing_interval: string;
+  plan_amount_paid: number;
+  mrr_contribution_cents: number;
+  started_at: string;
+}
+
+interface CancellationRow {
+  user_id: string;
+  email: string;
+  plan_type: string;
+  status: string;
+  updated_at: string;
+}
+
+interface OverviewDetails {
+  users: UserRow[];
+  new_signups: UserRow[];
+  active_subscriptions: ActiveSubscriptionRow[];
+  cancellations: CancellationRow[];
+}
+
+type OverviewCardKey = 'total_users' | 'new_signups' | 'mrr' | 'cancellations';
+
 const formatBRL = (cents: number) =>
   (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -29,8 +63,15 @@ const PLAN_LABELS: Record<string, string> = {
   premium: 'Premium',
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  cancelled: 'Cancelado',
+  refunded: 'Reembolsado',
+  disputed: 'Contestado',
+};
+
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
+  const [openCard, setOpenCard] = useState<OverviewCardKey | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-overview-stats'],
@@ -40,6 +81,121 @@ const AdminDashboard: React.FC = () => {
       return data as unknown as OverviewStats;
     },
   });
+
+  const { data: details, isLoading: detailsLoading } = useQuery({
+    queryKey: ['admin-overview-details'],
+    queryFn: async (): Promise<OverviewDetails> => {
+      const { data, error } = await supabase.rpc('admin_get_overview_details');
+      if (error) throw error;
+      return data as unknown as OverviewDetails;
+    },
+    enabled: openCard !== null,
+  });
+
+  const userRow = (row: UserRow) => (
+    <div key={row.user_id} className="flex items-center justify-between border-b border-border/50 pb-1.5">
+      <p className="text-sm font-medium truncate">{row.email}</p>
+      <p className="text-xs text-muted-foreground shrink-0 ml-3">
+        {new Date(row.signed_up_at).toLocaleDateString('pt-BR')}
+      </p>
+    </div>
+  );
+
+  const subscriptionRow = (row: ActiveSubscriptionRow) => (
+    <div key={row.user_id} className="flex items-start justify-between border-b border-border/50 pb-1.5">
+      <div className="min-w-0">
+        <p className="text-sm font-medium truncate">{row.email}</p>
+        <p className="text-xs text-muted-foreground">
+          {PLAN_LABELS[row.plan_type] ?? row.plan_type} · {row.billing_interval === 'year' ? 'Anual' : 'Mensal'}
+        </p>
+      </div>
+      <p className="text-sm font-medium shrink-0 ml-3">{formatBRL(row.mrr_contribution_cents)}</p>
+    </div>
+  );
+
+  const cancellationRow = (row: CancellationRow) => (
+    <div key={row.user_id} className="flex items-start justify-between border-b border-border/50 pb-1.5">
+      <div className="min-w-0">
+        <p className="text-sm font-medium truncate">{row.email}</p>
+        <p className="text-xs text-muted-foreground">{PLAN_LABELS[row.plan_type] ?? row.plan_type}</p>
+      </div>
+      <div className="text-right shrink-0 ml-3">
+        <Badge variant="destructive" className="text-[10px]">{STATUS_LABELS[row.status] ?? row.status}</Badge>
+        <p className="text-xs text-muted-foreground mt-1">{new Date(row.updated_at).toLocaleDateString('pt-BR')}</p>
+      </div>
+    </div>
+  );
+
+  const modalConfig: Record<OverviewCardKey, {
+    title: string;
+    headerTotal: string;
+    headerTotalLabel: string;
+    headerCount: number;
+    sections: DetailsSection[];
+  }> = {
+    total_users: {
+      title: 'Usuários totais',
+      headerTotal: String(data?.total_users ?? 0),
+      headerTotalLabel: 'Total de contas',
+      headerCount: details?.users.length ?? 0,
+      sections: [
+        {
+          key: 'users',
+          title: 'Contas cadastradas',
+          items: details?.users ?? [],
+          getDate: (item: UserRow) => item.signed_up_at,
+          render: userRow,
+        },
+      ],
+    },
+    new_signups: {
+      title: 'Novos usuários (30 dias)',
+      headerTotal: String(data?.new_signups_30d ?? 0),
+      headerTotalLabel: 'Cadastros no período',
+      headerCount: details?.new_signups.length ?? 0,
+      sections: [
+        {
+          key: 'new_signups',
+          title: 'Cadastros recentes',
+          items: details?.new_signups ?? [],
+          getDate: (item: UserRow) => item.signed_up_at,
+          render: userRow,
+        },
+      ],
+    },
+    mrr: {
+      title: 'MRR estimado',
+      headerTotal: formatBRL(data?.mrr_cents ?? 0),
+      headerTotalLabel: 'Receita recorrente mensal',
+      headerCount: details?.active_subscriptions.length ?? 0,
+      sections: [
+        {
+          key: 'active_subscriptions',
+          title: 'Assinaturas ativas',
+          items: details?.active_subscriptions ?? [],
+          getDate: (item: ActiveSubscriptionRow) => item.started_at,
+          render: subscriptionRow,
+        },
+      ],
+    },
+    cancellations: {
+      title: 'Cancelamentos (30 dias)',
+      headerTotal: String(data?.cancellations_30d ?? 0),
+      headerTotalLabel: 'Assinaturas encerradas',
+      headerCount: details?.cancellations.length ?? 0,
+      sections: [
+        {
+          key: 'cancellations',
+          title: 'Encerradas no período',
+          items: details?.cancellations ?? [],
+          getDate: (item: CancellationRow) => item.updated_at,
+          render: cancellationRow,
+        },
+      ],
+    },
+  };
+
+  const activeModal = openCard ? modalConfig[openCard] : null;
 
   return (
     <ResponsiveLayout
@@ -87,7 +243,18 @@ const AdminDashboard: React.FC = () => {
           {data && (
             <>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800">
+                <Card
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setOpenCard('total_users')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setOpenCard('total_users');
+                    }
+                  }}
+                  className="cursor-pointer transition-all hover:shadow-md hover:ring-1 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800"
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">Usuários totais</CardTitle>
                     <Users className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
@@ -98,7 +265,18 @@ const AdminDashboard: React.FC = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-teal-50 to-cyan-100 dark:from-teal-950/30 dark:to-cyan-950/30 border-teal-200 dark:border-teal-800">
+                <Card
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setOpenCard('new_signups')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setOpenCard('new_signups');
+                    }
+                  }}
+                  className="cursor-pointer transition-all hover:shadow-md hover:ring-1 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 bg-gradient-to-br from-teal-50 to-cyan-100 dark:from-teal-950/30 dark:to-cyan-950/30 border-teal-200 dark:border-teal-800"
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-xs sm:text-sm font-medium text-teal-700 dark:text-teal-300">Novos (30 dias)</CardTitle>
                     <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 text-teal-600 dark:text-teal-400" />
@@ -109,7 +287,18 @@ const AdminDashboard: React.FC = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800">
+                <Card
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setOpenCard('mrr')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setOpenCard('mrr');
+                    }
+                  }}
+                  className="cursor-pointer transition-all hover:shadow-md hover:ring-1 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800"
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">MRR estimado</CardTitle>
                     <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" />
@@ -120,7 +309,18 @@ const AdminDashboard: React.FC = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-950/30 dark:to-pink-950/30 border-red-200 dark:border-red-800">
+                <Card
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setOpenCard('cancellations')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setOpenCard('cancellations');
+                    }
+                  }}
+                  className="cursor-pointer transition-all hover:shadow-md hover:ring-1 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-950/30 dark:to-pink-950/30 border-red-200 dark:border-red-800"
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">Cancelamentos (30 dias)</CardTitle>
                     <UserMinus className="h-3 w-3 sm:h-4 sm:w-4 text-red-600 dark:text-red-400" />
@@ -169,6 +369,19 @@ const AdminDashboard: React.FC = () => {
           <AdminAuditTable />
         </TabsContent>
       </Tabs>
+
+      {activeModal && (
+        <DetailsListModal
+          open={openCard !== null}
+          onOpenChange={(open) => !open && setOpenCard(null)}
+          title={activeModal.title}
+          loading={detailsLoading}
+          headerTotal={activeModal.headerTotal}
+          headerTotalLabel={activeModal.headerTotalLabel}
+          headerCount={activeModal.headerCount}
+          sections={activeModal.sections}
+        />
+      )}
     </ResponsiveLayout>
   );
 };
