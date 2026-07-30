@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Users, CheckCircle2, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users, CheckCircle2, Clock, Search, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,13 +41,24 @@ const PAGE_SIZE = 25;
 
 export const AdminCustomersTable: React.FC = () => {
   const [page, setPage] = useState(0);
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput.trim());
+      setPage(0);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['admin-customers', page],
+    queryKey: ['admin-customers', page, search],
     queryFn: async (): Promise<CustomerRow[]> => {
       const { data, error } = await supabase.rpc('admin_list_customers', {
         p_limit: PAGE_SIZE,
         p_offset: page * PAGE_SIZE,
+        p_search: search || null,
       });
       if (error) throw error;
       return (data ?? []) as CustomerRow[];
@@ -126,6 +138,25 @@ export const AdminCustomersTable: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Buscar por e-mail..."
+              className="pl-8 pr-8"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => setSearchInput('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
           <div className="rounded-md border border-border overflow-x-auto">
         <Table>
           <TableHeader>
