@@ -20,6 +20,7 @@ interface OverviewStats {
   active_by_plan: Record<string, number>;
   mrr_cents: number;
   cancellations_30d: number;
+  churn_rate_pct: number;
   generated_at: string;
 }
 
@@ -368,7 +369,9 @@ const AdminDashboard: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="text-xl sm:text-2xl font-bold text-red-900 dark:text-red-100">{data.cancellations_30d}</div>
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-2 hidden sm:block">Assinaturas encerradas</p>
+                    <p className="text-xs text-red-600 dark:text-red-400 mt-2 hidden sm:block">
+                      Churn: {data.churn_rate_pct}% dos pagantes
+                    </p>
                   </CardContent>
                 </Card>
               </div>
