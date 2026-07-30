@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { AdminCustomersTable } from '@/components/admin/AdminCustomersTable';
 import { AdminAuditTable } from '@/components/admin/AdminAuditTable';
+import { AdminRevenueChart } from '@/components/admin/AdminRevenueChart';
 
 interface OverviewStats {
   total_users: number;
@@ -366,6 +367,8 @@ const AdminDashboard: React.FC = () => {
                   </CardContent>
                 </Card>
               </div>
+
+              <AdminRevenueChart />
 
               <Card className="bg-card border-border">
                 <CardHeader>
