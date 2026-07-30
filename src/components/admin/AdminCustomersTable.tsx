@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
+import { AdminCustomerDetailModal } from './AdminCustomerDetailModal';
 
 interface CustomerRow {
   user_id: string;
@@ -43,6 +44,7 @@ export const AdminCustomersTable: React.FC = () => {
   const [page, setPage] = useState(0);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -171,7 +173,11 @@ export const AdminCustomersTable: React.FC = () => {
           </TableHeader>
           <TableBody>
             {(data ?? []).map((row) => (
-              <TableRow key={row.user_id}>
+              <TableRow
+                key={row.user_id}
+                className="cursor-pointer"
+                onClick={() => setSelectedUserId(row.user_id)}
+              >
                 <TableCell className="font-medium">{row.email}</TableCell>
                 <TableCell>{row.plan_type ? (PLAN_LABELS[row.plan_type] ?? row.plan_type) : '—'}</TableCell>
                 <TableCell>
@@ -217,6 +223,11 @@ export const AdminCustomersTable: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <AdminCustomerDetailModal
+        userId={selectedUserId}
+        onOpenChange={(open) => !open && setSelectedUserId(null)}
+      />
     </div>
   );
 };
