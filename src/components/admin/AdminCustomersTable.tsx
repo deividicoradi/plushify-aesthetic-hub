@@ -21,8 +21,18 @@ interface CustomerRow {
   expires_at: string | null;
   trial_ends_at: string | null;
   signed_up_at: string;
+  last_sign_in_at: string | null;
   total_count: number;
 }
+
+const RISK_THRESHOLD_DAYS = 14;
+
+const isAtRisk = (row: CustomerRow) => {
+  if (row.status !== 'active' || row.plan_type === 'trial' || !row.plan_type) return false;
+  if (!row.last_sign_in_at) return true;
+  const daysSince = (Date.now() - new Date(row.last_sign_in_at).getTime()) / 86_400_000;
+  return daysSince > RISK_THRESHOLD_DAYS;
+};
 
 const PLAN_LABELS: Record<string, string> = {
   trial: 'Trial',
@@ -168,7 +178,7 @@ export const AdminCustomersTable: React.FC = () => {
               <TableHead>Status</TableHead>
               <TableHead>Método</TableHead>
               <TableHead>Cadastro</TableHead>
-              <TableHead>Expira em</TableHead>
+              <TableHead>Último acesso</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -188,7 +198,12 @@ export const AdminCustomersTable: React.FC = () => {
                   {new Date(row.signed_up_at).toLocaleDateString('pt-BR')}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {row.expires_at ? new Date(row.expires_at).toLocaleDateString('pt-BR') : '—'}
+                  <div className="flex items-center gap-1.5">
+                    <span>{row.last_sign_in_at ? new Date(row.last_sign_in_at).toLocaleDateString('pt-BR') : 'Nunca'}</span>
+                    {isAtRisk(row) && (
+                      <Badge variant="destructive" className="text-[10px]">Risco</Badge>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

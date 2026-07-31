@@ -96,6 +96,15 @@ const AdminDashboard: React.FC = () => {
     enabled: openCard !== null || selectedPlan !== null,
   });
 
+  const { data: engagementRisk } = useQuery({
+    queryKey: ['admin-engagement-risk'],
+    queryFn: async (): Promise<{ at_risk_count: number; threshold_days: number }> => {
+      const { data, error } = await supabase.rpc('admin_get_engagement_risk');
+      if (error) throw error;
+      return data as unknown as { at_risk_count: number; threshold_days: number };
+    },
+  });
+
   const userRow = (row: UserRow) => (
     <div key={row.user_id} className="flex items-center justify-between border-b border-border/50 pb-1.5">
       <p className="text-sm font-medium truncate">{row.email}</p>
@@ -377,6 +386,21 @@ const AdminDashboard: React.FC = () => {
               </div>
 
               <AdminRevenueChart />
+
+              {!!engagementRisk && engagementRisk.at_risk_count > 0 && (
+                <Card className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800">
+                  <CardContent className="py-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                        {engagementRisk.at_risk_count} cliente{engagementRisk.at_risk_count > 1 ? 's' : ''} pagante{engagementRisk.at_risk_count > 1 ? 's' : ''} sem acessar o sistema há mais de {engagementRisk.threshold_days} dias
+                      </p>
+                      <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                        Risco de churn — veja o selo "Risco" na aba Clientes.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card className="bg-card border-border">
                 <CardHeader>
