@@ -159,6 +159,27 @@ export type Database = {
         }
         Relationships: []
       }
+      authorization_password_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          success: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          success: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          success?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       authorization_passwords: {
         Row: {
           created_at: string
