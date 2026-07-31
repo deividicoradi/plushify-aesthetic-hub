@@ -5,14 +5,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 const LOVABLE_CLOUD_URL = 'https://iqpldxwwvnlloefqfhoo.supabase.co';
-const LOVABLE_CLOUD_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxcGxkeHd3dm5sbG9lZnFmaG9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzE0NjcsImV4cCI6MjA5NjUwNzQ2N30.CC7iWCl_8tp0K_2lZxRvDTLjhYvn85Tn2WYLzOFS3qs';
 
 const backendUrl = process.env.VITE_SUPABASE_URL || LOVABLE_CLOUD_URL;
-const backendAnonKey =
-  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.VITE_SUPABASE_ANON_KEY ||
-  LOVABLE_CLOUD_ANON_KEY;
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -116,8 +110,6 @@ export default defineConfig(({ mode }) => ({
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || 'dev'),
     __BUILD_ID__: JSON.stringify(`${Date.now()}`),
     'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(backendUrl),
-    'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(backendAnonKey),
-    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(backendAnonKey),
     'process.env.NODE_ENV': JSON.stringify(mode),
   },
   
