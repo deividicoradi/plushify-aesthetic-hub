@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_actions_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          reason: string | null
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          reason?: string | null
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          reason?: string | null
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           appointment_date: string
@@ -1999,14 +2029,57 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_extend_trial: {
+        Args: { p_days: number; p_reason?: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_force_cancel_subscription: {
+        Args: { p_reason: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_get_customer_detail: { Args: { p_user_id: string }; Returns: Json }
+      admin_get_engagement_risk: { Args: never; Returns: Json }
       admin_get_overview_details: { Args: never; Returns: Json }
       admin_get_overview_stats: { Args: never; Returns: Json }
-      admin_list_customers: {
+      admin_get_pending_issues: { Args: { p_limit?: number }; Returns: Json }
+      admin_get_revenue_series: {
+        Args: { p_months?: number }
+        Returns: {
+          cancellations: number
+          month_start: string
+          mrr_cents: number
+          new_signups: number
+        }[]
+      }
+      admin_list_actions_log: {
         Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          action: string
+          admin_email: string
+          created_at: string
+          details: Json
+          id: string
+          reason: string
+          target_email: string
+          total_count: number
+        }[]
+      }
+      admin_list_admins: {
+        Args: never
+        Returns: {
+          email: string
+          granted_at: string
+          granted_by_email: string
+          user_id: string
+        }[]
+      }
+      admin_list_customers: {
+        Args: { p_limit?: number; p_offset?: number; p_search?: string }
         Returns: {
           billing_interval: string
           email: string
           expires_at: string
+          last_sign_in_at: string
           payment_kind: string
           plan_type: string
           signed_up_at: string
@@ -2031,6 +2104,8 @@ export type Database = {
           total_count: number
         }[]
       }
+      admin_promote_to_admin: { Args: { p_email: string }; Returns: Json }
+      admin_revoke_admin: { Args: { p_user_id: string }; Returns: Json }
       calculate_upgrade_quote: {
         Args: {
           p_new_billing_interval: string
