@@ -10,8 +10,7 @@ export interface RuntimeEnv {
 // Resolve from VITE_* at build time, with a safe fallback to the current
 // Lovable Cloud project so the app keeps booting even if env injection fails.
 const FALLBACK_URL = 'https://iqpldxwwvnlloefqfhoo.supabase.co';
-const FALLBACK_ANON =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxcGxkeHd3dm5sbG9lZnFmaG9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzE0NjcsImV4cCI6MjA5NjUwNzQ2N30.CC7iWCl_8tp0K_2lZxRvDTLjhYvn85Tn2WYLzOFS3qs';
+const FALLBACK_ANON = 'sb_publishable_T1J2bo7KItjVZ-5_iea4uQ_ZdvG_43P';
 
 const viteEnv = (typeof import.meta !== 'undefined' ? (import.meta as any)?.env : undefined) ?? {};
 const SUPABASE_CONFIG = {
