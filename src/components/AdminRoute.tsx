@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { MfaGate } from '@/components/MfaGate';
 
 // Guarda separada de ProtectedRoute de propósito — não deve herdar nenhuma
 // lógica de plano/trial (admin não é "mais um plano", é uma dimensão
@@ -27,5 +28,5 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
     return <Navigate to="/dashboard" replace />;
   }
 
-  return <>{children}</>;
+  return <MfaGate>{children}</MfaGate>;
 }

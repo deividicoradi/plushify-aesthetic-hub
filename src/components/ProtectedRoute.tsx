@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
+import { MfaGate } from '@/components/MfaGate';
 
 // Rotas acessíveis mesmo com o trial vencido — precisa conseguir assinar um
 // plano, pedir ajuda, ver/editar a conta e sair, mesmo sem acesso ao app.
@@ -108,5 +109,5 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     console.log('SECURITY: Trial user accessing paid features with limitations');
   }
 
-  return <>{children}</>;
+  return <MfaGate>{children}</MfaGate>;
 }
