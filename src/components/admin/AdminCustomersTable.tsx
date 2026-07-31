@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,11 +43,23 @@ const PLAN_LABELS: Record<string, string> = {
 
 const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   active: 'default',
+  trial_active: 'default',
   cancelled: 'secondary',
   refunded: 'destructive',
   disputed: 'destructive',
   sem_plano: 'outline',
 };
+
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Ativo',
+  trial_active: 'Trial ativo',
+  cancelled: 'Cancelado',
+  refunded: 'Reembolsado',
+  disputed: 'Contestado',
+  sem_plano: 'Sem plano',
+};
+
+const ALL_VALUE = 'all';
 
 const PAGE_SIZE = 25;
 
@@ -54,6 +67,8 @@ export const AdminCustomersTable: React.FC = () => {
   const [page, setPage] = useState(0);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
+  const [planFilter, setPlanFilter] = useState(ALL_VALUE);
+  const [statusFilter, setStatusFilter] = useState(ALL_VALUE);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,12 +80,14 @@ export const AdminCustomersTable: React.FC = () => {
   }, [searchInput]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['admin-customers', page, search],
+    queryKey: ['admin-customers', page, search, planFilter, statusFilter],
     queryFn: async (): Promise<CustomerRow[]> => {
       const { data, error } = await supabase.rpc('admin_list_customers', {
         p_limit: PAGE_SIZE,
         p_offset: page * PAGE_SIZE,
         p_search: search || null,
+        p_plan_type: planFilter === ALL_VALUE ? null : planFilter,
+        p_status: statusFilter === ALL_VALUE ? null : statusFilter,
       });
       if (error) throw error;
       return (data ?? []) as CustomerRow[];
@@ -150,23 +167,61 @@ export const AdminCustomersTable: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Buscar por e-mail..."
-              className="pl-8 pr-8"
-            />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={() => setSearchInput('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Buscar por e-mail..."
+                className="pl-8 pr-8"
+              />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={() => setSearchInput('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            <Select
+              value={planFilter}
+              onValueChange={(v) => {
+                setPlanFilter(v);
+                setPage(0);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[160px]">
+                <SelectValue placeholder="Plano" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_VALUE}>Todos os planos</SelectItem>
+                {Object.entries(PLAN_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => {
+                setStatusFilter(v);
+                setPage(0);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[160px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_VALUE}>Todos os status</SelectItem>
+                {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="rounded-md border border-border overflow-x-auto">
@@ -191,7 +246,7 @@ export const AdminCustomersTable: React.FC = () => {
                 <TableCell className="font-medium">{row.email}</TableCell>
                 <TableCell>{row.plan_type ? (PLAN_LABELS[row.plan_type] ?? row.plan_type) : '—'}</TableCell>
                 <TableCell>
-                  <Badge variant={STATUS_VARIANT[row.status] ?? 'outline'}>{row.status}</Badge>
+                  <Badge variant={STATUS_VARIANT[row.status] ?? 'outline'}>{STATUS_LABELS[row.status] ?? row.status}</Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">{row.payment_kind ?? '—'}</TableCell>
                 <TableCell className="text-muted-foreground">
