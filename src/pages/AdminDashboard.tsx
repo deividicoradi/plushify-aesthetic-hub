@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { DetailsListModal, DetailsSection } from '@/components/common/DetailsListModal';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { AdminCustomersTable } from '@/components/admin/AdminCustomersTable';
 import { AdminAuditTable } from '@/components/admin/AdminAuditTable';
 import { AdminRevenueChart } from '@/components/admin/AdminRevenueChart';
@@ -73,7 +72,6 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const AdminDashboard: React.FC = () => {
-  const { user } = useAuth();
   const [openCard, setOpenCard] = useState<OverviewCardKey | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
@@ -247,7 +245,7 @@ const AdminDashboard: React.FC = () => {
   return (
     <ResponsiveLayout
       title="Painel Administrativo"
-      subtitle={`Visível apenas para ${user?.email ?? 'administradores'} — nenhum cliente tem acesso a esta página.`}
+      subtitle="Acesso restrito a administradores."
       icon={ShieldAlert}
     >
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
