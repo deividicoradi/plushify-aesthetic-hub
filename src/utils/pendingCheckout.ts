@@ -3,10 +3,12 @@
 
 export type PendingPlanType = 'trial' | 'professional' | 'premium';
 export type PendingBillingPeriod = 'monthly' | 'annual';
+export type PendingPaymentMethod = 'card' | 'pix';
 
 export interface PendingCheckout {
   planType: PendingPlanType;
   billingPeriod: PendingBillingPeriod;
+  method: PendingPaymentMethod;
   createdAt: number;
 }
 
@@ -19,11 +21,13 @@ const isBrowser = () => typeof window !== 'undefined' && !!window.sessionStorage
 export function setPendingCheckout(
   planType: PendingPlanType,
   billingPeriod: PendingBillingPeriod,
+  method: PendingPaymentMethod = 'card',
 ): void {
   if (!isBrowser()) return;
   const payload: PendingCheckout = {
     planType,
     billingPeriod,
+    method,
     createdAt: Date.now(),
   };
   try {
@@ -49,12 +53,17 @@ export function getPendingCheckout(): PendingCheckout | null {
     }
     const validPlans: PendingPlanType[] = ['trial', 'professional', 'premium'];
     const validPeriods: PendingBillingPeriod[] = ['monthly', 'annual'];
+    const validMethods: PendingPaymentMethod[] = ['card', 'pix'];
     if (
       !validPlans.includes(parsed.planType) ||
       !validPeriods.includes(parsed.billingPeriod)
     ) {
       clearPendingCheckout();
       return null;
+    }
+    // Retrocompatível com sessões antigas gravadas antes do campo `method` existir.
+    if (!validMethods.includes(parsed.method)) {
+      parsed.method = 'card';
     }
     return parsed;
   } catch {

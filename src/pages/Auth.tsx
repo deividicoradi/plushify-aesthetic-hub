@@ -17,6 +17,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { getPendingCheckout, clearPendingCheckout } from '@/utils/pendingCheckout';
 import { capturePendingReferralFromUrl, getPendingReferralCode, clearPendingReferral } from '@/utils/referral';
 import { useAbacateCheckout } from '@/hooks/useAbacateCheckout';
+import { usePixCheckout } from '@/hooks/usePixCheckout';
 
 // Deve bater com a data de "Última atualização" exibida em /terms e /privacy.
 // Atualizar aqui sempre que o conteúdo dessas páginas mudar de forma
@@ -43,6 +44,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { createCheckout } = useAbacateCheckout();
+  const { createPixCheckout } = usePixCheckout();
   const resumingRef = useRef(false);
 
   useEffect(() => {
@@ -76,7 +78,9 @@ const Auth = () => {
               navigate('/dashboard', { replace: true });
               return;
             }
-            const ok = await createCheckout(pending.planType, pending.billingPeriod);
+            const ok = pending.method === 'pix'
+              ? await createPixCheckout(pending.planType, pending.billingPeriod)
+              : await createCheckout(pending.planType, pending.billingPeriod);
             if (ok) {
               clearPendingCheckout();
             } else {
@@ -92,7 +96,7 @@ const Auth = () => {
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [user, navigate, createCheckout]);
+  }, [user, navigate, createCheckout, createPixCheckout]);
 
   // Validações de formulário
   const validateEmail = (email: string) => {

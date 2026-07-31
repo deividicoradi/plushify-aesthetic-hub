@@ -72,6 +72,7 @@ export const PlansPage: React.FC = () => {
       setPendingCheckout(
         planId as 'trial' | 'professional' | 'premium',
         billingPeriod,
+        'card',
       );
       toast({
         title: 'Faça login para continuar',
@@ -151,7 +152,7 @@ export const PlansPage: React.FC = () => {
   const handlePixSelection = async (planId: string) => {
     if (!user) {
       const billingPeriod = isAnnual ? 'annual' : 'monthly';
-      setPendingCheckout(planId as 'trial' | 'professional' | 'premium', billingPeriod);
+      setPendingCheckout(planId as 'trial' | 'professional' | 'premium', billingPeriod, 'pix');
       toast({
         title: 'Faça login para continuar',
         description: 'Após entrar, seu plano será retomado automaticamente.',
@@ -200,6 +201,8 @@ export const PlansPage: React.FC = () => {
             variant: 'destructive',
           });
         }
+      } else if (pending.method === 'pix') {
+        await createPixCheckout(pending.planType, pending.billingPeriod);
       } else {
         await createCheckout(pending.planType, pending.billingPeriod);
       }

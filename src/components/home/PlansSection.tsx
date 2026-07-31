@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, Crown, Zap, Clock } from 'lucide-react';
+import { ArrowRight, Check, Crown, Zap, Clock, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { setPendingCheckout, type PendingPlanType } from '@/utils/pendingCheckout';
 import { useToast } from '@/hooks/use-toast';
 import { useAbacateCheckout } from '@/hooks/useAbacateCheckout';
+import { usePixCheckout } from '@/hooks/usePixCheckout';
 import { supabase } from '@/integrations/supabase/client';
 
 export const PlansSection = () => {
@@ -18,6 +19,7 @@ export const PlansSection = () => {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { createCheckout, loading: checkoutLoading } = useAbacateCheckout();
+  const { createPixCheckout, loading: pixLoading } = usePixCheckout();
 
   // Usar dados centralizados dos planos
   const plansData = createPlansData('none'); // Não há plano atual na home
@@ -72,6 +74,27 @@ export const PlansSection = () => {
     }
 
     await createCheckout(planId as 'professional' | 'premium', billingPeriod);
+  };
+
+  const handlePixClick = async (planId: string) => {
+    if (planId !== 'professional' && planId !== 'premium') return;
+    const pixPlanId = planId as 'professional' | 'premium';
+
+    const billingPeriod = isAnnual ? 'annual' : 'monthly';
+
+    if (authLoading) return;
+
+    if (!user) {
+      setPendingCheckout(pixPlanId, billingPeriod, 'pix');
+      toast({
+        title: 'Crie sua conta para continuar',
+        description: 'Após entrar, seu plano será retomado automaticamente.',
+      });
+      navigate('/auth?tab=signup&redirect=checkout');
+      return;
+    }
+
+    await createPixCheckout(pixPlanId, billingPeriod);
   };
 
   return (
@@ -189,18 +212,30 @@ export const PlansSection = () => {
                     </ul>
                   </div>
 
-                  <Button 
+                  <Button
                     className={`w-full h-12 text-base font-semibold transition-all duration-300 ${
-                      plan.popular 
-                        ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg' 
+                      plan.popular
+                        ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg'
                         : 'bg-primary hover:bg-primary/90 text-primary-foreground'
                     }`}
-                    disabled={authLoading || checkoutLoading}
+                    disabled={authLoading || checkoutLoading || pixLoading}
                     onClick={() => handlePlanClick(plan.id)}
                   >
                     <span>{plan.buttonText}</span>
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
+
+                  {(plan.id === 'professional' || plan.id === 'premium') && (
+                    <Button
+                      variant="outline"
+                      className="w-full h-11 text-sm font-medium"
+                      disabled={authLoading || checkoutLoading || pixLoading}
+                      onClick={() => handlePixClick(plan.id)}
+                    >
+                      <QrCode className="w-4 h-4 mr-2" />
+                      Pagar com PIX
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             );
