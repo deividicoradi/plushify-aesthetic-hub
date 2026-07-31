@@ -7,16 +7,16 @@ export interface RuntimeEnv {
   MODE: string;
 }
 
-// Resolve from VITE_* at build time, with a safe fallback to the current
-// Lovable Cloud project so the app keeps booting even if env injection fails.
+// Resolve the URL at build time. The publishable key is pinned to the current
+// Lovable Cloud project so a stale legacy JWT injected by the build cannot win.
 const FALLBACK_URL = 'https://iqpldxwwvnlloefqfhoo.supabase.co';
-const FALLBACK_ANON =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxcGxkeHd3dm5sbG9lZnFmaG9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzE0NjcsImV4cCI6MjA5NjUwNzQ2N30.CC7iWCl_8tp0K_2lZxRvDTLjhYvn85Tn2WYLzOFS3qs';
+// Publishable (safe for the browser) key — legacy JWT anon keys are disabled.
+const FALLBACK_ANON = 'sb_publishable_T1J2bo7KItjVZ-5_iea4uQ_ZdvG_43P';
 
 const viteEnv = (typeof import.meta !== 'undefined' ? (import.meta as any)?.env : undefined) ?? {};
 const SUPABASE_CONFIG = {
   url: viteEnv.VITE_SUPABASE_URL || FALLBACK_URL,
-  anonKey: viteEnv.VITE_SUPABASE_PUBLISHABLE_KEY || viteEnv.VITE_SUPABASE_ANON_KEY || FALLBACK_ANON,
+  anonKey: FALLBACK_ANON,
 };
 
 const merged: RuntimeEnv = {
