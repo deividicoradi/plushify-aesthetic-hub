@@ -27,6 +27,14 @@ interface AdminRow {
   granted_at: string;
 }
 
+const maskEmail = (email: string | null): string => {
+  if (!email) return '—';
+  const [local, domain] = email.split('@');
+  if (!domain) return email;
+  const visible = local.slice(0, 2);
+  return `${visible}${'*'.repeat(Math.max(local.length - visible.length, 3))}@${domain}`;
+};
+
 export const AdminManageAdmins: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -127,8 +135,8 @@ export const AdminManageAdmins: React.FC = () => {
                   const isSelf = row.user_id === user?.id;
                   return (
                     <TableRow key={row.user_id}>
-                      <TableCell className="font-medium">{row.email}</TableCell>
-                      <TableCell className="text-muted-foreground">{row.granted_by_email ?? '—'}</TableCell>
+                      <TableCell className="font-medium">{maskEmail(row.email)}</TableCell>
+                      <TableCell className="text-muted-foreground">{maskEmail(row.granted_by_email)}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {new Date(row.granted_at).toLocaleDateString('pt-BR')}
                       </TableCell>
