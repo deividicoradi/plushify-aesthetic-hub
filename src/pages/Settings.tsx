@@ -11,6 +11,7 @@ import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { FeatureGuard } from '@/components/FeatureGuard';
 import { TeamManagement as TeamManagementComponent } from '@/components/premium/TeamManagement';
 import { ReferralPanel } from '@/components/settings/ReferralPanel';
+import { MfaSection } from '@/components/settings/MfaSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
@@ -412,6 +413,10 @@ const Settings = () => {
                       </p>
                     </div>
                   )}
+                </div>
+
+                <div className="border-t pt-6">
+                  <MfaSection />
                 </div>
               </CardContent>
             </Card>

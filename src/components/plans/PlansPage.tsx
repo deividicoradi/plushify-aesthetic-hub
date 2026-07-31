@@ -19,16 +19,22 @@ import { TestimonialsSection } from './TestimonialsSection';
 import { FAQSection } from './FAQSection';
 import { CTASection } from './CTASection';
 import { createPlansData } from '@/utils/plans/plansData';
+import { usePixCheckout } from '@/hooks/usePixCheckout';
+import { UpgradeQuoteDialog } from './UpgradeQuoteDialog';
 import Navbar from '../Navbar';
 import Footer from '../Footer';
 
+const PLAN_RANK: Record<string, number> = { trial: 0, professional: 1, premium: 2 };
+
 export const PlansPage: React.FC = () => {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [upgradeDialog, setUpgradeDialog] = useState<{ planType: 'professional' | 'premium'; billingInterval: 'month' | 'year' } | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { currentPlan, subscription, loading, checkSubscriptionStatus } = useSubscription();
   const { createCheckout, openCustomerPortal, loading: checkoutLoading } = useAbacateCheckout();
-  const isLoading = (_planKey: string) => checkoutLoading;
+  const { createPixCheckout, loading: pixLoading } = usePixCheckout();
+  const isLoading = (_planKey: string) => checkoutLoading || pixLoading;
   const { toast } = useToast();
 
   // Check for success/cancel parameters in URL
@@ -112,12 +118,59 @@ export const PlansPage: React.FC = () => {
     
     if (planId === 'professional' || planId === 'premium') {
       const billingPeriod = isAnnual ? 'annual' : 'monthly';
+      const billingInterval = isAnnual ? 'year' : 'month';
+
+      if (isRealUpgrade(planId, billingInterval)) {
+        setUpgradeDialog({ planType: planId as 'professional' | 'premium', billingInterval });
+        return;
+      }
+
       await createCheckout(planId as 'professional' | 'premium', billingPeriod);
     }
   };
 
   const handleManageSubscription = async () => {
     await openCustomerPortal();
+  };
+
+  // Upgrade de plano pago existente (ex: Profissional -> Premium, mesmo
+  // ciclo) usa crédito proporcional em vez de cobrar o valor cheio de novo —
+  // ver usePlanUpgrade/UpgradeQuoteDialog. Só se aplica quando o plano atual
+  // já é pago, o novo é realmente "maior", e o ciclo de cobrança é o mesmo
+  // (trocar mensal<->anual não é suportado ainda). Compartilhado pelos
+  // botões de cartão e PIX — o checkout de upgrade já oferece os dois
+  // métodos juntos na mesma tela hospedada da AbacatePay.
+  const isRealUpgrade = (planId: string, billingInterval: 'month' | 'year'): boolean => {
+    const isPaidPlanActive = subscription?.status === 'active'
+      && (subscription.plan_type === 'professional' || subscription.plan_type === 'premium');
+    return !!isPaidPlanActive
+      && PLAN_RANK[planId] > PLAN_RANK[subscription!.plan_type]
+      && subscription!.billing_interval === billingInterval;
+  };
+
+  const handlePixSelection = async (planId: string) => {
+    if (!user) {
+      const billingPeriod = isAnnual ? 'annual' : 'monthly';
+      setPendingCheckout(planId as 'trial' | 'professional' | 'premium', billingPeriod);
+      toast({
+        title: 'Faça login para continuar',
+        description: 'Após entrar, seu plano será retomado automaticamente.',
+      });
+      navigate('/auth?tab=signup&redirect=checkout');
+      return;
+    }
+    if (planId !== 'professional' && planId !== 'premium') return;
+    const billingPeriod = isAnnual ? 'annual' : 'monthly';
+    const billingInterval = isAnnual ? 'year' : 'month';
+
+    // Mesmo upgrade com crédito do botão de cartão — o checkout gerado por
+    // abacate-create-upgrade-checkout já inclui PIX como opção de pagamento.
+    if (isRealUpgrade(planId, billingInterval)) {
+      setUpgradeDialog({ planType: planId as 'professional' | 'premium', billingInterval });
+      return;
+    }
+
+    await createPixCheckout(planId, billingPeriod);
   };
 
   // Retomar checkout pendente após autenticação
@@ -181,8 +234,18 @@ export const PlansPage: React.FC = () => {
         plans={plans}
         isAnnual={isAnnual}
         onPlanSelection={handlePlanSelection}
+        onPixSelection={handlePixSelection}
         isLoading={isLoading}
       />
+
+      {upgradeDialog && (
+        <UpgradeQuoteDialog
+          open={!!upgradeDialog}
+          onOpenChange={(open) => !open && setUpgradeDialog(null)}
+          newPlanType={upgradeDialog.planType}
+          newBillingInterval={upgradeDialog.billingInterval}
+        />
+      )}
 
       {/* FAQ Section */}
       <div className="pt-8">

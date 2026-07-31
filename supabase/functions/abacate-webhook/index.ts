@@ -75,14 +75,14 @@ const log = (step: string, details?: unknown) => {
   console.log(`[ABACATE-WEBHOOK] ${step}${suffix}`)
 }
 
-const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed', 'checkout.completed'])
+const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed', 'checkout.completed', 'transparent.completed'])
 
 // CONFIRMADO via https://docs.abacatepay.com/pages/webhooks (2026-07-23): a AbacatePay
 // dispara eventos de reembolso (`*.refunded`) e disputa/chargeback (`*.disputed`) — antes
 // desta mudança, nenhum dos dois revogava o plano: um estorno ou chargeback deixava o
 // usuário com acesso pago para sempre, mesmo sem o pagamento estar mais confirmado.
-// `transparent.*` cobre o checkout transparente (Pix/Boleto avulso via /transparents/create),
-// não usado hoje pelo Plushify, mas tratado aqui para não deixar a lacuna se for adotado.
+// `transparent.*` cobre o checkout transparente (Pix avulso via /transparents/create),
+// usado por abacate-create-pix-charge desde 2026-07-27.
 const REVOCATION_EVENTS: Record<string, 'cancelled' | 'refunded' | 'disputed'> = {
   'subscription.cancelled': 'cancelled',
   'checkout.refunded': 'refunded',
@@ -159,11 +159,22 @@ Deno.serve(async (req) => {
     // também usa este objeto. Mantemos os fallbacks antigos por segurança.
     const checkoutObj = (dataRoot.checkout ?? {}) as Record<string, unknown>
 
+    // Checkout Transparente (PIX avulso via /v2/transparents/create, usado por
+    // abacate-create-pix-charge) — formato do payload de webhook não documentado
+    // pela AbacatePay (confirmado em 2026-07-27, doc só lista os nomes dos eventos,
+    // sem exemplo de "data"). A resposta de criação do próprio /transparents/create
+    // é FLAT (id/amount/status/metadata direto em data, sem container), então
+    // tentamos primeiro esse formato (dataRoot em si) e, por segurança, também os
+    // nomes mais prováveis de um container aninhado, caso a AbacatePay use um.
+    const transparentObj = (
+      (dataRoot.pixQrCode ?? dataRoot.transparent ?? dataRoot.charge ?? dataRoot.pix ?? {}) as Record<string, unknown>
+    )
+
     const revocationStatus = REVOCATION_EVENTS[eventType]
     if (revocationStatus) {
-      const cancelExternalId = (checkoutObj.externalId ?? sub.externalId ?? dataRoot.externalId ?? null) as string | null
+      const cancelExternalId = (checkoutObj.externalId ?? sub.externalId ?? transparentObj.externalId ?? dataRoot.externalId ?? null) as string | null
       const cancelParsed = parseExternalId(cancelExternalId)
-      const cancelMetadata = (checkoutObj.metadata ?? sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
+      const cancelMetadata = (checkoutObj.metadata ?? sub.metadata ?? transparentObj.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
       const cancelUserId = cancelParsed?.userId ?? (cancelMetadata.user_id ? String(cancelMetadata.user_id) : null)
       const cancelSubscriptionId = sub.id ? String(sub.id) : null
       // checkout.refunded/disputed (plano anual) não têm abacate_subscription_id —
@@ -230,12 +241,13 @@ Deno.serve(async (req) => {
       })
     }
 
-    // externalId e metadata vêm em data.checkout (ver checkoutObj acima).
-    const externalId = (checkoutObj.externalId ?? sub.externalId ?? dataRoot.externalId ?? null) as string | null
+    // externalId e metadata vêm em data.checkout (ver checkoutObj acima) para
+    // checkout.*/subscription.*; para transparent.* (PIX avulso), ver transparentObj.
+    const externalId = (checkoutObj.externalId ?? sub.externalId ?? transparentObj.externalId ?? dataRoot.externalId ?? null) as string | null
     let parsed = parseExternalId(externalId)
 
     if (!parsed) {
-      const metadata = (checkoutObj.metadata ?? sub.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
+      const metadata = (checkoutObj.metadata ?? sub.metadata ?? transparentObj.metadata ?? dataRoot.metadata ?? {}) as Record<string, unknown>
       const userId = metadata.user_id ? String(metadata.user_id) : null
       const planType = metadata.plan_type ? String(metadata.plan_type) : null
       const billingPeriod = metadata.billing_period ? String(metadata.billing_period) : 'monthly'
@@ -278,8 +290,13 @@ Deno.serve(async (req) => {
     const customerIdRaw = customerObj.id ?? checkoutObj.customerId ?? sub.customerId ?? null
     const abacateCustomerId = customerIdRaw ? String(customerIdRaw) : null
     // CONFIRMADO via payload real: id do bill (bill_...) vem em data.checkout.id
-    // em ambos os eventos (subscription.completed e checkout.completed).
-    const abacateCheckoutId = checkoutObj.id ? String(checkoutObj.id) : null
+    // em ambos os eventos (subscription.completed e checkout.completed). Para
+    // transparent.completed, guardamos o id da cobrança PIX (pix_char_...) em
+    // vez disso — não confirmado o container real, mas dataRoot.id cobre o
+    // caso do payload vir flat (mesmo formato da resposta de /transparents/create).
+    const abacateCheckoutId = (checkoutObj.id ?? transparentObj.id ?? (eventType.startsWith('transparent.') ? dataRoot.id : null))
+      ? String(checkoutObj.id ?? transparentObj.id ?? dataRoot.id)
+      : null
 
     // AJUSTAR: nome real do campo de próxima cobrança de assinatura mensal
     // não confirmado na documentação — tentamos as variações mais prováveis.
@@ -313,8 +330,14 @@ Deno.serve(async (req) => {
     // o método vem em checkout.methods (array, ex.: ["CARD"] ou ["PIX"]).
     // installmentsCount ainda não confirmado (só vimos pagamento à vista em
     // teste); mantemos leitura best-effort.
+    // Checa checkoutObj.methods sempre que existir (não só pra plano anual) —
+    // abacate-create-pix-charge desde 2026-07-27 usa /v2/checkouts/create com
+    // produtos "-onetime" (sem ciclo) pra oferecer PIX tanto no plano mensal
+    // quanto anual, então um checkout.completed com methods:["PIX"] pode vir
+    // com billingPeriod='monthly' — gatear em isAnnualCheckout deixava esses
+    // casos caírem no default 'recurring_card' incorretamente.
     let paymentKind: 'recurring_card' | 'pix' | 'installments' = 'recurring_card'
-    if (isAnnualCheckout) {
+    if (checkoutObj.id) {
       const installmentsCount = Number(checkoutObj.installmentsCount ?? 0)
       const methods = Array.isArray(checkoutObj.methods) ? (checkoutObj.methods as unknown[]) : []
       const usedPix = methods.some((m) => String(m).toUpperCase() === 'PIX')
@@ -331,6 +354,17 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
+    // Preço de CATÁLOGO do plano/ciclo sendo ativado — não o valor realmente
+    // cobrado nesta transação (checkoutObj.paidAmount), que em um upgrade já
+    // vem com desconto do crédito proporcional aplicado. Guardar o valor de
+    // catálogo aqui garante que um upgrade FUTURO calcule o crédito sobre o
+    // preço cheio do plano atual, nunca "desconto sobre desconto".
+    const CATALOG_PRICES: Record<string, Record<string, number>> = {
+      professional: { month: 8900, year: 89000 },
+      premium: { month: 17900, year: 179000 },
+    }
+    const planAmountPaid = CATALOG_PRICES[planType]?.[billingInterval] ?? null
+
     const { data: subscriptionId, error } = await admin.rpc('start_subscription', {
       p_user_id: userId,
       p_plan_code: planType,
@@ -341,6 +375,7 @@ Deno.serve(async (req) => {
       p_abacate_customer_id: abacateCustomerId,
       p_abacate_checkout_id: abacateCheckoutId,
       p_current_period_end: currentPeriodEnd,
+      p_plan_amount_paid: planAmountPaid,
     })
 
     if (error) {
@@ -353,6 +388,68 @@ Deno.serve(async (req) => {
     }
 
     log('subscription activated', { userId, planType, billingInterval, paymentKind, subscriptionId })
+
+    // E-mail de confirmação de upgrade — só quando abacate-create-upgrade-checkout
+    // marcou is_upgrade:"true" no metadata (não dispara pra assinatura nova/renovação
+    // normal, só pra troca de plano com crédito). Falha de envio nunca derruba a
+    // ativação do plano em si (já concluída acima) — só loga o erro.
+    const upgradeMetadata = (checkoutObj.metadata ?? {}) as Record<string, unknown>
+    if (upgradeMetadata.is_upgrade === 'true') {
+      try {
+        const recipientEmail = upgradeMetadata.user_email ? String(upgradeMetadata.user_email) : null
+        const previousPlanType = upgradeMetadata.previous_plan_type ? String(upgradeMetadata.previous_plan_type) : null
+        const creditCents = upgradeMetadata.credit_applied_cents ? Number(upgradeMetadata.credit_applied_cents) : 0
+        const chargedCents = Number(checkoutObj.paidAmount ?? checkoutObj.amount ?? 0)
+        const planLabels: Record<string, string> = { professional: 'Profissional', premium: 'Premium' }
+        const formatBRL = (cents: number) => (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+        if (recipientEmail) {
+          const subject = `Upgrade confirmado: seu plano agora é ${planLabels[planType] ?? planType}`
+          const html = `
+            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+              <h2>Upgrade confirmado! 🎉</h2>
+              <p>Seu plano na Plushify mudou de <strong>${planLabels[previousPlanType ?? ''] ?? previousPlanType}</strong> para <strong>${planLabels[planType] ?? planType}</strong>.</p>
+              <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                <tr><td style="padding: 8px 0; color: #666;">Crédito do plano anterior</td><td style="text-align: right;">− ${formatBRL(creditCents)}</td></tr>
+                <tr><td style="padding: 8px 0; color: #666; border-top: 1px solid #eee;">Valor cobrado hoje</td><td style="text-align: right; border-top: 1px solid #eee; font-weight: bold;">${formatBRL(chargedCents)}</td></tr>
+              </table>
+              ${checkoutObj.receiptUrl ? `<p><a href="${checkoutObj.receiptUrl}">Ver comprovante de pagamento</a></p>` : ''}
+              <p style="color: #999; font-size: 12px; margin-top: 24px;">Dúvidas? Responda este e-mail ou fale com plushify.suporte@gmail.com</p>
+            </div>
+          `
+          // API de e-mail da Lovable exige run_id (e-mails de auth) OU
+          // idempotency_key (e-mails de app com purpose=transactional) —
+          // confirmado via erro real em produção (2026-07-28): sem isso,
+          // TODA tentativa falha com 400 "Missing run_id or idempotency_key",
+          // esgota as 5 tentativas e a mensagem vai pra DLQ sem nunca ser
+          // enviada, mesmo o enqueue_email tendo retornado sucesso.
+          const upgradeMessageId = `upgrade-${abacateCheckoutId ?? crypto.randomUUID()}`
+          const { error: enqueueError } = await admin.rpc('enqueue_email', {
+            queue_name: 'transactional_emails',
+            payload: {
+              to: recipientEmail,
+              from: 'Plushify <naoresponda@notify.plushify.com.br>',
+              sender_domain: 'notify.plushify.com.br',
+              subject,
+              html,
+              text: `Seu plano mudou de ${previousPlanType} para ${planType}. Crédito aplicado: ${formatBRL(creditCents)}. Cobrado hoje: ${formatBRL(chargedCents)}.`,
+              purpose: 'transactional',
+              label: 'plan_upgrade_confirmation',
+              message_id: upgradeMessageId,
+              idempotency_key: upgradeMessageId,
+              queued_at: new Date().toISOString(),
+            },
+          })
+          if (enqueueError) {
+            log('WARN: falha ao enfileirar e-mail de confirmação de upgrade', enqueueError)
+          } else {
+            log('upgrade confirmation email enqueued', { recipientEmail })
+          }
+        }
+      } catch (emailErr) {
+        log('WARN: erro inesperado ao montar e-mail de upgrade', emailErr instanceof Error ? emailErr.message : String(emailErr))
+      }
+    }
 
     return new Response(JSON.stringify({ received: true, subscription_id: subscriptionId }), {
       status: 200,

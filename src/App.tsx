@@ -11,6 +11,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { AuthProvider } from "./contexts/AuthContext";
 import { StaffModeProvider } from "./contexts/StaffModeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import { SecurityProvider } from "./components/SecurityProvider";
 import { queryClient } from "@/lib/queryClient";
 import ScrollToTop from "./components/ScrollToTop";
@@ -21,6 +22,7 @@ import { RouteFallback } from "./components/layout/RouteFallback";
 // Lazy-loaded public/institutional pages (code-splitting) — só o layout
 // de rota (App.tsx) precisa carregar de cara; marketing/legal/auth pesam
 // no chunk de entrada sem benefício pra quem já está logado.
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Index = lazy(() => import("./pages/Index"));
 const Plans = lazy(() => import("./pages/Plans"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -208,6 +210,14 @@ const AppContent = () => {
           <ProtectedRoute>
             {Lazy(<PlansInternal />)}
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            {Lazy(<AdminDashboard />)}
+          </AdminRoute>
         }
       />
       <Route path="*" element={LazyPublic(<NotFound />)} />

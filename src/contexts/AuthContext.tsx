@@ -155,6 +155,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []); // Sem dependências - roda apenas uma vez
 
+  // Uma aba deixada aberta (ex: tela de "confirme seu e-mail") não fica
+  // sabendo sozinha que uma sessão foi criada em OUTRA aba (ex: ao clicar
+  // no link de confirmação, que abre em nova aba) — supabase-js não
+  // propaga isso automaticamente pra abas que ficaram ociosas. Ao voltar
+  // o foco pra essa aba, reconsulta a sessão real e atualiza o estado,
+  // fazendo o redirecionamento (ex: pro /dashboard) acontecer sozinho.
+  useEffect(() => {
+    const syncSessionOnFocus = async () => {
+      if (document.visibilityState !== 'visible') return;
+      const { data: { session: freshSession } } = await supabase.auth.getSession();
+      setSession((prev) => (prev?.access_token === freshSession?.access_token ? prev : freshSession));
+      setUser(freshSession?.user ?? null);
+    };
+
+    document.addEventListener('visibilitychange', syncSessionOnFocus);
+    window.addEventListener('focus', syncSessionOnFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', syncSessionOnFocus);
+      window.removeEventListener('focus', syncSessionOnFocus);
+    };
+  }, []);
+
   const signOut = useCallback(async () => {
     try {
       // 1. Limpar estado local primeiro (instantâneo)

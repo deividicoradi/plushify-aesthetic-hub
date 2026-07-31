@@ -10,7 +10,7 @@ import { cleanupConsoleLogsInProduction } from './utils/console-cleanup'
 import { validateEnvironment, checkProductionReadiness } from './utils/environmentNormalizer'
 import { initPerformanceMonitor } from './utils/performanceOptimizer'
 import { logger } from './utils/debugLogger'
-import { ensureFreshBundleBeforeBoot, initStaleBundleGuard, isRecoverableBootError, preRenderServiceWorkerSweep, recoverFromStaleBundle } from './utils/staleBundleGuard'
+import { ensureFreshBundleBeforeBoot, initBfcacheRecovery, initStaleBundleGuard, isRecoverableBootError, preRenderServiceWorkerSweep, recoverFromStaleBundle } from './utils/staleBundleGuard'
 import { installDomPatches, isDomMutationError } from './utils/domPatches'
 
 // Silenciar logs verbosos (log/debug/info) em produção o quanto antes,
@@ -23,6 +23,7 @@ cleanupConsoleLogsInProduction();
 installDomPatches();
 
 initStaleBundleGuard();
+initBfcacheRecovery();
 
 // Suprimir erros de WebSocket do ambiente de desenvolvimento Lovable
 if (import.meta.env.MODE === 'development') {

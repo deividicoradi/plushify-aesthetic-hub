@@ -7,6 +7,7 @@ interface PlansGridProps {
   plans: PlanFeature[];
   isAnnual: boolean;
   onPlanSelection: (planId: string) => void;
+  onPixSelection?: (planId: string) => void;
   isLoading: (planKey: string) => boolean;
 }
 
@@ -14,6 +15,7 @@ export const PlansGrid: React.FC<PlansGridProps> = ({
   plans,
   isAnnual,
   onPlanSelection,
+  onPixSelection,
   isLoading
 }) => {
   // Filtrar Trial quando estiver na aba Anual
@@ -55,6 +57,7 @@ export const PlansGrid: React.FC<PlansGridProps> = ({
               plan={plan}
               isAnnual={isAnnual}
               onPlanSelection={onPlanSelection}
+              onPixSelection={onPixSelection}
               isLoading={isLoading}
             />
           </div>

@@ -114,7 +114,7 @@ export const createHandler = (verify: VerifyToken = defaultVerify) => async (req
 
     const origin = req.headers.get("origin") ?? "https://plushify-aesthetic-hub.lovable.app";
     const returnUrl = `${origin}/`;
-    const completionUrl = `${origin}/planos?success=true&plan=${planType}&billing=annual`;
+    const completionUrl = `${origin}/dashboard?success=true&plan=${planType}&billing=annual`;
 
     const externalId = ["plushify", user.id, planType, "annual", crypto.randomUUID()].join(":");
 

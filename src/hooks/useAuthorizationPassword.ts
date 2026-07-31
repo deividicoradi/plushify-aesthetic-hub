@@ -28,6 +28,12 @@ export const useAuthorizationPassword = () => {
             description: "Configure sua senha de autorização nas configurações de segurança.",
             variant: "destructive",
           });
+        } else if (error.message?.includes('Muitas tentativas')) {
+          toast({
+            title: "Muitas Tentativas",
+            description: "Muitas tentativas incorretas seguidas. Aguarde 15 minutos e tente novamente.",
+            variant: "destructive",
+          });
         } else {
           toast({
             title: "Senha Incorreta",

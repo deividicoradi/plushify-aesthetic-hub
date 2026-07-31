@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_actions_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          reason: string | null
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          reason?: string | null
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          reason?: string | null
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           appointment_date: string
@@ -125,6 +155,27 @@ export type Database = {
           reason?: string | null
           record_id?: string
           table_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      authorization_password_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          success: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          success: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          success?: boolean
           user_id?: string
         }
         Relationships: []
@@ -1395,6 +1446,51 @@ export type Database = {
           },
         ]
       }
+      plan_upgrade_consents: {
+        Row: {
+          accepted_at: string
+          charge_now_cents: number
+          checkout_external_id: string
+          created_at: string
+          credit_cents: number
+          id: string
+          new_billing_interval: string
+          new_plan_type: string
+          new_price_cents: number
+          previous_billing_interval: string
+          previous_plan_type: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          charge_now_cents: number
+          checkout_external_id: string
+          created_at?: string
+          credit_cents: number
+          id?: string
+          new_billing_interval: string
+          new_plan_type: string
+          new_price_cents: number
+          previous_billing_interval: string
+          previous_plan_type: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          charge_now_cents?: number
+          checkout_external_id?: string
+          created_at?: string
+          credit_cents?: number
+          id?: string
+          new_billing_interval?: string
+          new_plan_type?: string
+          new_price_cents?: number
+          previous_billing_interval?: string
+          previous_plan_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           acquisition_date: string | null
@@ -1826,16 +1922,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           abacate_checkout_id: string | null
           abacate_customer_id: string | null
           abacate_subscription_id: string | null
+          billing_interval: string | null
           cancel_at_period_end: boolean
           created_at: string
           expires_at: string | null
           id: string
           payment_kind: string | null
+          plan_amount_paid: number | null
           plan_type: Database["public"]["Enums"]["plan_type"]
           started_at: string
           status: string
@@ -1847,11 +1972,13 @@ export type Database = {
           abacate_checkout_id?: string | null
           abacate_customer_id?: string | null
           abacate_subscription_id?: string | null
+          billing_interval?: string | null
           cancel_at_period_end?: boolean
           created_at?: string
           expires_at?: string | null
           id?: string
           payment_kind?: string | null
+          plan_amount_paid?: number | null
           plan_type?: Database["public"]["Enums"]["plan_type"]
           started_at?: string
           status?: string
@@ -1863,11 +1990,13 @@ export type Database = {
           abacate_checkout_id?: string | null
           abacate_customer_id?: string | null
           abacate_subscription_id?: string | null
+          billing_interval?: string | null
           cancel_at_period_end?: boolean
           created_at?: string
           expires_at?: string | null
           id?: string
           payment_kind?: string | null
+          plan_amount_paid?: number | null
           plan_type?: Database["public"]["Enums"]["plan_type"]
           started_at?: string
           status?: string
@@ -1921,6 +2050,107 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_extend_trial: {
+        Args: { p_days: number; p_reason?: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_force_cancel_subscription: {
+        Args: { p_reason: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_get_admin_login_log: {
+        Args: { p_limit?: number }
+        Returns: {
+          action: string
+          admin_email: string
+          created_at: string
+          id: string
+          ip_address: string
+        }[]
+      }
+      admin_get_customer_detail: { Args: { p_user_id: string }; Returns: Json }
+      admin_get_engagement_risk: { Args: never; Returns: Json }
+      admin_get_overview_details: { Args: never; Returns: Json }
+      admin_get_overview_stats: { Args: never; Returns: Json }
+      admin_get_pending_issues: { Args: { p_limit?: number }; Returns: Json }
+      admin_get_revenue_series: {
+        Args: { p_months?: number }
+        Returns: {
+          cancellations: number
+          month_start: string
+          mrr_cents: number
+          new_signups: number
+        }[]
+      }
+      admin_list_actions_log: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          action: string
+          admin_email: string
+          created_at: string
+          details: Json
+          id: string
+          reason: string
+          target_email: string
+          total_count: number
+        }[]
+      }
+      admin_list_admins: {
+        Args: never
+        Returns: {
+          email: string
+          granted_at: string
+          granted_by_email: string
+          user_id: string
+        }[]
+      }
+      admin_list_customers: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_plan_type?: string
+          p_search?: string
+          p_status?: string
+        }
+        Returns: {
+          billing_interval: string
+          email: string
+          expires_at: string
+          last_sign_in_at: string
+          payment_kind: string
+          plan_type: string
+          signed_up_at: string
+          started_at: string
+          status: string
+          total_count: number
+          trial_ends_at: string
+          user_id: string
+        }[]
+      }
+      admin_list_upgrade_consents: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          accepted_at: string
+          charge_now_cents: number
+          credit_cents: number
+          email: string
+          id: string
+          new_plan_type: string
+          new_price_cents: number
+          previous_plan_type: string
+          total_count: number
+        }[]
+      }
+      admin_promote_to_admin: { Args: { p_email: string }; Returns: Json }
+      admin_revoke_admin: { Args: { p_user_id: string }; Returns: Json }
+      calculate_upgrade_quote: {
+        Args: {
+          p_new_billing_interval: string
+          p_new_plan_type: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       cancel_subscription: {
         Args: {
           p_abacate_checkout_id?: string
@@ -2091,6 +2321,13 @@ export type Database = {
         Returns: Database["public"]["Enums"]["plan_type"]
       }
       has_feature_access: { Args: { feature_name: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -2150,6 +2387,7 @@ export type Database = {
           p_billing_interval?: string
           p_current_period_end?: string
           p_payment_kind?: string
+          p_plan_amount_paid?: number
           p_plan_code: string
           p_trial_days?: number
           p_user_id: string
@@ -2172,6 +2410,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "user"
       plan_type: "trial" | "professional" | "premium"
     }
     CompositeTypes: {
@@ -2300,6 +2539,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       plan_type: ["trial", "professional", "premium"],
     },
   },

@@ -221,6 +221,42 @@ export async function ensureFreshBundleBeforeBoot(): Promise<boolean> {
   return true;
 }
 
+/**
+ * bfcache (back-forward cache): ao voltar de um domínio externo (ex: checkout
+ * da AbacatePay) com o botão "voltar" do navegador, o navegador pode restaurar
+ * a página do cache de memória SEM re-executar nenhum script — inclusive os
+ * guards acima, que só rodam no boot inicial. Se a página tiver sido
+ * congelada num estado ruim (ex: mid-render, ou um SW antigo interceptando),
+ * a "restauração" é dessa mesma tela branca, e nada mais tenta corrigir,
+ * porque RECOVERY_FLAG já pode ter sido consumida numa tentativa anterior
+ * nesta sessão (recoverFromStaleBundle só tenta 1x por sessão).
+ *
+ * event.persisted=true identifica exatamente essa restauração via bfcache —
+ * tratamos como um caso NOVO (zera a flag de uma vez por sessão) e forçamos
+ * reload sempre que o elemento raiz do React estiver vazio, sem esperar o
+ * usuário ficar preso numa tela em branco sem saída.
+ */
+export function initBfcacheRecovery(): void {
+  if (typeof window === 'undefined') return;
+  if (isPreviewOrIframe()) return;
+
+  window.addEventListener('pageshow', (event: PageTransitionEvent) => {
+    if (!event.persisted) return;
+
+    const root = document.getElementById('root');
+    const isBlank = !root || root.childElementCount === 0;
+    if (!isBlank) return;
+
+    console.warn('[StaleBundleGuard] Página restaurada em branco via bfcache — forçando recuperação.');
+    try {
+      sessionStorage.removeItem(RECOVERY_FLAG);
+    } catch {
+      /* noop */
+    }
+    void recoverFromStaleBundle('bfcache-blank-restore');
+  });
+}
+
 export function initStaleBundleGuard(): void {
   if (typeof window === 'undefined') return;
 

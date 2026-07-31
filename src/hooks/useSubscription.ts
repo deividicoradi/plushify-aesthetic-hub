@@ -18,6 +18,7 @@ export interface UserSubscription {
   abacate_subscription_id?: string | null;
   abacate_customer_id?: string | null;
   abacate_checkout_id?: string | null;
+  billing_interval?: 'month' | 'year' | null;
   created_at: string;
   updated_at: string;
 }
@@ -78,7 +79,8 @@ export const useSubscription = () => {
         return { subscription: null, currentPlan: 'trial' };
       }
 
-      return { subscription: data, currentPlan: computeEffectivePlan(data) };
+      const sub = data as unknown as UserSubscription;
+      return { subscription: sub, currentPlan: computeEffectivePlan(sub) };
     },
   });
 

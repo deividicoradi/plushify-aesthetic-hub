@@ -10,6 +10,7 @@ interface PlanCardProps {
   plan: PlanFeature;
   isAnnual: boolean;
   onPlanSelection: (planId: string) => void;
+  onPixSelection?: (planId: string) => void;
   isLoading: (planKey: string) => boolean;
 }
 
@@ -17,6 +18,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   plan,
   isAnnual,
   onPlanSelection,
+  onPixSelection,
   isLoading
 }) => {
   const currentPrice = isAnnual ? plan.annualPrice : plan.price;
@@ -69,6 +71,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         plan={plan}
         isPlanLoading={isPlanLoading}
         onPlanSelection={onPlanSelection}
+        onPixSelection={onPixSelection}
       />
     </Card>
   );
