@@ -184,12 +184,11 @@ export function MfaSection() {
         <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
           <div className="space-y-2">
             <p className="text-sm font-medium">1. Escaneie o QR code com seu app autenticador</p>
-            <div
-              className="w-40 h-40 bg-white p-2 rounded"
-              // qr_code vem como SVG confiável direto da API do Supabase (não é
-              // entrada de usuário) — seguro renderizar via dangerouslySetInnerHTML.
-              dangerouslySetInnerHTML={{ __html: qrCode }}
-            />
+            <div className="w-40 h-40 bg-white p-2 rounded">
+              {/* qr_code vem como data URI (data:image/svg+xml;utf-8,<svg>...) da
+                  API do Supabase — precisa de <img src>, não dangerouslySetInnerHTML. */}
+              <img src={qrCode} alt="QR code para configurar o autenticador" className="w-full h-full" />
+            </div>
             <div className="flex items-center gap-2">
               <p className="text-xs text-muted-foreground break-all">Ou digite a chave manualmente: {secret}</p>
               <Button type="button" variant="ghost" size="sm" onClick={handleCopySecret} className="shrink-0 gap-1 h-auto py-1">
