@@ -36,17 +36,46 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "plushify-aesthetic-hub"
+const SITE_NAME = "Plushify"
 const SENDER_DOMAIN = "notify.plushify.com.br"
 const ROOT_DOMAIN = "plushify.com.br"
 const FROM_DOMAIN = "notify.plushify.com.br" // Domain shown in From address (may be root or sender subdomain)
+
+// Force every link in auth emails to point to the production domain instead of
+// the default *.lovable.app preview host.
+function toProductionUrl(rawUrl?: string): string {
+  if (!rawUrl) return `https://${ROOT_DOMAIN}`
+  try {
+    const url = new URL(rawUrl)
+    if (url.hostname.endsWith('.lovable.app')) {
+      url.protocol = 'https:'
+      url.hostname = ROOT_DOMAIN
+      url.port = ''
+    }
+    const redirectTo = url.searchParams.get('redirect_to')
+    if (redirectTo) {
+      try {
+        const target = new URL(redirectTo)
+        if (target.hostname.endsWith('.lovable.app')) {
+          target.protocol = 'https:'
+          target.hostname = ROOT_DOMAIN
+          target.port = ''
+          url.searchParams.set('redirect_to', target.toString())
+        }
+      } catch (_) { /* ignore malformed redirect_to */ }
+    }
+    return url.toString()
+  } catch (_) {
+    return rawUrl
+  }
+}
 
 // Sample data for preview mode ONLY (not used in actual email sending).
 // URLs are baked in at scaffold time from the project's real data.
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://plushify-aesthetic-hub.lovable.app"
+const SAMPLE_PROJECT_URL = "https://plushify.com.br"
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
@@ -223,7 +252,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     siteName: SITE_NAME,
     siteUrl: `https://${ROOT_DOMAIN}`,
     recipient: payload.data.email,
-    confirmationUrl: payload.data.url,
+    confirmationUrl: toProductionUrl(payload.data.url),
     token: payload.data.token,
     email: payload.data.email,
     oldEmail: payload.data.old_email,
