@@ -12,15 +12,19 @@ import { FeatureGuard } from '@/components/FeatureGuard';
 import { TeamManagement as TeamManagementComponent } from '@/components/premium/TeamManagement';
 import { ReferralPanel } from '@/components/settings/ReferralPanel';
 import { MfaSection } from '@/components/settings/MfaSection';
+import { AuthorizationPasswordSetup } from '@/components/security/AuthorizationPasswordSetup';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
 
 const Settings = () => {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
   const { profile, saveProfile } = useProfile();
+  const [authPasswordDialogOpen, setAuthPasswordDialogOpen] = useState(false);
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -418,6 +422,22 @@ const Settings = () => {
                 <div className="border-t pt-6">
                   <MfaSection />
                 </div>
+
+                {isAdmin && (
+                  <div className="border-t pt-6 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base sm:text-lg font-semibold">Senha de autorização (admin)</h3>
+                      <Button onClick={() => setAuthPasswordDialogOpen(true)} size="sm" className="gap-2">
+                        <Shield className="w-4 h-4" />
+                        Configurar
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Exigida para confirmar ações administrativas sensíveis (ex: cancelar assinatura de um
+                      cliente, promover/revogar admin). Diferente da sua senha de login.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -446,6 +466,13 @@ const Settings = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {isAdmin && (
+        <AuthorizationPasswordSetup
+          open={authPasswordDialogOpen}
+          onOpenChange={setAuthPasswordDialogOpen}
+        />
+      )}
     </ResponsiveLayout>
   );
 };
