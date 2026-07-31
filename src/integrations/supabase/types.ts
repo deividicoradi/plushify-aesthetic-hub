@@ -2037,6 +2037,16 @@ export type Database = {
         Args: { p_reason: string; p_user_id: string }
         Returns: Json
       }
+      admin_get_admin_login_log: {
+        Args: { p_limit?: number }
+        Returns: {
+          action: string
+          admin_email: string
+          created_at: string
+          id: string
+          ip_address: string
+        }[]
+      }
       admin_get_customer_detail: { Args: { p_user_id: string }; Returns: Json }
       admin_get_engagement_risk: { Args: never; Returns: Json }
       admin_get_overview_details: { Args: never; Returns: Json }
@@ -2074,7 +2084,13 @@ export type Database = {
         }[]
       }
       admin_list_customers: {
-        Args: { p_limit?: number; p_offset?: number; p_search?: string }
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_plan_type?: string
+          p_search?: string
+          p_status?: string
+        }
         Returns: {
           billing_interval: string
           email: string
