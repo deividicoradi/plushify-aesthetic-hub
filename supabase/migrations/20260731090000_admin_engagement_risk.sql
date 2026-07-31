@@ -1,8 +1,11 @@
 -- Sinal de engajamento/risco de churn na lista de Clientes: até aqui só
 -- dava pra ver "quantos clientes", nunca "quais estão sumidos" (não logam
--- há muito tempo apesar de pagar). Mesma assinatura de admin_list_customers
--- (3 parâmetros desde a migration de busca) — CREATE OR REPLACE preserva
--- os grants.
+-- há muito tempo apesar de pagar). Mesmos parâmetros de admin_list_customers
+-- (3 parâmetros desde a migration de busca), mas RETURNS TABLE muda (ganha
+-- last_sign_in_at) — Postgres não deixa CREATE OR REPLACE trocar o tipo de
+-- retorno, então precisa dropar antes.
+DROP FUNCTION IF EXISTS public.admin_list_customers(integer, integer, text);
+
 CREATE OR REPLACE FUNCTION public.admin_list_customers(
   p_limit integer DEFAULT 50,
   p_offset integer DEFAULT 0,
@@ -53,6 +56,11 @@ BEGIN
   LIMIT p_limit OFFSET p_offset;
 END;
 $$;
+
+REVOKE EXECUTE ON FUNCTION public.admin_list_customers(integer, integer, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.admin_list_customers(integer, integer, text) FROM anon;
+GRANT EXECUTE ON FUNCTION public.admin_list_customers(integer, integer, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_list_customers(integer, integer, text) TO service_role;
 
 -- Contagem de clientes pagantes ativos sem login recente (>14 dias, ou
 -- nunca logaram) pro card de risco na Visão Geral.
