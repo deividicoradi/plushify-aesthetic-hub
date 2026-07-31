@@ -165,8 +165,10 @@ const Auth = () => {
       if (referralCode) clearPendingReferral();
       toast.success("Cadastro realizado com sucesso! Verifique seu e-mail para confirmar sua conta.");
     } catch (error: any) {
+      // Mensagem genérica de propósito: não confirmar/negar se o e-mail já
+      // tem conta evita enumeração de usuários cadastrados no Plushify.
       if (error.message.includes('already registered')) {
-        toast.error("Este e-mail já está cadastrado. Tente fazer login.");
+        toast.error("Não foi possível concluir o cadastro. Se você já tem uma conta, tente fazer login ou recuperar sua senha.");
       } else {
         toast.error(error.message || "Ocorreu um erro ao criar sua conta.");
       }
