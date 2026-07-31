@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { convertToCSV, downloadFile } from '@/utils/fileUtils';
 import { useToast } from '@/hooks/use-toast';
 import { AdminManageAdmins } from './AdminManageAdmins';
+import { AdminLoginLog } from './AdminLoginLog';
 
 interface ConsentRow {
   id: string;
@@ -179,6 +180,8 @@ export const AdminAuditTable: React.FC = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
       <AdminManageAdmins />
+
+      <AdminLoginLog />
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800">
