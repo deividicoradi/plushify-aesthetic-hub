@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
+import { AdminManageAdmins } from './AdminManageAdmins';
 
 interface ConsentRow {
   id: string;
@@ -34,6 +35,8 @@ interface ActionLogRow {
 const ACTION_LABELS: Record<string, string> = {
   extend_trial: 'Estendeu trial',
   force_cancel: 'Cancelou assinatura',
+  promote_admin: 'Promoveu a admin',
+  revoke_admin: 'Revogou admin',
 };
 
 const PLAN_LABELS: Record<string, string> = {
@@ -107,6 +110,8 @@ export const AdminAuditTable: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      <AdminManageAdmins />
+
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
