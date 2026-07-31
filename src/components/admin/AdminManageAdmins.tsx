@@ -5,20 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import PasswordDialog from '@/components/ui/password-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthorizationPassword } from '@/hooks/useAuthorizationPassword';
 
 interface AdminRow {
   user_id: string;
@@ -39,7 +30,9 @@ export const AdminManageAdmins: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { verifyPassword, isVerifying } = useAuthorizationPassword();
   const [email, setEmail] = useState('');
+  const [pendingRevoke, setPendingRevoke] = useState<{ user_id: string; email: string } | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-list-admins'],
@@ -77,12 +70,20 @@ export const AdminManageAdmins: React.FC = () => {
     },
     onSuccess: () => {
       toast({ title: 'Acesso de administrador revogado' });
+      setPendingRevoke(null);
       invalidate();
     },
     onError: (err: Error) => {
       toast({ title: 'Erro ao revogar', description: err.message, variant: 'destructive' });
     },
   });
+
+  const handleRevokeConfirm = async (password: string) => {
+    if (!pendingRevoke) return;
+    const isValid = await verifyPassword(password);
+    if (!isValid) return;
+    revokeMutation.mutate(pendingRevoke.user_id);
+  };
 
   return (
     <Card className="bg-card border-border">
@@ -144,28 +145,15 @@ export const AdminManageAdmins: React.FC = () => {
                         {isSelf ? (
                           <span className="text-xs text-muted-foreground">Você</span>
                         ) : (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="outline" disabled={revokeMutation.isPending}>
-                                <ShieldMinus className="w-3.5 h-3.5 mr-1.5" />
-                                Revogar
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Revogar admin de {row.email}?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Essa pessoa perde acesso a este painel imediatamente. A ação fica registrada na auditoria.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Voltar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => revokeMutation.mutate(row.user_id)}>
-                                  Confirmar
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={revokeMutation.isPending}
+                            onClick={() => setPendingRevoke({ user_id: row.user_id, email: row.email })}
+                          >
+                            <ShieldMinus className="w-3.5 h-3.5 mr-1.5" />
+                            Revogar
+                          </Button>
                         )}
                       </TableCell>
                     </TableRow>
@@ -176,6 +164,16 @@ export const AdminManageAdmins: React.FC = () => {
           </div>
         )}
       </CardContent>
+
+      <PasswordDialog
+        open={!!pendingRevoke}
+        onOpenChange={(open) => !open && setPendingRevoke(null)}
+        onConfirm={handleRevokeConfirm}
+        title={`Revogar admin de ${pendingRevoke?.email ?? ''}?`}
+        description="Essa pessoa perde acesso a este painel imediatamente. A ação fica registrada na auditoria. Digite sua senha de autorização pra confirmar."
+        isLoading={isVerifying || revokeMutation.isPending}
+        requireReason={false}
+      />
     </Card>
   );
 };

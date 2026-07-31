@@ -8,24 +8,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import PasswordDialog from '@/components/ui/password-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthorizationPassword } from '@/hooks/useAuthorizationPassword';
 
 interface SubscriptionEntry {
   id: string;
@@ -89,9 +79,10 @@ interface Props {
 export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { verifyPassword, isVerifying } = useAuthorizationPassword();
   const [extendDays, setExtendDays] = useState('7');
   const [extendReason, setExtendReason] = useState('');
-  const [cancelReason, setCancelReason] = useState('');
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-customer-detail', userId],
@@ -132,16 +123,16 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
   });
 
   const forceCancelMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (reason: string) => {
       const { error } = await supabase.rpc('admin_force_cancel_subscription', {
         p_user_id: userId,
-        p_reason: cancelReason,
+        p_reason: reason,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       toast({ title: 'Assinatura cancelada' });
-      setCancelReason('');
+      setCancelDialogOpen(false);
       invalidateAfterAction();
     },
     onError: (err: Error) => {
@@ -149,10 +140,17 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
     },
   });
 
+  const handleCancelConfirm = async (password: string, reason?: string) => {
+    const isValid = await verifyPassword(password);
+    if (!isValid) return;
+    forceCancelMutation.mutate(reason ?? '');
+  };
+
   const hasActiveTrial = data?.subscriptions.some((s) => s.status === 'trial_active');
   const hasActiveSubscription = data?.subscriptions.some((s) => s.status === 'active' || s.status === 'trial_active');
 
   return (
+    <>
     <Dialog open={!!userId} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
@@ -210,43 +208,14 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
                     </div>
                   )}
 
-                  <AlertDialog>
-                    <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">Motivo do cancelamento (obrigatório)</label>
-                      <Textarea
-                        value={cancelReason}
-                        onChange={(e) => setCancelReason(e.target.value)}
-                        placeholder="Ex: solicitação do cliente via suporte, fraude, etc."
-                        className="text-sm min-h-[60px]"
-                      />
-                    </div>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        disabled={forceCancelMutation.isPending || !cancelReason.trim()}
-                      >
-                        <Ban className="w-3.5 h-3.5 mr-1.5" />
-                        Cancelar assinatura
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Cancelar assinatura de {data.email}?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Isso encerra o acesso pago desse cliente imediatamente. Essa ação fica registrada na
-                          auditoria com seu usuário e o motivo informado. Não cancela nem estorna nada na AbacatePay
-                          — só encerra o acesso no nosso sistema.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Voltar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => forceCancelMutation.mutate()}>
-                          Confirmar cancelamento
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => setCancelDialogOpen(true)}
+                  >
+                    <Ban className="w-3.5 h-3.5 mr-1.5" />
+                    Cancelar assinatura
+                  </Button>
                 </div>
               )}
 
@@ -305,6 +274,17 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
           </ScrollArea>
         )}
       </DialogContent>
+
+      <PasswordDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        onConfirm={handleCancelConfirm}
+        title={`Cancelar assinatura de ${data?.email ?? 'cliente'}?`}
+        description="Isso encerra o acesso pago desse cliente imediatamente e fica registrado na auditoria. Não cancela nem estorna nada na AbacatePay — só encerra o acesso no nosso sistema. Digite sua senha de autorização e o motivo pra confirmar."
+        isLoading={isVerifying || forceCancelMutation.isPending}
+        requireReason={true}
+      />
     </Dialog>
+    </>
   );
 };
