@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, ArrowRight, FileText, TrendingUp, DollarSign, ShieldAlert } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, FileText, TrendingUp, DollarSign, ShieldAlert, Download } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
+import { convertToCSV, downloadFile } from '@/utils/fileUtils';
+import { useToast } from '@/hooks/use-toast';
 import { AdminManageAdmins } from './AdminManageAdmins';
 
 interface ConsentRow {
@@ -49,9 +51,14 @@ const formatBRL = (cents: number) =>
 
 const PAGE_SIZE = 25;
 
+const EXPORT_CAP = 2000;
+
 export const AdminAuditTable: React.FC = () => {
   const [page, setPage] = useState(0);
   const [actionsPage, setActionsPage] = useState(0);
+  const [isExportingConsents, setIsExportingConsents] = useState(false);
+  const [isExportingActions, setIsExportingActions] = useState(false);
+  const { toast } = useToast();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-upgrade-consents', page],
@@ -85,6 +92,67 @@ export const AdminAuditTable: React.FC = () => {
   const rows = data ?? [];
   const creditSum = rows.reduce((acc, r) => acc + (r.credit_cents ?? 0), 0);
   const chargedSum = rows.reduce((acc, r) => acc + (r.charge_now_cents ?? 0), 0);
+
+  const exportConsents = async () => {
+    setIsExportingConsents(true);
+    try {
+      const { data: exportData, error } = await supabase.rpc('admin_list_upgrade_consents', {
+        p_limit: EXPORT_CAP,
+        p_offset: 0,
+      });
+      if (error) throw error;
+      const rowsToExport = (exportData ?? []) as ConsentRow[];
+      if (rowsToExport.length === 0) {
+        toast({ title: 'Nada para exportar' });
+        return;
+      }
+      const csv = convertToCSV(
+        rowsToExport.map((r) => ({
+          email: r.email,
+          plano_anterior: PLAN_LABELS[r.previous_plan_type] ?? r.previous_plan_type,
+          plano_novo: PLAN_LABELS[r.new_plan_type] ?? r.new_plan_type,
+          credito_cents: r.credit_cents,
+          valor_cobrado_cents: r.charge_now_cents,
+          aceito_em: r.accepted_at,
+        })),
+      );
+      downloadFile(csv, `upgrades_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv;charset=utf-8;');
+    } catch (err) {
+      toast({ title: 'Erro ao exportar', description: (err as Error).message, variant: 'destructive' });
+    } finally {
+      setIsExportingConsents(false);
+    }
+  };
+
+  const exportActions = async () => {
+    setIsExportingActions(true);
+    try {
+      const { data: exportData, error } = await supabase.rpc('admin_list_actions_log', {
+        p_limit: EXPORT_CAP,
+        p_offset: 0,
+      });
+      if (error) throw error;
+      const rowsToExport = (exportData ?? []) as ActionLogRow[];
+      if (rowsToExport.length === 0) {
+        toast({ title: 'Nada para exportar' });
+        return;
+      }
+      const csv = convertToCSV(
+        rowsToExport.map((r) => ({
+          admin: r.admin_email,
+          acao: ACTION_LABELS[r.action] ?? r.action,
+          cliente: r.target_email,
+          motivo: r.reason ?? '',
+          quando: r.created_at,
+        })),
+      );
+      downloadFile(csv, `acoes_admin_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv;charset=utf-8;');
+    } catch (err) {
+      toast({ title: 'Erro ao exportar', description: (err as Error).message, variant: 'destructive' });
+    } finally {
+      setIsExportingActions(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -148,14 +216,20 @@ export const AdminAuditTable: React.FC = () => {
       </div>
 
       <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="w-4 h-4 text-primary" />
-            Auditoria de upgrades
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Registro auditável de todo upgrade de plano confirmado — comprova o valor exibido e aceito por cada cliente.
-          </p>
+        <CardHeader className="flex flex-row items-start justify-between gap-2">
+          <div>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="w-4 h-4 text-primary" />
+              Auditoria de upgrades
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              Registro auditável de todo upgrade de plano confirmado — comprova o valor exibido e aceito por cada cliente.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" disabled={isExportingConsents} onClick={exportConsents}>
+            <Download className="w-3.5 h-3.5 mr-1.5" />
+            Exportar CSV
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-md border border-border overflow-x-auto">
@@ -220,14 +294,20 @@ export const AdminAuditTable: React.FC = () => {
       </Card>
 
       <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-primary" />
-            Ações administrativas
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Toda ação manual feita por um admin em conta de cliente (estender trial, cancelar) fica registrada aqui.
-          </p>
+        <CardHeader className="flex flex-row items-start justify-between gap-2">
+          <div>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-primary" />
+              Ações administrativas
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              Toda ação manual feita por um admin em conta de cliente (estender trial, cancelar) fica registrada aqui.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" disabled={isExportingActions} onClick={exportActions}>
+            <Download className="w-3.5 h-3.5 mr-1.5" />
+            Exportar CSV
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {actionsLoading ? (

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Users, CheckCircle2, Clock, Search, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users, CheckCircle2, Clock, Search, X, Download } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
+import { convertToCSV, downloadFile } from '@/utils/fileUtils';
+import { useToast } from '@/hooks/use-toast';
 import { AdminCustomerDetailModal } from './AdminCustomerDetailModal';
 
 interface CustomerRow {
@@ -70,6 +72,8 @@ export const AdminCustomersTable: React.FC = () => {
   const [planFilter, setPlanFilter] = useState(ALL_VALUE);
   const [statusFilter, setStatusFilter] = useState(ALL_VALUE);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -99,6 +103,45 @@ export const AdminCustomersTable: React.FC = () => {
   const rows = data ?? [];
   const activeCount = rows.filter((r) => r.status === 'active').length;
   const trialCount = rows.filter((r) => r.plan_type === 'trial').length;
+
+  const EXPORT_CAP = 2000;
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const { data: exportData, error } = await supabase.rpc('admin_list_customers', {
+        p_limit: EXPORT_CAP,
+        p_offset: 0,
+        p_search: search || null,
+        p_plan_type: planFilter === ALL_VALUE ? null : planFilter,
+        p_status: statusFilter === ALL_VALUE ? null : statusFilter,
+      });
+      if (error) throw error;
+      const rowsToExport = (exportData ?? []) as CustomerRow[];
+      if (rowsToExport.length === 0) {
+        toast({ title: 'Nada para exportar com esse filtro' });
+        return;
+      }
+      const csv = convertToCSV(
+        rowsToExport.map((r) => ({
+          email: r.email,
+          plano: r.plan_type ? (PLAN_LABELS[r.plan_type] ?? r.plan_type) : '',
+          status: STATUS_LABELS[r.status] ?? r.status,
+          metodo: r.payment_kind ?? '',
+          cadastro: r.signed_up_at,
+          ultimo_acesso: r.last_sign_in_at ?? '',
+        })),
+      );
+      downloadFile(csv, `clientes_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv;charset=utf-8;');
+      if (rowsToExport.length >= EXPORT_CAP) {
+        toast({ title: `Exportados os primeiros ${EXPORT_CAP} registros — refine o filtro pra exportar o restante` });
+      }
+    } catch (err) {
+      toast({ title: 'Erro ao exportar', description: (err as Error).message, variant: 'destructive' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -160,11 +203,15 @@ export const AdminCustomersTable: React.FC = () => {
       </div>
 
       <Card className="bg-card border-border">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-2">
           <CardTitle className="text-base flex items-center gap-2">
             <Users className="w-4 h-4 text-primary" />
             Clientes
           </CardTitle>
+          <Button size="sm" variant="outline" disabled={isExporting} onClick={handleExport}>
+            <Download className="w-3.5 h-3.5 mr-1.5" />
+            Exportar CSV
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-2">
