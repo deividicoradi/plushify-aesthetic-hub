@@ -63,8 +63,8 @@ const PaymentSecureActions = ({ onEdit, onSuccess, children }: PaymentSecureActi
         title={pendingAction?.type === 'edit' ? 'Confirmar Edição' : 'Confirmar Exclusão'}
         description={
           pendingAction?.type === 'edit'
-            ? 'Digite sua senha para autorizar a edição deste pagamento.'
-            : 'Digite sua senha para autorizar a exclusão deste pagamento. Esta ação não pode ser desfeita.'
+            ? 'Digite o código do seu app autenticador para autorizar a edição deste pagamento.'
+            : 'Digite o código do seu app autenticador para autorizar a exclusão deste pagamento. Esta ação não pode ser desfeita.'
         }
         isLoading={isVerifying || isDeleting}
         requireReason={true}

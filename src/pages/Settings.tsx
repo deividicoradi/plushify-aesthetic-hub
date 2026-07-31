@@ -12,7 +12,6 @@ import { FeatureGuard } from '@/components/FeatureGuard';
 import { TeamManagement as TeamManagementComponent } from '@/components/premium/TeamManagement';
 import { ReferralPanel } from '@/components/settings/ReferralPanel';
 import { MfaSection } from '@/components/settings/MfaSection';
-import { AuthorizationPasswordSetup } from '@/components/security/AuthorizationPasswordSetup';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useProfile } from '@/hooks/useProfile';
@@ -24,7 +23,6 @@ const Settings = () => {
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
   const { profile, saveProfile } = useProfile();
-  const [authPasswordDialogOpen, setAuthPasswordDialogOpen] = useState(false);
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -425,16 +423,11 @@ const Settings = () => {
 
                 {isAdmin && (
                   <div className="border-t pt-6 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-base sm:text-lg font-semibold">Senha de autorização (admin)</h3>
-                      <Button onClick={() => setAuthPasswordDialogOpen(true)} size="sm" className="gap-2">
-                        <Shield className="w-4 h-4" />
-                        Configurar
-                      </Button>
-                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold">Autorização de ações administrativas</h3>
                     <p className="text-sm text-muted-foreground">
-                      Exigida para confirmar ações administrativas sensíveis (ex: cancelar assinatura de um
-                      cliente, promover/revogar admin). Diferente da sua senha de login.
+                      Ações sensíveis (ex: cancelar assinatura de um cliente, promover/revogar admin) agora são
+                      confirmadas com o código do seu app autenticador (2FA) em vez de uma senha separada.
+                      Ative a autenticação em duas etapas acima para poder realizá-las.
                     </p>
                   </div>
                 )}
@@ -467,12 +460,6 @@ const Settings = () => {
         </Tabs>
       </div>
 
-      {isAdmin && (
-        <AuthorizationPasswordSetup
-          open={authPasswordDialogOpen}
-          onOpenChange={setAuthPasswordDialogOpen}
-        />
-      )}
     </ResponsiveLayout>
   );
 };

@@ -170,7 +170,7 @@ export const AdminManageAdmins: React.FC = () => {
         onOpenChange={(open) => !open && setPendingRevoke(null)}
         onConfirm={handleRevokeConfirm}
         title={`Revogar admin de ${pendingRevoke?.email ?? ''}?`}
-        description="Essa pessoa perde acesso a este painel imediatamente. A ação fica registrada na auditoria. Digite sua senha de autorização pra confirmar."
+        description="Essa pessoa perde acesso a este painel imediatamente. A ação fica registrada na auditoria. Digite o código do seu app autenticador pra confirmar."
         isLoading={isVerifying || revokeMutation.isPending}
         requireReason={false}
       />

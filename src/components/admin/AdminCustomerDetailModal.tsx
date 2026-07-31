@@ -280,7 +280,7 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
         onOpenChange={setCancelDialogOpen}
         onConfirm={handleCancelConfirm}
         title={`Cancelar assinatura de ${data?.email ?? 'cliente'}?`}
-        description="Isso encerra o acesso pago desse cliente imediatamente e fica registrado na auditoria. Não cancela nem estorna nada na AbacatePay — só encerra o acesso no nosso sistema. Digite sua senha de autorização e o motivo pra confirmar."
+        description="Isso encerra o acesso pago desse cliente imediatamente e fica registrado na auditoria. Não cancela nem estorna nada na AbacatePay — só encerra o acesso no nosso sistema. Digite o código do seu app autenticador e o motivo pra confirmar."
         isLoading={isVerifying || forceCancelMutation.isPending}
         requireReason={true}
       />

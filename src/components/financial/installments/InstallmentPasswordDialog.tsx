@@ -32,11 +32,11 @@ const InstallmentPasswordDialog = ({
 
   const getDialogDescription = () => {
     switch (pendingAction?.type) {
-      case 'edit': return 'Digite sua senha para autorizar a edição desta parcela.';
-      case 'delete': return 'Digite sua senha para autorizar a exclusão desta parcela. Esta ação não pode ser desfeita.';
-      case 'markPaid': return 'Digite sua senha para autorizar a marcação desta parcela como paga.';
-      case 'markPartial': return 'Digite sua senha para autorizar o registro do pagamento parcial.';
-      default: return 'Digite sua senha para autorizar esta ação.';
+      case 'edit': return 'Digite o código do seu app autenticador para autorizar a edição desta parcela.';
+      case 'delete': return 'Digite o código do seu app autenticador para autorizar a exclusão desta parcela. Esta ação não pode ser desfeita.';
+      case 'markPaid': return 'Digite o código do seu app autenticador para autorizar a marcação desta parcela como paga.';
+      case 'markPartial': return 'Digite o código do seu app autenticador para autorizar o registro do pagamento parcial.';
+      default: return 'Digite o código do seu app autenticador para autorizar esta ação.';
     }
   };
 

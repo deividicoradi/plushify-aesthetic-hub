@@ -36,9 +36,9 @@ const PasswordDialog = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password.trim()) return;
+    if (password.trim().length !== 6) return;
     if (requireReason && !reason.trim()) return;
-    
+
     onConfirm(password, reason);
     setPassword('');
     setReason('');
@@ -65,13 +65,14 @@ const PasswordDialog = ({
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">Senha de Autorização</Label>
+              <Label htmlFor="password">Código do Authenticator</Label>
               <Input
                 id="password"
-                type="password"
+                inputMode="numeric"
+                maxLength={6}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Digite sua senha"
+                onChange={(e) => setPassword(e.target.value.replace(/\D/g, ''))}
+                placeholder="000000"
                 required
                 autoFocus
               />
@@ -98,7 +99,7 @@ const PasswordDialog = ({
           </Button>
           <Button 
             onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}
-            disabled={!password.trim() || (requireReason && !reason.trim()) || isLoading}
+            disabled={password.trim().length !== 6 || (requireReason && !reason.trim()) || isLoading}
           >
             {isLoading ? 'Verificando...' : 'Confirmar'}
           </Button>

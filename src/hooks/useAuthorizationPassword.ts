@@ -4,53 +4,58 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "@/hooks/use-toast";
 
+// Ações administrativas/financeiras sensíveis agora são confirmadas com o
+// código do app autenticador (TOTP) já usado pelo 2FA de login, em vez de uma
+// segunda senha fixa: um código expira em 30s e não serve de novo se vazar,
+// diferente de uma senha estática guardada no banco.
 export const useAuthorizationPassword = () => {
   const { user } = useAuth();
   const [isVerifying, setIsVerifying] = useState(false);
 
-  const verifyPassword = async (password: string): Promise<boolean> => {
+  const verifyPassword = async (code: string): Promise<boolean> => {
     if (!user?.id) return false;
 
     setIsVerifying(true);
     try {
-      // Use secure RPC function instead of re-authentication
-      const { data, error } = await supabase.rpc('verify_authorization_password', {
-        p_password: password
-      });
-      
-      if (error) {
-        console.error('Erro na verificação da senha:', error);
-        
-        // Check if password is not configured
-        if (error.message?.includes('Authorization password not configured')) {
-          toast({
-            title: "Senha de Autorização Não Configurada",
-            description: "Configure sua senha de autorização nas configurações de segurança.",
-            variant: "destructive",
-          });
-        } else if (error.message?.includes('Muitas tentativas')) {
-          toast({
-            title: "Muitas Tentativas",
-            description: "Muitas tentativas incorretas seguidas. Aguarde 15 minutos e tente novamente.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Senha Incorreta",
-            description: "A senha de autorização está incorreta.",
-            variant: "destructive",
-          });
-        }
+      const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+      if (factorsError) throw factorsError;
+
+      const verifiedFactor = factorsData?.totp?.find((f) => f.status === 'verified');
+      if (!verifiedFactor) {
+        toast({
+          title: "2FA Não Configurado",
+          description: "Ative a autenticação em duas etapas nas configurações de segurança para autorizar esta ação.",
+          variant: "destructive",
+        });
         return false;
       }
 
-      // Return the verification result
-      return data === true;
-    } catch (error) {
-      console.error('Erro ao verificar senha:', error);
+      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: verifiedFactor.id,
+      });
+      if (challengeError) throw challengeError;
+
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: verifiedFactor.id,
+        challengeId: challenge.id,
+        code,
+      });
+
+      if (verifyError) {
+        toast({
+          title: "Código Inválido",
+          description: "O código do autenticador está incorreto ou expirou.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      return true;
+    } catch (error: any) {
+      console.error('Erro ao verificar código do autenticador:', error);
       toast({
         title: "Erro",
-        description: "Erro ao verificar senha de autorização.",
+        description: error?.message || "Erro ao verificar código do autenticador.",
         variant: "destructive",
       });
       return false;
@@ -59,43 +64,8 @@ export const useAuthorizationPassword = () => {
     }
   };
 
-  const setPassword = async (password: string): Promise<boolean> => {
-    if (!user?.id) return false;
-
-    try {
-      const { data, error } = await supabase.rpc('set_authorization_password', {
-        p_password: password
-      });
-      
-      if (error) {
-        console.error('Erro ao definir senha:', error);
-        toast({
-          title: "Erro",
-          description: error.message || "Erro ao definir senha de autorização.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      toast({
-        title: "Sucesso",
-        description: "Senha de autorização definida com sucesso.",
-      });
-      return true;
-    } catch (error) {
-      console.error('Erro ao definir senha:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao definir senha de autorização.",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
   return {
     verifyPassword,
-    setPassword,
     isVerifying
   };
 };
