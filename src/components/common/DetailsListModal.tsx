@@ -92,51 +92,55 @@ function SectionView({
   const visible = sorted.slice(start, start + pageSize);
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <h4 className="text-sm font-semibold">{section.title}</h4>
-        <span className="text-xs text-muted-foreground text-right">
+    <div className="rounded-lg border border-border/60 bg-muted/20 overflow-hidden">
+      <div className="flex items-center justify-between gap-2 bg-muted/60 px-3 py-2 border-b border-border/60">
+        <h4 className="text-xs font-bold uppercase tracking-wide text-foreground/90">
+          {section.title}
+        </h4>
+        <span className="text-[11px] font-medium text-muted-foreground text-right shrink-0 ml-3">
           {totalCount} {totalCount === 1 ? 'registro' : 'registros'}
           {section.totalLabel ? ` · ${section.totalLabel}` : ''}
         </span>
       </div>
-      {totalCount === 0 ? (
-        <p className="text-xs text-muted-foreground py-2">Nenhum registro.</p>
-      ) : (
-        <>
-          <div className="space-y-1.5">{visible.map((item) => section.render(item))}</div>
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-xs text-muted-foreground">
-                {start + 1}–{Math.min(start + pageSize, totalCount)} de {totalCount}
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7"
-                  disabled={currentPage <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  Anterior
-                </Button>
-                <span className="text-xs tabular-nums text-muted-foreground">
-                  {currentPage}/{totalPages}
+      <div className="px-3 py-2.5">
+        {totalCount === 0 ? (
+          <p className="text-xs text-muted-foreground py-2">Nenhum registro.</p>
+        ) : (
+          <>
+            <div className="space-y-1.5">{visible.map((item) => section.render(item))}</div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs text-muted-foreground">
+                  {start + 1}–{Math.min(start + pageSize, totalCount)} de {totalCount}
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                >
-                  Próxima
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7"
+                    disabled={currentPage <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    Anterior
+                  </Button>
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    {currentPage}/{totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    Próxima
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
