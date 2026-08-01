@@ -40,6 +40,7 @@ const ACTION_LABELS: Record<string, string> = {
   force_cancel: 'Cancelou assinatura',
   promote_admin: 'Promoveu a admin',
   revoke_admin: 'Revogou admin',
+  create_coupon: 'Criou cupom',
 };
 
 const PLAN_LABELS: Record<string, string> = {
