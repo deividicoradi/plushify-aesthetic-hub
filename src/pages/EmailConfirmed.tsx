@@ -32,7 +32,7 @@ const EmailConfirmed = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <SEO title="E-mail confirmado | Plushify" description="Seu e-mail foi confirmado com sucesso." noIndex />
+      <SEO title="E-mail confirmado | Plushify" description="Seu e-mail foi confirmado com sucesso." />
       <Card className="w-full max-w-md rounded-3xl shadow-lg">
         <CardHeader className="items-center text-center space-y-3">
           <Logo />

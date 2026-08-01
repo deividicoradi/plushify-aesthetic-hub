@@ -51,6 +51,19 @@ const Auth = () => {
     capturePendingReferralFromUrl();
   }, []);
 
+  // Quando o usuário confirma o e-mail (o clique abre, obrigatoriamente, uma
+  // nova aba), essa aba avisa via localStorage. Aqui a aba original recupera
+  // a sessão e segue o fluxo sem o usuário precisar fazer nada.
+  useEffect(() => {
+    const onConfirmed = async (e: StorageEvent) => {
+      if (e.key !== 'plushify:email-confirmed') return;
+      const { data } = await supabase.auth.getSession();
+      if (data.session) navigate('/dashboard', { replace: true });
+    };
+    window.addEventListener('storage', onConfirmed);
+    return () => window.removeEventListener('storage', onConfirmed);
+  }, [navigate]);
+
   useEffect(() => {
     // Verificar se o usuário já está logado ao carregar a página
     if (user) {
@@ -156,7 +169,7 @@ const Auth = () => {
             privacy_version: PRIVACY_VERSION,
             ...(referralCode ? { referral_code: referralCode } : {}),
           },
-          emailRedirectTo: `${window.location.origin}/dashboard`
+          emailRedirectTo: `${window.location.origin}/auth/confirmado`
         }
       });
       
