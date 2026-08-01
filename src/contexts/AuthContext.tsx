@@ -126,6 +126,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             
             if (event === 'SIGNED_IN') {
               analytics.login();
+              // Aviso por e-mail a cada login — dispara já na senha aceita
+              // (aal1), não depois do 2FA, pra avisar o dono mesmo quando o
+              // invasor não passa do segundo fator. Fire-and-forget: nunca
+              // deve travar ou falhar o login por causa do e-mail.
+              supabase.rpc('notify_login', { p_user_agent: navigator.userAgent }).then(({ error }) => {
+                if (error && import.meta.env.DEV) console.error('[AUTH] notify_login falhou:', error);
+              });
             }
           } else {
             setUserContext({ id: '' });
