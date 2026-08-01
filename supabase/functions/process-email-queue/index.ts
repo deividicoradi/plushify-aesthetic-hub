@@ -102,9 +102,13 @@ Deno.serve(async (req) => {
   // Defense in depth: verify_jwt=true already requires a valid JWT at the
   // gateway layer. This adds an explicit role check so only service-role
   // callers can trigger queue processing.
+  // Supabase's new-format secret keys (sb_secret_*) are opaque, not JWTs, so
+  // accept an exact match against the project's service role key as well —
+  // otherwise every cron invocation is rejected with 403 after key rotation.
   const token = authHeader.slice('Bearer '.length).trim()
   const claims = parseJwtClaims(token)
-  if (claims?.role !== 'service_role') {
+  const isServiceRoleKey = token === supabaseServiceKey
+  if (!isServiceRoleKey && claims?.role !== 'service_role') {
     return new Response(
       JSON.stringify({ error: 'Forbidden' }),
       { status: 403, headers: { 'Content-Type': 'application/json' } }
