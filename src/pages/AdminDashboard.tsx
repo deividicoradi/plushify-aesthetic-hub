@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Users, UserPlus, DollarSign, UserMinus, ShieldAlert, Layers, AlertTriangle, Ticket } from 'lucide-react';
+import { Users, UserPlus, DollarSign, UserMinus, ShieldAlert, Layers, AlertTriangle, Ticket, LifeBuoy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,6 +13,7 @@ import { AdminAuditTable } from '@/components/admin/AdminAuditTable';
 import { AdminRevenueChart } from '@/components/admin/AdminRevenueChart';
 import { AdminPendingIssues } from '@/components/admin/AdminPendingIssues';
 import { AdminCoupons } from '@/components/admin/AdminCoupons';
+import { AdminSupport } from '@/components/admin/AdminSupport';
 
 interface OverviewStats {
   total_users: number;
@@ -251,7 +252,7 @@ const AdminDashboard: React.FC = () => {
     >
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
         <div className="overflow-x-auto -mx-1 px-1">
-          <TabsList className="grid grid-cols-5 w-full min-w-[520px] sm:min-w-0 h-auto">
+          <TabsList className="grid grid-cols-6 w-full min-w-[620px] sm:min-w-0 h-auto">
             <TabsTrigger value="overview" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
               <Layers className="w-4 h-4 shrink-0" />
               <span>Visão Geral</span>
@@ -271,6 +272,10 @@ const AdminDashboard: React.FC = () => {
             <TabsTrigger value="coupons" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
               <Ticket className="w-4 h-4 shrink-0" />
               <span>Cupons</span>
+            </TabsTrigger>
+            <TabsTrigger value="support" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
+              <LifeBuoy className="w-4 h-4 shrink-0" />
+              <span>Suporte</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -460,6 +465,10 @@ const AdminDashboard: React.FC = () => {
 
         <TabsContent value="coupons" className="space-y-4 sm:space-y-6">
           <AdminCoupons />
+        </TabsContent>
+
+        <TabsContent value="support" className="space-y-4 sm:space-y-6">
+          <AdminSupport />
         </TabsContent>
       </Tabs>
 

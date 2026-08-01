@@ -1,7 +1,9 @@
 import React from 'react';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, MessageSquare } from 'lucide-react';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 import { HelpContent } from '@/components/help/HelpContent';
+import { SupportTickets } from '@/components/help/SupportTickets';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SEO } from '@/components/SEO';
 
 const HelpCenter = () => {
@@ -16,7 +18,24 @@ const HelpCenter = () => {
         description="Encontre respostas, tutoriais e suporte para usar o Plushify."
         path="/app/help"
       />
-      <HelpContent />
+      <Tabs defaultValue="help" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="help" className="gap-2">
+            <HelpCircle className="w-4 h-4" />
+            Ajuda
+          </TabsTrigger>
+          <TabsTrigger value="support" className="gap-2">
+            <MessageSquare className="w-4 h-4" />
+            Meus Chamados
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="help">
+          <HelpContent />
+        </TabsContent>
+        <TabsContent value="support">
+          <SupportTickets />
+        </TabsContent>
+      </Tabs>
     </ResponsiveLayout>
   );
 };
