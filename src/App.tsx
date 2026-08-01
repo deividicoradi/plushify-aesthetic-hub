@@ -36,6 +36,7 @@ const Cookies = lazy(() => import("./pages/Cookies"));
 const Product = lazy(() => import("./pages/Product"));
 const About = lazy(() => import("./pages/About"));
 const Updates = lazy(() => import("./pages/Updates"));
+const EmailConfirmed = lazy(() => import("./pages/EmailConfirmed"));
 const PublicBooking = lazy(() => import("./pages/PublicBooking"));
 
 // Lazy-loaded protected pages (code-splitting)
@@ -94,6 +95,7 @@ const AppContent = () => {
       <Route path="/about" element={LazyPublic(<About />)} />
       <Route path="/planos" element={LazyPublic(<Plans />)} />
       <Route path="/auth" element={LazyPublic(<Auth />)} />
+      <Route path="/auth/confirmado" element={LazyPublic(<EmailConfirmed />)} />
       <Route path="/signup" element={LazyPublic(<Signup />)} />
       <Route path="/terms" element={LazyPublic(<Terms />)} />
       <Route path="/privacy" element={LazyPublic(<Privacy />)} />
