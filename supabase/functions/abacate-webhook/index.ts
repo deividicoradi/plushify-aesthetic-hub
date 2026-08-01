@@ -75,6 +75,34 @@ const log = (step: string, details?: unknown) => {
   console.log(`[ABACATE-WEBHOOK] ${step}${suffix}`)
 }
 
+// Persiste falhas reais (pagamento recebido mas não ativado/revogado) em
+// public.webhook_failures, visível no painel admin em Pendências — antes
+// só existiam nos logs de produção. Nunca deixa uma falha ao logar quebrar
+// o fluxo principal do webhook.
+const logWebhookFailure = async (params: {
+  eventType: string | null
+  externalId: string | null
+  errorMessage: string
+  payload?: unknown
+}) => {
+  try {
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+    await admin.from('webhook_failures').insert({
+      source: 'abacate_webhook',
+      event_type: params.eventType,
+      external_id: params.externalId,
+      error_message: params.errorMessage,
+      payload: params.payload ?? null,
+    })
+  } catch (e) {
+    console.error('[ABACATE-WEBHOOK] falha ao registrar em webhook_failures', e)
+  }
+}
+
 const ACTIVATION_EVENTS = new Set(['subscription.completed', 'subscription.renewed', 'checkout.completed', 'transparent.completed'])
 
 // CONFIRMADO via https://docs.abacatepay.com/pages/webhooks (2026-07-23): a AbacatePay
@@ -187,6 +215,12 @@ Deno.serve(async (req) => {
           externalId: cancelExternalId,
           sub,
         })
+        await logWebhookFailure({
+          eventType,
+          externalId: cancelExternalId,
+          errorMessage: 'Revogação recebida mas não foi possível identificar o usuário',
+          payload: body,
+        })
         return new Response(JSON.stringify({ received: true, error: 'unresolved_metadata' }), {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -214,6 +248,12 @@ Deno.serve(async (req) => {
 
       if (cancelError) {
         log('ERROR: rpc cancel_subscription falhou', cancelError)
+        await logWebhookFailure({
+          eventType,
+          externalId: cancelExternalId ?? cancelSubscriptionId ?? cancelCheckoutId,
+          errorMessage: `rpc cancel_subscription falhou: ${cancelError.message ?? JSON.stringify(cancelError)}`,
+          payload: body,
+        })
         return new Response(JSON.stringify({ error: 'Failed to revoke subscription' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -263,7 +303,15 @@ Deno.serve(async (req) => {
         sub,
       })
       // 200 para o AbacatePay não retentar um payload que nunca vai conseguirmos processar
-      // sem antes corrigir o código — mas fica registrado no log para investigação.
+      // sem antes corrigir o código — mas fica registrado para investigação (log +
+      // webhook_failures, visível no admin). Caso mais grave possível: pagamento
+      // aprovado que nunca vira plano ativo.
+      await logWebhookFailure({
+        eventType,
+        externalId,
+        errorMessage: 'Pagamento recebido mas não foi possível identificar usuário/plano no payload',
+        payload: body,
+      })
       return new Response(JSON.stringify({ received: true, error: 'unresolved_metadata' }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -380,6 +428,12 @@ Deno.serve(async (req) => {
 
     if (error) {
       log('ERROR: rpc start_subscription falhou', error)
+      await logWebhookFailure({
+        eventType,
+        externalId: externalId ?? abacateCheckoutId ?? abacateSubscriptionId,
+        errorMessage: `rpc start_subscription falhou: ${error.message ?? JSON.stringify(error)}`,
+        payload: body,
+      })
       // 500 para o AbacatePay tentar reenviar o evento depois.
       return new Response(JSON.stringify({ error: 'Failed to activate subscription' }), {
         status: 500,
@@ -457,6 +511,11 @@ Deno.serve(async (req) => {
     })
   } catch (err) {
     log('UNEXPECTED ERROR', err instanceof Error ? err.message : String(err))
+    await logWebhookFailure({
+      eventType: null,
+      externalId: null,
+      errorMessage: `Erro inesperado: ${err instanceof Error ? err.message : String(err)}`,
+    })
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

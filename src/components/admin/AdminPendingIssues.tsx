@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, MailWarning } from 'lucide-react';
+import { AlertTriangle, MailWarning, ShieldAlert } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,9 +17,20 @@ interface FailedEmailRow {
   created_at: string;
 }
 
+interface WebhookFailureRow {
+  id: string;
+  source: string;
+  event_type: string | null;
+  external_id: string | null;
+  error_message: string;
+  created_at: string;
+}
+
 interface PendingIssues {
   failed_emails: FailedEmailRow[];
   failed_emails_count: number;
+  webhook_failures: WebhookFailureRow[];
+  webhook_failures_count: number;
 }
 
 const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -62,16 +73,74 @@ export const AdminPendingIssues: React.FC = () => {
   }
 
   const rows = data?.failed_emails ?? [];
+  const webhookRows = data?.webhook_failures ?? [];
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <Card className="bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-950/30 dark:to-pink-950/30 border-red-200 dark:border-red-800 w-full sm:max-w-xs">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">E-mails com falha (30 dias)</CardTitle>
-          <MailWarning className="h-3 w-3 sm:h-4 sm:w-4 text-red-600 dark:text-red-400" />
+      <div className="flex flex-wrap gap-4">
+        <Card className="bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-950/30 dark:to-pink-950/30 border-red-200 dark:border-red-800 w-full sm:max-w-xs">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">E-mails com falha (30 dias)</CardTitle>
+            <MailWarning className="h-3 w-3 sm:h-4 sm:w-4 text-red-600 dark:text-red-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-red-900 dark:text-red-100">{data?.failed_emails_count ?? 0}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200 dark:border-orange-800 w-full sm:max-w-xs">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-300">Falhas de pagamento (30 dias)</CardTitle>
+            <ShieldAlert className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 dark:text-orange-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-orange-900 dark:text-orange-100">{data?.webhook_failures_count ?? 0}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-primary" />
+            Falhas no webhook de pagamento
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Pagamentos recebidos da AbacatePay que não conseguiram ativar/revogar o plano do cliente nos últimos 30 dias — antes só apareciam nos logs de produção. Requer investigação manual (pode significar cliente pagou e não recebeu acesso).
+          </p>
         </CardHeader>
         <CardContent>
-          <div className="text-xl sm:text-2xl font-bold text-red-900 dark:text-red-100">{data?.failed_emails_count ?? 0}</div>
+          <div className="rounded-md border border-border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Evento</TableHead>
+                  <TableHead>Referência</TableHead>
+                  <TableHead>Erro</TableHead>
+                  <TableHead>Quando</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {webhookRows.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="font-medium">{row.event_type ?? '—'}</TableCell>
+                    <TableCell className="text-muted-foreground max-w-[160px] truncate">{row.external_id ?? '—'}</TableCell>
+                    <TableCell className="text-muted-foreground max-w-[320px] truncate">{row.error_message}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(row.created_at).toLocaleString('pt-BR')}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {webhookRows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                      Nenhuma falha de pagamento nos últimos 30 dias.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
