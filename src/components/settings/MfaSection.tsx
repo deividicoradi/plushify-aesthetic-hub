@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -38,6 +37,8 @@ export function MfaSection() {
   const [verifying, setVerifying] = useState(false);
   const [factorToRemove, setFactorToRemove] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [removeCode, setRemoveCode] = useState('');
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   const loadFactors = async () => {
     setLoadingFactors(true);
@@ -115,19 +116,36 @@ export function MfaSection() {
     }
   };
 
-  const handleRemoveFactor = async () => {
+  // Desativar exige provar posse do autenticador de novo (challenge+verify
+  // real, validado pelo Supabase) em vez de só um clique de confirmação —
+  // senão uma sessão sequestrada bastaria para derrubar a proteção.
+  const handleRemoveFactor = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!factorToRemove) return;
     setRemoving(true);
+    setRemoveError(null);
     try {
+      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: factorToRemove });
+      if (challengeError) throw challengeError;
+
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: factorToRemove,
+        challengeId: challenge.id,
+        code: removeCode,
+      });
+      if (verifyError) throw verifyError;
+
       const { error } = await supabase.auth.mfa.unenroll({ factorId: factorToRemove });
       if (error) throw error;
       toast({ title: 'Autenticação em duas etapas desativada' });
+      setFactorToRemove(null);
+      setRemoveCode('');
       await loadFactors();
     } catch (err: any) {
-      toast({ title: 'Erro ao remover', description: err.message, variant: 'destructive' });
+      setRemoveError(err.message || 'Código inválido. Tente novamente.');
+      setRemoveCode('');
     } finally {
       setRemoving(false);
-      setFactorToRemove(null);
     }
   };
 
@@ -222,20 +240,50 @@ export function MfaSection() {
         </div>
       )}
 
-      <AlertDialog open={!!factorToRemove} onOpenChange={(open) => !open && setFactorToRemove(null)}>
+      <AlertDialog
+        open={!!factorToRemove}
+        onOpenChange={(open) => {
+          if (!open) {
+            setFactorToRemove(null);
+            setRemoveCode('');
+            setRemoveError(null);
+          }
+        }}
+      >
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Desativar autenticação em duas etapas?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Sua conta ficará protegida só pela senha. Recomendado apenas se você estiver trocando de app autenticador.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={removing}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemoveFactor} disabled={removing} className="bg-destructive hover:bg-destructive/90">
-              {removing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Desativar'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
+          <form onSubmit={handleRemoveFactor}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Desativar autenticação em duas etapas?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Sua conta ficará protegida só pela senha. Para confirmar, digite o código atual do seu app autenticador.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-2 py-2">
+              <Label htmlFor="mfa-remove-code">Código de 6 dígitos</Label>
+              <Input
+                id="mfa-remove-code"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="000000"
+                autoFocus
+                value={removeCode}
+                onChange={(e) => setRemoveCode(e.target.value.replace(/\D/g, ''))}
+                disabled={removing}
+                required
+              />
+              {removeError && <p className="text-sm text-destructive">{removeError}</p>}
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel type="button" disabled={removing}>Cancelar</AlertDialogCancel>
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={removing || removeCode.length !== 6}
+              >
+                {removing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Desativar'}
+              </Button>
+            </AlertDialogFooter>
+          </form>
         </AlertDialogContent>
       </AlertDialog>
     </div>
