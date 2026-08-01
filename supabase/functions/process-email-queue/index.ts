@@ -252,6 +252,16 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Once a send with a given idempotency_key fails, the API permanently
+      // rejects every retry that reuses it with 409 "already failed" — found
+      // in production 2026-08-01 (login_notification stuck in an infinite
+      // 409 loop until DLQ). Vary the key per retry so a real transient
+      // failure can actually be retried instead of being wedged forever.
+      const effectiveIdempotencyKey =
+        failedAttempts > 0 && payload.idempotency_key
+          ? `${payload.idempotency_key}-r${failedAttempts}`
+          : payload.idempotency_key
+
       try {
         await sendLovableEmail(
           {
@@ -264,7 +274,7 @@ Deno.serve(async (req) => {
             text: payload.text,
             purpose: payload.purpose,
             label: payload.label,
-            idempotency_key: payload.idempotency_key,
+            idempotency_key: effectiveIdempotencyKey,
             unsubscribe_token: payload.unsubscribe_token,
             message_id: payload.message_id,
           },
