@@ -133,6 +133,17 @@ Deno.serve(async (req) => {
       })
     }
 
+    // ban_duration só bloqueia login NOVO — o access token já emitido nesta
+    // sessão continua válido (JWT é stateless) até expirar sozinho (~1h por
+    // padrão), mesmo com o usuário banido. Revoga a sessão agora pra fechar
+    // essa janela, em vez de confiar só no ban. Nunca falha a exclusão em si
+    // por causa disso (dados já foram anonimizados e o login já foi banido).
+    try {
+      await admin.auth.admin.signOut(token, 'global')
+    } catch (signOutEx) {
+      console.error('[DELETE-ACCOUNT] falha ao revogar sessão ativa', signOutEx instanceof Error ? signOutEx.message : String(signOutEx))
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
