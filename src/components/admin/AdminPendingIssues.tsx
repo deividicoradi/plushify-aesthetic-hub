@@ -253,7 +253,7 @@ export const AdminPendingIssues: React.FC = () => {
                     <TableCell className="font-medium">{row.recipient_email}</TableCell>
                     <TableCell className="text-muted-foreground">{row.template_name}</TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_VARIANT[row.status] ?? 'outline'}>
+                      <Badge variant={STATUS_VARIANT[row.status] ?? 'outline'} className="whitespace-nowrap">
                         {STATUS_LABELS[row.status] ?? row.status}
                       </Badge>
                     </TableCell>
