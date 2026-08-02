@@ -64,7 +64,10 @@ REVOKE EXECUTE ON FUNCTION public.submit_support_event(text, text, text, text) F
 GRANT EXECUTE ON FUNCTION public.submit_support_event(text, text, text, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.submit_support_event(text, text, text, text) TO service_role;
 
--- get_my_support_events passa a retornar priority.
+-- get_my_support_events passa a retornar priority (muda o tipo de retorno,
+-- CREATE OR REPLACE não permite — precisa dropar antes).
+DROP FUNCTION IF EXISTS public.get_my_support_events();
+
 CREATE OR REPLACE FUNCTION public.get_my_support_events()
 RETURNS TABLE(
   id uuid,
@@ -100,7 +103,10 @@ REVOKE EXECUTE ON FUNCTION public.get_my_support_events() FROM anon;
 GRANT EXECUTE ON FUNCTION public.get_my_support_events() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_my_support_events() TO service_role;
 
--- admin_list_support_events passa a retornar priority.
+-- admin_list_support_events passa a retornar priority (muda o tipo de
+-- retorno, precisa dropar antes).
+DROP FUNCTION IF EXISTS public.admin_list_support_events(text, integer, integer);
+
 CREATE OR REPLACE FUNCTION public.admin_list_support_events(
   p_status text DEFAULT NULL,
   p_limit integer DEFAULT 100,
