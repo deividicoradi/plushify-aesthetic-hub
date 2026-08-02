@@ -106,18 +106,28 @@ Deno.serve(async (req) => {
 
     // Desativa o login (ban de ~100 anos) e troca o e-mail por um placeholder
     // único — não faz hard delete pra não cascatear em dados financeiros que
-    // precisam ser mantidos.
+    // precisam ser mantidos. Em try/catch próprio (em vez de só checar
+    // {error}) porque uma falha de validação do GoTrue pode vir como
+    // exceção lançada, não só como {error} retornado.
     const anonymizedEmail = `deleted-${userId}@deleted.plushify.com.br`
-    const { error: banError } = await admin.auth.admin.updateUser(userId, {
-      ban_duration: '876000h',
-      email: anonymizedEmail,
-      email_confirm: true,
-      phone: '',
-      user_metadata: {},
-    })
-    if (banError) {
-      console.error('[DELETE-ACCOUNT] falha ao desativar login', banError)
-      return new Response(JSON.stringify({ error: 'Dados anonimizados, mas falha ao desativar o login. Contate o suporte.' }), {
+    try {
+      const { error: banError } = await admin.auth.admin.updateUser(userId, {
+        ban_duration: '876000h',
+        email: anonymizedEmail,
+        email_confirm: true,
+        user_metadata: {},
+      })
+      if (banError) {
+        console.error('[DELETE-ACCOUNT] falha ao desativar login', banError)
+        return new Response(JSON.stringify({ error: `Dados anonimizados, mas falha ao desativar o login: ${banError.message}. Contate o suporte.` }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    } catch (banEx) {
+      const msg = banEx instanceof Error ? banEx.message : String(banEx)
+      console.error('[DELETE-ACCOUNT] exceção ao desativar login', msg)
+      return new Response(JSON.stringify({ error: `Dados anonimizados, mas falha ao desativar o login: ${msg}. Contate o suporte.` }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -128,8 +138,9 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    console.error('[DELETE-ACCOUNT] erro inesperado', err instanceof Error ? err.message : String(err))
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[DELETE-ACCOUNT] erro inesperado', msg)
+    return new Response(JSON.stringify({ error: `Internal server error: ${msg}` }), {
       status: 500,
       headers: { ...buildCorsHeaders(req.headers.get('origin')), 'Content-Type': 'application/json' },
     })
