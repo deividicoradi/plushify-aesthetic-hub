@@ -56,10 +56,10 @@ BEGIN
   JOIN auth.users u ON u.id = s.user_id
   LEFT JOIN public.profiles p ON p.id = s.user_id
   LEFT JOIN LATERAL (
-    SELECT reason, comment, created_at
-    FROM public.subscription_cancellation_feedback
-    WHERE subscription_id = s.id
-    ORDER BY created_at DESC
+    SELECT cf.reason AS reason, cf.comment AS comment, cf.created_at AS created_at
+    FROM public.subscription_cancellation_feedback cf
+    WHERE cf.subscription_id = s.id
+    ORDER BY cf.created_at DESC
     LIMIT 1
   ) f ON true
   WHERE s.status IN ('cancelled', 'refunded', 'disputed')
