@@ -30,6 +30,8 @@ interface CancellationRow {
   reason: string | null;
   comment: string | null;
   feedback_created_at: string | null;
+  deleted_email_before: string | null;
+  deleted_at: string | null;
 }
 
 const REASON_LABELS: Record<string, string> = {
@@ -122,8 +124,19 @@ export const AdminCancellations: React.FC = () => {
                       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelected(row)}
                     >
                       <TableCell className="font-medium">
-                        <div>{row.user_name || '—'}</div>
-                        <div className="text-xs text-muted-foreground">{row.user_email}</div>
+                        {row.deleted_email_before ? (
+                          <>
+                            <div className="flex items-center gap-1.5">
+                              <Badge variant="destructive" className="text-[10px]">Conta excluída</Badge>
+                            </div>
+                            <div className="text-xs">{row.deleted_email_before}</div>
+                          </>
+                        ) : (
+                          <>
+                            <div>{row.user_name || '—'}</div>
+                            <div className="text-xs text-muted-foreground">{row.user_email}</div>
+                          </>
+                        )}
                       </TableCell>
                       <TableCell className="text-muted-foreground">{row.user_phone || '—'}</TableCell>
                       <TableCell className="text-muted-foreground">{kindLabel(row)}</TableCell>
@@ -157,14 +170,25 @@ export const AdminCancellations: React.FC = () => {
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{selected?.user_name || selected?.user_email}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <span>{selected?.deleted_email_before || selected?.user_name || selected?.user_email}</span>
+              {selected?.deleted_email_before && (
+                <Badge variant="destructive" className="text-[10px]">Conta excluída</Badge>
+              )}
+            </DialogTitle>
           </DialogHeader>
           {selected && (
             <div className="space-y-4 text-sm">
+              {selected.deleted_email_before && (
+                <p className="text-xs text-muted-foreground rounded-md bg-destructive/10 p-2">
+                  Essa conta foi excluída pelo cliente{selected.deleted_at ? ` em ${new Date(selected.deleted_at).toLocaleString('pt-BR')}` : ''}.
+                  Use o e-mail original acima pra contato — o e-mail de login foi anonimizado.
+                </p>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">E-mail</p>
-                  <p className="font-medium break-all">{selected.user_email}</p>
+                  <p className="text-xs text-muted-foreground mb-1">E-mail {selected.deleted_email_before ? 'original' : ''}</p>
+                  <p className="font-medium break-all">{selected.deleted_email_before || selected.user_email}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Telefone</p>
