@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_log: {
+        Row: {
+          email_before: string
+          id: string
+          requested_at: string
+          user_id: string
+        }
+        Insert: {
+          email_before: string
+          id?: string
+          requested_at?: string
+          user_id: string
+        }
+        Update: {
+          email_before?: string
+          id?: string
+          requested_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_actions_log: {
         Row: {
           action: string
@@ -1872,6 +1893,7 @@ export type Database = {
           event_number: number
           event_type: string
           id: string
+          priority: string
           status: string
           title: string
           updated_at: string
@@ -1884,6 +1906,7 @@ export type Database = {
           event_number?: number
           event_type: string
           id?: string
+          priority?: string
           status?: string
           title: string
           updated_at?: string
@@ -1896,6 +1919,7 @@ export type Database = {
           event_number?: number
           event_type?: string
           id?: string
+          priority?: string
           status?: string
           title?: string
           updated_at?: string
@@ -2262,6 +2286,7 @@ export type Database = {
           event_number: number
           event_type: string
           id: string
+          priority: string
           status: string
           title: string
           total_count: number
@@ -2283,6 +2308,14 @@ export type Database = {
           total_count: number
         }[]
       }
+      admin_mark_subscription_refunded: {
+        Args: {
+          p_reason?: string
+          p_subscription_id: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       admin_promote_to_admin: { Args: { p_email: string }; Returns: Json }
       admin_revoke_admin: { Args: { p_user_id: string }; Returns: Json }
       admin_update_support_event_status: {
@@ -2291,9 +2324,11 @@ export type Database = {
           p_event_id: string
           p_new_status: string
           p_note?: string
+          p_priority?: string
         }
         Returns: undefined
       }
+      anonymize_account_data: { Args: never; Returns: undefined }
       calculate_upgrade_quote: {
         Args: {
           p_new_billing_interval: string
@@ -2359,6 +2394,7 @@ export type Database = {
         Returns: number
       }
       ensure_loyalty_defaults: { Args: never; Returns: undefined }
+      get_account_deletion_status: { Args: never; Returns: Json }
       get_available_slots: {
         Args: {
           p_date: string
@@ -2436,6 +2472,7 @@ export type Database = {
           event_number: number
           event_type: string
           id: string
+          priority: string
           status: string
           title: string
           updated_at: string
@@ -2562,7 +2599,12 @@ export type Database = {
         Returns: string
       }
       submit_support_event: {
-        Args: { p_description: string; p_event_type: string; p_title: string }
+        Args: {
+          p_description: string
+          p_event_type: string
+          p_priority?: string
+          p_title: string
+        }
         Returns: number
       }
       subscribe_to_newsletter: {
