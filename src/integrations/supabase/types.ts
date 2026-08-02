@@ -926,6 +926,21 @@ export type Database = {
           },
         ]
       }
+      login_notification_state: {
+        Row: {
+          last_notified_at: string
+          user_id: string
+        }
+        Insert: {
+          last_notified_at: string
+          user_id: string
+        }
+        Update: {
+          last_notified_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       loyalty_challenges: {
         Row: {
           audience: string
@@ -1811,6 +1826,83 @@ export type Database = {
         }
         Relationships: []
       }
+      support_event_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          event_id: string
+          id: string
+          new_status: string
+          note: string | null
+          old_status: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          new_status: string
+          note?: string | null
+          old_status?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          new_status?: string
+          note?: string | null
+          old_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_event_history_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "support_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_events: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          description: string
+          event_number: number
+          event_type: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          description: string
+          event_number?: number
+          event_type: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          description?: string
+          event_number?: number
+          event_type?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -2006,6 +2098,36 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_failures: {
+        Row: {
+          created_at: string
+          error_message: string
+          event_type: string | null
+          external_id: string | null
+          id: string
+          payload: Json | null
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          error_message: string
+          event_type?: string | null
+          external_id?: string | null
+          id?: string
+          payload?: Json | null
+          source: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string
+          event_type?: string | null
+          external_id?: string | null
+          id?: string
+          payload?: Json | null
+          source?: string
+        }
+        Relationships: []
+      }
       working_hours: {
         Row: {
           auto_complete_appointments: boolean
@@ -2082,6 +2204,10 @@ export type Database = {
           new_signups: number
         }[]
       }
+      admin_get_support_event_detail: {
+        Args: { p_event_id: string }
+        Returns: Json
+      }
       admin_list_actions_log: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -2127,6 +2253,22 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_support_events: {
+        Args: { p_limit?: number; p_offset?: number; p_status?: string }
+        Returns: {
+          admin_response: string
+          created_at: string
+          description: string
+          event_number: number
+          event_type: string
+          id: string
+          status: string
+          title: string
+          total_count: number
+          updated_at: string
+          user_email: string
+        }[]
+      }
       admin_list_upgrade_consents: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -2143,6 +2285,15 @@ export type Database = {
       }
       admin_promote_to_admin: { Args: { p_email: string }; Returns: Json }
       admin_revoke_admin: { Args: { p_user_id: string }; Returns: Json }
+      admin_update_support_event_status: {
+        Args: {
+          p_admin_response?: string
+          p_event_id: string
+          p_new_status: string
+          p_note?: string
+        }
+        Returns: undefined
+      }
       calculate_upgrade_quote: {
         Args: {
           p_new_billing_interval: string
@@ -2276,6 +2427,20 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_my_support_events: {
+        Args: never
+        Returns: {
+          admin_response: string
+          created_at: string
+          description: string
+          event_number: number
+          event_type: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }[]
+      }
       get_or_create_booking_slug: { Args: never; Returns: string }
       get_or_create_referral_code: { Args: never; Returns: string }
       get_professionals_secure: {
@@ -2328,6 +2493,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      mfa_satisfied: { Args: never; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -2337,6 +2503,7 @@ export type Database = {
         }
         Returns: number
       }
+      notify_login: { Args: { p_user_agent?: string }; Returns: undefined }
       purchase_client_package: {
         Args: {
           p_client_id: string
@@ -2393,6 +2560,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      submit_support_event: {
+        Args: { p_description: string; p_event_type: string; p_title: string }
+        Returns: number
       }
       subscribe_to_newsletter: {
         Args: { p_email: string; p_name: string }
