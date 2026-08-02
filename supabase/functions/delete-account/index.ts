@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
     // exceção lançada, não só como {error} retornado.
     const anonymizedEmail = `deleted-${userId}@deleted.plushify.com.br`
     try {
-      const { error: banError } = await admin.auth.admin.updateUser(userId, {
+      const { error: banError } = await admin.auth.admin.updateUserById(userId, {
         ban_duration: '876000h',
         email: anonymizedEmail,
         email_confirm: true,
