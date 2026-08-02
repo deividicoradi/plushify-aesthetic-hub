@@ -236,6 +236,12 @@ export const PlansSection = () => {
                       Pagar com PIX
                     </Button>
                   )}
+
+                  {(plan.id === 'professional' || plan.id === 'premium') && (
+                    <p className="text-[11px] text-muted-foreground text-center leading-snug">
+                      Direito de arrependimento: cancele em até 7 dias e receba 100% do valor de volta.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             );

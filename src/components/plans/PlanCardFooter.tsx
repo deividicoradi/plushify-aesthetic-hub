@@ -97,6 +97,12 @@ export const PlanCardFooter: React.FC<PlanCardFooterProps> = ({
             Pagar com PIX
           </Button>
         )}
+
+        {(plan.id === 'professional' || plan.id === 'premium') && !(plan.current && !plan.trial) && (
+          <p className="text-[11px] text-muted-foreground text-center leading-snug">
+            Direito de arrependimento: cancele em até 7 dias e receba 100% do valor de volta.
+          </p>
+        )}
       </div>
     </CardFooter>
   );

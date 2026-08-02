@@ -47,6 +47,9 @@ export const CTASection: React.FC<CTASectionProps> = ({
             Comece hoje mesmo • Sem cartão de crédito • Cancele quando quiser
           </div>
         </div>
+        <p className="text-[11px] text-muted-foreground">
+          Direito de arrependimento: cancele em até 7 dias e receba 100% do valor de volta.
+        </p>
       </CardContent>
     </Card>
   );

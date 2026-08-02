@@ -106,6 +106,10 @@ export const UpgradeQuoteDialog: React.FC<UpgradeQuoteDialogProps> = ({
               válido por 1 {cycleLabel === 'ano' ? 'ano' : 'mês'} a partir de hoje.
             </p>
 
+            <p className="text-[11px] text-muted-foreground">
+              Direito de arrependimento: cancele em até 7 dias e receba 100% do valor de volta.
+            </p>
+
             <div className="flex items-start gap-2">
               <Checkbox
                 id="upgrade-terms"
