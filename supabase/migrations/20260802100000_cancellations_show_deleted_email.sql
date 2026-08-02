@@ -6,6 +6,8 @@
 -- aqui. Junta account_deletion_log e mostra o e-mail original quando
 -- existir, igual já funciona na tela de Clientes.
 
+DROP FUNCTION IF EXISTS public.admin_list_cancellations_and_refunds();
+
 CREATE OR REPLACE FUNCTION public.admin_list_cancellations_and_refunds()
 RETURNS TABLE(
   subscription_id uuid,
