@@ -25,6 +25,8 @@ interface CustomerRow {
   trial_ends_at: string | null;
   signed_up_at: string;
   last_sign_in_at: string | null;
+  deleted_email_before: string | null;
+  deleted_at: string | null;
   total_count: number;
 }
 
@@ -125,6 +127,7 @@ export const AdminCustomersTable: React.FC = () => {
       const csv = convertToCSV(
         rowsToExport.map((r) => ({
           email: r.email,
+          email_original_antes_da_exclusao: r.deleted_email_before ?? '',
           plano: r.plan_type ? (PLAN_LABELS[r.plan_type] ?? r.plan_type) : '',
           status: STATUS_LABELS[r.status] ?? r.status,
           metodo: r.payment_kind ?? '',
@@ -290,7 +293,21 @@ export const AdminCustomersTable: React.FC = () => {
                 className="cursor-pointer"
                 onClick={() => setSelectedUserId(row.user_id)}
               >
-                <TableCell className="font-medium">{row.email}</TableCell>
+                <TableCell className="font-medium">
+                  {row.deleted_email_before ? (
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="destructive" className="text-[10px]">Conta excluída</Badge>
+                      </div>
+                      <p className="text-sm">{row.deleted_email_before}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Excluída em {row.deleted_at ? new Date(row.deleted_at).toLocaleDateString('pt-BR') : '—'} · contate por esse e-mail para tentar recuperar
+                      </p>
+                    </div>
+                  ) : (
+                    row.email
+                  )}
+                </TableCell>
                 <TableCell>{row.plan_type ? (PLAN_LABELS[row.plan_type] ?? row.plan_type) : '—'}</TableCell>
                 <TableCell>
                   <Badge variant={STATUS_VARIANT[row.status] ?? 'outline'}>{STATUS_LABELS[row.status] ?? row.status}</Badge>

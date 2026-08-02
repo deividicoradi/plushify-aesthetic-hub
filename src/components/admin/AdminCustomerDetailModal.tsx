@@ -51,6 +51,8 @@ interface CustomerDetail {
   signed_up_at: string;
   subscriptions: SubscriptionEntry[];
   upgrades: UpgradeEntry[];
+  deleted_email_before: string | null;
+  deleted_at: string | null;
 }
 
 const PLAN_LABELS: Record<string, string> = {
@@ -206,6 +208,18 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
         {data && (
           <ScrollArea className="flex-1 -mx-2 px-2">
             <div className="space-y-6 py-2">
+              {data.deleted_email_before && (
+                <div className="rounded-md border border-destructive/50 bg-destructive/5 p-3 space-y-1">
+                  <h4 className="text-sm font-semibold text-destructive">Conta excluída pelo cliente</h4>
+                  <p className="text-sm">
+                    E-mail original: <span className="font-medium">{data.deleted_email_before}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Excluída em {data.deleted_at ? new Date(data.deleted_at).toLocaleString('pt-BR') : '—'} — use esse e-mail pra contatar o cliente.
+                  </p>
+                </div>
+              )}
+
               {hasActiveSubscription && (
                 <div className="rounded-md border border-border p-3 space-y-3">
                   <h4 className="text-sm font-semibold">Ações administrativas</h4>
