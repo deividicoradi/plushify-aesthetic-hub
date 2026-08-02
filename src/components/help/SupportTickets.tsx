@@ -71,7 +71,6 @@ export const SupportTickets: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [eventType, setEventType] = useState<string>('correcao');
-  const [priority, setPriority] = useState<string>('normal');
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['my-support-events'],
@@ -88,7 +87,6 @@ export const SupportTickets: React.FC = () => {
         p_title: title,
         p_description: description,
         p_event_type: eventType,
-        p_priority: priority,
       });
       if (error) throw error;
       return data as number;
@@ -98,7 +96,6 @@ export const SupportTickets: React.FC = () => {
       setTitle('');
       setDescription('');
       setEventType('correcao');
-      setPriority('normal');
       queryClient.invalidateQueries({ queryKey: ['my-support-events'] });
     },
     onError: (err: Error) => {
@@ -137,34 +134,19 @@ export const SupportTickets: React.FC = () => {
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Tipo</Label>
-                <Select value={eventType} onValueChange={setEventType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="correcao">Correção (algo quebrado)</SelectItem>
-                    <SelectItem value="pequena_correcao">Pequena correção</SelectItem>
-                    <SelectItem value="melhoria">Melhoria</SelectItem>
-                    <SelectItem value="pequena_melhoria">Pequena melhoria</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Urgência</Label>
-                <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="urgente">🔴 Urgente</SelectItem>
-                    <SelectItem value="atencao">🟡 Atenção</SelectItem>
-                    <SelectItem value="normal">⚪ Normal</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <Select value={eventType} onValueChange={setEventType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="correcao">Correção (algo quebrado)</SelectItem>
+                  <SelectItem value="pequena_correcao">Pequena correção</SelectItem>
+                  <SelectItem value="melhoria">Melhoria</SelectItem>
+                  <SelectItem value="pequena_melhoria">Pequena melhoria</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="support-description">Descrição</Label>
