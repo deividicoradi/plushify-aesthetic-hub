@@ -22,6 +22,8 @@ interface ConsentRow {
   charge_now_cents: number;
   accepted_at: string;
   total_count: number;
+  deleted_email_before: string | null;
+  deleted_at: string | null;
 }
 
 interface ActionLogRow {
@@ -33,6 +35,8 @@ interface ActionLogRow {
   details: Record<string, unknown> | null;
   created_at: string;
   total_count: number;
+  target_deleted_email_before: string | null;
+  target_deleted_at: string | null;
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -251,7 +255,16 @@ export const AdminAuditTable: React.FC = () => {
           <TableBody>
             {(data ?? []).map((row) => (
               <TableRow key={row.id}>
-                <TableCell className="font-medium">{row.email}</TableCell>
+                <TableCell className="font-medium">
+                  {row.deleted_email_before ? (
+                    <>
+                      <Badge variant="destructive" className="text-[10px] mb-0.5">Conta excluída</Badge>
+                      <div className="text-xs">{row.deleted_email_before}</div>
+                    </>
+                  ) : (
+                    row.email
+                  )}
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1.5 text-sm">
                     <span>{PLAN_LABELS[row.previous_plan_type] ?? row.previous_plan_type}</span>
@@ -337,7 +350,16 @@ export const AdminAuditTable: React.FC = () => {
                         <TableCell>
                           <Badge variant="outline">{ACTION_LABELS[row.action] ?? row.action}</Badge>
                         </TableCell>
-                        <TableCell className="font-medium">{row.target_email}</TableCell>
+                        <TableCell className="font-medium">
+                          {row.target_deleted_email_before ? (
+                            <>
+                              <Badge variant="destructive" className="text-[10px] mb-0.5">Conta excluída</Badge>
+                              <div className="text-xs">{row.target_deleted_email_before}</div>
+                            </>
+                          ) : (
+                            row.target_email
+                          )}
+                        </TableCell>
                         <TableCell className="text-muted-foreground max-w-[220px] truncate">{row.reason ?? '—'}</TableCell>
                         <TableCell className="text-muted-foreground">
                           {new Date(row.created_at).toLocaleString('pt-BR')}
