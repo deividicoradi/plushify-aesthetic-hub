@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, Clock, Ban } from 'lucide-react';
+import { ArrowRight, Clock, Ban, RotateCcw } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,8 @@ interface SubscriptionEntry {
   trial_ends_at: string | null;
   cancel_at_period_end: boolean;
   updated_at: string;
+  abacate_checkout_id: string | null;
+  abacate_subscription_id: string | null;
 }
 
 interface UpgradeEntry {
@@ -83,6 +85,8 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
   const [extendDays, setExtendDays] = useState('7');
   const [extendReason, setExtendReason] = useState('');
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [refundTarget, setRefundTarget] = useState<SubscriptionEntry | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-customer-detail', userId],
@@ -144,6 +148,38 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
     const isValid = await verifyPassword(password);
     if (!isValid) return;
     forceCancelMutation.mutate(reason ?? '');
+  };
+
+  const refundMutation = useMutation({
+    mutationFn: async (reason: string) => {
+      if (!refundTarget) return;
+      const { data, error } = await supabase.functions.invoke('abacate-refund-checkout', {
+        body: { target_user_id: userId, subscription_id: refundTarget.id, reason },
+      });
+      if (error) throw new Error(error.message ?? 'Erro ao comunicar com a AbacatePay');
+      if (data?.error) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+      return data;
+    },
+    onSuccess: () => {
+      toast({ title: 'Reembolso realizado', description: 'O acesso pago desse cliente foi revogado.' });
+      setRefundDialogOpen(false);
+      setRefundTarget(null);
+      invalidateAfterAction();
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Erro ao reembolsar', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  const handleRefundConfirm = async (password: string, reason?: string) => {
+    const isValid = await verifyPassword(password);
+    if (!isValid) return;
+    refundMutation.mutate(reason ?? '');
+  };
+
+  const openRefundDialog = (sub: SubscriptionEntry) => {
+    setRefundTarget(sub);
+    setRefundDialogOpen(true);
   };
 
   const hasActiveTrial = data?.subscriptions.some((s) => s.status === 'trial_active');
@@ -241,6 +277,17 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
                           <span>Valor: {formatBRL(s.plan_amount_paid)}</span>
                           {s.payment_kind && <span>Método: {s.payment_kind}</span>}
                         </div>
+                        {s.abacate_checkout_id && s.status !== 'refunded' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => openRefundDialog(s)}
+                          >
+                            <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+                            Reembolsar
+                          </Button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -282,6 +329,16 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
         title={`Cancelar assinatura de ${data?.email ?? 'cliente'}?`}
         description="Isso encerra o acesso pago desse cliente imediatamente e fica registrado na auditoria. Não cancela nem estorna nada na AbacatePay — só encerra o acesso no nosso sistema. Digite o código do seu app autenticador e o motivo pra confirmar."
         isLoading={isVerifying || forceCancelMutation.isPending}
+        requireReason={true}
+      />
+
+      <PasswordDialog
+        open={refundDialogOpen}
+        onOpenChange={(open) => { setRefundDialogOpen(open); if (!open) setRefundTarget(null); }}
+        onConfirm={handleRefundConfirm}
+        title={`Reembolsar ${data?.email ?? 'cliente'}?`}
+        description="Estorna o valor dessa cobrança direto na AbacatePay (dinheiro volta pro cliente de verdade) e revoga o acesso pago na hora. Ação irreversível pelo sistema. Digite o código do seu app autenticador e o motivo pra confirmar."
+        isLoading={isVerifying || refundMutation.isPending}
         requireReason={true}
       />
     </Dialog>

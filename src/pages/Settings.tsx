@@ -12,6 +12,7 @@ import { FeatureGuard } from '@/components/FeatureGuard';
 import { TeamManagement as TeamManagementComponent } from '@/components/premium/TeamManagement';
 import { ReferralPanel } from '@/components/settings/ReferralPanel';
 import { MfaSection } from '@/components/settings/MfaSection';
+import { DeleteAccountSection } from '@/components/settings/DeleteAccountSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useProfile } from '@/hooks/useProfile';
@@ -433,6 +434,8 @@ const Settings = () => {
                 )}
               </CardContent>
             </Card>
+
+            <DeleteAccountSection />
           </TabsContent>
 
           <TabsContent value="team" className="space-y-6">

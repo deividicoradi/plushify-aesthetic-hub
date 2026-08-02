@@ -41,6 +41,7 @@ const ACTION_LABELS: Record<string, string> = {
   promote_admin: 'Promoveu a admin',
   revoke_admin: 'Revogou admin',
   create_coupon: 'Criou cupom',
+  refund_subscription: 'Reembolsou assinatura',
 };
 
 const PLAN_LABELS: Record<string, string> = {
