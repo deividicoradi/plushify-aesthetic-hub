@@ -75,6 +75,10 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | '
   fechado: 'default',
 };
 
+const STATUS_CLASS: Record<string, string> = {
+  concluido: 'bg-emerald-600 hover:bg-emerald-600 text-white',
+};
+
 const PRIORITY_LABELS: Record<string, string> = {
   urgente: 'Urgente',
   atencao: 'Atenção',
@@ -213,7 +217,7 @@ export const AdminSupport: React.FC = () => {
                         <Badge className={PRIORITY_CLASS[row.priority]}>{PRIORITY_LABELS[row.priority] ?? row.priority}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={STATUS_VARIANT[row.status] ?? 'outline'}>{STATUS_LABELS[row.status] ?? row.status}</Badge>
+                        <Badge variant={STATUS_VARIANT[row.status] ?? 'outline'} className={STATUS_CLASS[row.status]}>{STATUS_LABELS[row.status] ?? row.status}</Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {new Date(row.updated_at).toLocaleString('pt-BR')}
