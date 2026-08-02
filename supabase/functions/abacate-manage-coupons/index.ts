@@ -133,7 +133,11 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           code,
           discountKind: body.discountKind,
-          discount: body.discount,
+          // AbacatePay espera o desconto percentual multiplicado por 100
+          // (ex: 10% deve ser enviado como 1000) — mesma lógica de "centavos"
+          // já aplicada pelo frontend para FIXED. Confirmado em teste real:
+          // enviar 10 criou um cupom de 0.1% no painel deles.
+          discount: body.discountKind === 'PERCENTAGE' ? Math.round(body.discount * 100) : body.discount,
           notes: body.notes || undefined,
           maxRedeems: body.maxRedeems ?? -1,
         }),

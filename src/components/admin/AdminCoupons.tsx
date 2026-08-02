@@ -37,7 +37,7 @@ interface Coupon {
 }
 
 const formatDiscount = (c: Coupon) =>
-  c.discountKind === 'PERCENTAGE' ? `${c.discount}%` : (c.discount / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  c.discountKind === 'PERCENTAGE' ? `${c.discount / 100}%` : (c.discount / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   ACTIVE: 'default',
