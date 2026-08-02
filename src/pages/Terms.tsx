@@ -26,7 +26,7 @@ const Terms = () => {
               Termos de Serviço
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Última atualização: 28 de julho de 2026
+              Última atualização: 02 de agosto de 2026
             </p>
           </div>
 
@@ -149,7 +149,31 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-foreground mb-4">6. Limitação de Responsabilidade</h2>
+                <h2 className="text-2xl font-semibold text-foreground mb-4">6. Direito de Arrependimento</h2>
+                <div className="text-muted-foreground space-y-4">
+                  <p>
+                    Nos termos do artigo 49 do Código de Defesa do Consumidor (Lei nº 8.078/1990), por se tratar
+                    de contratação realizada fora do estabelecimento comercial (à distância, pela internet), você
+                    tem o direito de desistir da assinatura em até <strong>7 (sete) dias corridos</strong> a
+                    contar da data da contratação (assinatura do plano) ou do recebimento/ativação do serviço, o
+                    que ocorrer por último.
+                  </p>
+                  <p>
+                    Exercido esse direito dentro do prazo, você recebe o <strong>reembolso integral</strong> dos
+                    valores pagos, sem qualquer desconto ou penalidade, monetariamente atualizados quando
+                    aplicável. Para solicitar, abra um chamado em Central de Ajuda → Meus Chamados, ou entre em
+                    contato pelo e-mail de suporte informado ao final destes Termos.
+                  </p>
+                  <p>
+                    Esse direito de arrependimento é distinto e não se confunde com as políticas de cancelamento
+                    e reembolso proporcional descritas na seção 5 acima, que se aplicam a cancelamentos feitos
+                    <strong> após</strong> o prazo de 7 dias.
+                  </p>
+                </div>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold text-foreground mb-4">7. Limitação de Responsabilidade</h2>
                 <div className="text-muted-foreground space-y-4">
                   <p>
                     O Plushify fornece a plataforma "como está" e não garante que será livre de erros ou 
@@ -164,7 +188,7 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-foreground mb-4">7. Suspensão e Cancelamento</h2>
+                <h2 className="text-2xl font-semibold text-foreground mb-4">8. Suspensão e Cancelamento</h2>
                 <div className="text-muted-foreground space-y-4">
                   <p>
                     Reservamo-nos o direito de suspender ou encerrar o acesso de qualquer usuário que viole 
@@ -178,7 +202,7 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-foreground mb-4">8. Alterações dos Termos</h2>
+                <h2 className="text-2xl font-semibold text-foreground mb-4">9. Alterações dos Termos</h2>
                 <div className="text-muted-foreground space-y-4">
                   <p>
                     Podemos atualizar estes Termos periodicamente para refletir mudanças em nossos serviços 

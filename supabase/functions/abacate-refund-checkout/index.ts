@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
 
     const { data: subRow, error: subError } = await admin
       .from('user_subscriptions')
-      .select('id, abacate_checkout_id, status')
+      .select('id, abacate_checkout_id, status, started_at')
       .eq('id', subscriptionId)
       .eq('user_id', targetUserId)
       .maybeSingle()
@@ -104,6 +104,19 @@ Deno.serve(async (req) => {
     }
     if (subRow.status === 'refunded') {
       return new Response(JSON.stringify({ error: 'Essa assinatura já foi reembolsada' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    // CDC Art. 49 (direito de arrependimento): reembolso garantido só dentro
+    // de 7 dias corridos da contratação — checado aqui ANTES de chamar a
+    // AbacatePay pra nunca estornar dinheiro de verdade e só depois falhar
+    // (a RPC admin_mark_subscription_refunded também trava isso, em
+    // profundidade, caso essa função seja chamada por outro caminho).
+    const startedAt = subRow.started_at ? new Date(subRow.started_at) : null
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
+    if (!startedAt || Date.now() - startedAt.getTime() > sevenDaysMs) {
+      return new Response(JSON.stringify({ error: 'Prazo legal de arrependimento (7 dias, Art. 49 do CDC) já passou — essa assinatura não pode mais ser reembolsada por este botão' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })

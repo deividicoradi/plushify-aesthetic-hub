@@ -73,6 +73,16 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | '
 const formatBRL = (cents: number | null) =>
   cents == null ? '—' : (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+const REFUND_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+const refundDaysLeft = (startedAt: string) => {
+  const deadline = new Date(startedAt).getTime() + REFUND_WINDOW_MS;
+  const msLeft = deadline - Date.now();
+  return Math.ceil(msLeft / (24 * 60 * 60 * 1000));
+};
+
+const isWithinRefundWindow = (startedAt: string) => refundDaysLeft(startedAt) > 0;
+
 const formatDateTime = (d: string | null) => (d ? new Date(d).toLocaleString('pt-BR') : '—');
 
 interface Props {
@@ -292,15 +302,26 @@ export const AdminCustomerDetailModal: React.FC<Props> = ({ userId, onOpenChange
                           {s.payment_kind && <span>Método: {s.payment_kind}</span>}
                         </div>
                         {s.abacate_checkout_id && s.status !== 'refunded' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => openRefundDialog(s)}
-                          >
-                            <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
-                            Reembolsar
-                          </Button>
+                          isWithinRefundWindow(s.started_at) ? (
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => openRefundDialog(s)}
+                              >
+                                <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+                                Reembolsar
+                              </Button>
+                              <span className="text-xs text-muted-foreground">
+                                Direito de arrependimento (Art. 49 CDC): {refundDaysLeft(s.started_at)} dia(s) restante(s)
+                              </span>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              Prazo de reembolso (7 dias, Art. 49 CDC) expirado em {formatDateTime(new Date(new Date(s.started_at).getTime() + REFUND_WINDOW_MS).toISOString())}
+                            </p>
+                          )
                         )}
                       </div>
                     ))}
