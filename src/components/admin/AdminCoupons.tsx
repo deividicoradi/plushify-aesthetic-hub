@@ -27,7 +27,6 @@ import { toast } from '@/hooks/use-toast';
 
 interface Coupon {
   id: string;
-  code: string;
   discount: number;
   discountKind: 'PERCENTAGE' | 'FIXED';
   notes: string | null;
@@ -211,7 +210,7 @@ export const AdminCoupons: React.FC = () => {
               <TableBody>
                 {(data ?? []).map((c) => (
                   <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.code}</TableCell>
+                    <TableCell className="font-medium">{c.id}</TableCell>
                     <TableCell>{formatDiscount(c)}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {c.redeemsCount}{c.maxRedeems >= 0 ? ` / ${c.maxRedeems}` : ' / ∞'}
