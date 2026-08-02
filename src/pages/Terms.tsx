@@ -120,15 +120,21 @@ const Terms = () => {
                   </p>
                   <p>
                     <strong>Política de Cancelamento (planos mensais):</strong> Você pode cancelar sua assinatura
-                    a qualquer momento através das configurações da sua conta. O cancelamento será efetivo no
-                    final do período de cobrança atual, sem multa.
+                    a qualquer momento, diretamente pelas configurações da sua conta, sem burocracia e sem
+                    precisar justificar o motivo. O cancelamento interrompe a renovação e você mantém acesso até
+                    o final do período de cobrança já pago, sem qualquer multa.
                   </p>
                   <p>
                     <strong>Política de Cancelamento (planos anuais):</strong> Ao cancelar um plano anual antes
-                    do fim do período contratado, você recebe o reembolso proporcional aos meses ainda não
-                    utilizados, descontada uma multa de 50% sobre esse valor proporcional a título de
-                    cancelamento antecipado. Exemplo: ao cancelar no 3º mês de um plano anual de 12 meses,
-                    os 9 meses restantes seriam reembolsados, mas com 50% de desconto sobre esse valor.
+                    do fim dos 12 meses contratados, você recebe o reembolso proporcional aos meses ainda não
+                    utilizados, descontada uma multa rescisória de 10% sobre esse valor proporcional (nunca
+                    sobre o valor total do contrato), em linha com o princípio da proporcionalidade adotado pela
+                    jurisprudência sobre multas de cancelamento antecipado. Exemplo: em um plano anual de
+                    R$ 1.200,00 (R$ 100,00/mês), ao cancelar após 4 meses de uso, restam 8 meses (R$ 800,00);
+                    a multa de 10% equivale a R$ 80,00, e o reembolso é de R$ 720,00. A solicitação de
+                    cancelamento é registrada imediatamente pelas configurações da sua conta; o reembolso
+                    proporcional é processado por nossa equipe em seguida, sem cobrança de novas parcelas a
+                    partir do pedido.
                   </p>
                   <p>
                     <strong>Reajuste de Preços:</strong> Os valores dos planos podem ser reajustados a qualquer

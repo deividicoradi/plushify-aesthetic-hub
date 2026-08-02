@@ -13,6 +13,7 @@ import { TeamManagement as TeamManagementComponent } from '@/components/premium/
 import { ReferralPanel } from '@/components/settings/ReferralPanel';
 import { MfaSection } from '@/components/settings/MfaSection';
 import { DeleteAccountSection } from '@/components/settings/DeleteAccountSection';
+import { CancelSubscriptionSection } from '@/components/settings/CancelSubscriptionSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useProfile } from '@/hooks/useProfile';
@@ -434,6 +435,8 @@ const Settings = () => {
                 )}
               </CardContent>
             </Card>
+
+            <CancelSubscriptionSection />
 
             <DeleteAccountSection />
           </TabsContent>
