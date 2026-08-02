@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { LifeBuoy, Loader2 } from 'lucide-react';
+import { LifeBuoy, Loader2, CheckCircle2, RotateCcw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -124,19 +124,21 @@ export const AdminSupport: React.FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async () => {
-      if (!selectedId || !newStatus) return;
+    mutationFn: async (status: string) => {
+      if (!selectedId || !status) return;
       const { error } = await supabase.rpc('admin_update_support_event_status', {
         p_event_id: selectedId,
-        p_new_status: newStatus,
+        p_new_status: status,
         p_note: note.trim() || null,
         p_admin_response: adminResponse.trim() || null,
         p_priority: newPriority || null,
       });
       if (error) throw error;
+      return status;
     },
-    onSuccess: () => {
-      toast({ title: 'Chamado atualizado' });
+    onSuccess: (status) => {
+      toast({ title: status === 'concluido' ? 'Chamado marcado como concluído' : 'Chamado atualizado' });
+      if (status) setNewStatus(status);
       setNote('');
       queryClient.invalidateQueries({ queryKey: ['admin-support-events'] });
       queryClient.invalidateQueries({ queryKey: ['admin-support-event-detail', selectedId] });
@@ -305,14 +307,37 @@ export const AdminSupport: React.FC = () => {
                 />
               </div>
 
-              <Button
-                onClick={() => updateMutation.mutate()}
-                disabled={updateMutation.isPending || !newStatus}
-                className="w-full"
-              >
-                {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Salvar
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => updateMutation.mutate(newStatus)}
+                  disabled={updateMutation.isPending || !newStatus}
+                  className="flex-1"
+                >
+                  {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Salvar
+                </Button>
+                {detail.status === 'concluido' ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => updateMutation.mutate('em_analise')}
+                    disabled={updateMutation.isPending}
+                    className="gap-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Reabrir
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="gap-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white"
+                    onClick={() => updateMutation.mutate('concluido')}
+                    disabled={updateMutation.isPending}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Marcar como concluído
+                  </Button>
+                )}
+              </div>
 
               {detail.history.length > 0 && (
                 <div className="space-y-2 pt-2 border-t border-border">
