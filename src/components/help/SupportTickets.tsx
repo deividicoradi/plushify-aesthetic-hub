@@ -25,6 +25,7 @@ interface SupportEvent {
   description: string;
   event_type: string;
   status: string;
+  priority: string;
   admin_response: string | null;
   created_at: string;
   updated_at: string;
@@ -53,11 +54,24 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | '
   fechado: 'default',
 };
 
+const PRIORITY_LABELS: Record<string, string> = {
+  urgente: 'Urgente',
+  atencao: 'Atenção',
+  normal: 'Normal',
+};
+
+const PRIORITY_CLASS: Record<string, string> = {
+  urgente: 'bg-red-600 text-white hover:bg-red-600',
+  atencao: 'bg-yellow-500 text-black hover:bg-yellow-500',
+  normal: 'bg-muted text-muted-foreground hover:bg-muted',
+};
+
 export const SupportTickets: React.FC = () => {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [eventType, setEventType] = useState<string>('correcao');
+  const [priority, setPriority] = useState<string>('normal');
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['my-support-events'],
@@ -74,6 +88,7 @@ export const SupportTickets: React.FC = () => {
         p_title: title,
         p_description: description,
         p_event_type: eventType,
+        p_priority: priority,
       });
       if (error) throw error;
       return data as number;
@@ -83,6 +98,7 @@ export const SupportTickets: React.FC = () => {
       setTitle('');
       setDescription('');
       setEventType('correcao');
+      setPriority('normal');
       queryClient.invalidateQueries({ queryKey: ['my-support-events'] });
     },
     onError: (err: Error) => {
@@ -121,19 +137,34 @@ export const SupportTickets: React.FC = () => {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label>Tipo</Label>
-              <Select value={eventType} onValueChange={setEventType}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="correcao">Correção (algo quebrado)</SelectItem>
-                  <SelectItem value="pequena_correcao">Pequena correção</SelectItem>
-                  <SelectItem value="melhoria">Melhoria</SelectItem>
-                  <SelectItem value="pequena_melhoria">Pequena melhoria</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Tipo</Label>
+                <Select value={eventType} onValueChange={setEventType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="correcao">Correção (algo quebrado)</SelectItem>
+                    <SelectItem value="pequena_correcao">Pequena correção</SelectItem>
+                    <SelectItem value="melhoria">Melhoria</SelectItem>
+                    <SelectItem value="pequena_melhoria">Pequena melhoria</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Urgência</Label>
+                <Select value={priority} onValueChange={setPriority}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="urgente">🔴 Urgente</SelectItem>
+                    <SelectItem value="atencao">🟡 Atenção</SelectItem>
+                    <SelectItem value="normal">⚪ Normal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="support-description">Descrição</Label>
@@ -174,7 +205,10 @@ export const SupportTickets: React.FC = () => {
                 <div key={ev.id} className="rounded-lg border border-border p-3 space-y-1.5">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <p className="text-sm font-semibold">#{ev.event_number} · {ev.title}</p>
-                    <Badge variant={STATUS_VARIANT[ev.status] ?? 'outline'}>{STATUS_LABELS[ev.status] ?? ev.status}</Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge className={PRIORITY_CLASS[ev.priority]}>{PRIORITY_LABELS[ev.priority] ?? ev.priority}</Badge>
+                      <Badge variant={STATUS_VARIANT[ev.status] ?? 'outline'}>{STATUS_LABELS[ev.status] ?? ev.status}</Badge>
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">{TYPE_LABELS[ev.event_type] ?? ev.event_type} · aberto em {new Date(ev.created_at).toLocaleDateString('pt-BR')}</p>
                   <p className="text-sm text-muted-foreground">{ev.description}</p>

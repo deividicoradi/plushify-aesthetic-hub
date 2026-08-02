@@ -31,6 +31,7 @@ interface SupportEventRow {
   description: string;
   event_type: string;
   status: string;
+  priority: string;
   admin_response: string | null;
   created_at: string;
   updated_at: string;
@@ -74,6 +75,20 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | '
   fechado: 'default',
 };
 
+const PRIORITY_LABELS: Record<string, string> = {
+  urgente: 'Urgente',
+  atencao: 'Atenção',
+  normal: 'Normal',
+};
+
+const PRIORITY_CLASS: Record<string, string> = {
+  urgente: 'bg-red-600 text-white hover:bg-red-600',
+  atencao: 'bg-yellow-500 text-black hover:bg-yellow-500',
+  normal: 'bg-muted text-muted-foreground hover:bg-muted',
+};
+
+const PRIORITY_ORDER = ['urgente', 'atencao', 'normal'];
+
 const ALL_VALUE = 'all';
 
 export const AdminSupport: React.FC = () => {
@@ -81,6 +96,7 @@ export const AdminSupport: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>(ALL_VALUE);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newStatus, setNewStatus] = useState<string>('');
+  const [newPriority, setNewPriority] = useState<string>('');
   const [note, setNote] = useState('');
   const [adminResponse, setAdminResponse] = useState('');
 
@@ -115,6 +131,7 @@ export const AdminSupport: React.FC = () => {
         p_new_status: newStatus,
         p_note: note.trim() || null,
         p_admin_response: adminResponse.trim() || null,
+        p_priority: newPriority || null,
       });
       if (error) throw error;
     },
@@ -132,6 +149,7 @@ export const AdminSupport: React.FC = () => {
   const openDetail = (row: SupportEventRow) => {
     setSelectedId(row.id);
     setNewStatus(row.status);
+    setNewPriority(row.priority);
     setAdminResponse(row.admin_response ?? '');
     setNote('');
   };
@@ -170,6 +188,7 @@ export const AdminSupport: React.FC = () => {
                     <TableHead>Título</TableHead>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Tipo</TableHead>
+                    <TableHead>Urgência</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Atualizado</TableHead>
                   </TableRow>
@@ -189,6 +208,9 @@ export const AdminSupport: React.FC = () => {
                       <TableCell className="text-muted-foreground">{row.user_email}</TableCell>
                       <TableCell className="text-muted-foreground">{TYPE_LABELS[row.event_type] ?? row.event_type}</TableCell>
                       <TableCell>
+                        <Badge className={PRIORITY_CLASS[row.priority]}>{PRIORITY_LABELS[row.priority] ?? row.priority}</Badge>
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={STATUS_VARIANT[row.status] ?? 'outline'}>{STATUS_LABELS[row.status] ?? row.status}</Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
@@ -198,7 +220,7 @@ export const AdminSupport: React.FC = () => {
                   ))}
                   {(data ?? []).length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-6">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-6">
                         Nenhum chamado encontrado.
                       </TableCell>
                     </TableRow>
@@ -213,8 +235,11 @@ export const AdminSupport: React.FC = () => {
       <Dialog open={!!selectedId} onOpenChange={(open) => !open && setSelectedId(null)}>
         <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {detail ? `Chamado #${detail.event_number} · ${detail.title}` : 'Carregando...'}
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <span>{detail ? `Chamado #${detail.event_number} · ${detail.title}` : 'Carregando...'}</span>
+              {detail && (
+                <Badge className={PRIORITY_CLASS[detail.priority]}>{PRIORITY_LABELS[detail.priority] ?? detail.priority}</Badge>
+              )}
             </DialogTitle>
           </DialogHeader>
 
@@ -241,6 +266,19 @@ export const AdminSupport: React.FC = () => {
                     <SelectContent>
                       {STATUS_ORDER.map((s) => (
                         <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">Alterar urgência</p>
+                  <Select value={newPriority} onValueChange={setNewPriority}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRIORITY_ORDER.map((p) => (
+                        <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
