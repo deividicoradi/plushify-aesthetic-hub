@@ -172,7 +172,7 @@ const Privacy = () => {
               <div className="bg-background rounded-lg p-4 border border-primary/20">
                 <p><strong>E-mail:</strong> plushify.suporte@gmail.com</p>
                 <p><strong>Encarregado de Dados (DPO):</strong> Equipe Plushify</p>
-                <p><strong>Razão Social / CNPJ:</strong> [a ser incluído após abertura da empresa]</p>
+                <p><strong>Razão Social / CNPJ:</strong> 68.354.573 DEIVIDI CORADI — 68.354.573/0001-57</p>
               </div>
             </div>
 
