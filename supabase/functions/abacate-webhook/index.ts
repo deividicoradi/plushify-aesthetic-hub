@@ -467,7 +467,7 @@ Deno.serve(async (req) => {
                 <tr><td style="padding: 8px 0; color: #666;">Crédito do plano anterior</td><td style="text-align: right;">− ${formatBRL(creditCents)}</td></tr>
                 <tr><td style="padding: 8px 0; color: #666; border-top: 1px solid #eee;">Valor cobrado hoje</td><td style="text-align: right; border-top: 1px solid #eee; font-weight: bold;">${formatBRL(chargedCents)}</td></tr>
               </table>
-              ${checkoutObj.receiptUrl ? `<p><a href="${checkoutObj.receiptUrl}">Ver comprovante de pagamento</a></p>` : ''}
+              ${typeof checkoutObj.receiptUrl === 'string' && checkoutObj.receiptUrl.startsWith('https://') ? `<p><a href="${checkoutObj.receiptUrl}">Ver comprovante de pagamento</a></p>` : ''}
               <p style="color: #999; font-size: 12px; margin-top: 24px;">Dúvidas? Responda este e-mail ou fale com plushify.suporte@gmail.com</p>
             </div>
           `
