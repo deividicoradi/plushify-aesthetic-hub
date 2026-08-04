@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,6 +41,7 @@ interface ProspectFormDialogProps {
 export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, onOpenChange, prospect, onSuccess }) => {
   const [saving, setSaving] = useState(false);
   const [prospectors, setProspectors] = useState<Prospector[]>([]);
+  const [duplicateWarning, setDuplicateWarning] = useState<{ field: string; name: string; status: string } | null>(null);
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -76,7 +78,23 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
     } else {
       setForm({ name: '', phone: '', email: '', origin: '', contact_channel: '', plan_interest: '', estimated_value: '', notes: '', prospector_id: '' });
     }
+    setDuplicateWarning(null);
   }, [prospect, open]);
+
+  const checkDuplicate = async (phone: string, email: string) => {
+    if (!phone.trim() && !email.trim()) {
+      setDuplicateWarning(null);
+      return;
+    }
+    const { data, error } = await supabase.rpc('admin_find_duplicate_prospect', {
+      p_phone: phone.trim() || null,
+      p_email: email.trim() || null,
+      p_exclude_id: prospect?.id || null,
+    });
+    if (error) return;
+    const match = (data || [])[0] as { name: string; status: string; matched_field: string } | undefined;
+    setDuplicateWarning(match ? { field: match.matched_field, name: match.name, status: match.status } : null);
+  };
 
   const handleSubmit = async () => {
     if (!form.name.trim()) return;
@@ -124,13 +142,35 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="prospect-phone">Telefone</Label>
-              <Input id="prospect-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="(00) 00000-0000" />
+              <Input
+                id="prospect-phone"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                onBlur={() => checkDuplicate(form.phone, form.email)}
+                placeholder="(00) 00000-0000"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="prospect-email">E-mail</Label>
-              <Input id="prospect-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@exemplo.com" />
+              <Input
+                id="prospect-email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onBlur={() => checkDuplicate(form.phone, form.email)}
+                placeholder="email@exemplo.com"
+              />
             </div>
           </div>
+
+          {duplicateWarning && (
+            <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-md p-3">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>
+                Já existe um prospect com esse {duplicateWarning.field === 'phone' ? 'telefone' : 'e-mail'}: <strong>{duplicateWarning.name}</strong> (status: {duplicateWarning.status}). Não será possível salvar até isso ser corrigido.
+              </span>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -195,7 +235,7 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={saving || !form.name.trim()}>
+          <Button onClick={handleSubmit} disabled={saving || !form.name.trim() || !!duplicateWarning}>
             {saving ? 'Salvando...' : prospect ? 'Salvar alterações' : 'Cadastrar prospect'}
           </Button>
         </DialogFooter>
