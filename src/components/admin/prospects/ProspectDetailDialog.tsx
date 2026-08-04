@@ -46,6 +46,7 @@ export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open
   const [lossReason, setLossReason] = useState('');
   const [showLossForm, setShowLossForm] = useState(false);
   const [purchaseValue, setPurchaseValue] = useState('');
+  const [convertedEmail, setConvertedEmail] = useState('');
   const [showConvertForm, setShowConvertForm] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -68,6 +69,7 @@ export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open
       setShowConvertForm(false);
       setLossReason('');
       setPurchaseValue('');
+      setConvertedEmail('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, prospect?.id]);
@@ -132,6 +134,7 @@ export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open
     setSaving(true);
     const { error } = await supabase.rpc('admin_convert_prospect', {
       p_id: prospect.id,
+      p_converted_email: convertedEmail.trim() || null,
       p_first_payment_value: purchaseValue ? Number(purchaseValue) : null,
     });
     setSaving(false);
@@ -177,7 +180,10 @@ export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open
               <div className="col-span-2"><span className="text-muted-foreground">Motivo da perda:</span> {prospect.loss_reason || '—'}</div>
             )}
             {prospect.status === 'convertido' && (
-              <div className="col-span-2"><span className="text-muted-foreground">Valor da primeira cobrança:</span> {prospect.first_payment_value != null ? `R$ ${prospect.first_payment_value.toFixed(2)}` : '—'}</div>
+              <>
+                <div className="col-span-2"><span className="text-muted-foreground">Valor da primeira cobrança:</span> {prospect.first_payment_value != null ? `R$ ${prospect.first_payment_value.toFixed(2)}` : '—'}</div>
+                <div className="col-span-2"><span className="text-muted-foreground">Conta vinculada:</span> {prospect.converted_user_email || 'não vinculada'}</div>
+              </>
             )}
             {prospect.notes && <div className="col-span-2"><span className="text-muted-foreground">Observações:</span> {prospect.notes}</div>}
           </div>
@@ -209,6 +215,9 @@ export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open
 
           {showConvertForm && (
             <div className="space-y-2 border border-emerald-600/30 rounded-lg p-3">
+              <Label htmlFor="converted-email">E-mail da conta assinante (opcional)</Label>
+              <Input id="converted-email" type="email" value={convertedEmail} onChange={(e) => setConvertedEmail(e.target.value)} placeholder="email@exemplo.com" />
+              <p className="text-xs text-muted-foreground">Se o dono já criou conta no Plushify, informe o e-mail pra vincular este prospect ao cliente real.</p>
               <Label htmlFor="purchase-value">Valor da primeira cobrança (opcional)</Label>
               <Input id="purchase-value" type="number" min="0" step="0.01" value={purchaseValue} onChange={(e) => setPurchaseValue(e.target.value)} placeholder="0,00" />
               <p className="text-xs text-muted-foreground">Marca este prospect como convertido em assinante.</p>

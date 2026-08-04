@@ -18,6 +18,7 @@ export type Prospect = {
   next_action_date: string | null;
   last_contact_at: string | null;
   converted_user_id: string | null;
+  converted_user_email: string | null;
   converted_at: string | null;
   first_payment_value: number | null;
   notes: string | null;
