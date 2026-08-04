@@ -26,7 +26,7 @@ const Terms = () => {
               Termos de Serviço
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Última atualização: 02 de agosto de 2026
+              Última atualização: 03 de agosto de 2026
             </p>
           </div>
 
@@ -194,7 +194,41 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-foreground mb-4">8. Suspensão e Cancelamento</h2>
+                <h2 className="text-2xl font-semibold text-foreground mb-4">8. Suporte, Manutenção e Correção de Falhas</h2>
+                <div className="text-muted-foreground space-y-4">
+                  <p>
+                    Nos empenhamos para manter a plataforma disponível e livre de falhas, mas, como qualquer
+                    sistema de software, o Plushify pode apresentar bugs ou indisponibilidades pontuais. Quando
+                    uma falha que compromete o funcionamento do serviço contratado (vício, nos termos do art. 18
+                    do Código de Defesa do Consumidor) é formalmente reportada por você através dos nossos
+                    canais de suporte, buscamos saná-la dentro do seguinte prazo, contado a partir da abertura
+                    do chamado:
+                  </p>
+                  <ul className="list-disc list-inside space-y-2 ml-4">
+                    <li><strong>Urgente</strong> (bloqueia o uso da plataforma): até 7 dias.</li>
+                    <li><strong>Atenção</strong> (afeta funcionalidade específica, sem bloquear o uso geral): até 15 dias.</li>
+                    <li><strong>Normal</strong> (impacto limitado ou solução alternativa disponível): até 30 dias.</li>
+                  </ul>
+                  <p>
+                    O prazo máximo de 30 dias observa o limite estabelecido pelo art. 18, §1º do CDC para
+                    sanar vícios de qualidade do serviço. Caso o prazo aplicável não seja cumprido, você pode
+                    exigir, à sua escolha: (i) reexecução do serviço; (ii) abatimento proporcional do valor pago;
+                    ou (iii) rescisão do contrato com devolução dos valores pagos, sem prejuízo de eventuais perdas
+                    e danos.
+                  </p>
+                  <p>
+                    Melhorias, novas funcionalidades e ajustes que não configuram vício do serviço contratado
+                    seguem nosso backlog de desenvolvimento e não estão sujeitos a este prazo.
+                  </p>
+                  <p>
+                    Manutenções programadas que exijam indisponibilidade temporária serão comunicadas com
+                    antecedência razoável sempre que possível.
+                  </p>
+                </div>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold text-foreground mb-4">9. Suspensão e Cancelamento</h2>
                 <div className="text-muted-foreground space-y-4">
                   <p>
                     Reservamo-nos o direito de suspender ou encerrar o acesso de qualquer usuário que viole 
@@ -208,7 +242,7 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-foreground mb-4">9. Alterações dos Termos</h2>
+                <h2 className="text-2xl font-semibold text-foreground mb-4">10. Alterações dos Termos</h2>
                 <div className="text-muted-foreground space-y-4">
                   <p>
                     Podemos atualizar estes Termos periodicamente para refletir mudanças em nossos serviços 
