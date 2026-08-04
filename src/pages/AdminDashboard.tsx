@@ -253,7 +253,7 @@ const AdminDashboard: React.FC = () => {
     >
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
         <div className="overflow-x-auto -mx-1 px-1">
-          <TabsList className="grid grid-cols-7 w-full min-w-[720px] sm:min-w-0 h-auto">
+          <TabsList className="grid grid-cols-6 w-full min-w-[640px] sm:min-w-0 h-auto">
             <TabsTrigger value="overview" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
               <Layers className="w-4 h-4 shrink-0" />
               <span>Visão Geral</span>
@@ -269,10 +269,6 @@ const AdminDashboard: React.FC = () => {
             <TabsTrigger value="issues" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>Pendências</span>
-            </TabsTrigger>
-            <TabsTrigger value="coupons" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
-              <Ticket className="w-4 h-4 shrink-0" />
-              <span>Cupons</span>
             </TabsTrigger>
             <TabsTrigger value="support" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
               <LifeBuoy className="w-4 h-4 shrink-0" />
@@ -457,7 +453,24 @@ const AdminDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="customers" className="space-y-4 sm:space-y-6">
-          <AdminCustomersTable />
+          <Tabs defaultValue="list" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="list" className="flex items-center gap-2">
+                <Users className="w-4 h-4 shrink-0" />
+                <span>Clientes</span>
+              </TabsTrigger>
+              <TabsTrigger value="coupons" className="flex items-center gap-2">
+                <Ticket className="w-4 h-4 shrink-0" />
+                <span>Cupons</span>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="list">
+              <AdminCustomersTable />
+            </TabsContent>
+            <TabsContent value="coupons">
+              <AdminCoupons />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-4 sm:space-y-6">
@@ -466,10 +479,6 @@ const AdminDashboard: React.FC = () => {
 
         <TabsContent value="issues" className="space-y-4 sm:space-y-6">
           <AdminPendingIssues />
-        </TabsContent>
-
-        <TabsContent value="coupons" className="space-y-4 sm:space-y-6">
-          <AdminCoupons />
         </TabsContent>
 
         <TabsContent value="support" className="space-y-4 sm:space-y-6">
