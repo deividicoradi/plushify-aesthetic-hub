@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Handshake, Plus, AlertTriangle } from 'lucide-react';
+import { Handshake, Plus, AlertTriangle, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,11 +18,13 @@ import {
 import { toast } from '@/components/ui/sonner';
 import { ProspectFormDialog } from './prospects/ProspectFormDialog';
 import { ProspectDetailDialog } from './prospects/ProspectDetailDialog';
+import { ProspectorsManageDialog } from './prospects/ProspectorsManageDialog';
 import {
   Prospect,
   ProspectStatus,
   StaleProspect,
   ProspectMetrics,
+  ProspectorStats,
   STATUS_LABELS,
   STATUS_CLASS,
 } from './prospects/types';
@@ -51,6 +53,7 @@ export const AdminProspects: React.FC = () => {
   const [editingProspect, setEditingProspect] = useState<Prospect | null>(null);
   const [selectedProspect, setSelectedProspect] = useState<Prospect | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [prospectorsOpen, setProspectorsOpen] = useState(false);
   const monthOptions = buildMonthOptions();
   const [selectedMonth, setSelectedMonth] = useState(monthOptions[0].value);
 
@@ -89,10 +92,25 @@ export const AdminProspects: React.FC = () => {
     },
   });
 
+  const { data: prospectorStats, isLoading: isLoadingProspectorStats } = useQuery({
+    queryKey: ['admin-prospector-stats', selectedMonth],
+    queryFn: async (): Promise<ProspectorStats[]> => {
+      const startDate = new Date(year, month - 1, 1).toISOString().slice(0, 10);
+      const endDate = new Date(year, month, 0).toISOString().slice(0, 10);
+      const { data, error } = await supabase.rpc('admin_get_prospector_stats', {
+        p_start_date: startDate,
+        p_end_date: endDate,
+      });
+      if (error) throw error;
+      return (data || []) as ProspectorStats[];
+    },
+  });
+
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['admin-prospects'] });
     queryClient.invalidateQueries({ queryKey: ['admin-prospects-stale'] });
     queryClient.invalidateQueries({ queryKey: ['admin-prospects-metrics'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-prospector-stats'] });
   };
 
   const handleSelect = (prospect: Prospect) => {
@@ -130,10 +148,16 @@ export const AdminProspects: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={() => { setEditingProspect(null); setFormOpen(true); }} className="gap-2 w-full sm:w-auto">
-              <Plus className="w-4 h-4" />
-              Novo prospect
-            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="outline" onClick={() => setProspectorsOpen(true)} className="gap-2 flex-1 sm:flex-none">
+                <Users className="w-4 h-4" />
+                Equipe
+              </Button>
+              <Button onClick={() => { setEditingProspect(null); setFormOpen(true); }} className="gap-2 flex-1 sm:flex-none">
+                <Plus className="w-4 h-4" />
+                Novo prospect
+              </Button>
+            </div>
           </div>
 
           {isLoading ? (
@@ -151,6 +175,7 @@ export const AdminProspects: React.FC = () => {
                     <TableHead>Telefone</TableHead>
                     <TableHead>Origem</TableHead>
                     <TableHead>Plano de interesse</TableHead>
+                    <TableHead>Prospectando</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Último contato</TableHead>
                   </TableRow>
@@ -162,6 +187,7 @@ export const AdminProspects: React.FC = () => {
                       <TableCell>{p.phone || '—'}</TableCell>
                       <TableCell className="capitalize">{p.origin || '—'}</TableCell>
                       <TableCell className="capitalize">{p.plan_interest || '—'}</TableCell>
+                      <TableCell>{p.prospector_name || '—'}</TableCell>
                       <TableCell><Badge className={`${STATUS_CLASS[p.status]} whitespace-nowrap`}>{STATUS_LABELS[p.status]}</Badge></TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {p.last_contact_at ? new Date(p.last_contact_at).toLocaleDateString('pt-BR') : 'Sem contato'}
@@ -242,6 +268,42 @@ export const AdminProspects: React.FC = () => {
               </CardContent></Card>
             </div>
           )}
+
+          <div className="space-y-2 pt-2">
+            <h3 className="text-sm font-semibold">Por pessoa</h3>
+            {isLoadingProspectorStats ? (
+              <div className="space-y-2">
+                {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+              </div>
+            ) : !prospectorStats || prospectorStats.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">Ninguém cadastrado na equipe ainda.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Prospectados</TableHead>
+                      <TableHead>Convertidos</TableHead>
+                      <TableHead>Perdidos</TableHead>
+                      <TableHead>Taxa de conversão</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {prospectorStats.map((s) => (
+                      <TableRow key={s.prospector_id}>
+                        <TableCell className="font-medium">{s.prospector_name}</TableCell>
+                        <TableCell>{s.total_prospected}</TableCell>
+                        <TableCell>{s.total_converted}</TableCell>
+                        <TableCell>{s.total_lost}</TableCell>
+                        <TableCell>{s.conversion_rate}%</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
 
@@ -256,6 +318,12 @@ export const AdminProspects: React.FC = () => {
         open={detailOpen}
         onOpenChange={setDetailOpen}
         prospect={selectedProspect}
+        onChanged={refresh}
+      />
+
+      <ProspectorsManageDialog
+        open={prospectorsOpen}
+        onOpenChange={setProspectorsOpen}
         onChanged={refresh}
       />
     </div>

@@ -21,6 +21,7 @@ import {
 import { toast } from '@/components/ui/sonner';
 import {
   Prospect,
+  Prospector,
   ProspectOrigin,
   ContactChannel,
   PlanInterest,
@@ -38,6 +39,7 @@ interface ProspectFormDialogProps {
 
 export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, onOpenChange, prospect, onSuccess }) => {
   const [saving, setSaving] = useState(false);
+  const [prospectors, setProspectors] = useState<Prospector[]>([]);
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -47,7 +49,16 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
     plan_interest: '' as PlanInterest | '',
     estimated_value: '',
     notes: '',
+    prospector_id: '' as string | '',
   });
+
+  useEffect(() => {
+    if (open) {
+      supabase.rpc('admin_list_prospectors').then(({ data, error }) => {
+        if (!error) setProspectors(((data || []) as Prospector[]).filter(p => p.active || p.id === prospect?.prospector_id));
+      });
+    }
+  }, [open, prospect?.prospector_id]);
 
   useEffect(() => {
     if (prospect) {
@@ -60,9 +71,10 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
         plan_interest: prospect.plan_interest ?? '',
         estimated_value: prospect.estimated_value != null ? String(prospect.estimated_value) : '',
         notes: prospect.notes ?? '',
+        prospector_id: prospect.prospector_id ?? '',
       });
     } else {
-      setForm({ name: '', phone: '', email: '', origin: '', contact_channel: '', plan_interest: '', estimated_value: '', notes: '' });
+      setForm({ name: '', phone: '', email: '', origin: '', contact_channel: '', plan_interest: '', estimated_value: '', notes: '', prospector_id: '' });
     }
   }, [prospect, open]);
 
@@ -79,6 +91,7 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
         p_plan_interest: form.plan_interest || null,
         p_estimated_value: form.estimated_value ? Number(form.estimated_value) : null,
         p_notes: form.notes.trim() || null,
+        p_prospector_id: form.prospector_id || null,
       };
 
       const { error } = prospect
@@ -160,6 +173,18 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
               <Label htmlFor="prospect-value">Valor estimado (R$/mês)</Label>
               <Input id="prospect-value" type="number" min="0" step="0.01" value={form.estimated_value} onChange={(e) => setForm({ ...form, estimated_value: e.target.value })} placeholder="0,00" />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Quem está prospectando</Label>
+            <Select value={form.prospector_id} onValueChange={(v) => setForm({ ...form, prospector_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecione uma pessoa" /></SelectTrigger>
+              <SelectContent>
+                {prospectors.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}{!p.active ? ' (inativo)' : ''}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

@@ -21,8 +21,26 @@ export type Prospect = {
   converted_at: string | null;
   first_payment_value: number | null;
   notes: string | null;
+  prospector_id: string | null;
+  prospector_name: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type Prospector = {
+  id: string;
+  name: string;
+  active: boolean;
+  created_at: string;
+};
+
+export type ProspectorStats = {
+  prospector_id: string;
+  prospector_name: string;
+  total_prospected: number;
+  total_converted: number;
+  total_lost: number;
+  conversion_rate: number;
 };
 
 export type ProspectInteraction = {
