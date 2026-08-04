@@ -13,8 +13,7 @@ import {
   CreditCard,
   TrendingUp,
   Crown,
-  PieChart,
-  Handshake
+  PieChart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,7 +36,6 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ isOpen, onClose })
     { icon: Calendar, label: 'Agendamentos', path: '/appointments' },
     { icon: Users, label: 'Clientes', path: '/clients' },
     { icon: Wrench, label: 'Serviços', path: '/services' },
-    { icon: Handshake, label: 'Comercial', path: '/prospects' },
     { icon: Package, label: 'Estoque', path: '/inventory' },
     { icon: CreditCard, label: 'Financeiro', path: '/financial' },
     { icon: PieChart, label: 'Painel Financeiro', path: '/financial-dashboard' },

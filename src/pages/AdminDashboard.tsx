@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Users, UserPlus, DollarSign, UserMinus, ShieldAlert, Layers, AlertTriangle, Ticket, LifeBuoy } from 'lucide-react';
+import { Users, UserPlus, DollarSign, UserMinus, ShieldAlert, Layers, AlertTriangle, Ticket, LifeBuoy, Handshake } from 'lucide-react';
 import { AdminCancellations } from '@/components/admin/AdminCancellations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,6 +15,7 @@ import { AdminRevenueChart } from '@/components/admin/AdminRevenueChart';
 import { AdminPendingIssues } from '@/components/admin/AdminPendingIssues';
 import { AdminCoupons } from '@/components/admin/AdminCoupons';
 import { AdminSupport } from '@/components/admin/AdminSupport';
+import { AdminProspects } from '@/components/admin/AdminProspects';
 
 interface OverviewStats {
   total_users: number;
@@ -253,7 +254,7 @@ const AdminDashboard: React.FC = () => {
     >
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
         <div className="overflow-x-auto -mx-1 px-1">
-          <TabsList className="grid grid-cols-6 w-full min-w-[640px] sm:min-w-0 h-auto">
+          <TabsList className="grid grid-cols-7 w-full min-w-[720px] sm:min-w-0 h-auto">
             <TabsTrigger value="overview" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
               <Layers className="w-4 h-4 shrink-0" />
               <span>Visão Geral</span>
@@ -277,6 +278,10 @@ const AdminDashboard: React.FC = () => {
             <TabsTrigger value="cancellations" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
               <UserMinus className="w-4 h-4 shrink-0" />
               <span>Cancelamentos</span>
+            </TabsTrigger>
+            <TabsTrigger value="prospects" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-[11px] sm:text-sm py-2">
+              <Handshake className="w-4 h-4 shrink-0" />
+              <span>Comercial</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -487,6 +492,10 @@ const AdminDashboard: React.FC = () => {
 
         <TabsContent value="cancellations" className="space-y-4 sm:space-y-6">
           <AdminCancellations />
+        </TabsContent>
+
+        <TabsContent value="prospects" className="space-y-4 sm:space-y-6">
+          <AdminProspects />
         </TabsContent>
       </Tabs>
 

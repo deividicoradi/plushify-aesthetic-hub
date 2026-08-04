@@ -43,7 +43,6 @@ const PublicBooking = lazy(() => import("./pages/PublicBooking"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Appointments = lazy(() => import("./pages/Appointments"));
 const Clients = lazy(() => import("./pages/Clients"));
-const Prospects = lazy(() => import("./pages/Prospects"));
 const Financial = lazy(() => import("./pages/Financial"));
 const Services = lazy(() => import("./pages/Services"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -126,14 +125,6 @@ const AppContent = () => {
         element={
           <ProtectedRoute>
             {Lazy(<Clients />)}
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/prospects"
-        element={
-          <ProtectedRoute>
-            {Lazy(<Prospects />)}
           </ProtectedRoute>
         }
       />
