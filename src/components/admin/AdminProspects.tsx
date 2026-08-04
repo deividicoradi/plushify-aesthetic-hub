@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Handshake, Plus, AlertTriangle, Users } from 'lucide-react';
+import { Handshake, Plus, AlertTriangle, Users, Download } from 'lucide-react';
+import { convertToCSV, downloadFile } from '@/utils/fileUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -123,6 +124,49 @@ export const AdminProspects: React.FC = () => {
     if (found) handleSelect(found);
   };
 
+  const handleExportProspects = () => {
+    if (!prospects || prospects.length === 0) {
+      toast.error('Nada para exportar com esse filtro');
+      return;
+    }
+    const csv = convertToCSV(
+      prospects.map((p) => ({
+        nome: p.name,
+        telefone: p.phone ?? '',
+        email: p.email ?? '',
+        origem: p.origin ?? '',
+        canal_contato: p.contact_channel ?? '',
+        plano_interesse: p.plan_interest ?? '',
+        valor_estimado: p.estimated_value ?? '',
+        prospectando: p.prospector_name ?? '',
+        status: STATUS_LABELS[p.status],
+        motivo_perda: p.loss_reason ?? '',
+        conta_vinculada: p.converted_user_email ?? '',
+        valor_primeira_cobranca: p.first_payment_value ?? '',
+        ultimo_contato: p.last_contact_at ?? '',
+        cadastrado_em: p.created_at,
+      })),
+    );
+    downloadFile(csv, `prospects_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv;charset=utf-8;');
+  };
+
+  const handleExportProspectorStats = () => {
+    if (!prospectorStats || prospectorStats.length === 0) {
+      toast.error('Nada para exportar nesse mês');
+      return;
+    }
+    const csv = convertToCSV(
+      prospectorStats.map((s) => ({
+        nome: s.prospector_name,
+        prospectados: s.total_prospected,
+        convertidos: s.total_converted,
+        perdidos: s.total_lost,
+        taxa_conversao: `${s.conversion_rate}%`,
+      })),
+    );
+    downloadFile(csv, `prospeccao_por_pessoa_${selectedMonth}.csv`, 'text/csv;charset=utf-8;');
+  };
+
   return (
     <div className="space-y-4">
       <Tabs defaultValue="lista">
@@ -148,7 +192,11 @@ export const AdminProspects: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+              <Button variant="outline" onClick={handleExportProspects} className="gap-2 flex-1 sm:flex-none">
+                <Download className="w-4 h-4" />
+                Exportar CSV
+              </Button>
               <Button variant="outline" onClick={() => setProspectorsOpen(true)} className="gap-2 flex-1 sm:flex-none">
                 <Users className="w-4 h-4" />
                 Equipe
@@ -270,7 +318,13 @@ export const AdminProspects: React.FC = () => {
           )}
 
           <div className="space-y-2 pt-2">
-            <h3 className="text-sm font-semibold">Por pessoa</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold">Por pessoa</h3>
+              <Button size="sm" variant="outline" onClick={handleExportProspectorStats} className="gap-2">
+                <Download className="w-4 h-4" />
+                Exportar CSV
+              </Button>
+            </div>
             {isLoadingProspectorStats ? (
               <div className="space-y-2">
                 {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
