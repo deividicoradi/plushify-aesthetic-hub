@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Pencil } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,11 +33,12 @@ import {
 interface ProspectDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEdit: (prospect: Prospect) => void;
   prospect: Prospect | null;
   onChanged: () => void;
 }
 
-export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open, onOpenChange, prospect, onChanged }) => {
+export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open, onOpenChange, prospect, onChanged, onEdit }) => {
   const [interactions, setInteractions] = useState<ProspectInteraction[]>([]);
   const [loadingInteractions, setLoadingInteractions] = useState(false);
   const [newChannel, setNewChannel] = useState<ContactChannel>('whatsapp');
@@ -152,6 +154,15 @@ export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open
           <DialogTitle className="flex items-center gap-2 flex-wrap">
             {prospect.name}
             <Badge className={STATUS_CLASS[prospect.status]}>{STATUS_LABELS[prospect.status]}</Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 ml-auto mr-6"
+              onClick={() => { onOpenChange(false); onEdit(prospect); }}
+              aria-label="Editar prospect"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </Button>
           </DialogTitle>
         </DialogHeader>
 
@@ -161,6 +172,7 @@ export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open
             <div><span className="text-muted-foreground">E-mail:</span> {prospect.email || '—'}</div>
             <div><span className="text-muted-foreground">Plano de interesse:</span> {prospect.plan_interest || '—'}</div>
             <div><span className="text-muted-foreground">Valor estimado:</span> {prospect.estimated_value != null ? `R$ ${prospect.estimated_value.toFixed(2)}` : '—'}</div>
+            <div><span className="text-muted-foreground">Prospectando:</span> {prospect.prospector_name || '—'}</div>
             {prospect.status === 'perdido' && (
               <div className="col-span-2"><span className="text-muted-foreground">Motivo da perda:</span> {prospect.loss_reason || '—'}</div>
             )}

@@ -319,6 +319,7 @@ export const AdminProspects: React.FC = () => {
         onOpenChange={setDetailOpen}
         prospect={selectedProspect}
         onChanged={refresh}
+        onEdit={(p) => { setEditingProspect(p); setFormOpen(true); }}
       />
 
       <ProspectorsManageDialog

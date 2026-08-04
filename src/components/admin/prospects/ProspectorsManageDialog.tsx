@@ -118,7 +118,12 @@ export const ProspectorsManageDialog: React.FC<ProspectorsManageDialogProps> = (
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Nome da pessoa"
-              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAdd();
+                }
+              }}
             />
             <Button size="icon" disabled={!newName.trim() || saving} onClick={handleAdd}>
               <Plus className="w-4 h-4" />
