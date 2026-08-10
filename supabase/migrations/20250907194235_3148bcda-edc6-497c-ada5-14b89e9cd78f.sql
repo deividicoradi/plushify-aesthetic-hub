@@ -140,15 +140,7 @@ CREATE TRIGGER secure_audit_clients_trigger
 -- Add index for better performance on user queries
 CREATE INDEX IF NOT EXISTS idx_clients_user_id_status ON public.clients(user_id, status) WHERE status = 'Ativo';
 
--- Create security function to validate client data access
-CREATE OR REPLACE FUNCTION public.validate_client_access(client_id uuid, requesting_user_id uuid)
-RETURNS boolean AS $$
-BEGIN
-  -- Verify user owns this client record
-  RETURN EXISTS (
-    SELECT 1 FROM public.clients 
-    WHERE id = client_id 
-    AND user_id = requesting_user_id
-  );
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+-- validate_client_access foi removida (IDOR: recebia requesting_user_id do
+-- client sem checar auth.uid(); confirmado que nunca foi aplicada em
+-- produção via pg_get_function_identity_arguments). Não recriar sem
+-- adicionar checagem de posse.

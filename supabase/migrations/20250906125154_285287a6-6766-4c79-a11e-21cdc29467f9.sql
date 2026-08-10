@@ -179,34 +179,7 @@ BEGIN
 END;
 $$;
 
--- Função para buscar profissionais por serviço
-CREATE OR REPLACE FUNCTION public.get_professionals_by_service(
-  p_user_id UUID,
-  p_service_id UUID
-) RETURNS TABLE(
-  id UUID,
-  name TEXT,
-  email TEXT,
-  phone TEXT,
-  specialties TEXT[]
-)
-LANGUAGE plpgsql
-STABLE SECURITY DEFINER
-SET search_path = 'public'
-AS $$
-BEGIN
-  RETURN QUERY
-  SELECT 
-    p.id,
-    p.name,
-    p.email,
-    p.phone,
-    p.specialties
-  FROM public.professionals p
-  INNER JOIN public.service_professionals sp ON sp.professional_id = p.id
-  WHERE sp.user_id = p_user_id
-    AND sp.service_id = p_service_id
-    AND p.active = true
-  ORDER BY p.name;
-END;
-$$;
+-- get_professionals_by_service foi removida (IDOR: recebia p_user_id do
+-- client sem checar auth.uid(); confirmado que nunca foi aplicada em
+-- produção via pg_get_function_identity_arguments). Não recriar sem
+-- adicionar checagem de posse.
