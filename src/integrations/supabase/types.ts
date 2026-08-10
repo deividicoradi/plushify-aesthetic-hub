@@ -641,6 +641,10 @@ export type Database = {
           message_id: string | null
           metadata: Json | null
           recipient_email: string
+          resolution_note: string | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
           status: string
           template_name: string
         }
@@ -651,6 +655,10 @@ export type Database = {
           message_id?: string | null
           metadata?: Json | null
           recipient_email: string
+          resolution_note?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           status: string
           template_name: string
         }
@@ -661,6 +669,10 @@ export type Database = {
           message_id?: string | null
           metadata?: Json | null
           recipient_email?: string
+          resolution_note?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           status?: string
           template_name?: string
         }
@@ -1650,6 +1662,151 @@ export type Database = {
         }
         Relationships: []
       }
+      prospect_interactions: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          occurred_at: string
+          prospect_id: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          occurred_at?: string
+          prospect_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          occurred_at?: string
+          prospect_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_interactions_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prospectors: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      prospects: {
+        Row: {
+          contact_channel: string | null
+          converted_at: string | null
+          converted_user_id: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          estimated_value: number | null
+          first_payment_value: number | null
+          id: string
+          last_contact_at: string | null
+          loss_reason: string | null
+          name: string
+          next_action_date: string | null
+          next_action_note: string | null
+          notes: string | null
+          origin: string | null
+          phone: string | null
+          plan_interest: string | null
+          prospector_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contact_channel?: string | null
+          converted_at?: string | null
+          converted_user_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          first_payment_value?: number | null
+          id?: string
+          last_contact_at?: string | null
+          loss_reason?: string | null
+          name: string
+          next_action_date?: string | null
+          next_action_note?: string | null
+          notes?: string | null
+          origin?: string | null
+          phone?: string | null
+          plan_interest?: string | null
+          prospector_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_channel?: string | null
+          converted_at?: string | null
+          converted_user_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          first_payment_value?: number | null
+          id?: string
+          last_contact_at?: string | null
+          loss_reason?: string | null
+          name?: string
+          next_action_date?: string | null
+          next_action_note?: string | null
+          notes?: string | null
+          origin?: string | null
+          phone?: string | null
+          plan_interest?: string | null
+          prospector_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospects_prospector_id_fkey"
+            columns: ["prospector_id"]
+            isOneToOne: false
+            referencedRelation: "prospectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_rate_limits: {
         Row: {
           endpoint: string
@@ -1843,6 +2000,36 @@ export type Database = {
           name?: string
           price?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscription_cancellation_feedback: {
+        Row: {
+          billing_interval: string | null
+          comment: string | null
+          created_at: string
+          id: string
+          reason: string | null
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          billing_interval?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          billing_interval?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          subscription_id?: string | null
           user_id?: string
         }
         Relationships: []
@@ -2130,6 +2317,10 @@ export type Database = {
           external_id: string | null
           id: string
           payload: Json | null
+          resolution_note: string | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
           source: string
         }
         Insert: {
@@ -2139,6 +2330,10 @@ export type Database = {
           external_id?: string | null
           id?: string
           payload?: Json | null
+          resolution_note?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           source: string
         }
         Update: {
@@ -2148,6 +2343,10 @@ export type Database = {
           external_id?: string | null
           id?: string
           payload?: Json | null
+          resolution_note?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           source?: string
         }
         Relationships: []
@@ -2196,9 +2395,47 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_add_prospect_interaction: {
+        Args: { p_channel: string; p_note?: string; p_prospect_id: string }
+        Returns: string
+      }
+      admin_convert_prospect: {
+        Args: {
+          p_converted_email?: string
+          p_first_payment_value?: number
+          p_id: string
+        }
+        Returns: undefined
+      }
+      admin_create_prospect: {
+        Args: {
+          p_contact_channel?: string
+          p_email?: string
+          p_estimated_value?: number
+          p_name: string
+          p_notes?: string
+          p_origin?: string
+          p_phone?: string
+          p_plan_interest?: string
+          p_prospector_id?: string
+        }
+        Returns: string
+      }
+      admin_create_prospector: { Args: { p_name: string }; Returns: string }
+      admin_delete_prospect: { Args: { p_id: string }; Returns: undefined }
+      admin_delete_prospector: { Args: { p_id: string }; Returns: undefined }
       admin_extend_trial: {
         Args: { p_days: number; p_reason?: string; p_user_id: string }
         Returns: Json
+      }
+      admin_find_duplicate_prospect: {
+        Args: { p_email?: string; p_exclude_id?: string; p_phone?: string }
+        Returns: {
+          id: string
+          matched_field: string
+          name: string
+          status: string
+        }[]
       }
       admin_force_cancel_subscription: {
         Args: { p_reason: string; p_user_id: string }
@@ -2219,6 +2456,39 @@ export type Database = {
       admin_get_overview_details: { Args: never; Returns: Json }
       admin_get_overview_stats: { Args: never; Returns: Json }
       admin_get_pending_issues: { Args: { p_limit?: number }; Returns: Json }
+      admin_get_prospect_interactions: {
+        Args: { p_prospect_id: string }
+        Returns: {
+          channel: string
+          created_at: string
+          id: string
+          note: string
+          occurred_at: string
+          prospect_id: string
+        }[]
+      }
+      admin_get_prospect_metrics: {
+        Args: { p_end_date: string; p_start_date: string }
+        Returns: {
+          conversion_rate: number
+          loss_rate: number
+          total_converted: number
+          total_lost: number
+          total_open: number
+          total_prospected: number
+        }[]
+      }
+      admin_get_prospector_stats: {
+        Args: { p_end_date: string; p_start_date: string }
+        Returns: {
+          conversion_rate: number
+          prospector_id: string
+          prospector_name: string
+          total_converted: number
+          total_lost: number
+          total_prospected: number
+        }[]
+      }
       admin_get_revenue_series: {
         Args: { p_months?: number }
         Returns: {
@@ -2226,6 +2496,18 @@ export type Database = {
           month_start: string
           mrr_cents: number
           new_signups: number
+        }[]
+      }
+      admin_get_stale_prospects: {
+        Args: never
+        Returns: {
+          days_since_contact: number
+          id: string
+          last_contact_at: string
+          name: string
+          phone: string
+          status: string
+          urgency: string
         }[]
       }
       admin_get_support_event_detail: {
@@ -2241,6 +2523,8 @@ export type Database = {
           details: Json
           id: string
           reason: string
+          target_deleted_at: string
+          target_deleted_email_before: string
           target_email: string
           total_count: number
         }[]
@@ -2254,6 +2538,29 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_cancellations_and_refunds: {
+        Args: never
+        Returns: {
+          billing_interval: string
+          cancel_at_period_end: boolean
+          comment: string
+          deleted_at: string
+          deleted_email_before: string
+          expires_at: string
+          feedback_created_at: string
+          plan_amount_paid: number
+          plan_type: string
+          reason: string
+          started_at: string
+          status: string
+          subscription_id: string
+          updated_at: string
+          user_email: string
+          user_id: string
+          user_name: string
+          user_phone: string
+        }[]
+      }
       admin_list_customers: {
         Args: {
           p_limit?: number
@@ -2264,6 +2571,8 @@ export type Database = {
         }
         Returns: {
           billing_interval: string
+          deleted_at: string
+          deleted_email_before: string
           email: string
           expires_at: string
           last_sign_in_at: string
@@ -2275,6 +2584,43 @@ export type Database = {
           total_count: number
           trial_ends_at: string
           user_id: string
+        }[]
+      }
+      admin_list_prospectors: {
+        Args: never
+        Returns: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+        }[]
+      }
+      admin_list_prospects: {
+        Args: { p_limit?: number; p_offset?: number; p_status?: string }
+        Returns: {
+          contact_channel: string
+          converted_at: string
+          converted_user_email: string
+          converted_user_id: string
+          created_at: string
+          email: string
+          estimated_value: number
+          first_payment_value: number
+          id: string
+          last_contact_at: string
+          loss_reason: string
+          name: string
+          next_action_date: string
+          next_action_note: string
+          notes: string
+          origin: string
+          phone: string
+          plan_interest: string
+          prospector_id: string
+          prospector_name: string
+          status: string
+          total_count: number
+          updated_at: string
         }[]
       }
       admin_list_support_events: {
@@ -2300,6 +2646,8 @@ export type Database = {
           accepted_at: string
           charge_now_cents: number
           credit_cents: number
+          deleted_at: string
+          deleted_email_before: string
           email: string
           id: string
           new_plan_type: string
@@ -2318,6 +2666,37 @@ export type Database = {
       }
       admin_promote_to_admin: { Args: { p_email: string }; Returns: Json }
       admin_revoke_admin: { Args: { p_user_id: string }; Returns: Json }
+      admin_set_email_failure_resolved: {
+        Args: { p_id: string; p_note?: string; p_resolved: boolean }
+        Returns: undefined
+      }
+      admin_set_prospect_status: {
+        Args: { p_id: string; p_loss_reason?: string; p_status: string }
+        Returns: undefined
+      }
+      admin_set_webhook_failure_resolved: {
+        Args: { p_id: string; p_note?: string; p_resolved: boolean }
+        Returns: undefined
+      }
+      admin_update_prospect: {
+        Args: {
+          p_contact_channel?: string
+          p_email?: string
+          p_estimated_value?: number
+          p_id: string
+          p_name: string
+          p_notes?: string
+          p_origin?: string
+          p_phone?: string
+          p_plan_interest?: string
+          p_prospector_id?: string
+        }
+        Returns: undefined
+      }
+      admin_update_prospector: {
+        Args: { p_active?: boolean; p_id: string; p_name: string }
+        Returns: undefined
+      }
       admin_update_support_event_status: {
         Args: {
           p_admin_response?: string
@@ -2371,6 +2750,15 @@ export type Database = {
         Returns: boolean
       }
       clear_team_member_pin: { Args: { p_member_id: string }; Returns: boolean }
+      comprehensive_security_check: {
+        Args: { check_user_id: string }
+        Returns: {
+          check_type: string
+          details: string
+          status: string
+          table_name: string
+        }[]
+      }
       create_public_booking: {
         Args: {
           p_appointment_date: string
@@ -2573,7 +2961,38 @@ export type Database = {
         Args: { p_client_id: string; p_reward_id: string }
         Returns: string
       }
+      rotate_refresh_token: {
+        Args: {
+          p_ip_address?: unknown
+          p_new_encrypted_token: string
+          p_new_token_hash: string
+          p_old_token_hash: string
+          p_session_id: string
+          p_user_agent?: string
+          p_user_id: string
+        }
+        Returns: {
+          expires_at: string
+          new_token_id: string
+          success: boolean
+        }[]
+      }
       sanitize_input: { Args: { input_text: string }; Returns: string }
+      search_clients: {
+        Args: { search_term?: string; target_user_id: string }
+        Returns: {
+          email: string
+          id: string
+          last_visit: string
+          name: string
+          phone: string
+          status: string
+        }[]
+      }
+      self_cancel_subscription: {
+        Args: { p_comment?: string; p_reason?: string }
+        Returns: Json
+      }
       set_authorization_password: {
         Args: { p_password: string }
         Returns: boolean
@@ -2616,6 +3035,15 @@ export type Database = {
       verify_authorization_password: {
         Args: { p_password: string }
         Returns: boolean
+      }
+      verify_data_integrity: {
+        Args: { check_user_id: string }
+        Returns: {
+          status: string
+          table_name: string
+          total_records: number
+          unauthorized_records: number
+        }[]
       }
       verify_team_member_pin: {
         Args: { p_member_id: string; p_pin: string }
