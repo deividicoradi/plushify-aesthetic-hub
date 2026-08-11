@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { startOfDay, startOfWeek, startOfMonth, startOfYear, endOfDay } from 'date-fns';
 import { Handshake, Plus, AlertTriangle, Users, Download } from 'lucide-react';
-import { convertToCSV, downloadFile } from '@/utils/fileUtils';
+import { exportToXLSX } from '@/utils/fileUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -183,26 +183,27 @@ export const AdminProspects: React.FC = () => {
       toast.error('Nada para exportar com esse filtro');
       return;
     }
-    const csv = convertToCSV(
+    exportToXLSX(
       prospects.map((p) => ({
-        nome: p.name,
-        telefone: p.phone ?? '',
-        email: p.email ?? '',
-        rede_social: p.social_link ?? '',
-        origem: p.origin ?? '',
-        canal_contato: p.contact_channel ?? '',
-        plano_interesse: p.plan_interest ?? '',
-        valor_estimado: p.estimated_value ?? '',
-        prospectando: p.prospector_name ?? '',
-        status: STATUS_LABELS[p.status],
-        motivo_perda: p.loss_reason ?? '',
-        conta_vinculada: p.converted_user_email ?? '',
-        valor_primeira_cobranca: p.first_payment_value ?? '',
-        ultimo_contato: p.last_contact_at ?? '',
-        cadastrado_em: p.created_at,
+        'Nome': p.name,
+        'Telefone': p.phone ?? '—',
+        'E-mail': p.email ?? '—',
+        'Rede social': p.social_link ?? '—',
+        'Origem': p.origin ?? '—',
+        'Canal de contato': p.contact_channel ?? '—',
+        'Plano de interesse': p.plan_interest ?? '—',
+        'Valor estimado': p.estimated_value ?? '',
+        'Prospectando': p.prospector_name ?? '—',
+        'Status': STATUS_LABELS[p.status],
+        'Motivo da perda': p.loss_reason ?? '—',
+        'Conta vinculada': p.converted_user_email ?? '—',
+        'Valor 1ª cobrança': p.first_payment_value ?? '',
+        'Último contato': p.last_contact_at ? new Date(p.last_contact_at).toLocaleDateString('pt-BR') : '—',
+        'Cadastrado em': new Date(p.created_at).toLocaleDateString('pt-BR'),
       })),
+      `prospects_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      'Prospects',
     );
-    downloadFile(csv, `prospects_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv;charset=utf-8;');
   };
 
   const handleExportProspectorStats = () => {
@@ -210,16 +211,17 @@ export const AdminProspects: React.FC = () => {
       toast.error('Nada para exportar nesse mês');
       return;
     }
-    const csv = convertToCSV(
+    exportToXLSX(
       prospectorStats.map((s) => ({
-        nome: s.prospector_name,
-        prospectados: s.total_prospected,
-        convertidos: s.total_converted,
-        perdidos: s.total_lost,
-        taxa_conversao: `${s.conversion_rate}%`,
+        'Nome': s.prospector_name,
+        'Prospectados': s.total_prospected,
+        'Convertidos': s.total_converted,
+        'Perdidos': s.total_lost,
+        'Taxa de conversão': `${s.conversion_rate}%`,
       })),
+      `prospeccao_por_pessoa_${selectedMonth}.xlsx`,
+      'Por pessoa',
     );
-    downloadFile(csv, `prospeccao_por_pessoa_${selectedMonth}.csv`, 'text/csv;charset=utf-8;');
   };
 
   return (
@@ -260,7 +262,7 @@ export const AdminProspects: React.FC = () => {
             <div className="flex gap-2 w-full sm:w-auto flex-wrap">
               <Button variant="outline" onClick={handleExportProspects} className="gap-2 flex-1 sm:flex-none">
                 <Download className="w-4 h-4" />
-                Exportar CSV
+                Exportar Excel
               </Button>
               <Button variant="outline" onClick={() => setProspectorsOpen(true)} className="gap-2 flex-1 sm:flex-none">
                 <Users className="w-4 h-4" />
@@ -397,7 +399,7 @@ export const AdminProspects: React.FC = () => {
               <h3 className="text-sm font-semibold">Por pessoa</h3>
               <Button size="sm" variant="outline" onClick={handleExportProspectorStats} className="gap-2">
                 <Download className="w-4 h-4" />
-                Exportar CSV
+                Exportar Excel
               </Button>
             </div>
             {isLoadingProspectorStats ? (
