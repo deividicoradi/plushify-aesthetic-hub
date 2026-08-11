@@ -1748,6 +1748,7 @@ export type Database = {
           phone: string | null
           plan_interest: string | null
           prospector_id: string | null
+          social_link: string | null
           status: string
           updated_at: string
         }
@@ -1771,6 +1772,7 @@ export type Database = {
           phone?: string | null
           plan_interest?: string | null
           prospector_id?: string | null
+          social_link?: string | null
           status?: string
           updated_at?: string
         }
@@ -1794,6 +1796,7 @@ export type Database = {
           phone?: string | null
           plan_interest?: string | null
           prospector_id?: string | null
+          social_link?: string | null
           status?: string
           updated_at?: string
         }
@@ -2418,6 +2421,7 @@ export type Database = {
           p_phone?: string
           p_plan_interest?: string
           p_prospector_id?: string
+          p_social_link?: string
         }
         Returns: string
       }
@@ -2624,6 +2628,7 @@ export type Database = {
           plan_interest: string
           prospector_id: string
           prospector_name: string
+          social_link: string
           status: string
           total_count: number
           updated_at: string
@@ -2696,6 +2701,7 @@ export type Database = {
           p_phone?: string
           p_plan_interest?: string
           p_prospector_id?: string
+          p_social_link?: string
         }
         Returns: undefined
       }

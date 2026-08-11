@@ -8,6 +8,7 @@ export type Prospect = {
   name: string;
   email: string | null;
   phone: string | null;
+  social_link: string | null;
   origin: ProspectOrigin | null;
   contact_channel: ContactChannel | null;
   plan_interest: PlanInterest | null;

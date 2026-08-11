@@ -173,6 +173,14 @@ export const ProspectDetailDialog: React.FC<ProspectDetailDialogProps> = ({ open
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div><span className="text-muted-foreground">Telefone:</span> {prospect.phone || '—'}</div>
             <div><span className="text-muted-foreground">E-mail:</span> {prospect.email || '—'}</div>
+            <div className="col-span-2">
+              <span className="text-muted-foreground">Rede social:</span>{' '}
+              {prospect.social_link ? (
+                <a href={prospect.social_link} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 break-all">
+                  {prospect.social_link}
+                </a>
+              ) : '—'}
+            </div>
             <div><span className="text-muted-foreground">Plano de interesse:</span> {prospect.plan_interest || '—'}</div>
             <div><span className="text-muted-foreground">Valor estimado:</span> {prospect.estimated_value != null ? `R$ ${prospect.estimated_value.toFixed(2)}` : '—'}</div>
             <div><span className="text-muted-foreground">Prospectando:</span> {prospect.prospector_name || '—'}</div>

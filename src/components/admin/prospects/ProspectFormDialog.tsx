@@ -46,6 +46,7 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
     name: '',
     phone: '',
     email: '',
+    social_link: '',
     origin: '' as ProspectOrigin | '',
     contact_channel: '' as ContactChannel | '',
     plan_interest: '' as PlanInterest | '',
@@ -68,6 +69,7 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
         name: prospect.name,
         phone: prospect.phone ?? '',
         email: prospect.email ?? '',
+        social_link: prospect.social_link ?? '',
         origin: prospect.origin ?? '',
         contact_channel: prospect.contact_channel ?? '',
         plan_interest: prospect.plan_interest ?? '',
@@ -76,7 +78,7 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
         prospector_id: prospect.prospector_id ?? '',
       });
     } else {
-      setForm({ name: '', phone: '', email: '', origin: '', contact_channel: '', plan_interest: '', estimated_value: '', notes: '', prospector_id: '' });
+      setForm({ name: '', phone: '', email: '', social_link: '', origin: '', contact_channel: '', plan_interest: '', estimated_value: '', notes: '', prospector_id: '' });
     }
     setDuplicateWarning(null);
   }, [prospect, open]);
@@ -110,6 +112,7 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
         p_estimated_value: form.estimated_value ? Number(form.estimated_value) : null,
         p_notes: form.notes.trim() || null,
         p_prospector_id: form.prospector_id || null,
+        p_social_link: form.social_link.trim() || null,
       };
 
       const { error } = prospect
@@ -161,6 +164,17 @@ export const ProspectFormDialog: React.FC<ProspectFormDialogProps> = ({ open, on
                 placeholder="email@exemplo.com"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="prospect-social-link">Link da rede social</Label>
+            <Input
+              id="prospect-social-link"
+              value={form.social_link}
+              onChange={(e) => setForm({ ...form, social_link: e.target.value })}
+              placeholder="https://instagram.com/perfil"
+            />
+            <p className="text-xs text-muted-foreground">Útil quando ainda não tem telefone nem e-mail — só o perfil da rede social.</p>
           </div>
 
           {duplicateWarning && (

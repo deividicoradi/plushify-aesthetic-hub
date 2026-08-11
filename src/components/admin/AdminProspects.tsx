@@ -182,6 +182,7 @@ export const AdminProspects: React.FC = () => {
         nome: p.name,
         telefone: p.phone ?? '',
         email: p.email ?? '',
+        rede_social: p.social_link ?? '',
         origem: p.origin ?? '',
         canal_contato: p.contact_channel ?? '',
         plano_interesse: p.plan_interest ?? '',
