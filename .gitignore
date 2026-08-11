@@ -25,3 +25,6 @@ dist-ssr
 *.sln
 *.sw?
 vite.config.ts.timestamp-*.mjs
+
+# Ferramenta MCP de terceiro (clone local, não faz parte do app)
+abacatepay-mcp/
