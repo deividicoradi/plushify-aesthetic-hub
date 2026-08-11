@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { startOfDay, startOfWeek, startOfMonth, startOfYear, endOfDay } from 'date-fns';
 import { Handshake, Plus, AlertTriangle, Users, Download } from 'lucide-react';
 import { convertToCSV, downloadFile } from '@/utils/fileUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +36,34 @@ const STATUS_FILTER_LABELS: Record<ProspectStatus | 'todos', string> = {
   ...STATUS_LABELS,
 };
 
+type PeriodFilter = 'hoje' | 'semana' | 'mes' | 'ano' | 'todos';
+
+const PERIOD_FILTER_LABELS: Record<PeriodFilter, string> = {
+  hoje: 'Hoje',
+  semana: 'Esta semana',
+  mes: 'Este mês',
+  ano: 'Este ano',
+  todos: 'Todo o período',
+};
+
+const computePeriodRange = (period: PeriodFilter): { startDate?: string; endDate?: string } => {
+  const now = new Date();
+  switch (period) {
+    case 'hoje':
+      return { startDate: startOfDay(now).toISOString(), endDate: endOfDay(now).toISOString() };
+    case 'semana':
+      return { startDate: startOfWeek(now, { weekStartsOn: 0 }).toISOString(), endDate: endOfDay(now).toISOString() };
+    case 'mes':
+      return { startDate: startOfMonth(now).toISOString(), endDate: endOfDay(now).toISOString() };
+    case 'ano':
+      return { startDate: startOfYear(now).toISOString(), endDate: endOfDay(now).toISOString() };
+    case 'todos':
+      return {};
+  }
+};
+
+const PAGE_SIZE = 50;
+
 const MONTH_LABELS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 const buildMonthOptions = () => {
@@ -50,6 +79,8 @@ const buildMonthOptions = () => {
 export const AdminProspects: React.FC = () => {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<ProspectStatus | 'todos'>('todos');
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('hoje');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [formOpen, setFormOpen] = useState(false);
   const [editingProspect, setEditingProspect] = useState<Prospect | null>(null);
   const [selectedProspect, setSelectedProspect] = useState<Prospect | null>(null);
@@ -59,15 +90,32 @@ export const AdminProspects: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(monthOptions[0].value);
 
   const { data: prospects, isLoading } = useQuery({
-    queryKey: ['admin-prospects', statusFilter],
+    queryKey: ['admin-prospects', statusFilter, periodFilter, visibleCount],
     queryFn: async (): Promise<Prospect[]> => {
+      const { startDate, endDate } = computePeriodRange(periodFilter);
       const { data, error } = await supabase.rpc('admin_list_prospects', {
         p_status: statusFilter === 'todos' ? null : statusFilter,
+        p_limit: visibleCount,
+        p_offset: 0,
+        p_start_date: startDate ?? null,
+        p_end_date: endDate ?? null,
       });
       if (error) throw error;
       return (data || []) as Prospect[];
     },
   });
+  const totalCount = prospects?.[0]?.total_count ?? 0;
+  const hasMore = prospects ? prospects.length < totalCount : false;
+
+  const handleStatusFilterChange = (v: ProspectStatus | 'todos') => {
+    setStatusFilter(v);
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const handlePeriodFilterChange = (v: PeriodFilter) => {
+    setPeriodFilter(v);
+    setVisibleCount(PAGE_SIZE);
+  };
 
   const { data: staleProspects, isLoading: isLoadingStale } = useQuery({
     queryKey: ['admin-prospects-stale'],
@@ -184,14 +232,24 @@ export const AdminProspects: React.FC = () => {
 
         <TabsContent value="lista" className="space-y-4 mt-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as ProspectStatus | 'todos')}>
-              <SelectTrigger className="w-full sm:w-56"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {Object.entries(STATUS_FILTER_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+              <Select value={periodFilter} onValueChange={(v) => handlePeriodFilterChange(v as PeriodFilter)}>
+                <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(PERIOD_FILTER_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={(v) => handleStatusFilterChange(v as ProspectStatus | 'todos')}>
+                <SelectTrigger className="w-full sm:w-56"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(STATUS_FILTER_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex gap-2 w-full sm:w-auto flex-wrap">
               <Button variant="outline" onClick={handleExportProspects} className="gap-2 flex-1 sm:flex-none">
                 <Download className="w-4 h-4" />
@@ -244,6 +302,16 @@ export const AdminProspects: React.FC = () => {
                   ))}
                 </TableBody>
               </Table>
+              <div className="flex items-center justify-between pt-3">
+                <p className="text-xs text-muted-foreground">
+                  Mostrando {prospects.length} de {totalCount}
+                </p>
+                {hasMore && (
+                  <Button variant="outline" size="sm" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+                    Carregar mais
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </TabsContent>

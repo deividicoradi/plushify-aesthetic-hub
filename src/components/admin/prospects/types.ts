@@ -26,6 +26,7 @@ export type Prospect = {
   prospector_name: string | null;
   created_at: string;
   updated_at: string;
+  total_count: number;
 };
 
 export type Prospector = {

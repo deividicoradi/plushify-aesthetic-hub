@@ -2596,7 +2596,13 @@ export type Database = {
         }[]
       }
       admin_list_prospects: {
-        Args: { p_limit?: number; p_offset?: number; p_status?: string }
+        Args: {
+          p_end_date?: string
+          p_limit?: number
+          p_offset?: number
+          p_start_date?: string
+          p_status?: string
+        }
         Returns: {
           contact_channel: string
           converted_at: string
