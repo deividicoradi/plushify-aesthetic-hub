@@ -1,4 +1,4 @@
-export type ProspectStatus = 'novo' | 'contatado' | 'interessado' | 'negociando' | 'convertido' | 'perdido';
+export type ProspectStatus = 'novo' | 'contatado' | 'interessado' | 'negociando' | 'sem_retorno' | 'convertido' | 'perdido';
 export type ProspectOrigin = 'instagram' | 'facebook' | 'whatsapp' | 'indicacao' | 'google' | 'evento' | 'porta' | 'outro';
 export type ContactChannel = 'whatsapp' | 'instagram' | 'telefone' | 'presencial' | 'email' | 'outro';
 export type PlanInterest = 'professional' | 'premium' | 'indefinido';
@@ -105,6 +105,7 @@ export const STATUS_LABELS: Record<ProspectStatus, string> = {
   contatado: 'Contatado',
   interessado: 'Interessado',
   negociando: 'Negociando',
+  sem_retorno: 'Sem retorno',
   convertido: 'Convertido',
   perdido: 'Perdido',
 };
@@ -114,6 +115,7 @@ export const STATUS_CLASS: Record<ProspectStatus, string> = {
   contatado: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400',
   interessado: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
   negociando: 'bg-purple-500/15 text-purple-600 dark:text-purple-400',
+  sem_retorno: 'bg-slate-500/15 text-slate-600 dark:text-slate-400',
   convertido: 'bg-emerald-600 text-white',
   perdido: 'bg-destructive/15 text-destructive',
 };
