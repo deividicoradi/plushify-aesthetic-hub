@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { startOfDay, startOfWeek, startOfMonth, startOfYear, endOfDay } from 'date-fns';
 import { Handshake, Plus, AlertTriangle, Users, Download } from 'lucide-react';
@@ -161,6 +161,12 @@ export const AdminProspects: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ['admin-prospects-metrics'] });
     queryClient.invalidateQueries({ queryKey: ['admin-prospector-stats'] });
   };
+
+  useEffect(() => {
+    if (!selectedProspect || !prospects) return;
+    const fresh = prospects.find((p) => p.id === selectedProspect.id);
+    if (fresh && fresh !== selectedProspect) setSelectedProspect(fresh);
+  }, [prospects, selectedProspect]);
 
   const handleSelect = (prospect: Prospect) => {
     setSelectedProspect(prospect);
