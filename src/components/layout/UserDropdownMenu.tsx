@@ -9,11 +9,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 
 export const UserDropdownMenu = () => {
   const { signOut, user } = useAuth();
+  const { profile } = useProfile();
 
   const userInitials = user?.email?.substring(0, 2).toUpperCase() || 'US';
 
@@ -22,6 +24,7 @@ export const UserDropdownMenu = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
+            {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt="" />}
             <AvatarFallback className="bg-primary text-primary-foreground text-sm">
               {userInitials}
             </AvatarFallback>

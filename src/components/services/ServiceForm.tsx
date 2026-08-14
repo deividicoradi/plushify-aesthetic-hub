@@ -17,6 +17,7 @@ import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useProfessionals, Professional } from '@/hooks/useProfessionals';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { validateImageFile } from '@/lib/imageUpload';
 import ProfessionalSelector from './ProfessionalSelector';
 import { toast } from 'sonner';
 
@@ -110,19 +111,15 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Selecione um arquivo de imagem');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('A imagem deve ter no máximo 5MB');
+    const validation = validateImageFile(file);
+    if (!validation.ok) {
+      toast.error(validation.error);
       return;
     }
 
     setUploadingImage(true);
     try {
-      const ext = file.name.split('.').pop();
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const path = `${user.id}/${crypto.randomUUID()}.${validation.extension}`;
       const { error: uploadError } = await supabase.storage
         .from('service-images')
         .upload(path, file, { upsert: true });

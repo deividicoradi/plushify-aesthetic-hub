@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy, Loader2, Users, AlertCircle, Gift } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy, Loader2, Users, AlertCircle, Gift, ImagePlus } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,11 +25,26 @@ const Settings = () => {
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
-  const { profile, saveProfile } = useProfile();
+  const { profile, saveProfile, uploadAvatar } = useProfile();
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    try {
+      await uploadAvatar(file);
+    } finally {
+      setUploadingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
 
   const [nameInput, setNameInput] = useState('');
   const [phoneInput, setPhoneInput] = useState('');
@@ -217,6 +233,32 @@ const Settings = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
+                <div className="flex items-center gap-4 mb-6">
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarSelect}
+                  />
+                  <Avatar className="w-16 h-16">
+                    {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt="" />}
+                    <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                      {(profile.name || user?.email || 'US').substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    disabled={uploadingAvatar}
+                    onClick={() => avatarInputRef.current?.click()}
+                  >
+                    {uploadingAvatar ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
+                    {profile.avatar_url ? 'Trocar foto' : 'Adicionar foto'}
+                  </Button>
+                </div>
                 {isEditingProfile ? (
                   <form id="profile-form" onSubmit={handleSaveProfile} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
