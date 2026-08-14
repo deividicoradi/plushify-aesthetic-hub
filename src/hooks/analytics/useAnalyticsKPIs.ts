@@ -67,7 +67,7 @@ export const useAnalyticsKPIs = (range: Range) => {
     enabled: !!user,
     staleTime: 60_000,
     queryFn: async (): Promise<AnalyticsKPIsData> => {
-      const [clientsRes, paymentsRes, methodsRes, apptsRes, profsRes] = await Promise.all([
+      const [clientsRes, paymentsRes, methodsRes, apptsRes, profsRes, allClientsRes] = await Promise.all([
         supabase
           .from('clients')
           .select('id, name, email, phone, status, created_at')
@@ -89,15 +89,14 @@ export const useAnalyticsKPIs = (range: Range) => {
           .gte('appointment_date', fromDate)
           .lte('appointment_date', toDate),
         supabase.from('team_members').select('id, name').eq('user_id', user!.id),
+        // Lookup de nome de cliente pros pagamentos — precisa da tabela
+        // inteira (não só do período) porque um pagamento no período pode
+        // referenciar um cliente cadastrado fora dele.
+        supabase.from('clients').select('id, name').eq('user_id', user!.id),
       ]);
 
-      // Client lookup for revenue rows
       const clientMap = new Map<string, string>();
-      const { data: allClients } = await supabase
-        .from('clients')
-        .select('id, name')
-        .eq('user_id', user!.id);
-      (allClients || []).forEach((c: any) => clientMap.set(c.id, c.name));
+      (allClientsRes.data || []).forEach((c: any) => clientMap.set(c.id, c.name));
 
       const methodMap = new Map<string, string>();
       (methodsRes.data || []).forEach((m: any) => methodMap.set(m.id, m.name));

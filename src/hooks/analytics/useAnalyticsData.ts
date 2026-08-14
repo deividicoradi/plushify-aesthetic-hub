@@ -63,6 +63,20 @@ interface OptionalRange {
   endDate?: Date;
 }
 
+const serviceColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#ffb347', '#87ceeb', '#dda0dd'];
+const paymentMethodColors: Record<string, string> = {
+  'Dinheiro': '#10b981',
+  'Cartão': '#3b82f6',
+  'PIX': '#8b5cf6',
+  'Outros': '#6b7280'
+};
+const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+// monthKey no fuso local (não toISOString, que pode "voltar" um dia em
+// fusos negativos e jogar o registro pro mês/bucket errado).
+const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 export const useAnalyticsChartData = (range?: OptionalRange) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -77,14 +91,6 @@ export const useAnalyticsChartData = (range?: OptionalRange) => {
   const [revenueVsExpensesData, setRevenueVsExpensesData] = useState<RevenueVsExpensesData[]>([]);
   const [servicePerformanceData, setServicePerformanceData] = useState<ServicePerformanceData[]>([]);
 
-  const serviceColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#ffb347', '#87ceeb', '#dda0dd'];
-  const paymentMethodColors = {
-    'Dinheiro': '#10b981',
-    'Cartão': '#3b82f6', 
-    'PIX': '#8b5cf6',
-    'Outros': '#6b7280'
-  };
-
   const fromISO = range?.startDate?.toISOString();
   const toISO = range?.endDate?.toISOString();
   // format() usa o dia local; toISOString().slice(0,10) usaria o dia em UTC,
@@ -94,123 +100,27 @@ export const useAnalyticsChartData = (range?: OptionalRange) => {
 
   useEffect(() => {
     if (!user) return;
-    
+
     const fetchAnalyticsData = async () => {
       try {
         setLoading(true);
 
-        // Buscar dados de pipeline por valor (receita por serviço)
-        let revenueByServiceQuery = supabase
-          .from('appointments')
-          .select('service_name, price')
-          .eq('user_id', user.id)
-          .eq('status', 'concluido');
-        if (fromDate) revenueByServiceQuery = revenueByServiceQuery.gte('appointment_date', fromDate);
-        if (toDate) revenueByServiceQuery = revenueByServiceQuery.lte('appointment_date', toDate);
-        const { data: revenueByService, error: revenueError } = await revenueByServiceQuery;
-
-        if (revenueError) throw revenueError;
-
-        // Agrupar receita por serviço
-        const revenueMap = new Map<string, number>();
-        revenueByService?.forEach(appointment => {
-          const serviceName = appointment.service_name || 'Outros';
-          const currentAmount = revenueMap.get(serviceName) || 0;
-          revenueMap.set(serviceName, currentAmount + (appointment.price || 0));
-        });
-
-        const pipelineAmount = Array.from(revenueMap.entries()).map(([name, value], index) => ({
-          name,
-          value: Number(value),
-          fill: serviceColors[index % serviceColors.length]
-        }));
-
-        // Buscar dados de pipeline por quantidade (agendamentos por serviço)
-        let countByServiceQuery = supabase
-          .from('appointments')
-          .select('service_name')
-          .eq('user_id', user.id);
-        if (fromDate) countByServiceQuery = countByServiceQuery.gte('appointment_date', fromDate);
-        if (toDate) countByServiceQuery = countByServiceQuery.lte('appointment_date', toDate);
-        const { data: countByService, error: countError } = await countByServiceQuery;
-
-        if (countError) throw countError;
-
-        // Agrupar contagem por serviço
-        const countMap = new Map<string, number>();
-        countByService?.forEach(appointment => {
-          const serviceName = appointment.service_name || 'Outros';
-          const currentCount = countMap.get(serviceName) || 0;
-          countMap.set(serviceName, currentCount + 1);
-        });
-
-        const pipelineCount = Array.from(countMap.entries()).map(([name, value], index) => ({
-          name,
-          value,
-          fill: serviceColors[index % serviceColors.length]
-        }));
-
-        // Buscar dados trimestrais dos últimos 4 trimestres
         const currentDate = new Date();
-        const quarterlyRevenue: QuarterlyData[] = [];
-        
-        for (let i = 3; i >= 0; i--) {
-          const quarterDate = new Date(currentDate);
-          quarterDate.setMonth(quarterDate.getMonth() - (i * 3));
-          const startQuarter = new Date(quarterDate.getFullYear(), Math.floor(quarterDate.getMonth() / 3) * 3, 1);
-          const endQuarter = new Date(startQuarter.getFullYear(), startQuarter.getMonth() + 3, 0);
-          
-          const { data: quarterData, error: quarterError } = await supabase
-            .from('payments')
-            .select('amount')
-            .eq('user_id', user.id)
-            .eq('status', 'pago')
-            .gte('payment_date', startQuarter.toISOString())
-            .lte('payment_date', endQuarter.toISOString());
+        const twelveMoStart = new Date(currentDate.getFullYear(), currentDate.getMonth() - 11, 1);
+        const twelveMoStartISO = twelveMoStart.toISOString();
+        const nowISO = currentDate.toISOString();
 
-          if (quarterError) throw quarterError;
+        // Antes: ~58 requisições sequenciais (uma por mês/trimestre, em
+        // loops com await isolado) — cada round-trip soma latência mesmo
+        // sem dado nenhum pra processar. Agora: 5 buscas em paralelo,
+        // trazendo o período inteiro de uma vez, e agregação em JS.
+        let apptFilteredQuery = supabase
+          .from('appointments')
+          .select('service_name, price, status, appointment_date')
+          .eq('user_id', user.id);
+        if (fromDate) apptFilteredQuery = apptFilteredQuery.gte('appointment_date', fromDate);
+        if (toDate) apptFilteredQuery = apptFilteredQuery.lte('appointment_date', toDate);
 
-          const totalRevenue = quarterData?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
-          const quarterName = `Q${Math.floor(startQuarter.getMonth() / 3) + 1} ${startQuarter.getFullYear()}`;
-          
-          quarterlyRevenue.push({
-            quarter: quarterName,
-            revenue: Number(totalRevenue)
-          });
-        }
-
-        // Buscar dados mensais dos últimos 13 meses
-        const monthlyRevenue: MonthlyData[] = [];
-        
-        for (let i = 11; i >= 0; i--) {
-          const monthDate = new Date(currentDate);
-          monthDate.setMonth(monthDate.getMonth() - i);
-          const startMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
-          const endMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
-          
-          const { data: monthData, error: monthError } = await supabase
-            .from('payments')
-            .select('amount')
-            .eq('user_id', user.id)
-            .eq('status', 'pago')
-            .gte('payment_date', startMonth.toISOString())
-            .lte('payment_date', endMonth.toISOString());
-
-          if (monthError) throw monthError;
-
-          const totalRevenue = monthData?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
-          const monthName = startMonth.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
-          
-          monthlyRevenue.push({
-            month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-            revenue: Number(totalRevenue)
-          });
-        }
-
-        setQuarterlyData(quarterlyRevenue);
-        setMonthlyRevenueData(monthlyRevenue);
-
-        // Buscar dados de métodos de pagamento
         let paymentMethodsQuery = supabase
           .from('payments')
           .select('amount, payment_method_id, payment_methods(name, type)')
@@ -218,179 +128,189 @@ export const useAnalyticsChartData = (range?: OptionalRange) => {
           .eq('status', 'pago');
         if (fromISO) paymentMethodsQuery = paymentMethodsQuery.gte('payment_date', fromISO);
         if (toISO) paymentMethodsQuery = paymentMethodsQuery.lte('payment_date', toISO);
-        const { data: paymentMethods, error: paymentMethodError } = await paymentMethodsQuery;
 
+        const [
+          { data: apptFiltered, error: apptError },
+          { data: paymentMethods, error: paymentMethodError },
+          { data: payments12mo, error: payments12moError },
+          { data: expenses12mo, error: expenses12moError },
+          { data: allClients, error: clientsError },
+        ] = await Promise.all([
+          apptFilteredQuery,
+          paymentMethodsQuery,
+          supabase
+            .from('payments')
+            .select('amount, payment_date')
+            .eq('user_id', user.id)
+            .eq('status', 'pago')
+            .gte('payment_date', twelveMoStartISO)
+            .lte('payment_date', nowISO),
+          supabase
+            .from('expenses')
+            .select('amount, expense_date')
+            .eq('user_id', user.id)
+            .gte('expense_date', twelveMoStartISO)
+            .lte('expense_date', nowISO),
+          supabase
+            .from('clients')
+            .select('id, created_at')
+            .eq('user_id', user.id),
+        ]);
+
+        if (apptError) throw apptError;
         if (paymentMethodError) throw paymentMethodError;
+        if (payments12moError) throw payments12moError;
+        if (expenses12moError) throw expenses12moError;
+        if (clientsError) throw clientsError;
 
+        // ---- Pipeline por serviço (valor e quantidade) ----
+        const revenueMap = new Map<string, number>();
+        const countMap = new Map<string, number>();
+        const servicePerformanceMap = new Map<string, { count: number; revenue: number }>();
+        (apptFiltered || []).forEach((a) => {
+          const serviceName = a.service_name || 'Outros';
+          countMap.set(serviceName, (countMap.get(serviceName) || 0) + 1);
+          if (a.status === 'concluido') {
+            revenueMap.set(serviceName, (revenueMap.get(serviceName) || 0) + (a.price || 0));
+            const current = servicePerformanceMap.get(serviceName) || { count: 0, revenue: 0 };
+            servicePerformanceMap.set(serviceName, {
+              count: current.count + 1,
+              revenue: current.revenue + (a.price || 0),
+            });
+          }
+        });
+
+        const pipelineAmount = Array.from(revenueMap.entries()).map(([name, value], index) => ({
+          name, value: Number(value), fill: serviceColors[index % serviceColors.length],
+        }));
+        const pipelineCount = Array.from(countMap.entries()).map(([name, value], index) => ({
+          name, value, fill: serviceColors[index % serviceColors.length],
+        }));
+        const servicePerformance = Array.from(servicePerformanceMap.entries())
+          .map(([serviceName, data]) => ({
+            serviceName,
+            count: data.count,
+            revenue: Number(data.revenue),
+            avgPrice: data.count > 0 ? Number(data.revenue / data.count) : 0,
+          }))
+          .sort((a, b) => b.revenue - a.revenue);
+
+        // ---- Status de agendamentos ----
+        const statusMap = new Map<string, number>();
+        (apptFiltered || []).forEach((a) => {
+          const status = a.status || 'Outros';
+          statusMap.set(status, (statusMap.get(status) || 0) + 1);
+        });
+        const totalAppointments = apptFiltered?.length || 1;
+        const appointmentStatus = Array.from(statusMap.entries()).map(([status, count]) => ({
+          status: capitalize(status),
+          count,
+          percentage: (count / totalAppointments) * 100,
+        }));
+
+        // ---- Padrão semanal ----
+        const weeklyMap = new Map<number, { appointments: number; revenue: number }>();
+        (apptFiltered || []).forEach((a) => {
+          if (a.status !== 'concluido') return;
+          // parseISO trata "yyyy-MM-dd" como data local; new Date() trataria
+          // como UTC e .getDay() sempre retornaria o dia da semana anterior
+          // em fusos negativos (ex: Brasil) — não só em casos de borda.
+          const dayOfWeek = parseISO(a.appointment_date).getDay();
+          const current = weeklyMap.get(dayOfWeek) || { appointments: 0, revenue: 0 };
+          weeklyMap.set(dayOfWeek, {
+            appointments: current.appointments + 1,
+            revenue: current.revenue + (a.price || 0),
+          });
+        });
+        const weeklyPattern = Array.from({ length: 7 }, (_, i) => {
+          const data = weeklyMap.get(i) || { appointments: 0, revenue: 0 };
+          return { dayOfWeek: dayNames[i], appointments: data.appointments, revenue: Number(data.revenue) };
+        });
+
+        // ---- Métodos de pagamento ----
         const methodMap = new Map<string, { amount: number; count: number }>();
-        paymentMethods?.forEach(payment => {
+        (paymentMethods || []).forEach((payment: any) => {
           const methodName = payment.payment_methods?.name || 'Outros';
           const current = methodMap.get(methodName) || { amount: 0, count: 0 };
           methodMap.set(methodName, {
             amount: current.amount + (payment.amount || 0),
-            count: current.count + 1
-          });
-        });
-
-        const paymentMethodsData = Array.from(methodMap.entries()).map(([method, data]) => ({
-          method,
-          amount: Number(data.amount),
-          count: data.count,
-          fill: paymentMethodColors[method as keyof typeof paymentMethodColors] || '#6b7280'
-        }));
-
-        // Buscar dados de status de agendamentos
-        let appointmentStatusQuery = supabase
-          .from('appointments')
-          .select('status')
-          .eq('user_id', user.id);
-        if (fromDate) appointmentStatusQuery = appointmentStatusQuery.gte('appointment_date', fromDate);
-        if (toDate) appointmentStatusQuery = appointmentStatusQuery.lte('appointment_date', toDate);
-        const { data: appointmentStatus, error: statusError } = await appointmentStatusQuery;
-
-        if (statusError) throw statusError;
-
-        const statusMap = new Map<string, number>();
-        appointmentStatus?.forEach(appointment => {
-          const status = appointment.status || 'Outros';
-          statusMap.set(status, (statusMap.get(status) || 0) + 1);
-        });
-
-        const totalAppointments = appointmentStatus?.length || 1;
-        const appointmentStatusData = Array.from(statusMap.entries()).map(([status, count]) => ({
-          status: status.charAt(0).toUpperCase() + status.slice(1),
-          count,
-          percentage: (count / totalAppointments) * 100
-        }));
-
-        // Buscar crescimento de clientes (últimos 12 meses)
-        const clientGrowthData: ClientGrowthData[] = [];
-        for (let i = 11; i >= 0; i--) {
-          const monthDate = new Date(currentDate);
-          monthDate.setMonth(monthDate.getMonth() - i);
-          const startMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
-          const endMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
-          
-          const { data: newClients, error: newClientsError } = await supabase
-            .from('clients')
-            .select('id')
-            .eq('user_id', user.id)
-            .gte('created_at', startMonth.toISOString())
-            .lte('created_at', endMonth.toISOString());
-
-          const { data: totalClients, error: totalClientsError } = await supabase
-            .from('clients')
-            .select('id')
-            .eq('user_id', user.id)
-            .lte('created_at', endMonth.toISOString());
-
-          if (newClientsError || totalClientsError) continue;
-
-          const monthName = startMonth.toLocaleDateString('pt-BR', { month: 'short' });
-          clientGrowthData.push({
-            month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-            newClients: newClients?.length || 0,
-            totalClients: totalClients?.length || 0
-          });
-        }
-
-        // Buscar padrão semanal
-        let weeklyQuery = supabase
-          .from('appointments')
-          .select('appointment_date, price')
-          .eq('user_id', user.id)
-          .eq('status', 'concluido');
-        if (fromDate) weeklyQuery = weeklyQuery.gte('appointment_date', fromDate);
-        if (toDate) weeklyQuery = weeklyQuery.lte('appointment_date', toDate);
-        const { data: weeklyAppointments, error: weeklyError } = await weeklyQuery;
-
-        if (weeklyError) throw weeklyError;
-
-        const weeklyMap = new Map<number, { appointments: number; revenue: number }>();
-        weeklyAppointments?.forEach(appointment => {
-          // parseISO trata "yyyy-MM-dd" como data local; new Date() trataria
-          // como UTC e .getDay() sempre retornaria o dia da semana anterior
-          // em fusos negativos (ex: Brasil) — não só em casos de borda.
-          const dayOfWeek = parseISO(appointment.appointment_date).getDay();
-          const current = weeklyMap.get(dayOfWeek) || { appointments: 0, revenue: 0 };
-          weeklyMap.set(dayOfWeek, {
-            appointments: current.appointments + 1,
-            revenue: current.revenue + (appointment.price || 0)
-          });
-        });
-
-        const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-        const weeklyPatternData = Array.from({ length: 7 }, (_, i) => {
-          const data = weeklyMap.get(i) || { appointments: 0, revenue: 0 };
-          return {
-            dayOfWeek: dayNames[i],
-            appointments: data.appointments,
-            revenue: Number(data.revenue)
-          };
-        });
-
-        // Buscar receita vs despesas (últimos 12 meses)
-        const revenueVsExpensesData: RevenueVsExpensesData[] = [];
-        for (let i = 11; i >= 0; i--) {
-          const monthDate = new Date(currentDate);
-          monthDate.setMonth(monthDate.getMonth() - i);
-          const startMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
-          const endMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
-          
-          const [revenueResult, expensesResult] = await Promise.all([
-            supabase
-              .from('payments')
-              .select('amount')
-              .eq('user_id', user.id)
-              .eq('status', 'pago')
-              .gte('payment_date', startMonth.toISOString())
-              .lte('payment_date', endMonth.toISOString()),
-            supabase
-              .from('expenses')
-              .select('amount')
-              .eq('user_id', user.id)
-              .gte('expense_date', startMonth.toISOString())
-              .lte('expense_date', endMonth.toISOString())
-          ]);
-
-          const revenue = revenueResult.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
-          const expenses = expensesResult.data?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
-          
-          const monthName = startMonth.toLocaleDateString('pt-BR', { month: 'short' });
-          revenueVsExpensesData.push({
-            month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-            revenue: Number(revenue),
-            expenses: Number(expenses),
-            profit: Number(revenue - expenses)
-          });
-        }
-
-        // Buscar performance dos serviços
-        const servicePerformanceMap = new Map<string, { count: number; revenue: number }>();
-        revenueByService?.forEach(appointment => {
-          const serviceName = appointment.service_name || 'Outros';
-          const current = servicePerformanceMap.get(serviceName) || { count: 0, revenue: 0 };
-          servicePerformanceMap.set(serviceName, {
             count: current.count + 1,
-            revenue: current.revenue + (appointment.price || 0)
           });
         });
+        const paymentMethodsAgg = Array.from(methodMap.entries()).map(([method, data]) => ({
+          method, amount: Number(data.amount), count: data.count,
+          fill: paymentMethodColors[method] || '#6b7280',
+        }));
 
-        const servicePerformanceData = Array.from(servicePerformanceMap.entries()).map(([serviceName, data]) => ({
-          serviceName,
-          count: data.count,
-          revenue: Number(data.revenue),
-          avgPrice: data.count > 0 ? Number(data.revenue / data.count) : 0
-        })).sort((a, b) => b.revenue - a.revenue);
+        // ---- Buckets de 12 meses (receita, despesas, trimestre) ----
+        const monthBuckets: { key: string; label: string; start: Date; end: Date }[] = [];
+        for (let i = 11; i >= 0; i--) {
+          const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+          const start = new Date(d.getFullYear(), d.getMonth(), 1);
+          const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+          const label = capitalize(start.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }));
+          monthBuckets.push({ key: monthKey(start), label, start, end });
+        }
+
+        const revenueByMonth = new Map<string, number>();
+        (payments12mo || []).forEach((p) => {
+          if (!p.payment_date) return;
+          const key = monthKey(new Date(p.payment_date));
+          revenueByMonth.set(key, (revenueByMonth.get(key) || 0) + (p.amount || 0));
+        });
+
+        const expensesByMonth = new Map<string, number>();
+        (expenses12mo || []).forEach((e) => {
+          if (!e.expense_date) return;
+          const key = monthKey(new Date(e.expense_date));
+          expensesByMonth.set(key, (expensesByMonth.get(key) || 0) + (e.amount || 0));
+        });
+
+        const monthlyRevenue = monthBuckets.map((b) => ({
+          month: b.label,
+          revenue: Number(revenueByMonth.get(b.key) || 0),
+        }));
+
+        const revenueVsExpenses = monthBuckets.map((b) => {
+          const revenue = Number(revenueByMonth.get(b.key) || 0);
+          const expenses = Number(expensesByMonth.get(b.key) || 0);
+          return { month: b.label.slice(0, 3), revenue, expenses, profit: revenue - expenses };
+        });
+
+        // Trimestres: agrupa os mesmos buckets mensais de 3 em 3.
+        const quarterlyRevenue: QuarterlyData[] = [];
+        for (let i = 0; i < 4; i++) {
+          const quarterMonths = monthBuckets.slice(i * 3, i * 3 + 3);
+          if (quarterMonths.length === 0) continue;
+          const start = quarterMonths[0].start;
+          const total = quarterMonths.reduce((sum, b) => sum + Number(revenueByMonth.get(b.key) || 0), 0);
+          quarterlyRevenue.push({
+            quarter: `Q${Math.floor(start.getMonth() / 3) + 1} ${start.getFullYear()}`,
+            revenue: total,
+          });
+        }
+
+        // ---- Crescimento de clientes (novos por mês + total acumulado) ----
+        const clientDates = (allClients || [])
+          .map((c) => (c.created_at ? new Date(c.created_at) : null))
+          .filter((d): d is Date => d !== null);
+
+        const clientGrowth = monthBuckets.map((b) => {
+          const newClients = clientDates.filter((d) => d >= b.start && d <= b.end).length;
+          const totalClients = clientDates.filter((d) => d <= b.end).length;
+          return { month: b.label.slice(0, 3), newClients, totalClients };
+        });
 
         setPipelineByAmountData(pipelineAmount);
         setPipelineByCountData(pipelineCount);
-        setPaymentMethodData(paymentMethodsData);
-        setAppointmentStatusData(appointmentStatusData);
-        setClientGrowthData(clientGrowthData);
-        setWeeklyPatternData(weeklyPatternData);
-        setRevenueVsExpensesData(revenueVsExpensesData);
-        setServicePerformanceData(servicePerformanceData);
+        setQuarterlyData(quarterlyRevenue);
+        setMonthlyRevenueData(monthlyRevenue);
+        setPaymentMethodData(paymentMethodsAgg);
+        setAppointmentStatusData(appointmentStatus);
+        setClientGrowthData(clientGrowth);
+        setWeeklyPatternData(weeklyPattern);
+        setRevenueVsExpensesData(revenueVsExpenses);
+        setServicePerformanceData(servicePerformance);
 
       } catch (error) {
         console.error('Erro ao buscar dados de analytics:', error);
