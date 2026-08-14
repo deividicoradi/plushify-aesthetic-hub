@@ -331,7 +331,7 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
             </label>
             <p className="text-[11px] sm:text-xs text-muted-foreground pl-6">
               Desmarque se a pessoa é apenas um profissional que atende clientes (aparece na
-              agenda/serviços), sem precisar operar o sistema — não conta no limite de usuários
+              agenda/serviços), sem precisar operar o sistema. Não conta no limite de usuários
               do seu plano.
             </p>
           </div>
