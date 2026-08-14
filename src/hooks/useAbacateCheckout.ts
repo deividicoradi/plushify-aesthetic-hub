@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { isValidAbacateCheckoutUrl } from '@/lib/checkoutUrl';
 
 // Hook único de checkout — usa exclusivamente AbacatePay.
 export const useAbacateCheckout = () => {
@@ -80,19 +81,14 @@ export const useAbacateCheckout = () => {
 
       if (data?.url) {
         // Verificar se URL é da AbacatePay antes de redirecionar
-        try {
-          const checkoutUrl = new URL(data.url);
-          if (!checkoutUrl.hostname.endsWith('abacatepay.com')) {
-            throw new Error('URL de checkout inválida');
-          }
-          
-          console.log('SECURITY: Valid checkout URL received, redirecting');
-          window.location.href = data.url;
-          return true;
-        } catch (urlError) {
+        if (!isValidAbacateCheckoutUrl(data.url)) {
           console.error('SECURITY: Invalid checkout URL', { url: data.url });
           throw new Error('URL de checkout inválida recebida');
         }
+
+        console.log('SECURITY: Valid checkout URL received, redirecting');
+        window.location.href = data.url;
+        return true;
       } else {
         throw new Error('Nenhuma URL de checkout foi recebida');
       }
