@@ -9,3 +9,5 @@ project_id = "iqpldxwwvnlloefqfhoo"
     verify_jwt = true
   [functions.secure-signup]
     verify_jwt = false
+  [functions.secure-login]
+    verify_jwt = false

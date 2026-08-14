@@ -207,9 +207,22 @@ const Auth = () => {
         return;
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      
+      // Passa por uma edge function em vez de chamar signInWithPassword()
+      // direto do navegador — evita que o GoTrue devolva um erro diferente
+      // pra "senha errada" vs "e-mail existe mas não confirmado" (permite
+      // descobrir quais e-mails têm conta no Plushify por tentativa e
+      // erro). A função sempre devolve a mesma mensagem genérica.
+      const { data: invokeData, error: invokeError } = await supabase.functions.invoke('secure-login', {
+        body: { email, password }
+      });
+
+      if (invokeError) throw invokeError;
+      if (invokeData?.error) throw new Error(invokeData.error.message);
+
+      const { access_token, refresh_token } = invokeData.data;
+      const { error: sessionError } = await supabase.auth.setSession({ access_token, refresh_token });
+      if (sessionError) throw sessionError;
+
       if (import.meta.env.DEV) console.log('Login successful, auth context will handle redirect');
       toast.success("Login realizado com sucesso!");
       // Removido redirecionamento manual - o useEffect acima irá lidar com isso
