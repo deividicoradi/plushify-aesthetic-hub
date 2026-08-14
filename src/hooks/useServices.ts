@@ -12,6 +12,7 @@ export interface Service {
   description?: string;
   category?: string;
   active: boolean;
+  image_url?: string;
 }
 
 export const useServices = () => {

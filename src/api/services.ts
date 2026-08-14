@@ -4,7 +4,7 @@ import type { Service } from '@/hooks/useServices';
 export async function fetchServices(userId: string): Promise<Service[]> {
   const { data, error } = await supabase
     .from('services')
-    .select('id, name, price, duration, description, category, active')
+    .select('id, name, price, duration, description, category, active, image_url')
     .eq('user_id', userId)
     .order('name');
     

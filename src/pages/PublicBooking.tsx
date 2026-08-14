@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, User, CheckCircle, ArrowLeft, ArrowRight, Star, Sparkles, Home, Scissors, Phone, Mail, MessageSquare, CalendarCheck } from "lucide-react";
+import { Calendar, Clock, User, CheckCircle, ArrowLeft, ArrowRight, Star, Sparkles, Home, Scissors, Phone, Mail, MessageSquare, CalendarCheck, Search, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format, addDays, startOfDay, parseISO } from "date-fns";
@@ -20,6 +20,7 @@ interface Service {
   price: number;
   duration: number;
   category: string;
+  image_url?: string;
 }
 
 interface TimeSlot {
@@ -52,6 +53,8 @@ export default function PublicBooking() {
   });
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
 
   // Gerar próximos 14 dias úteis
   useEffect(() => {
@@ -85,6 +88,8 @@ export default function PublicBooking() {
         const { data, error } = await supabase.rpc('get_public_services', { p_slug: slug });
         if (error) throw error;
         setServices(data || []);
+        const categories = Array.from(new Set((data || []).map((s: Service) => s.category || 'Outros')));
+        setOpenCategories(Object.fromEntries(categories.map((c) => [c, true])));
       } catch (error) {
         console.error('Erro ao buscar serviços:', error);
         toast({
@@ -353,35 +358,95 @@ export default function PublicBooking() {
                     <p>Nenhum serviço disponível para agendamento neste link.</p>
                   </div>
                 ) : (
-                  services.map((service) => {
-                    const isSelected = booking.service?.id === service.id;
-                    return (
-                      <div
-                        key={service.id}
-                        className={`flex gap-3 p-4 border rounded-2xl cursor-pointer transition-all hover:border-primary/60 hover:shadow-sm ${
-                          isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
-                        }`}
-                        onClick={() => setBooking(prev => ({ ...prev, service }))}
-                      >
-                        <div className={`shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${isSelected ? 'bg-primary text-white' : 'bg-primary/10 text-primary'}`}>
-                          <Scissors className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start gap-2 mb-1">
-                            <h3 className="font-semibold truncate">{service.name}</h3>
-                            <Badge variant="secondary" className="rounded-full shrink-0">{formatPrice(service.price)}</Badge>
+                  <>
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        value={serviceSearch}
+                        onChange={(e) => setServiceSearch(e.target.value)}
+                        placeholder="Procurar serviço"
+                        className="rounded-xl pl-10"
+                      />
+                    </div>
+
+                    {(() => {
+                      const filtered = services.filter((s) =>
+                        s.name.toLowerCase().includes(serviceSearch.trim().toLowerCase())
+                      );
+
+                      if (filtered.length === 0) {
+                        return (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <Search className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                            <p>Nenhum serviço encontrado.</p>
                           </div>
-                          {service.description && (
-                            <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{service.description}</p>
-                          )}
-                          <div className="flex items-center text-xs text-muted-foreground">
-                            <Clock className="w-3.5 h-3.5 mr-1" />
-                            {service.duration} min
+                        );
+                      }
+
+                      const grouped = filtered.reduce<Record<string, Service[]>>((acc, s) => {
+                        const key = s.category || 'Outros';
+                        (acc[key] ||= []).push(s);
+                        return acc;
+                      }, {});
+
+                      return Object.entries(grouped).map(([category, items]) => {
+                        const isOpen = openCategories[category] ?? true;
+                        return (
+                          <div key={category} className="border border-border rounded-2xl overflow-hidden">
+                            <button
+                              type="button"
+                              onClick={() => setOpenCategories(prev => ({ ...prev, [category]: !isOpen }))}
+                              className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 text-sm font-semibold"
+                            >
+                              {category}
+                              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                            </button>
+                            {isOpen && (
+                              <div className="p-3 space-y-3">
+                                {items.map((service) => {
+                                  const isSelected = booking.service?.id === service.id;
+                                  return (
+                                    <div
+                                      key={service.id}
+                                      className={`flex gap-3 p-4 border rounded-2xl cursor-pointer transition-all hover:border-primary/60 hover:shadow-sm ${
+                                        isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
+                                      }`}
+                                      onClick={() => setBooking(prev => ({ ...prev, service }))}
+                                    >
+                                      {service.image_url ? (
+                                        <img
+                                          src={service.image_url}
+                                          alt={service.name}
+                                          className="shrink-0 w-11 h-11 rounded-xl object-cover"
+                                        />
+                                      ) : (
+                                        <div className={`shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${isSelected ? 'bg-primary text-white' : 'bg-primary/10 text-primary'}`}>
+                                          <Scissors className="w-5 h-5" />
+                                        </div>
+                                      )}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start gap-2 mb-1">
+                                          <h3 className="font-semibold truncate">{service.name}</h3>
+                                          <Badge variant="secondary" className="rounded-full shrink-0">{formatPrice(service.price)}</Badge>
+                                        </div>
+                                        {service.description && (
+                                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{service.description}</p>
+                                        )}
+                                        <div className="flex items-center text-xs text-muted-foreground">
+                                          <Clock className="w-3.5 h-3.5 mr-1" />
+                                          {service.duration} min
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      </div>
-                    );
-                  })
+                        );
+                      });
+                    })()}
+                  </>
                 )}
 
                 <Button

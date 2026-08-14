@@ -1,10 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { ImagePlus, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -39,9 +40,12 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
     duration: 60,
     price: 0,
     category: '',
-    active: true
+    active: true,
+    image_url: ''
   });
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch service professionals when editing
   const fetchServiceProfessionals = async (serviceId: string) => {
@@ -84,7 +88,8 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
         duration: service.duration,
         price: service.price,
         category: service.category || '',
-        active: service.active
+        active: service.active,
+        image_url: service.image_url || ''
       });
       fetchServiceProfessionals(service.id);
     } else {
@@ -94,11 +99,45 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
         duration: 60,
         price: 0,
         category: '',
-        active: true
+        active: true,
+        image_url: ''
       });
       setSelectedProfessionals([]);
     }
   }, [service, isOpen, user]);
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Selecione um arquivo de imagem');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('service-images')
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('service-images').getPublicUrl(path);
+      handleChange('image_url', data.publicUrl);
+    } catch (error) {
+      console.error('Erro ao enviar imagem:', error);
+      toast.error('Não foi possível enviar a imagem');
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,6 +191,43 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Foto do serviço</Label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageSelect}
+            />
+            {formData.image_url ? (
+              <div className="relative w-24 h-24">
+                <img
+                  src={formData.image_url}
+                  alt=""
+                  className="w-24 h-24 rounded-xl object-cover border border-border"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleChange('image_url', '')}
+                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="w-24 h-24 rounded-xl border border-dashed border-border flex flex-col items-center justify-center gap-1 text-muted-foreground hover:border-primary/60 hover:text-primary transition-colors"
+              >
+                <ImagePlus className="w-5 h-5" />
+                <span className="text-[10px]">{uploadingImage ? 'Enviando...' : 'Adicionar'}</span>
+              </button>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="name">Nome do Serviço</Label>
             <Input
