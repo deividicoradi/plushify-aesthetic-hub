@@ -88,6 +88,11 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
           </div>
           
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {member.counts_as_seat === false && (
+              <Badge variant="outline" className="text-[10px] sm:text-xs">
+                Só profissional
+              </Badge>
+            )}
             {getStatusBadge(member.status)}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

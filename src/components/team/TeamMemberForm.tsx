@@ -64,6 +64,7 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
       active: member?.active ?? true,
       specialties: member?.specialties || [],
       permissions: (member?.permissions as Record<string, boolean>) || {},
+      counts_as_seat: member?.counts_as_seat ?? true,
     }
   });
 
@@ -87,6 +88,7 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
         active: member.active ?? true,
         specialties: member.specialties || [],
         permissions: (member.permissions as Record<string, boolean>) || {},
+        counts_as_seat: member.counts_as_seat ?? true,
       });
     } else {
       reset({
@@ -101,6 +103,7 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
         active: true,
         specialties: [],
         permissions: {},
+        counts_as_seat: true,
       });
     }
   }, [member, reset]);
@@ -313,6 +316,24 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
                 Aparece como opção de profissional ao criar um agendamento
               </label>
             </div>
+          </div>
+
+          <Separator />
+
+          <div className="rounded-md border p-3 space-y-1.5">
+            <label className="flex items-start gap-2.5 text-xs sm:text-sm cursor-pointer">
+              <Checkbox
+                className="mt-0.5"
+                checked={!!watch('counts_as_seat')}
+                onCheckedChange={(checked) => setValue('counts_as_seat', checked === true)}
+              />
+              <span className="font-medium">Este membro ocupa uma vaga do plano</span>
+            </label>
+            <p className="text-[11px] sm:text-xs text-muted-foreground pl-6">
+              Desmarque se a pessoa é apenas um profissional que atende clientes (aparece na
+              agenda/serviços), sem precisar operar o sistema — não conta no limite de usuários
+              do seu plano.
+            </p>
           </div>
 
           {hasFeature('hasStaffPinMode') && (

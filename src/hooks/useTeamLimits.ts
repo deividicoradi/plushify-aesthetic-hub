@@ -7,7 +7,10 @@ export const useTeamLimits = () => {
   const { teamMembers, loading: teamLoading } = useTeamMembers();
   const { toast } = useToast();
 
-  const activeTeamMembers = teamMembers.filter(member => member.status === 'active');
+  // Só quem realmente ocupa uma vaga do plano (opera o sistema) conta pro
+  // limite — profissionais cadastrados só pra aparecer na agenda/serviço,
+  // sem acesso ao sistema, não devem esbarrar no limite de usuários.
+  const activeTeamMembers = teamMembers.filter(member => member.status === 'active' && member.counts_as_seat);
   const currentActiveUsers = activeTeamMembers.length;
   
   const { activeUsersLimit, canAddUsers, upgradeMessage } = getUserLimitsInfo();

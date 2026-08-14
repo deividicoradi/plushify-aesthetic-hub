@@ -50,12 +50,10 @@ export const TeamManagement = () => {
   );
 
   const handleAddMember = () => {
-    // Verificar se pode adicionar mais usuários
-    if (!limitInfo.canAdd) {
-      setShowLimitModal(true);
-      return;
-    }
-    
+    // O limite do plano só se aplica a quem ocupa vaga (counts_as_seat) —
+    // cadastro de profissional-só-agenda continua liberado mesmo no limite,
+    // então o formulário sempre pode abrir; a checagem real acontece no
+    // submit, condicionada à escolha feita no formulário.
     setEditingMember(null);
     setIsFormOpen(true);
   };
@@ -77,8 +75,11 @@ export const TeamManagement = () => {
     try {
       setFormLoading(true);
       
-      // Se está criando um novo membro, verificar limites novamente
-      if (!editingMember && !checkUserLimit()) {
+      // Limite de plano só vale pra quem ocupa vaga (counts_as_seat) —
+      // membro cadastrado só como profissional (sem acesso ao sistema)
+      // não esbarra nele.
+      const willCountAsSeat = data.counts_as_seat !== false;
+      if (!editingMember && willCountAsSeat && !checkUserLimit()) {
         setIsFormOpen(false);
         setShowLimitModal(true);
         return;
@@ -148,9 +149,8 @@ export const TeamManagement = () => {
         </div>
         
         <div className="flex gap-2 w-full sm:w-auto justify-end">
-          <Button 
+          <Button
             onClick={handleAddMember}
-            disabled={!limitInfo.canAdd}
             className="gap-2 touch-target w-full sm:w-auto"
           >
             <UserPlus className="w-4 h-4" />
@@ -184,7 +184,7 @@ export const TeamManagement = () => {
                   <p className="text-sm text-muted-foreground mb-4">
                     Comece adicionando membros à sua equipe para gerenciar melhor seu negócio.
                   </p>
-                  <Button onClick={handleAddMember} disabled={!limitInfo.canAdd} className="w-full sm:w-auto">
+                  <Button onClick={handleAddMember} className="w-full sm:w-auto">
                     <UserPlus className="w-4 h-4 mr-2" />
                     Adicionar Primeiro Membro
                   </Button>
