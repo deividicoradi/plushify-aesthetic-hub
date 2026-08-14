@@ -158,23 +158,30 @@ const Auth = () => {
 
       const referralCode = getPendingReferralCode();
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            terms_accepted: 'true',
-            terms_version: TERMS_VERSION,
-            privacy_version: PRIVACY_VERSION,
-            ...(referralCode ? { referral_code: referralCode } : {}),
-          },
-          emailRedirectTo: `${window.location.origin}/auth/confirmado`
+      // Passa por uma edge function em vez de chamar signUp() direto do
+      // navegador — aplica rate limit por IP antes de criar a conta,
+      // evitando cadastro em massa por script (ver relatório de bug
+      // bounty "enumeracao-usuarios-login-signup").
+      const { data: invokeData, error: invokeError } = await supabase.functions.invoke('secure-signup', {
+        body: {
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              terms_accepted: 'true',
+              terms_version: TERMS_VERSION,
+              privacy_version: PRIVACY_VERSION,
+              ...(referralCode ? { referral_code: referralCode } : {}),
+            },
+            emailRedirectTo: `${window.location.origin}/auth/confirmado`
+          }
         }
       });
-      
-      if (error) throw error;
-      
+
+      if (invokeError) throw invokeError;
+      if (invokeData?.error) throw new Error(invokeData.error.message);
+
       if (referralCode) clearPendingReferral();
       toast.success("Cadastro realizado com sucesso! Verifique seu e-mail para confirmar sua conta.");
     } catch (error: any) {
