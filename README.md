@@ -66,21 +66,16 @@ The application expects the following variables at build time:
 
 - `VITE_SUPABASE_URL` – your Supabase project URL.
 - `VITE_SUPABASE_ANON_KEY` – the public anon key for your project.
-- `PRICE_ID_STARTER_MONTHLY` – Stripe price ID for the monthly Starter plan.
-- `PRICE_ID_STARTER_YEARLY` – Stripe price ID for the yearly Starter plan.
-- `PRICE_ID_PRO_MONTHLY` – Stripe price ID for the monthly Pro plan.
-- `PRICE_ID_PRO_YEARLY` – Stripe price ID for the yearly Pro plan.
-- `PRICE_ID_PREMIUM_MONTHLY` – Stripe price ID for the monthly Premium plan.
-- `PRICE_ID_PREMIUM_YEARLY` – Stripe price ID for the yearly Premium plan.
 - `APP_URL` – base URL used by Supabase functions when no `Origin` header is provided. This must be defined when running functions without an `Origin` header in the request.
 
 Supabase functions (`supabase/functions/*`) also use the following variables at runtime:
 
-- `STRIPE_SECRET_KEY` – secret key for Stripe used in `create-checkout-session`, `verify-subscription` and `stripe-webhook`.
-- `STRIPE_WEBHOOK_SECRET` – webhook signing secret used by `stripe-webhook`.
-- `SUPABASE_SERVICE_ROLE_KEY` – service role key used by `stripe-webhook` for privileged database access.
+- `ABACATE_API_KEY` – secret key for the AbacatePay API, used by `abacate-create-checkout`, `abacate-create-subscription`, `abacate-create-upgrade-checkout`, `abacate-refund-checkout` and related functions.
+- `ABACATE_WEBHOOK_SECRET` – webhook signing secret used by `abacate-webhook`.
+- `ABACATE_WEBHOOK_PUBLIC_KEY` – public key used to verify webhook signatures in `abacate-webhook`.
+- `SUPABASE_SERVICE_ROLE_KEY` – service role key used by `abacate-webhook` for privileged database access.
 - `SUPABASE_URL` – your Supabase project URL, used by all functions.
-- `SUPABASE_ANON_KEY` – anon key used by functions in `_shared/stripeUtils.ts` to authenticate users.
+- `SUPABASE_ANON_KEY` – anon key used by the `abacate-*` functions to authenticate users.
 
 Create a `.env` file in the project root and define these values when running locally or configure them in the Supabase dashboard for your functions.
 
