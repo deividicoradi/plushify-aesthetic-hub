@@ -138,44 +138,44 @@ export const WorkingHoursSetup = () => {
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200 dark:border-blue-800/50">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0 flex-1">
+            <div className="flex flex-col gap-1.5 p-3 rounded-lg bg-background/60 border border-blue-200/50 dark:border-blue-800/30">
+              <div className="flex items-center gap-2.5">
+                <Switch
+                  checked={editedHours.length > 0 && editedHours.every(h => h.auto_confirm_appointments)}
+                  onCheckedChange={(checked) => {
+                    const newEditedHours = editedHours.map(h => ({
+                      ...h,
+                      auto_confirm_appointments: checked
+                    }));
+                    setEditedHours(newEditedHours);
+                    setHasChanges(true);
+                  }}
+                />
                 <Label className="text-sm font-medium">Confirmar agendamentos automaticamente</Label>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Aprovar agendamentos dentro do horário de trabalho
-                </p>
               </div>
-              <Switch
-                checked={editedHours.length > 0 && editedHours.every(h => h.auto_confirm_appointments)}
-                onCheckedChange={(checked) => {
-                  const newEditedHours = editedHours.map(h => ({
-                    ...h,
-                    auto_confirm_appointments: checked
-                  }));
-                  setEditedHours(newEditedHours);
-                  setHasChanges(true);
-                }}
-              />
+              <p className="text-xs text-muted-foreground pl-[52px]">
+                Aprovar agendamentos dentro do horário de trabalho
+              </p>
             </div>
-            
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0 flex-1">
+
+            <div className="flex flex-col gap-1.5 p-3 rounded-lg bg-background/60 border border-blue-200/50 dark:border-blue-800/30">
+              <div className="flex items-center gap-2.5">
+                <Switch
+                  checked={editedHours.length > 0 && editedHours.every(h => h.auto_complete_appointments)}
+                  onCheckedChange={(checked) => {
+                    const newEditedHours = editedHours.map(h => ({
+                      ...h,
+                      auto_complete_appointments: checked
+                    }));
+                    setEditedHours(newEditedHours);
+                    setHasChanges(true);
+                  }}
+                />
                 <Label className="text-sm font-medium">Concluir agendamentos automaticamente</Label>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Finalizar agendamentos confirmados às 23:00
-                </p>
               </div>
-              <Switch
-                checked={editedHours.length > 0 && editedHours.every(h => h.auto_complete_appointments)}
-                onCheckedChange={(checked) => {
-                  const newEditedHours = editedHours.map(h => ({
-                    ...h,
-                    auto_complete_appointments: checked
-                  }));
-                  setEditedHours(newEditedHours);
-                  setHasChanges(true);
-                }}
-              />
+              <p className="text-xs text-muted-foreground pl-[52px]">
+                Finalizar agendamentos confirmados às 23:00
+              </p>
             </div>
           </div>
         </div>
