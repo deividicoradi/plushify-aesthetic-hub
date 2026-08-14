@@ -20,7 +20,7 @@ const LGPD = () => {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
               <CheckCircle className="w-4 h-4" />
-              100% Conforme com a LGPD
+              Comprometidos com a LGPD
             </div>
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent mb-6">
               Conformidade com a LGPD
@@ -40,9 +40,9 @@ const LGPD = () => {
                 Nosso Compromisso
               </h2>
               <p className="text-muted-foreground leading-relaxed">
-                O Plushify está em total conformidade com a Lei Geral de Proteção de Dados (LGPD). 
-                Implementamos todas as medidas técnicas e organizacionais necessárias para garantir 
-                a proteção dos dados pessoais de nossos usuários e clientes.
+                O Plushify segue os princípios e diretrizes da Lei Geral de Proteção de Dados (LGPD).
+                Implementamos medidas técnicas e organizacionais para garantir a proteção dos dados
+                pessoais de nossos usuários e clientes, e revisamos essas práticas continuamente.
               </p>
             </div>
 
