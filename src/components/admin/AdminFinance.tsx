@@ -22,6 +22,7 @@ import {
 } from '@/hooks/admin/useAdminFinance';
 import { FinanceEntryFormDialog } from './finance/FinanceEntryFormDialog';
 import { AdminFinanceNotes } from './finance/AdminFinanceNotes';
+import { FinanceStatusDetailDialog } from './finance/FinanceStatusDetailDialog';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -38,12 +39,28 @@ const currentMonth = () => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 };
 
+const monthRange = (month: string) => {
+  const monthDate = new Date(`${month}-01T00:00:00`);
+  const from = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1).toISOString().slice(0, 10);
+  const to = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).toISOString().slice(0, 10);
+  return { from, to };
+};
+
+const DETAIL_TITLES: Record<FinanceStatus, string> = {
+  pending: 'Pendente no mês',
+  paid: 'Pago no mês',
+  overdue: 'Vencido no mês',
+  cancelled: 'Cancelado no mês',
+};
+
 export const AdminFinance: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<FinanceStatus | 'todos'>('todos');
   const [categoryFilter, setCategoryFilter] = useState<FinanceCategory | 'todas'>('todas');
   const [formOpen, setFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<FinanceEntry | null>(null);
+  const [detailStatus, setDetailStatus] = useState<FinanceStatus | null>(null);
   const month = currentMonth();
+  const { from: monthFrom, to: monthTo } = monthRange(month);
 
   const { entries, loading, createEntry, updateEntry, markPaid, cancelEntry, deleteEntry } = useAdminFinance({
     status: statusFilter,
@@ -69,7 +86,13 @@ export const AdminFinance: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800">
+        <Card
+          role="button"
+          tabIndex={0}
+          onClick={() => setDetailStatus('paid')}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setDetailStatus('paid'))}
+          className="cursor-pointer transition-all hover:shadow-md hover:ring-1 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">Pago no mês</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -81,7 +104,13 @@ export const AdminFinance: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800">
+        <Card
+          role="button"
+          tabIndex={0}
+          onClick={() => setDetailStatus('pending')}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setDetailStatus('pending'))}
+          className="cursor-pointer transition-all hover:shadow-md hover:ring-1 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium text-amber-700 dark:text-amber-300">Pendente no mês</CardTitle>
             <Wallet className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -93,7 +122,13 @@ export const AdminFinance: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-950/30 dark:to-rose-950/30 border-red-200 dark:border-red-800 col-span-2 lg:col-span-1">
+        <Card
+          role="button"
+          tabIndex={0}
+          onClick={() => setDetailStatus('overdue')}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setDetailStatus('overdue'))}
+          className="cursor-pointer transition-all hover:shadow-md hover:ring-1 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-950/30 dark:to-rose-950/30 border-red-200 dark:border-red-800 col-span-2 lg:col-span-1"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">Vencido no mês</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
@@ -221,6 +256,14 @@ export const AdminFinance: React.FC = () => {
         onOpenChange={setFormOpen}
         onSubmit={handleSubmit}
         entry={editingEntry}
+      />
+
+      <FinanceStatusDetailDialog
+        status={detailStatus}
+        title={detailStatus ? DETAIL_TITLES[detailStatus] : ''}
+        from={monthFrom}
+        to={monthTo}
+        onOpenChange={(open) => !open && setDetailStatus(null)}
       />
     </div>
   );

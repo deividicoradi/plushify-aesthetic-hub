@@ -78,6 +78,7 @@ interface Filters {
   category?: FinanceCategory | 'todas';
   from?: string;
   to?: string;
+  enabled?: boolean;
 }
 
 export const useAdminFinance = (filters: Filters = {}) => {
@@ -86,6 +87,7 @@ export const useAdminFinance = (filters: Filters = {}) => {
 
   const { data: entries = [], isLoading: loading, refetch } = useQuery({
     queryKey,
+    enabled: filters.enabled ?? true,
     queryFn: async (): Promise<FinanceEntry[]> => {
       const { data, error } = await sb.rpc('admin_list_finance_entries', {
         p_status: !filters.status || filters.status === 'todos' ? null : filters.status,
