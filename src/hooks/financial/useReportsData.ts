@@ -20,81 +20,97 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
 
       console.log('🔍 Buscando dados do relatório para o período:', { fromDate, toDate });
 
-      // Buscar todos os pagamentos (incluindo pagos) para o período
-      const { data: payments, error: paymentsError } = await supabase
-        .from('payments')
-        .select(`
-          id,
-          description,
-          amount,
-          paid_amount,
-          status,
-          created_at,
-          payment_date,
-          user_id,
-          appointment_id,
-          client_id,
-          payment_method_id,
-          discount,
-          due_date,
-          installments,
-          notes
-        `)
-        .eq('user_id', user?.id)
-        .or('status.eq.pago,status.eq.parcial')
-        .or(`payment_date.gte.${fromDate},created_at.gte.${fromDate}`)
-        .or(`payment_date.lte.${toDate},created_at.lte.${toDate}`);
+      // 1ª rodada: 5 consultas independentes entre si, em paralelo (antes
+      // eram sequenciais, uma esperando a outra terminar sem necessidade —
+      // só clients/payment_methods realmente dependem do resultado de
+      // payments, então essas duas ficam pra 2ª rodada, também em paralelo).
+      const [
+        { data: payments, error: paymentsError },
+        { data: deletedPayments, error: deletedError },
+        { data: installments },
+        { data: expenses },
+        { data: cashClosures, error: cashClosuresError },
+      ] = await Promise.all([
+        supabase
+          .from('payments')
+          .select(`
+            id,
+            description,
+            amount,
+            paid_amount,
+            status,
+            created_at,
+            payment_date,
+            user_id,
+            appointment_id,
+            client_id,
+            payment_method_id,
+            discount,
+            due_date,
+            installments,
+            notes
+          `)
+          .eq('user_id', user?.id)
+          .or('status.eq.pago,status.eq.parcial')
+          .or(`payment_date.gte.${fromDate},created_at.gte.${fromDate}`)
+          .or(`payment_date.lte.${toDate},created_at.lte.${toDate}`),
+        // Pagamentos excluídos através dos logs de auditoria
+        supabase
+          .from('audit_logs')
+          .select('*')
+          .eq('user_id', user?.id)
+          .eq('table_name', 'payments')
+          .eq('action', 'DELETE')
+          .gte('created_at', fromDate)
+          .lte('created_at', toDate),
+        // Parcelamentos do período (pagos e pendentes)
+        supabase
+          .from('installments')
+          .select(`
+            id,
+            installment_number,
+            total_installments,
+            amount,
+            paid_amount,
+            due_date,
+            payment_date,
+            status,
+            payment_id
+          `)
+          .eq('user_id', user?.id)
+          .or(`payment_date.gte.${fromDate},due_date.gte.${fromDate}`)
+          .or(`payment_date.lte.${toDate},due_date.lte.${toDate}`),
+        // Despesas
+        supabase
+          .from('expenses')
+          .select(`
+            *,
+            payment_methods(name, type)
+          `)
+          .eq('user_id', user?.id)
+          .gte('expense_date', fromDate)
+          .lte('expense_date', toDate),
+        // Fechamentos de caixa
+        supabase
+          .from('cash_closures')
+          .select('*')
+          .eq('user_id', user?.id)
+          .gte('closure_date', fromDateOnly)
+          .lte('closure_date', toDateOnly),
+      ]);
 
       console.log('💰 Pagamentos encontrados:', payments);
       if (paymentsError) {
         console.error('❌ Erro ao buscar pagamentos:', paymentsError);
       }
-
-      // Buscar informações dos clientes separadamente
-      const clientIds = payments?.map(p => p.client_id).filter(Boolean) || [];
-      let clients: any[] = [];
-      if (clientIds.length > 0) {
-        const { data: clientsData, error: clientsError } = await supabase
-          .from('clients')
-          .select('id, name')
-          .in('id', clientIds);
-        
-        if (clientsError) {
-          console.error('❌ Erro ao buscar clientes:', clientsError);
-        } else {
-          clients = clientsData || [];
-        }
-      }
-
-      // Buscar informações dos métodos de pagamento separadamente
-      const paymentMethodIds = payments?.map(p => p.payment_method_id).filter(Boolean) || [];
-      let paymentMethods: any[] = [];
-      if (paymentMethodIds.length > 0) {
-        const { data: paymentMethodsData, error: paymentMethodsError } = await supabase
-          .from('payment_methods')
-          .select('id, name, type')
-          .in('id', paymentMethodIds);
-        
-        if (paymentMethodsError) {
-          console.error('❌ Erro ao buscar métodos de pagamento:', paymentMethodsError);
-        } else {
-          paymentMethods = paymentMethodsData || [];
-        }
-      }
-
-      // Buscar pagamentos excluídos através dos logs de auditoria
-      const { data: deletedPayments, error: deletedError } = await supabase
-        .from('audit_logs')
-        .select('*')
-        .eq('user_id', user?.id)
-        .eq('table_name', 'payments')
-        .eq('action', 'DELETE')
-        .gte('created_at', fromDate)
-        .lte('created_at', toDate);
-
       console.log('🗑️ Pagamentos excluídos encontrados:', deletedPayments);
       if (deletedError) {
         console.error('❌ Erro ao buscar pagamentos excluídos:', deletedError);
+      }
+      console.log('📊 Parcelamentos encontrados:', installments?.length || 0);
+      console.log('🏦 Fechamentos de caixa encontrados:', cashClosures);
+      if (cashClosuresError) {
+        console.error('❌ Erro ao buscar fechamentos:', cashClosuresError);
       }
 
       // Processar pagamentos excluídos para incluir no relatório
@@ -113,49 +129,29 @@ export const useReportsData = (dateFrom: Date, dateTo: Date, reportType: string)
         };
       }) || [];
 
-      // Buscar parcelamentos do período (pagos e pendentes)
-      const { data: installments } = await supabase
-        .from('installments')
-        .select(`
-          id,
-          installment_number,
-          total_installments,
-          amount,
-          paid_amount,
-          due_date,
-          payment_date,
-          status,
-          payment_id
-        `)
-        .eq('user_id', user?.id)
-        .or(`payment_date.gte.${fromDate},due_date.gte.${fromDate}`)
-        .or(`payment_date.lte.${toDate},due_date.lte.${toDate}`);
+      // 2ª rodada: nomes de cliente e método de pagamento pros IDs
+      // encontrados em payments — precisam do resultado da 1ª rodada, mas
+      // são independentes entre si, então rodam juntas.
+      const clientIds = payments?.map(p => p.client_id).filter(Boolean) || [];
+      const paymentMethodIds = payments?.map(p => p.payment_method_id).filter(Boolean) || [];
 
-      console.log('📊 Parcelamentos encontrados:', installments?.length || 0);
+      const [clientsRes, paymentMethodsRes] = await Promise.all([
+        clientIds.length > 0
+          ? supabase.from('clients').select('id, name').in('id', clientIds)
+          : Promise.resolve({ data: [], error: null }),
+        paymentMethodIds.length > 0
+          ? supabase.from('payment_methods').select('id, name, type').in('id', paymentMethodIds)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
 
-      // Buscar despesas
-      const { data: expenses } = await supabase
-        .from('expenses')
-        .select(`
-          *,
-          payment_methods(name, type)
-        `)
-        .eq('user_id', user?.id)
-        .gte('expense_date', fromDate)
-        .lte('expense_date', toDate);
-
-      // Buscar fechamentos de caixa
-      const { data: cashClosures, error: cashClosuresError } = await supabase
-        .from('cash_closures')
-        .select('*')
-        .eq('user_id', user?.id)
-        .gte('closure_date', fromDateOnly)
-        .lte('closure_date', toDateOnly);
-
-      console.log('🏦 Fechamentos de caixa encontrados:', cashClosures);
-      if (cashClosuresError) {
-        console.error('❌ Erro ao buscar fechamentos:', cashClosuresError);
+      if (clientsRes.error) {
+        console.error('❌ Erro ao buscar clientes:', clientsRes.error);
       }
+      if (paymentMethodsRes.error) {
+        console.error('❌ Erro ao buscar métodos de pagamento:', paymentMethodsRes.error);
+      }
+      const clients = clientsRes.data || [];
+      const paymentMethods = paymentMethodsRes.data || [];
 
       // Fix TypeScript error by properly typing the payments
       const validPayments: Payment[] = (payments || []).map(p => {
