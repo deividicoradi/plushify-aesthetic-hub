@@ -66,7 +66,7 @@ export const useProfile = () => {
   const uploadAvatar = async (file: File): Promise<boolean> => {
     if (!user) return false;
     const validation = validateImageFile(file);
-    if (!validation.ok) {
+    if ('error' in validation) {
       toast({ title: 'Erro', description: validation.error, variant: 'destructive' });
       return false;
     }
