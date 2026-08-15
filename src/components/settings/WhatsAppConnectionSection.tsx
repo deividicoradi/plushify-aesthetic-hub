@@ -52,10 +52,10 @@ export function WhatsAppConnectionSection() {
       });
       if (error) return;
 
-      const connected = data?.status?.status === 'connected' || data?.status?.connected === true;
+      const connected = data?.status?.status === 'ready';
       if (connected) {
         setStatus('connected');
-        setPhoneNumber(data?.status?.phoneNumber ?? data?.status?.phone ?? null);
+        setPhoneNumber(data?.status?.phone ?? null);
         setQrImage(null);
         stopPolling();
         toast({ title: 'WhatsApp conectado!', description: 'Agora você pode enviar mensagens para seus clientes.' });
@@ -66,7 +66,7 @@ export function WhatsAppConnectionSection() {
       const { data: qrData } = await supabase.functions.invoke('whatsapp-proxy', {
         body: { action: 'qr' },
       });
-      const qrValue = qrData?.qr?.qr ?? qrData?.qr?.image ?? qrData?.qr?.data ?? null;
+      const qrValue = qrData?.qr?.qrCode ?? null;
       if (qrValue) setQrImage(qrValue);
     }, 3000);
   };

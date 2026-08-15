@@ -65,25 +65,46 @@ Deno.serve(async (req) => {
         headers: { ...owaHeaders, ...(init.headers ?? {}) },
       })
 
+    // The OpenWA REST API addresses sessions by their internal UUID (the "id"
+    // field), not by the human-readable "name" we assign — so every action
+    // beyond creation has to resolve name -> id via the list endpoint first.
+    type OwaSession = {
+      id: string
+      name: string
+      status: string
+      phone: string | null
+      connectedAt: string | null
+    }
+    const findSession = async (): Promise<OwaSession | null> => {
+      const listRes = await owaFetch('/api/sessions')
+      if (!listRes.ok) return null
+      const list = (await listRes.json()) as OwaSession[]
+      return list.find((s) => s.name === sessionName) ?? null
+    }
+
     if (action === 'connect') {
       // Ensure the wa_sessions row exists for this tenant.
       await admin
         .from('wa_sessions')
         .upsert({ tenant_id: userId, session_name: sessionName, status: 'connecting' }, { onConflict: 'tenant_id' })
 
-      // Create the OpenWA session if it doesn't exist yet (idempotent-ish: ignore 409/already-exists).
-      const createRes = await owaFetch('/api/sessions', {
-        method: 'POST',
-        body: JSON.stringify({ name: sessionName }),
-      })
-      if (!createRes.ok && createRes.status !== 409) {
-        const detail = await createRes.text()
-        console.error('whatsapp-proxy: create session failed', createRes.status, detail)
-        return json({ error: 'Falha ao criar sessão do WhatsApp' }, 502)
+      let session = await findSession()
+      if (!session) {
+        const createRes = await owaFetch('/api/sessions', {
+          method: 'POST',
+          body: JSON.stringify({ name: sessionName }),
+        })
+        if (!createRes.ok) {
+          const detail = await createRes.text()
+          console.error('whatsapp-proxy: create session failed', createRes.status, detail)
+          return json({ error: 'Falha ao criar sessão do WhatsApp' }, 502)
+        }
+        session = (await createRes.json()) as OwaSession
       }
 
-      const startRes = await owaFetch(`/api/sessions/${sessionName}/start`, { method: 'POST' })
-      if (!startRes.ok) {
+      const startRes = await owaFetch(`/api/sessions/${session.id}/start`, { method: 'POST' })
+      // 400 here means "session already started" per the OpenWA API — not a real failure.
+      if (!startRes.ok && startRes.status !== 400) {
         const detail = await startRes.text()
         console.error('whatsapp-proxy: start session failed', startRes.status, detail)
         return json({ error: 'Falha ao iniciar sessão do WhatsApp' }, 502)
@@ -93,7 +114,10 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'qr') {
-      const qrRes = await owaFetch(`/api/sessions/${sessionName}/qr`)
+      const session = await findSession()
+      if (!session) return json({ error: 'Sessão não encontrada' }, 404)
+
+      const qrRes = await owaFetch(`/api/sessions/${session.id}/qr`)
       if (!qrRes.ok) {
         const detail = await qrRes.text()
         console.error('whatsapp-proxy: qr fetch failed', qrRes.status, detail)
@@ -104,28 +128,29 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'status') {
-      const statusRes = await owaFetch(`/api/sessions/${sessionName}/status`)
-      if (!statusRes.ok) {
-        return json({ error: 'Falha ao consultar status' }, 502)
-      }
-      const data = await statusRes.json()
-      const connected = data?.status === 'connected' || data?.connected === true
+      const session = await findSession()
+      if (!session) return json({ error: 'Sessão não encontrada' }, 404)
+
+      const connected = session.status === 'ready'
 
       await admin
         .from('wa_sessions')
         .update({
           status: connected ? 'connected' : 'connecting',
-          phone_number: data?.phoneNumber ?? data?.phone ?? null,
+          phone_number: session.phone,
           connected_at: connected ? new Date().toISOString() : null,
         })
         .eq('tenant_id', userId)
 
-      return json({ success: true, status: data })
+      return json({ success: true, status: session })
     }
 
     if (action === 'disconnect') {
-      await owaFetch(`/api/sessions/${sessionName}/logout`, { method: 'POST' }).catch(() => null)
-      await owaFetch(`/api/sessions/${sessionName}`, { method: 'DELETE' }).catch(() => null)
+      const session = await findSession()
+      if (session) {
+        await owaFetch(`/api/sessions/${session.id}/logout`, { method: 'POST' }).catch(() => null)
+        await owaFetch(`/api/sessions/${session.id}`, { method: 'DELETE' }).catch(() => null)
+      }
 
       await admin
         .from('wa_sessions')
