@@ -35,6 +35,8 @@ export function WhatsAppConnectionSection() {
     if (!error && data) {
       setStatus(data.status as WaStatus);
       setPhoneNumber(data.phone_number);
+      // Se a página recarregou no meio de uma conexão em andamento, retoma o polling.
+      if (data.status === 'connecting') pollStatus();
     }
     setLoading(false);
   };
