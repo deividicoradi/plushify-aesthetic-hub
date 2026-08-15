@@ -112,7 +112,7 @@ export const ServiceForm = ({ isOpen, onClose, onSubmit, service, title }: Servi
     if (!file || !user) return;
 
     const validation = validateImageFile(file);
-    if (!validation.ok) {
+    if ('error' in validation) {
       toast.error(validation.error);
       return;
     }

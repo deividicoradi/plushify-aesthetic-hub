@@ -1637,6 +1637,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           id: string
           name: string | null
@@ -1645,6 +1646,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           id: string
           name?: string | null
@@ -1653,6 +1655,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           id?: string
           name?: string | null
@@ -1661,154 +1664,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      prospect_interactions: {
-        Row: {
-          channel: string
-          created_at: string
-          created_by: string | null
-          id: string
-          note: string | null
-          occurred_at: string
-          prospect_id: string
-        }
-        Insert: {
-          channel: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          note?: string | null
-          occurred_at?: string
-          prospect_id: string
-        }
-        Update: {
-          channel?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          note?: string | null
-          occurred_at?: string
-          prospect_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "prospect_interactions_prospect_id_fkey"
-            columns: ["prospect_id"]
-            isOneToOne: false
-            referencedRelation: "prospects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      prospectors: {
-        Row: {
-          active: boolean
-          created_at: string
-          created_by: string | null
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      prospects: {
-        Row: {
-          contact_channel: string | null
-          converted_at: string | null
-          converted_user_id: string | null
-          created_at: string
-          created_by: string | null
-          email: string | null
-          estimated_value: number | null
-          first_payment_value: number | null
-          id: string
-          last_contact_at: string | null
-          loss_reason: string | null
-          name: string
-          next_action_date: string | null
-          next_action_note: string | null
-          notes: string | null
-          origin: string | null
-          phone: string | null
-          plan_interest: string | null
-          prospector_id: string | null
-          social_link: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          contact_channel?: string | null
-          converted_at?: string | null
-          converted_user_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          estimated_value?: number | null
-          first_payment_value?: number | null
-          id?: string
-          last_contact_at?: string | null
-          loss_reason?: string | null
-          name: string
-          next_action_date?: string | null
-          next_action_note?: string | null
-          notes?: string | null
-          origin?: string | null
-          phone?: string | null
-          plan_interest?: string | null
-          prospector_id?: string | null
-          social_link?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          contact_channel?: string | null
-          converted_at?: string | null
-          converted_user_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          estimated_value?: number | null
-          first_payment_value?: number | null
-          id?: string
-          last_contact_at?: string | null
-          loss_reason?: string | null
-          name?: string
-          next_action_date?: string | null
-          next_action_note?: string | null
-          notes?: string | null
-          origin?: string | null
-          phone?: string | null
-          plan_interest?: string | null
-          prospector_id?: string | null
-          social_link?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "prospects_prospector_id_fkey"
-            columns: ["prospector_id"]
-            isOneToOne: false
-            referencedRelation: "prospectors"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       public_rate_limits: {
         Row: {
@@ -1976,6 +1831,7 @@ export type Database = {
           description: string | null
           duration: number
           id: string
+          image_url: string | null
           name: string
           price: number
           updated_at: string
@@ -1988,6 +1844,7 @@ export type Database = {
           description?: string | null
           duration: number
           id?: string
+          image_url?: string | null
           name: string
           price: number
           updated_at?: string
@@ -2000,6 +1857,7 @@ export type Database = {
           description?: string | null
           duration?: number
           id?: string
+          image_url?: string | null
           name?: string
           price?: number
           updated_at?: string
@@ -2146,6 +2004,7 @@ export type Database = {
           active: boolean
           avatar_url: string | null
           commission_percent: number
+          counts_as_seat: boolean
           created_at: string
           email: string | null
           hire_date: string | null
@@ -2165,6 +2024,7 @@ export type Database = {
           active?: boolean
           avatar_url?: string | null
           commission_percent?: number
+          counts_as_seat?: boolean
           created_at?: string
           email?: string | null
           hire_date?: string | null
@@ -2184,6 +2044,7 @@ export type Database = {
           active?: boolean
           avatar_url?: string | null
           commission_percent?: number
+          counts_as_seat?: boolean
           created_at?: string
           email?: string | null
           hire_date?: string | null
@@ -2312,6 +2173,39 @@ export type Database = {
         }
         Relationships: []
       }
+      wa_sessions: {
+        Row: {
+          connected_at: string | null
+          created_at: string
+          id: string
+          phone_number: string | null
+          session_name: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          phone_number?: string | null
+          session_name: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          phone_number?: string | null
+          session_name?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       webhook_failures: {
         Row: {
           created_at: string
@@ -2402,6 +2296,7 @@ export type Database = {
         Args: { p_channel: string; p_note?: string; p_prospect_id: string }
         Returns: string
       }
+      admin_cancel_finance_entry: { Args: { p_id: string }; Returns: undefined }
       admin_convert_prospect: {
         Args: {
           p_converted_email?: string
@@ -2409,6 +2304,22 @@ export type Database = {
           p_id: string
         }
         Returns: undefined
+      }
+      admin_create_finance_entry: {
+        Args: {
+          p_amount: number
+          p_attachment_url?: string
+          p_category: string
+          p_description: string
+          p_due_date: string
+          p_notes?: string
+          p_recurrence?: string
+        }
+        Returns: string
+      }
+      admin_create_finance_note: {
+        Args: { p_content?: string; p_pinned?: boolean; p_title: string }
+        Returns: string
       }
       admin_create_prospect: {
         Args: {
@@ -2426,6 +2337,8 @@ export type Database = {
         Returns: string
       }
       admin_create_prospector: { Args: { p_name: string }; Returns: string }
+      admin_delete_finance_entry: { Args: { p_id: string }; Returns: undefined }
+      admin_delete_finance_note: { Args: { p_id: string }; Returns: undefined }
       admin_delete_prospect: { Args: { p_id: string }; Returns: undefined }
       admin_delete_prospector: { Args: { p_id: string }; Returns: undefined }
       admin_extend_trial: {
@@ -2457,6 +2370,16 @@ export type Database = {
       }
       admin_get_customer_detail: { Args: { p_user_id: string }; Returns: Json }
       admin_get_engagement_risk: { Args: never; Returns: Json }
+      admin_get_finance_summary: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: {
+          category: string
+          category_total: number
+          total_overdue: number
+          total_paid: number
+          total_pending: number
+        }[]
+      }
       admin_get_overview_details: { Args: never; Returns: Json }
       admin_get_overview_stats: { Args: never; Returns: Json }
       admin_get_pending_issues: { Args: { p_limit?: number }; Returns: Json }
@@ -2590,6 +2513,43 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_finance_entries: {
+        Args: {
+          p_category?: string
+          p_from?: string
+          p_limit?: number
+          p_offset?: number
+          p_status?: string
+          p_to?: string
+        }
+        Returns: {
+          amount: number
+          attachment_url: string
+          category: string
+          created_at: string
+          description: string
+          due_date: string
+          id: string
+          notes: string
+          paid_at: string
+          payment_method: string
+          recurrence: string
+          status: string
+          total_count: number
+          updated_at: string
+        }[]
+      }
+      admin_list_finance_notes: {
+        Args: never
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          pinned: boolean
+          title: string
+          updated_at: string
+        }[]
+      }
       admin_list_prospectors: {
         Args: never
         Returns: {
@@ -2667,6 +2627,10 @@ export type Database = {
           total_count: number
         }[]
       }
+      admin_mark_finance_entry_paid: {
+        Args: { p_id: string; p_payment_method?: string }
+        Returns: undefined
+      }
       admin_mark_subscription_refunded: {
         Args: {
           p_reason?: string
@@ -2687,6 +2651,28 @@ export type Database = {
       }
       admin_set_webhook_failure_resolved: {
         Args: { p_id: string; p_note?: string; p_resolved: boolean }
+        Returns: undefined
+      }
+      admin_update_finance_entry: {
+        Args: {
+          p_amount: number
+          p_attachment_url?: string
+          p_category: string
+          p_description: string
+          p_due_date: string
+          p_id: string
+          p_notes?: string
+          p_recurrence?: string
+        }
+        Returns: undefined
+      }
+      admin_update_finance_note: {
+        Args: {
+          p_content?: string
+          p_id: string
+          p_pinned?: boolean
+          p_title: string
+        }
         Returns: undefined
       }
       admin_update_prospect: {
@@ -2914,6 +2900,7 @@ export type Database = {
           description: string
           duration: number
           id: string
+          image_url: string
           name: string
           price: number
         }[]
@@ -2930,6 +2917,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_overdue_finance_entries: { Args: never; Returns: undefined }
       mfa_satisfied: { Args: never; Returns: boolean }
       move_to_dlq: {
         Args: {
