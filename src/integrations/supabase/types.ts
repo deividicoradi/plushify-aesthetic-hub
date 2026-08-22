@@ -2173,6 +2173,45 @@ export type Database = {
         }
         Relationships: []
       }
+      wa_sessions: {
+        Row: {
+          connected_at: string | null
+          created_at: string
+          id: string
+          instance_name: string
+          instance_token: string | null
+          phone_number: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          warmup_started_at: string | null
+        }
+        Insert: {
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          instance_name: string
+          instance_token?: string | null
+          phone_number?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          warmup_started_at?: string | null
+        }
+        Update: {
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          instance_name?: string
+          instance_token?: string | null
+          phone_number?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          warmup_started_at?: string | null
+        }
+        Relationships: []
+      }
       webhook_failures: {
         Row: {
           created_at: string
