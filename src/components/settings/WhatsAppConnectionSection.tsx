@@ -51,8 +51,16 @@ export function WhatsAppConnectionSection() {
     (async () => {
       try {
         const data = await callWhatsAppProxy('status');
-        setState({ status: data.status, phone_number: data.phone_number });
-        if (data.status === 'connecting') pollStatus();
+        if (data.status === 'connecting') {
+          // Sem QR persistido: retomar via connect (idempotente, reaproveita
+          // a mesma instância) em vez de deixar a tela presa esperando um QR
+          // que nunca chega.
+          const reconnected = await callWhatsAppProxy('connect');
+          setState({ status: reconnected.status, qrcode: reconnected.qrcode });
+          pollStatus();
+        } else {
+          setState({ status: data.status, phone_number: data.phone_number });
+        }
       } catch (err) {
         console.error('Erro ao carregar sessão do WhatsApp:', err);
       } finally {
@@ -66,7 +74,7 @@ export function WhatsAppConnectionSection() {
     setConnecting(true);
     try {
       const data = await callWhatsAppProxy('connect');
-      setState({ status: data.status, qrcode: data.qrcode });
+      setState((prev) => ({ status: data.status, phone_number: prev.phone_number, qrcode: data.qrcode }));
       if (data.status === 'connecting') pollStatus();
     } catch (err) {
       console.error('Erro ao conectar WhatsApp:', err);
