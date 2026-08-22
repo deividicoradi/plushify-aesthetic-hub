@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy, Loader2, Users, AlertCircle, Gift, ImagePlus } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Save, X, ArrowLeft, Edit, Link2, Copy, Loader2, Users, AlertCircle, Gift, ImagePlus, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { FeatureGuard } from '@/components/FeatureGuard';
 import { TeamManagement as TeamManagementComponent } from '@/components/premium/TeamManagement';
 import { ReferralPanel } from '@/components/settings/ReferralPanel';
 import { MfaSection } from '@/components/settings/MfaSection';
+import { WhatsAppConnectionSection } from '@/components/settings/WhatsAppConnectionSection';
 import { DeleteAccountSection } from '@/components/settings/DeleteAccountSection';
 import { CancelSubscriptionSection } from '@/components/settings/CancelSubscriptionSection';
 import { useAuth } from '@/contexts/AuthContext';
@@ -182,7 +183,7 @@ const Settings = () => {
         </div>
         
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile" className="flex items-center gap-2 text-xs sm:text-sm">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Perfil</span>
@@ -192,6 +193,11 @@ const Settings = () => {
               <Shield className="w-4 h-4" />
               <span className="hidden sm:inline">Conta</span>
               <span className="sm:hidden">Conta</span>
+            </TabsTrigger>
+            <TabsTrigger value="whatsapp" className="flex items-center gap-2 text-xs sm:text-sm">
+              <MessageCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">WhatsApp</span>
+              <span className="sm:hidden">WhatsApp</span>
             </TabsTrigger>
             <TabsTrigger value="team" className="flex items-center gap-2 text-xs sm:text-sm">
               <Users className="w-4 h-4" />
@@ -481,6 +487,10 @@ const Settings = () => {
             <CancelSubscriptionSection />
 
             <DeleteAccountSection />
+          </TabsContent>
+
+          <TabsContent value="whatsapp" className="space-y-6">
+            <WhatsAppConnectionSection />
           </TabsContent>
 
           <TabsContent value="team" className="space-y-6">
