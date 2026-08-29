@@ -68,16 +68,22 @@ if (!rootElement) {
   throw new Error("Root element not found")
 }
 
-// Global fatal error fallback to avoid white screen
+// Global fatal error fallback to avoid white screen. The message text is set
+// via textContent (never innerHTML) — achado F5 da auditoria de segurança de
+// 2026-08-29: nenhum caminho de exploração foi identificado hoje, mas
+// message vem de e.message/e.error?.message/e.reason, que em tese podem
+// carregar texto influenciado por dado externo em algum erro futuro.
 function showFatalError(message: string) {
   if (!rootElement) return
   rootElement.innerHTML = `
     <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; padding: 24px; max-width: 720px; margin: 40px auto;">
       <h1 style="font-size: 20px; line-height: 1.4; margin: 0 0 12px;">Ocorreu um erro ao iniciar o aplicativo</h1>
-      <p style="color: #666; margin: 0 0 16px;">${message}</p>
+      <p style="color: #666; margin: 0 0 16px;" id="fatal-error-message"></p>
       <button style="padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer;" onclick="location.reload()">Recarregar</button>
     </div>
   `
+  const messageEl = document.getElementById('fatal-error-message')
+  if (messageEl) messageEl.textContent = message
 }
 
 // Capture uncaught errors to render a friendly message instead of a blank screen

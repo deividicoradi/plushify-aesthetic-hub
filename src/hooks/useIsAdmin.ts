@@ -13,8 +13,7 @@ export const useIsAdmin = () => {
     enabled: !!user,
     staleTime: 60_000,
     queryFn: async (): Promise<boolean> => {
-      const { data, error } = await supabase.rpc('has_role', {
-        _user_id: user!.id,
+      const { data, error } = await supabase.rpc('has_role_self', {
         _role: 'admin',
       });
       if (error) {

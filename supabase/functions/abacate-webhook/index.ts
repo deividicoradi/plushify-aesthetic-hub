@@ -14,6 +14,21 @@ const secretsMatch = (a: string, b: string): boolean => {
   return timingSafeEqual(bufA, bufB)
 }
 
+// Proteção contra replay (achado F1 da auditoria de segurança de 2026-08-29):
+// a AbacatePay não expõe, nesta conta, a chave pública necessária pra
+// verificar a assinatura HMAC (X-Webhook-Signature) que a doc menciona — só
+// resta o secret estático na query string como autenticação. Um secret
+// capturado (ex: em log de proxy/CDN) permite reenviar o MESMO payload já
+// visto quantas vezes quiser. sha256Hex(rawBody) + UNIQUE(source, hash) em
+// webhook_processed_events bloqueia reentregas idênticas: a segunda tentativa
+// esbarra na constraint e é descartada sem reprocessar. Não impede um payload
+// FORJADO (conteúdo novo) por quem tem o secret — só HMAC resolveria isso, e
+// não é implementável aqui — mas fecha o vetor de replay puro.
+const sha256Hex = async (text: string): Promise<string> => {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
 // Recebe as notificações de pagamento do AbacatePay e ativa/renova/revoga o
 // plano pago do usuário. Sem esta função, um pagamento aprovado nunca é
 // refletido em user_subscriptions e o cliente fica preso no plano trial mesmo
@@ -175,6 +190,36 @@ Deno.serve(async (req) => {
     log('event received', body)
 
     const eventType = String(body.event ?? '')
+
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+
+    // Replay bloqueado ANTES de qualquer efeito colateral: se este exato
+    // payload já foi processado, a inserção esbarra em UNIQUE(source, hash)
+    // e paramos aqui — sem chamar cancel_subscription/start_subscription de
+    // novo. Erro ao gravar (não-23505) não bloqueia o fluxo: é melhor um
+    // pagamento real ser processado do que travar por falha da tabela de
+    // controle.
+    const payloadHash = await sha256Hex(rawBody)
+    const { error: idempotencyError } = await admin.from('webhook_processed_events').insert({
+      source: 'abacate_webhook',
+      payload_hash: payloadHash,
+      event_type: eventType,
+    })
+    if (idempotencyError) {
+      if (idempotencyError.code === '23505') {
+        log('REPLAY: payload já processado, ignorando', { eventType, payloadHash })
+        return new Response(JSON.stringify({ received: true, duplicate: true }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      log('WARN: falha ao registrar idempotência, seguindo mesmo assim', idempotencyError)
+    }
+
     const dataRoot = (body.data ?? {}) as Record<string, unknown>
 
     // Eventos de assinatura vêm aninhados em data.subscription (confirmado na doc).
@@ -395,12 +440,6 @@ Deno.serve(async (req) => {
         paymentKind = 'installments'
       }
     }
-
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
 
     // Preço de CATÁLOGO do plano/ciclo sendo ativado — não o valor realmente
     // cobrado nesta transação (checkoutObj.paidAmount), que em um upgrade já

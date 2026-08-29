@@ -2923,6 +2923,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_role_self: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
       mark_overdue_finance_entries: { Args: never; Returns: undefined }
       mfa_satisfied: { Args: never; Returns: boolean }
       move_to_dlq: {
