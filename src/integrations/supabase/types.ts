@@ -2254,6 +2254,30 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_processed_events: {
+        Row: {
+          event_type: string | null
+          id: string
+          payload_hash: string
+          processed_at: string
+          source: string
+        }
+        Insert: {
+          event_type?: string | null
+          id?: string
+          payload_hash: string
+          processed_at?: string
+          source: string
+        }
+        Update: {
+          event_type?: string | null
+          id?: string
+          payload_hash?: string
+          processed_at?: string
+          source?: string
+        }
+        Relationships: []
+      }
       working_hours: {
         Row: {
           auto_complete_appointments: boolean
