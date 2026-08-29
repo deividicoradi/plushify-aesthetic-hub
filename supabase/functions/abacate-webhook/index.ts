@@ -29,6 +29,16 @@ const sha256Hex = async (text: string): Promise<string> => {
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+// Achado informativo da reauditoria de 2026-08-29: planType/previousPlanType
+// no e-mail de upgrade abaixo, quando não batem com planLabels (só deveria
+// acontecer se um valor inesperado entrar em plan_type), caem no fallback
+// de interpolar a string crua no HTML sem escape. Hoje esses valores só vêm
+// de metadata setado pelo nosso próprio backend (abacate-create-checkout/
+// -subscription), não de texto livre de usuário — mas escapar por defesa em
+// profundidade custa nada.
+const escapeHtml = (value: string): string =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
 // Recebe as notificações de pagamento do AbacatePay e ativa/renova/revoga o
 // plano pago do usuário. Sem esta função, um pagamento aprovado nunca é
 // refletido em user_subscriptions e o cliente fica preso no plano trial mesmo
@@ -497,11 +507,13 @@ Deno.serve(async (req) => {
         const formatBRL = (cents: number) => (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
         if (recipientEmail) {
-          const subject = `Upgrade confirmado: seu plano agora é ${planLabels[planType] ?? planType}`
+          const planLabel = planLabels[planType] ?? escapeHtml(planType)
+          const previousPlanLabel = planLabels[previousPlanType ?? ''] ?? escapeHtml(previousPlanType ?? '')
+          const subject = `Upgrade confirmado: seu plano agora é ${planLabel}`
           const html = `
             <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
               <h2>Upgrade confirmado! 🎉</h2>
-              <p>Seu plano na Plushify mudou de <strong>${planLabels[previousPlanType ?? ''] ?? previousPlanType}</strong> para <strong>${planLabels[planType] ?? planType}</strong>.</p>
+              <p>Seu plano na Plushify mudou de <strong>${previousPlanLabel}</strong> para <strong>${planLabel}</strong>.</p>
               <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
                 <tr><td style="padding: 8px 0; color: #666;">Crédito do plano anterior</td><td style="text-align: right;">− ${formatBRL(creditCents)}</td></tr>
                 <tr><td style="padding: 8px 0; color: #666; border-top: 1px solid #eee;">Valor cobrado hoje</td><td style="text-align: right; border-top: 1px solid #eee; font-weight: bold;">${formatBRL(chargedCents)}</td></tr>
