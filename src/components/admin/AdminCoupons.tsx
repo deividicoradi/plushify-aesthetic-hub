@@ -36,8 +36,11 @@ interface Coupon {
   createdAt: string;
 }
 
+// discount vem da AbacatePay multiplicado por 100 pros dois tipos (mesma
+// lógica de "centavos" pro percentual também) — precisa dividir por 100
+// pra exibir o valor real, senão 40% aparece como 4000%.
 const formatDiscount = (c: Coupon) =>
-  c.discountKind === 'PERCENTAGE' ? `${c.discount}%` : (c.discount / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  c.discountKind === 'PERCENTAGE' ? `${c.discount / 100}%` : (c.discount / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   ACTIVE: 'default',
