@@ -1,0 +1,22 @@
+-- Achado adicional (2026-08-29, revisão extra pedida pelo usuário: acesso
+-- admin é área crítica, tolerância zero). Migrations antigas de 2025-10-05
+-- (2634d2ae/bb05f22a/b6c0d98f) criaram public.initialize_first_admin(uuid)
+-- SEM restringir grant de EXECUTE (Postgres concede EXECUTE a PUBLIC por
+-- padrão) e SEM checar auth.uid() = p_user_id — qualquer usuário autenticado
+-- (ou até anônimo) poderia chamá-la e se auto-promover a admin, desde que
+-- nenhum admin existisse ainda na tabela user_roles.
+--
+-- O próprio código já documenta (ver comentário no topo de
+-- 20260728030000_admin_dashboard_foundation.sql) que essa versão antiga
+-- NUNCA foi aplicada no banco de produção real — a tabela user_roles atual
+-- foi recriada do zero em 20260728030000, sem essa função de bootstrap, e o
+-- primeiro admin foi inserido manualmente uma única vez via SQL Editor.
+--
+-- Isso resolve o risco no banco de produção ATUAL. Mas os arquivos de
+-- migration antigos continuam no histórico do projeto sem nenhum DROP
+-- explícito — se este projeto (ou uma cópia/disaster-recovery) algum dia
+-- rodar TODAS as migrations do zero contra um banco novo, a função
+-- vulnerável seria recriada e ficaria exposta até alguém rodar manualmente
+-- 20260728030000 por cima. Este DROP fecha essa lacuna de forma permanente
+-- e incondicional, independente da ordem/replay das migrations.
+DROP FUNCTION IF EXISTS public.initialize_first_admin(uuid);
